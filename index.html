@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voxel Strike - Free Voxel FPS IO Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #0a0e17;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(28, 58, 173, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.15) 0%, transparent 50%);
+        }
+
+        /* Voxel Background Pattern */
+        .voxel-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(10, 14, 23, 0.9), rgba(10, 14, 23, 0.95)),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="50" height="50" fill="%231E3A8A" opacity="0.1"/><rect x="50" y="0" width="50" height="50" fill="%231E3A8A" opacity="0.05"/><rect x="0" y="50" width="50" height="50" fill="%231E3A8A" opacity="0.05"/><rect x="50" y="50" width="50" height="50" fill="%231E3A8A" opacity="0.1"/></svg>');
+            z-index: -1;
+        }
+
+        /* Header/Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+            color: #3b82f6;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #fff;
+        }
+
+        .nav-links a.active {
+            background: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #3b82f6, #ef4444, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Game Preview */
+        .game-preview {
+            width: 100%;
+            height: 400px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            border: 2px solid rgba(59, 130, 246, 0.4);
+            overflow: hidden;
+            position: relative;
+            margin: 40px auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-screen {
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .voxel-world {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Voxel blocks for preview */
+        .voxel {
+            position: absolute;
+            background: #1e40af;
+            border: 1px solid #3b82f6;
+            box-shadow: inset 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+
+        .voxel-player {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: #ef4444;
+            border: 2px solid #fca5a5;
+            border-radius: 4px;
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+        }
+
+        .game-stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        /* Play Button */
+        .play-container {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        .play-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 800;
+            padding: 22px 60px;
+            border-radius: 12px;
+            text-decoration: none;
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .play-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.6);
+        }
+
+        .play-button:active {
+            transform: translateY(0);
+        }
+
+        .play-button i {
+            margin-right: 12px;
+        }
+
+        /* Game Modes */
+        .game-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .mode-card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+
+        .mode-icon {
+            font-size: 2.5rem;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+
+        .mode-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #f1f5f9;
+        }
+
+        .mode-card p {
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .players-online {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 10px 15px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 80px;
+            border-top: 1px solid rgba(59, 130, 246, 0.3);
+            color: #94a3b8;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #3b82f6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .game-preview {
+                height: 300px;
+            }
+        }
+
+        /* Game Lobby */
+        .game-lobby {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lobby-container {
+            background: rgba(15, 23, 42, 0.95);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+
+        .lobby-header {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lobby-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .close-lobby {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: #fca5a5;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-lobby:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
+        .lobby-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .server-list {
+            grid-column: 1 / -1;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .server-item {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .server-item:hover {
+            background: rgba(30, 58, 138, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .server-players {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #60a5fa;
+        }
+
+        .join-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .join-btn:hover {
+            background: #2563eb;
+        }
+
+        .player-customization {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-option.selected {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .loading-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e17;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-text {
+            font-size: 2rem;
+            margin-top: 30px;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .blinking {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Voxel Background -->
+    <div class="voxel-bg"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-cube"></i></div>
+            <div class="logo-text">VOXEL STRIKE</div>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Home</a>
+            <a href="#">Play</a>
+            <a href="#">Leaderboards</a>
+            <a href="#">Community</a>
+            <a href="#">Wiki</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="hero">
+            <h1>FREE VOXEL FPS SHOOTER</h1>
+            <p class="hero-subtitle">Join millions of players in the ultimate voxel battle arena. Build, destroy, and dominate in fast-paced blocky combat!</p>
+            
+            <!-- Game Preview -->
+            <div class="game-preview">
+                <div class="game-screen" id="gamePreview">
+                    <!-- Voxel elements will be generated by JS -->
+                </div>
+            </div>
+            
+            <!-- Play Button -->
+            <div class="play-container">
+                <button class="play-button" id="playButton">
+                    <i class="fas fa-play"></i> PLAY FREE NOW
+                </button>
+                <p style="margin-top: 20px; color: #94a3b8;">No download required • Works in any browser</p>
+            </div>
+        </div>
+
+        <!-- Game Modes -->
+        <div class="game-modes">
+            <div class="mode-card">
+                <div class="mode-icon"><i class="fas fa-crosshairs"></i></div>
+                <h3>Team Deathmatch</h3>
+                <p>Battle in teams of 4 in destructible voxel arenas. The first team to reach 50 kills wins!</p>
+                <div class="players-online">
+                    <i class="fas fa-users"></i> 12,845 playing now
+                </div>
+            </div>
+            
+            <div class="mode-card">
+                <div class="mode-icon"><i class="fas fa-flag"></i></div>
+                <h3>Capture the Block</h3>
+                <p>Capture the enemy's voxel flag while defending your own. Build defenses and plan attacks.</p>
+                <div class="players-online">
+                    <i class="fas fa-users"></i> 8,342 playing now
+                </div>
+            </div>
+            
+            <div class="mode-card">
+                <div class="mode-icon"><i class="fas fa-crown"></i></div>
+                <h3>Battle Royale</h3>
+                <p>100 players drop into a massive voxel island. The last player standing wins the match.</p>
+                <div class="players-online">
+                    <i class="fas fa-users"></i> 24,109 playing now
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-links">
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Community Guidelines</a>
+            <a href="#">Support</a>
+            <a href="#">Blog</a>
+        </div>
+        <p>© 2023 Voxel Strike. All rights reserved. This is a fan-made concept page.</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Not affiliated with Mojang, Roblox, or poxel.io. For demonstration purposes only.</p>
+    </div>
+
+    <!-- Game Lobby -->
+    <div class="game-lobby" id="gameLobby">
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <h2><i class="fas fa-gamepad"></i> JOIN A SERVER</h2>
+                <button class="close-lobby" id="closeLobby"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="lobby-content">
+                <div class="server-list">
+                    <h3><i class="fas fa-server"></i> AVAILABLE SERVERS</h3>
+                    <div id="serverList">
+                        <!-- Servers will be populated by JS -->
+                    </div>
+                </div>
+                
+                <div class="player-customization">
+                    <h3><i class="fas fa-user-edit"></i> CUSTOMIZE PLAYER</h3>
+                    <p>Choose your player color:</p>
+                    <div class="color-options" id="colorOptions">
+                        <!-- Color options will be populated by JS -->
+                    </div>
+                    <p style="margin-top: 20px; color: #94a3b8;">More customization available in-game</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div style="font-size: 5rem; color: #3b82f6;">
+            <i class="fas fa-cube blinking"></i>
+        </div>
+        <div class="loading-text" id="loadingText">Loading Voxel World...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game Preview Animation
+        function initGamePreview() {
+            const preview = document.getElementById('gamePreview');
+            
+            // Create voxel floor
+            for (let x = 0; x < 8; x++) {
+                for (let z = 0; z < 8; z++) {
+                    const voxel = document.createElement('div');
+                    voxel.className = 'voxel';
+                    voxel.style.width = '50px';
+                    voxel.style.height = '50px';
+                    voxel.style.left = `${20 + x * 52}px`;
+                    voxel.style.top = `${280 - z * 52}px`;
+                    voxel.style.background = x % 2 === z % 2 ? '#1e40af' : '#1d4ed8';
+                    preview.appendChild(voxel);
+                }
+            }
+            
+            // Create voxel walls
+            for (let i = 0; i < 5; i++) {
+                const wall = document.createElement('div');
+                wall.className = 'voxel';
+                wall.style.width = '40px';
+                wall.style.height = '80px';
+                wall.style.left = `${100 + i * 42}px`;
+                wall.style.top = '180px';
+                wall.style.background = i % 2 === 0 ? '#374151' : '#4b5563';
+                preview.appendChild(wall);
+            }
+            
+            // Create player
+            const player = document.createElement('div');
+            player.className = 'voxel-player';
+            player.style.left = '200px';
+            player.style.top = '150px';
+            player.id = 'previewPlayer';
+            preview.appendChild(player);
+            
+            // Create enemy
+            const enemy = document.createElement('div');
+            enemy.className = 'voxel-player';
+            enemy.style.width = '40px';
+            enemy.style.height = '60px';
+            enemy.style.left = '400px';
+            enemy.style.top = '150px';
+            enemy.style.background = '#10b981';
+            enemy.style.borderColor = '#34d399';
+            preview.appendChild(enemy);
+            
+            // Add game stats
+            const stats = document.createElement('div');
+            stats.className = 'game-stats';
+            stats.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 5px;">TEAM DEATHMATCH</div>
+                <div style="display: flex; gap: 15px;">
+                    <div>Kills: <span style="color: #60a5fa;">12</span></div>
+                    <div>Deaths: <span style="color: #f87171;">3</span></div>
+                    <div>Score: <span style="color: #fbbf24;">1850</span></div>
+                </div>
+            `;
+            preview.appendChild(stats);
+            
+            // Animate player
+            let playerX = 200;
+            let direction = 1;
+            
+            function animatePlayer() {
+                playerX += direction * 2;
+                
+                if (playerX > 350) direction = -1;
+                if (playerX < 200) direction = 1;
+                
+                document.getElementById('previewPlayer').style.left = `${playerX}px`;
+                
+                // Randomly change player color
+                if (Math.random() < 0.02) {
+                    const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+                    document.getElementById('previewPlayer').style.background = colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                requestAnimationFrame(animatePlayer);
+            }
+            
+            animatePlayer();
+        }
+        
+        // Initialize lobby
+        function initLobby() {
+            const colorOptions = document.getElementById('colorOptions');
+            const colors = [
+                {name: 'Red', value: '#ef4444'},
+                {name: 'Blue', value: '#3b82f6'},
+                {name: 'Green', value: '#10b981'},
+                {name: 'Yellow', value: '#f59e0b'},
+                {name: 'Purple', value: '#8b5cf6'},
+                {name: 'Pink', value: '#ec4899'},
+                {name: 'Cyan', value: '#06b6d4'},
+                {name: 'Orange', value: '#f97316'}
+            ];
+            
+            colors.forEach((color, index) => {
+                const colorOption = document.createElement('div');
+                colorOption.className = `color-option ${index === 0 ? 'selected' : ''}`;
+                colorOption.style.background = color.value;
+                colorOption.title = color.name;
+                colorOption.addEventListener('click', () => {
+                    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                    colorOption.classList.add('selected');
+                    localStorage.setItem('playerColor', color.value);
+                });
+                colorOptions.appendChild(colorOption);
+            });
+            
+            // Populate server list
+            const serverList = document.getElementById('serverList');
+            const servers = [
+                {name: 'US East #1', mode: 'Team Deathmatch', players: '24/32', ping: '18ms'},
+                {name: 'EU Central #3', mode: 'Capture the Block', players: '18/24', ping: '42ms'},
+                {name: 'Asia #2', mode: 'Battle Royale', players: '87/100', ping: '120ms'},
+                {name: 'US West #5', mode: 'Team Deathmatch', players: '31/32', ping: '32ms'},
+                {name: 'EU West #7', mode: 'Free Build', players: '12/20', ping: '38ms'},
+                {name: 'Oceania #1', mode: 'Capture the Block', players: '16/24', ping: '210ms'}
+            ];
+            
+            servers.forEach(server => {
+                const serverItem = document.createElement('div');
+                serverItem.className = 'server-item';
+                serverItem.innerHTML = `
+                    <div>
+                        <div style="font-weight: 600;">${server.name}</div>
+                        <div style="font-size: 0.9rem; color: #94a3b8;">${server.mode}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div class="server-players">
+                            <i class="fas fa-user"></i> ${server.players}
+                        </div>
+                        <div style="color: ${parseInt(server.ping) < 50 ? '#10b981' : parseInt(server.ping) < 100 ? '#f59e0b' : '#ef4444'}">
+                            ${server.ping}
+                        </div>
+                        <button class="join-btn">JOIN</button>
+                    </div>
+                `;
+                
+                serverItem.querySelector('.join-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    joinGame(server.name);
+                });
+                
+                serverList.appendChild(serverItem);
+            });
+        }
+        
+        // Join game function
+        function joinGame(serverName) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingProgress = document.getElementById('loadingProgress');
+            const loadingText = document.getElementById('loadingText');
+            
+            // Show loading screen
+            loadingScreen.style.display = 'flex';
+            
+            // Simulate loading
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                loadingProgress.style.width = `${progress}%`;
+                
+                // Update loading text
+                if (progress < 30) {
+                    loadingText.textContent = 'Loading Voxel World...';
+                } else if (progress < 60) {
+                    loadingText.textContent = 'Loading Textures...';
+                } else if (progress < 90) {
+                    loadingText.textContent = 'Connecting to Server...';
+                } else {
+                    loadingText.textContent = 'Almost Ready...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                    
+                    // Show "play" message
+                    setTimeout(() => {
+                        loadingText.innerHTML = `<i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i> Connected to ${serverName}!`;
+                        
+                        // In a real game, this would redirect to the actual game
+                        setTimeout(() => {
+                            alert(`In a real implementation, you would now be playing on ${serverName}!\n\nThis is a frontend demo only. For a full game, you would need a backend server with WebSocket connections.`);
+                            loadingScreen.style.display = 'none';
+                            document.getElementById('gameLobby').style.display = 'none';
+                        }, 1500);
+                    }, 500);
+                }
+            }, 200);
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize preview
+            initGamePreview();
+            
+            // Initialize lobby
+            initLobby();
+            
+            // Play button click
+            document.getElementById('playButton').addEventListener('click', () => {
+                document.getElementById('gameLobby').style.display = 'flex';
+            });
+            
+            // Close lobby
+            document.getElementById('closeLobby').addEventListener('click', () => {
+                document.getElementById('gameLobby').style.display = 'none';
+            });
+            
+            // Close lobby when clicking outside
+            document.getElementById('gameLobby').addEventListener('click', (e) => {
+                if (e.target.id === 'gameLobby') {
+                    document.getElementById('gameLobby').style.display = 'none';
+                }
+            });
+            
+            // Update player count periodically
+            function updatePlayerCounts() {
+                const counts = document.querySelectorAll('.players-online');
+                counts.forEach(count => {
+                    const current = parseInt(count.textContent.replace(/,/g, '').match(/\d+/)[0]);
+                    const change = Math.floor(Math.random() * 200) - 100;
+                    const newCount = Math.max(5000, current + change);
+                    count.innerHTML = `<i class="fas fa-users"></i> ${newCount.toLocaleString()} playing now`;
+                });
+            }
+            
+            setInterval(updatePlayerCounts, 10000);
+        });
+    </script>
+</body>
+</html>
