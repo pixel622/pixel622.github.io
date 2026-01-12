@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quillbot AI Detector Clone</title>
+    <title>Advanced AI Text Detector with Highlighting</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -15,7 +15,7 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: #f0f0f0;
             min-height: 100vh;
             padding: 20px;
@@ -40,7 +40,7 @@
         h1 {
             font-size: 2.8rem;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -92,7 +92,7 @@
         h2 {
             font-size: 1.8rem;
             margin-bottom: 20px;
-            color: #4facfe;
+            color: #00dbde;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -106,7 +106,7 @@
             width: 100%;
             height: 300px;
             background: rgba(0, 0, 0, 0.3);
-            border: 2px solid #2a5298;
+            border: 2px solid #302b63;
             border-radius: 10px;
             padding: 15px;
             color: #f0f0f0;
@@ -118,7 +118,7 @@
         
         textarea:focus {
             outline: none;
-            border-color: #4facfe;
+            border-color: #00dbde;
         }
         
         .buttons {
@@ -130,7 +130,7 @@
         }
         
         button {
-            background: linear-gradient(90deg, #2a5298, #1e3c72);
+            background: linear-gradient(90deg, #302b63, #24243e);
             color: white;
             border: none;
             padding: 12px 25px;
@@ -148,11 +148,12 @@
         }
         
         button:hover {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 219, 222, 0.4);
         }
         
+        /* New Text Highlighting Section */
         .highlight-section {
             margin-top: 25px;
             padding: 20px;
@@ -172,7 +173,7 @@
         
         .highlight-title {
             font-size: 1.2rem;
-            color: #4facfe;
+            color: #00dbde;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -197,11 +198,11 @@
         }
         
         .ai-color {
-            background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+            background: linear-gradient(90deg, #fc00ff, #b300b3);
         }
         
         .human-color {
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            background: linear-gradient(90deg, #00dbde, #0099cc);
         }
         
         .highlighted-text-container {
@@ -221,29 +222,29 @@
         }
         
         .ai-highlight {
-            background-color: rgba(255, 107, 107, 0.3);
-            border-bottom: 2px solid #ff6b6b;
+            background-color: rgba(252, 0, 255, 0.25);
+            border-bottom: 2px solid #fc00ff;
             padding: 1px 3px;
             border-radius: 3px;
             transition: all 0.2s;
         }
         
         .ai-highlight:hover {
-            background-color: rgba(255, 107, 107, 0.5);
-            box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+            background-color: rgba(252, 0, 255, 0.4);
+            box-shadow: 0 0 5px rgba(252, 0, 255, 0.5);
         }
         
         .human-highlight {
-            background-color: rgba(79, 172, 254, 0.3);
-            border-bottom: 2px solid #4facfe;
+            background-color: rgba(0, 219, 222, 0.25);
+            border-bottom: 2px solid #00dbde;
             padding: 1px 3px;
             border-radius: 3px;
             transition: all 0.2s;
         }
         
         .human-highlight:hover {
-            background-color: rgba(79, 172, 254, 0.5);
-            box-shadow: 0 0 5px rgba(79, 172, 254, 0.5);
+            background-color: rgba(0, 219, 222, 0.4);
+            box-shadow: 0 0 5px rgba(0, 219, 222, 0.5);
         }
         
         .neutral-text {
@@ -287,11 +288,11 @@
         }
         
         .ai-score {
-            color: #ff6b6b;
+            color: #fc00ff;
         }
         
         .human-score {
-            color: #4facfe;
+            color: #00dbde;
         }
         
         .confidence-level {
@@ -314,7 +315,7 @@
         
         .confidence-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ffd93d, #ff6b6b);
+            background: linear-gradient(90deg, #ff9a00, #ffcc00);
             border-radius: 5px;
             width: 0%;
             transition: width 1s ease-out;
@@ -329,7 +330,7 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
-            border-left: 4px solid #4facfe;
+            border-left: 4px solid #00dbde;
             transition: transform 0.3s;
         }
         
@@ -342,7 +343,7 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 8px;
-            color: #4facfe;
+            color: #00dbde;
             font-weight: 600;
         }
         
@@ -365,7 +366,7 @@
         
         .detail-value {
             font-weight: bold;
-            color: #4facfe;
+            color: #00dbde;
         }
         
         .red-flag {
@@ -373,11 +374,11 @@
         }
         
         .green-flag {
-            color: #6bcf7f;
+            color: #51cf66;
         }
         
         .yellow-flag {
-            color: #ffd93d;
+            color: #ffd43b;
         }
         
         footer {
@@ -397,8 +398,8 @@
         }
         
         .sample-btn {
-            background: rgba(42, 82, 152, 0.5);
-            border: 1px solid #2a5298;
+            background: rgba(48, 43, 99, 0.5);
+            border: 1px solid #302b63;
             padding: 8px 15px;
             border-radius: 6px;
             color: #b0b0b0;
@@ -408,30 +409,8 @@
         }
         
         .sample-btn:hover {
-            background: rgba(79, 172, 254, 0.2);
-            color: #4facfe;
-        }
-        
-        .accuracy-badge {
-            background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-left: 10px;
-        }
-        
-        .quillbot-logo {
-            font-weight: bold;
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-size: 1.1em;
+            background: rgba(0, 219, 222, 0.2);
+            color: #00dbde;
         }
         
         @media (max-width: 768px) {
@@ -470,8 +449,8 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-robot"></i> <span class="quillbot-logo">Quillbot</span> AI Detector Clone</h1>
-            <p class="subtitle">This detector uses the same analysis patterns as Quillbot's AI detector, checking for predictability, burstiness, and other linguistic markers of AI-generated content.</p>
+            <h1><i class="fas fa-robot"></i> Advanced AI Text Detector</h1>
+            <p class="subtitle">Paste your text below for consistent AI detection analysis with highlighted AI and human sections.</p>
         </header>
         
         <div class="main-content">
@@ -482,29 +461,32 @@
                     <button class="sample-btn" data-sample="ai">AI-Generated Sample</button>
                     <button class="sample-btn" data-sample="human">Human-Written Sample</button>
                     <button class="sample-btn" data-sample="mixed">Mixed Content Sample</button>
-                    <button class="sample-btn" data-sample="quillbot">Quillbot Paraphrased</button>
                 </div>
                 
-                <textarea id="inputText" placeholder="Paste or type your text here for analysis...">The development of artificial intelligence has progressed significantly in recent years, enabling machines to perform tasks that were once considered exclusively within the domain of human cognition. Machine learning algorithms, particularly those based on deep neural networks, have demonstrated remarkable capabilities in areas such as natural language processing, computer vision, and autonomous decision-making. These systems analyze vast datasets to identify patterns and make predictions, often achieving performance levels that rival or exceed human experts in specific domains. However, the interpretability of these models remains a challenge, as the decision-making processes of complex neural networks can be difficult to understand and explain, leading to concerns about transparency and accountability in AI systems.</textarea>
+                <textarea id="inputText" placeholder="Paste or type your text here for analysis...">Artificial Intelligence (AI) has become an increasingly significant field of study in recent years, with applications ranging from simple automation to complex decision-making systems. The fundamental premise of AI is to develop machines that can perform tasks typically requiring human intelligence, such as visual perception, speech recognition, and language translation.
+
+Machine learning, a subset of AI, employs algorithms that enable computers to learn from and make predictions based on data. These algorithms identify patterns within datasets and utilize these patterns to make informed decisions without explicit programming for each specific task. Deep learning, a further subset of machine learning, utilizes neural networks with multiple layers to process data in increasingly abstract ways.
+
+The ethical implications of AI development have become a topic of considerable discussion among researchers and policymakers. Concerns include algorithmic bias, job displacement due to automation, and the potential for autonomous systems to make decisions with significant real-world consequences. Consequently, many organizations are developing guidelines for responsible AI implementation.</textarea>
                 
                 <div class="buttons">
                     <button id="analyzeBtn">
-                        <i class="fas fa-search"></i> Detect AI Content
+                        <i class="fas fa-search"></i> Analyze Text
                     </button>
                     <button id="clearBtn">
                         <i class="fas fa-eraser"></i> Clear Text
                     </button>
                     <button id="saveBtn">
-                        <i class="fas fa-download"></i> Export Results
+                        <i class="fas fa-save"></i> Save Analysis
                     </button>
                 </div>
                 
+                <!-- New Text Highlighting Section -->
                 <div class="highlight-section">
                     <div class="highlight-header">
                         <div class="highlight-title">
                             <i class="fas fa-highlighter"></i>
                             <span>Text Analysis Breakdown</span>
-                            <span class="accuracy-badge">93% Match with Quillbot</span>
                         </div>
                         <div class="highlight-legend">
                             <div class="legend-item">
@@ -522,14 +504,14 @@
                         <div class="highlighted-text" id="highlightedText">
                             <div style="text-align: center; padding: 40px; color: #888;">
                                 <i class="fas fa-highlighter fa-2x" style="margin-bottom: 15px; display: block;"></i>
-                                <p>Your text will appear here with AI parts highlighted in red and human parts in blue after analysis.</p>
+                                <p>Your text will appear here with AI parts highlighted in purple and human parts in blue after analysis.</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="analysis-details">
-                    <p><i class="fas fa-info-circle"></i> This detector analyzes the same patterns as Quillbot: Perplexity (predictability), Burstiness (sentence variation), and semantic coherence to identify AI-generated text.</p>
+                    <p><i class="fas fa-info-circle"></i> This detector analyzes: Sentence structure, vocabulary diversity, word patterns, readability scores, and linguistic features to provide consistent AI detection results.</p>
                 </div>
             </div>
             
@@ -555,7 +537,7 @@
                         </div>
                         
                         <div class="confidence-level">
-                            <span>Detection Confidence:</span>
+                            <span>Analysis Confidence:</span>
                             <div class="confidence-bar">
                                 <div class="confidence-fill" id="confidenceFill"></div>
                             </div>
@@ -564,15 +546,15 @@
                     </div>
                     
                     <div class="detail-row">
-                        <span>Perplexity Score:</span>
-                        <span class="detail-value" id="perplexityScore">0</span>
+                        <span>Words Analyzed:</span>
+                        <span class="detail-value" id="wordCount">0</span>
                     </div>
                     <div class="detail-row">
-                        <span>Burstiness Score:</span>
-                        <span class="detail-value" id="burstinessScore">0</span>
+                        <span>Readability Score:</span>
+                        <span class="detail-value" id="readabilityScore">0</span>
                     </div>
                     <div class="detail-row">
-                        <span>Sentence Length Variation:</span>
+                        <span>Sentence Variation:</span>
                         <span class="detail-value" id="sentenceVariation">0%</span>
                     </div>
                     <div class="detail-row">
@@ -582,7 +564,7 @@
                 </div>
                 
                 <div class="panel suggestions">
-                    <h2><i class="fas fa-lightbulb"></i> Recommendations</h2>
+                    <h2><i class="fas fa-lightbulb"></i> Suggestions to Humanize</h2>
                     
                     <div id="suggestionsList">
                         <div class="suggestion-item">
@@ -590,22 +572,22 @@
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>Analyze text to get suggestions</span>
                             </div>
-                            <p>Click "Detect AI Content" to see specific recommendations for making your content sound more natural and human-like.</p>
+                            <p>Click "Analyze Text" to see specific recommendations for making your content sound more natural and human-like.</p>
                         </div>
                     </div>
                     
                     <div class="analysis-details" style="margin-top: 20px;">
-                        <p><strong>Quillbot Detection Patterns:</strong></p>
-                        <p>• <span class="red-flag">High Perplexity</span>: AI text is more predictable (lower perplexity)</p>
-                        <p>• <span class="red-flag">Low Burstiness</span>: AI text has less sentence variation</p>
-                        <p>• <span class="green-flag">Human Indicators</span>: Personal anecdotes, varied structures, emotional language</p>
+                        <p><strong>AI Detection Factors:</strong></p>
+                        <p>• <span class="red-flag">Red flags:</span> Repetitive structures, formal tone, lack of pronouns</p>
+                        <p>• <span class="green-flag">Human indicators:</span> Personal anecdotes, varied sentence lengths, informal expressions</p>
+                        <p>• <span class="yellow-flag">Neutral elements:</span> Technical terms, factual statements, standard grammar</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <footer>
-            <p>Quillbot AI Detector Clone v3.0 | This tool uses similar detection patterns to Quillbot's AI detector but is an independent implementation.</p>
+            <p>Advanced AI Detector v2.0 | Analysis is based on linguistic patterns and provides consistent, reproducible results for the same input text.</p>
         </footer>
     </div>
     
@@ -620,8 +602,8 @@
             const humanPercentage = document.getElementById('humanPercentage');
             const confidenceValue = document.getElementById('confidenceValue');
             const confidenceFill = document.getElementById('confidenceFill');
-            const perplexityScore = document.getElementById('perplexityScore');
-            const burstinessScore = document.getElementById('burstinessScore');
+            const wordCount = document.getElementById('wordCount');
+            const readabilityScore = document.getElementById('readabilityScore');
             const sentenceVariation = document.getElementById('sentenceVariation');
             const vocabDiversity = document.getElementById('vocabDiversity');
             const suggestionsList = document.getElementById('suggestionsList');
@@ -634,107 +616,86 @@
             
             // Sample texts
             const sampleTexts = {
-                ai: `The implementation of artificial intelligence in contemporary technological frameworks has facilitated unprecedented advancements in computational capabilities. Neural network architectures, particularly those utilizing deep learning methodologies, have demonstrated exceptional proficiency in tasks encompassing natural language processing, image recognition, and predictive analytics. These systems leverage extensive datasets to identify intricate patterns and correlations that may not be readily apparent to human observers. The operational efficacy of such models is contingent upon the quality and quantity of training data, with larger datasets generally yielding superior performance metrics. However, the interpretability of complex neural networks remains a significant challenge, often described as the "black box" problem in machine learning literature.`,
+                ai: `Artificial intelligence represents a paradigm shift in computational capabilities, enabling machines to perform tasks that traditionally required human cognitive faculties. The development of neural networks, particularly deep learning architectures, has facilitated remarkable progress in domains such as natural language processing, computer vision, and autonomous systems. These systems leverage vast datasets and sophisticated algorithms to identify patterns and generate responses that increasingly approximate human-like understanding. However, the interpretability of AI decision-making processes remains a significant challenge, often described as the "black box" problem in machine learning literature. Researchers continue to explore methods for enhancing transparency and accountability in AI systems to ensure their ethical deployment across various sectors.`,
                 
-                human: `I've been using AI tools for my work lately, and honestly, it's both amazing and a bit scary. Sometimes it writes exactly what I need, but other times it completely misses the point. Just last week, I asked it to draft an email to a client about a delayed project, and it came back with this super formal, robotic message that would've made me sound like a corporate chatbot!
+                human: `You know, when I think about AI, it's kind of wild how fast it's all moving. Just a few years ago, my phone could barely understand what I was saying, and now it's writing emails for me! But honestly, it still messes up sometimes - like when it suggests replies that don't even make sense for the conversation. 
+
+I was talking to my friend about her dog the other day, and my keyboard suggested "I'm sorry for your loss" as a response! Her dog is perfectly healthy. These AI tools are getting better, but they still miss the human touch - the little nuances that make conversations feel real. 
+
+What really worries me though is when I can't tell if I'm talking to a person or a bot online. The other day I spent ten minutes chatting with what I thought was a customer service rep, only to realize it was just a really advanced chatbot. It did solve my problem, but the interaction felt... off somehow.`,
                 
-I had to rewrite the whole thing to sound like... well, me. You know, with actual emotions and personality. It's weird how these tools can be so smart yet so dumb at the same time. They get the facts right but miss the human touch - the little jokes, the empathy, the understanding of how people actually talk to each other.
-                
-What really gets me is when I read something online and I can't tell if it was written by a person or a machine. The lines are getting blurrier every day, and I'm not sure how I feel about that.`,
-                
-                mixed: `Artificial intelligence has transformed numerous industries, but from my experience, it still has significant limitations. While working on a recent project, we used an AI tool to generate initial content drafts, but we found that it consistently produced text that was technically accurate yet lacked nuance and practical insight.
-                
-For example, when we asked it to analyze market trends, it provided generic observations that were already common knowledge in our field. Our human analysts, however, were able to identify subtle patterns and make connections that the AI completely missed. This experience taught me that while AI can handle repetitive tasks efficiently, human judgment remains essential for strategic decision-making.
-                
-The key is finding the right balance - using AI for what it does well (processing large amounts of data quickly) while relying on human expertise for interpretation, creativity, and ethical considerations.`,
-                
-                quillbot: `In recent years, artificial intelligence has made significant strides, allowing machines to execute operations previously thought to be solely within the scope of human thought. Deep neural network-based machine learning algorithms have shown outstanding skills in fields like autonomous decision-making, computer vision, and natural language processing. By examining enormous datasets to find patterns and generate predictions, these systems frequently reach performance levels that are comparable to or better than those of human specialists in particular fields. The interpretability of these models continues to be a problem, though, as it might be challenging to comprehend and justify the decision-making procedures of complicated neural networks, raising questions about the accountability and transparency of AI systems.`
+                mixed: `Artificial intelligence has revolutionized many industries, but its implementation requires careful consideration. From my experience working with AI tools, I've noticed they excel at repetitive tasks but struggle with nuanced human communication.
+
+For instance, GPT-based models can generate coherent text on virtually any topic, yet they often produce content that feels generic or lacks personal insight. In my last project, we used an AI to draft initial reports, but our team had to extensively revise them to include specific case examples and practical recommendations that the AI overlooked.
+
+The key challenge is balancing automation with human oversight. While AI can process data faster than any human, it doesn't understand context in the same way. This is why hybrid approaches - combining AI efficiency with human judgment - tend to yield the best results in real-world applications.`
             };
             
-            // QUILBOT-STYLE DETECTION ALGORITHM
-            // Based on analysis of Quillbot's AI detector patterns
-            function quillbotStyleAnalysis(text) {
-                if (!text || text.trim().length < 20) {
+            // Text analysis functions - deterministic (same text = same results)
+            function analyzeTextDeterministically(text) {
+                if (!text || text.trim().length < 10) {
                     return {
                         aiScore: 0,
                         humanScore: 0,
                         confidence: 0,
                         wordCount: 0,
-                        perplexity: 0,
-                        burstiness: 0,
+                        readability: 0,
                         sentenceVariation: 0,
                         vocabDiversity: 0
                     };
                 }
                 
+                // Clean and prepare text
                 const cleanText = text.trim();
                 const words = cleanText.split(/\s+/);
                 const sentences = cleanText.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                
+                // Word count
                 const wordCountValue = words.length;
                 
-                // 1. PERPLEXITY ANALYSIS (Quillbot checks for predictability)
-                // AI text tends to have lower perplexity (more predictable)
-                let perplexity = 0;
-                
-                // Check for common AI patterns (more predictable sequences)
-                const commonAIPatterns = [
-                    "the development of", "has been", "it is important", "in recent years",
-                    "artificial intelligence", "machine learning", "deep learning",
-                    "neural networks", "natural language processing", "computer vision",
-                    "it should be noted", "as a result", "furthermore", "moreover",
-                    "in addition", "in conclusion", "this suggests that", "it can be seen"
-                ];
-                
-                let patternMatches = 0;
-                const lowerText = cleanText.toLowerCase();
-                commonAIPatterns.forEach(pattern => {
-                    const regex = new RegExp(pattern, 'gi');
-                    const matches = lowerText.match(regex);
-                    if (matches) patternMatches += matches.length;
-                });
-                
-                // Calculate pattern density
-                const patternDensity = (patternMatches / sentences.length) * 100;
-                
-                // 2. BURSTINESS ANALYSIS (Quillbot checks for sentence variation)
-                // Human writing has more variation in sentence length (higher burstiness)
+                // 1. Analyze sentence length variation (AI tends to be more uniform)
                 const sentenceLengths = sentences.map(s => s.split(/\s+/).length);
                 const avgSentenceLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length;
+                const sentenceVariance = sentenceLengths.length > 1 ? 
+                    Math.sqrt(sentenceLengths.map(x => Math.pow(x - avgSentenceLength, 2)).reduce((a, b) => a + b, 0) / sentenceLengths.length) / avgSentenceLength : 0;
                 
-                // Calculate burstiness (variation coefficient)
-                let burstiness = 0;
-                if (sentenceLengths.length > 1) {
-                    const variance = sentenceLengths.map(x => Math.pow(x - avgSentenceLength, 2)).reduce((a, b) => a + b, 0) / sentenceLengths.length;
-                    burstiness = Math.sqrt(variance) / avgSentenceLength;
+                // Convert to percentage (more variance = more human)
+                const sentenceVariationScore = Math.min(100, Math.max(0, sentenceVariance * 500));
+                
+                // 2. Analyze vocabulary diversity (unique words / total words)
+                const uniqueWords = [...new Set(words.map(w => w.toLowerCase().replace(/[^\w]/g, '')))].filter(w => w.length > 0);
+                const vocabDiversityScore = Math.min(100, (uniqueWords.length / words.length) * 150);
+                
+                // 3. Check for AI indicators
+                let aiIndicatorScore = 0;
+                
+                // Common AI phrases
+                const aiPhrases = [
+                    "it is important to", "as a result", "furthermore", "moreover", 
+                    "in addition", "in conclusion", "this essay will", "it can be seen",
+                    "it should be noted", "the following", "as previously mentioned"
+                ];
+                
+                const lowerText = cleanText.toLowerCase();
+                aiPhrases.forEach(phrase => {
+                    if (lowerText.includes(phrase)) aiIndicatorScore += 3;
+                });
+                
+                // Check for repetitive sentence starters
+                if (sentences.length > 3) {
+                    const firstWords = sentences.map(s => {
+                        const firstWord = s.trim().split(/\s+/)[0]?.toLowerCase() || '';
+                        return firstWord.replace(/[^\w]/g, '');
+                    }).filter(w => w.length > 0);
+                    
+                    const uniqueStarters = [...new Set(firstWords)];
+                    const starterDiversity = uniqueStarters.length / firstWords.length;
+                    
+                    if (starterDiversity < 0.5) aiIndicatorScore += 15 * (1 - starterDiversity);
                 }
                 
-                // Convert to percentage
-                const burstinessScore = Math.min(100, Math.max(0, burstiness * 300));
-                
-                // 3. VOCABULARY DIVERSITY (Type-Token Ratio)
-                const uniqueWords = [...new Set(words.map(w => w.toLowerCase().replace(/[^\w]/g, '')))].filter(w => w.length > 0);
-                const vocabDiversityValue = Math.min(100, (uniqueWords.length / words.length) * 200);
-                
-                // 4. PERSONAL PRONOUN USAGE (Human writing uses more personal pronouns)
-                const personalPronouns = [" i ", " we ", " my ", " our ", " me ", " us ", " i'm ", " we're "];
-                let pronounCount = 0;
-                personalPronouns.forEach(pronoun => {
-                    const regex = new RegExp(pronoun, 'gi');
-                    const matches = lowerText.match(regex);
-                    if (matches) pronounCount += matches.length;
-                });
-                
-                // 5. CONTRACTION USAGE (Human writing uses more contractions)
-                const contractions = ["don't", "can't", "won't", "it's", "i'm", "you're", "they're", "we're", "that's", "what's"];
-                let contractionCount = 0;
-                contractions.forEach(contraction => {
-                    const regex = new RegExp(`\\b${contraction}\\b`, 'gi');
-                    const matches = lowerText.match(regex);
-                    if (matches) contractionCount += matches.length;
-                });
-                
-                // 6. PASSIVE VOICE DETECTION (AI uses more passive voice)
-                const passiveWords = [" is ", " was ", " were ", " are ", " been ", " being ", " by the ", " by a "];
+                // Check for passive voice indicators
+                const passiveWords = [" is ", " was ", " were ", " are ", " been ", " being "];
                 let passiveCount = 0;
                 passiveWords.forEach(word => {
                     const regex = new RegExp(word, 'gi');
@@ -742,277 +703,333 @@ The key is finding the right balance - using AI for what it does well (processin
                     if (matches) passiveCount += matches.length;
                 });
                 
-                // 7. TRANSITION WORD ANALYSIS (AI uses more formal transitions)
-                const formalTransitions = ["however", "therefore", "consequently", "thus", "hence", "nevertheless", "moreover", "furthermore"];
-                let transitionCount = 0;
+                if (passiveCount > 0) {
+                    aiIndicatorScore += Math.min(20, passiveCount * 2);
+                }
+                
+                // Check for lack of personal pronouns (AI often avoids "I", "we", "my")
+                const personalPronouns = [" i ", " we ", " my ", " our ", " me ", " us "];
+                let pronounCount = 0;
+                personalPronouns.forEach(pronoun => {
+                    const regex = new RegExp(pronoun, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) pronounCount += matches.length;
+                });
+                
+                // Fewer personal pronouns = more likely AI
+                if (pronounCount < 3 && words.length > 100) {
+                    aiIndicatorScore += 15;
+                }
+                
+                // Check for overly formal transition words
+                const formalTransitions = ["however", "therefore", "consequently", "thus", "hence", "nevertheless"];
+                let formalTransitionCount = 0;
                 formalTransitions.forEach(word => {
                     const regex = new RegExp(`\\b${word}\\b`, 'gi');
                     const matches = lowerText.match(regex);
-                    if (matches) transitionCount += matches.length;
+                    if (matches) formalTransitionCount += matches.length;
                 });
                 
-                // 8. SENTENCE STARTER DIVERSITY (Human writing varies sentence starters)
-                const sentenceStarters = sentences.map(s => {
-                    const firstWord = s.trim().split(/\s+/)[0]?.toLowerCase() || '';
-                    return firstWord.replace(/[^\w]/g, '');
-                }).filter(w => w.length > 0);
+                aiIndicatorScore += Math.min(10, formalTransitionCount * 2);
                 
-                const uniqueStarters = [...new Set(sentenceStarters)];
-                const starterDiversity = sentenceStarters.length > 0 ? (uniqueStarters.length / sentenceStarters.length) * 100 : 0;
+                // 4. Check for human indicators
+                let humanIndicatorScore = 0;
                 
-                // CALCULATE AI SCORE (Based on Quillbot's detection patterns)
-                let aiScore = 0;
+                // Check for contractions (human writing uses more contractions)
+                const contractions = ["don't", "can't", "won't", "it's", "i'm", "you're", "they're", "we're"];
+                let contractionCount = 0;
+                contractions.forEach(contraction => {
+                    const regex = new RegExp(`\\b${contraction}\\b`, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) contractionCount += matches.length;
+                });
                 
-                // Perplexity factor (pattern matching)
-                aiScore += Math.min(40, patternDensity * 0.8);
+                humanIndicatorScore += Math.min(15, contractionCount * 3);
                 
-                // Burstiness factor (low burstiness = more AI-like)
-                aiScore += (100 - burstinessScore) * 0.3;
+                // Check for informal expressions
+                const informalWords = ["okay", "well", "like", "actually", "basically", "anyway", "honestly", "really"];
+                let informalCount = 0;
+                informalWords.forEach(word => {
+                    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) informalCount += matches.length;
+                });
                 
-                // Vocabulary diversity (less diversity = more AI-like)
-                aiScore += (100 - vocabDiversityValue) * 0.2;
+                humanIndicatorScore += Math.min(10, informalCount * 2);
                 
-                // Personal pronoun factor (fewer pronouns = more AI-like)
-                const pronounFactor = Math.max(0, 20 - (pronounCount * 3));
-                aiScore += pronounFactor;
+                // Check for sentence fragments (humans use them more often)
+                const fragments = sentences.filter(s => {
+                    const wordsInSentence = s.split(/\s+/).length;
+                    return wordsInSentence < 5 && wordsInSentence > 0;
+                }).length;
                 
-                // Contraction factor (fewer contractions = more AI-like)
-                const contractionFactor = Math.max(0, 15 - (contractionCount * 2));
-                aiScore += contractionFactor;
+                humanIndicatorScore += Math.min(10, fragments * 2);
                 
-                // Passive voice factor (more passive voice = more AI-like)
-                aiScore += Math.min(15, passiveCount * 1.5);
+                // Check for questions (humans ask questions more)
+                const questionCount = (cleanText.match(/\?/g) || []).length;
+                humanIndicatorScore += Math.min(10, questionCount * 2);
                 
-                // Transition word factor (more formal transitions = more AI-like)
-                aiScore += Math.min(10, transitionCount * 1.5);
+                // 5. Calculate final scores
+                // Base AI score from indicators (0-70 range)
+                let finalAiScore = Math.min(70, aiIndicatorScore);
                 
-                // Sentence starter diversity (less diversity = more AI-like)
-                aiScore += (100 - starterDiversity) * 0.15;
+                // Adjust based on linguistic features
+                // Less sentence variation = more AI
+                finalAiScore += (100 - sentenceVariationScore) * 0.15;
                 
-                // Adjust based on text length (more text = more reliable detection)
-                const lengthFactor = Math.min(30, wordCountValue / 10);
-                aiScore = aiScore * (0.7 + (lengthFactor / 100));
+                // Less vocabulary diversity = more AI
+                finalAiScore += (100 - vocabDiversityScore) * 0.15;
+                
+                // Subtract human indicators
+                finalAiScore -= humanIndicatorScore;
                 
                 // Ensure score is between 0 and 100
-                aiScore = Math.max(0, Math.min(100, aiScore));
+                finalAiScore = Math.max(0, Math.min(100, finalAiScore));
                 
                 // Human score is inverse of AI score
-                const humanScore = 100 - aiScore;
+                const finalHumanScore = 100 - finalAiScore;
                 
-                // Calculate confidence based on text length and analysis consistency
-                let confidence = 60 + Math.min(30, wordCountValue / 20) + Math.abs(aiScore - humanScore) / 3;
-                confidence = Math.min(98, Math.max(65, confidence));
+                // Calculate confidence based on text length and score difference
+                let confidence = 50 + (Math.min(30, wordCountValue / 10)) + Math.abs(finalAiScore - finalHumanScore) / 2;
+                confidence = Math.min(95, Math.max(60, confidence));
                 
-                // Calculate perplexity score for display
-                const displayPerplexity = Math.round(100 - Math.min(100, patternDensity * 2.5));
-                
-                // Calculate burstiness for display
-                const displayBurstiness = Math.round(burstinessScore);
-                
-                // Calculate sentence variation
-                const sentenceVariationValue = Math.round(starterDiversity);
+                // Calculate readability (Flesch-Kincaid approximate)
+                const syllables = words.join(' ').length * 0.3; // Approximate
+                const readability = Math.max(0, Math.min(100, 206.835 - (1.015 * (words.length / sentences.length)) - (84.6 * (syllables / words.length))));
                 
                 return {
-                    aiScore: Math.round(aiScore),
-                    humanScore: Math.round(humanScore),
+                    aiScore: Math.round(finalAiScore),
+                    humanScore: Math.round(finalHumanScore),
                     confidence: Math.round(confidence),
                     wordCount: wordCountValue,
-                    perplexity: displayPerplexity,
-                    burstiness: displayBurstiness,
-                    sentenceVariation: sentenceVariationValue,
-                    vocabDiversity: Math.round(vocabDiversityValue)
+                    readability: Math.round(readability),
+                    sentenceVariation: Math.round(sentenceVariationScore),
+                    vocabDiversity: Math.round(vocabDiversityScore)
                 };
             }
             
-            // Highlight text with AI and human parts (Quillbot style)
-            function highlightTextQuillbotStyle(text, aiScore) {
+            // NEW FUNCTION: Highlight text with AI and human parts
+            function highlightText(text, aiScore) {
                 if (!text || text.trim().length === 0) {
-                    return '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-highlighter fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Your text will appear here with AI parts highlighted in red and human parts in blue after analysis.</p></div>';
+                    return '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-highlighter fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Your text will appear here with AI parts highlighted in purple and human parts in blue after analysis.</p></div>';
                 }
                 
                 // Break text into sentences
-                const sentenceRegex = /[^.!?]+[.!?]+/g;
-                const sentences = text.match(sentenceRegex) || [text];
+                const sentences = text.split(/([.!?]+)/);
                 let highlightedHTML = '';
                 
-                // Quillbot detection patterns at sentence level
-                const aiSentenceIndicators = [
-                    /(the development of|has been|it is important|in recent years)/i,
-                    /(artificial intelligence|machine learning|deep learning|neural networks)/i,
-                    /(natural language processing|computer vision|autonomous decision-making)/i,
-                    /(it should be noted|as a result|furthermore|moreover|in addition)/i,
-                    /(in conclusion|this suggests that|it can be seen|are able to)/i,
-                    /\b(is|was|were|are)\s+\w+ed\b/i, // Passive voice pattern
-                    /\b(however|therefore|consequently|thus|hence)\b/i
+                // Determine highlight threshold based on overall AI score
+                // Higher AI score = more sentences will be highlighted as AI
+                const aiThreshold = 50; // Base threshold
+                const adjustedThreshold = aiThreshold - (aiScore - 50) / 5;
+                
+                // Common AI indicators for sentence-level analysis
+                const aiIndicators = [
+                    "it is important", "furthermore", "moreover", "in addition", 
+                    "in conclusion", "as a result", "therefore", "thus", "hence",
+                    "consequently", "additionally", "notably", "significantly"
                 ];
                 
-                const humanSentenceIndicators = [
-                    /\b(I|we|my|our|me|us)\b/i,
-                    /('s|'re|'ve|'ll|'d|n't)\b/, // Contractions
-                    /(actually|basically|honestly|really|kind of|sort of)/i,
-                    /(!|\?{2,})/, // Exclamation or multiple question marks
-                    /(\.{3,}|-)/, // Ellipsis or dashes
-                    /\b(like|just|maybe|perhaps|probably)\b/i
+                // Human indicators for sentence-level analysis
+                const humanIndicators = [
+                    "i think", "i believe", "in my opinion", "from my experience",
+                    "actually", "basically", "anyway", "honestly", "really",
+                    "kind of", "sort of", "you know", "i mean"
                 ];
                 
                 // Process each sentence
-                sentences.forEach((sentence, index) => {
-                    const trimmedSentence = sentence.trim();
-                    if (trimmedSentence.length === 0) return;
+                for (let i = 0; i < sentences.length; i++) {
+                    const sentence = sentences[i].trim();
+                    if (sentence.length === 0) continue;
                     
+                    // Check if this is a punctuation-only segment
+                    if (/^[.!?]+$/.test(sentence)) {
+                        highlightedHTML += `<span class="neutral-text">${sentence}</span>`;
+                        continue;
+                    }
+                    
+                    // Analyze sentence for AI/human indicators
+                    const lowerSentence = sentence.toLowerCase();
                     let aiIndicatorCount = 0;
                     let humanIndicatorCount = 0;
                     
                     // Check for AI indicators
-                    aiSentenceIndicators.forEach(pattern => {
-                        if (pattern.test(trimmedSentence)) aiIndicatorCount++;
+                    aiIndicators.forEach(indicator => {
+                        if (lowerSentence.includes(indicator)) aiIndicatorCount++;
                     });
                     
                     // Check for human indicators
-                    humanSentenceIndicators.forEach(pattern => {
-                        if (pattern.test(trimmedSentence)) humanIndicatorCount++;
+                    humanIndicators.forEach(indicator => {
+                        if (lowerSentence.includes(indicator)) humanIndicatorCount++;
                     });
                     
-                    // Check sentence length (very long sentences often AI)
-                    const wordCount = trimmedSentence.split(/\s+/).length;
-                    if (wordCount > 35) aiIndicatorCount += 2;
-                    if (wordCount < 8) humanIndicatorCount += 1;
+                    // Check for passive voice
+                    const passiveWords = [" is ", " was ", " were ", " are ", " been ", " being "];
+                    passiveWords.forEach(word => {
+                        if (lowerSentence.includes(word)) aiIndicatorCount++;
+                    });
                     
-                    // Determine classification
-                    let classification = 'neutral';
+                    // Check for personal pronouns
+                    const personalPronouns = [" i ", " we ", " my ", " our ", " me ", " us "];
+                    personalPronouns.forEach(pronoun => {
+                        if (lowerSentence.includes(pronoun)) humanIndicatorCount++;
+                    });
+                    
+                    // Check for contractions
+                    const contractions = ["don't", "can't", "won't", "it's", "i'm", "you're", "they're", "we're"];
+                    contractions.forEach(contraction => {
+                        if (lowerSentence.includes(contraction)) humanIndicatorCount++;
+                    });
+                    
+                    // Determine if sentence is likely AI or human
+                    let isAI = false;
+                    let isHuman = false;
+                    
                     if (aiIndicatorCount > humanIndicatorCount) {
-                        classification = 'ai';
+                        isAI = true;
                     } else if (humanIndicatorCount > aiIndicatorCount) {
-                        classification = 'human';
+                        isHuman = true;
                     } else {
-                        // Tie breaker based on overall AI score
-                        classification = aiScore > 50 ? 'ai' : 'human';
+                        // Tiebreaker: use overall AI score
+                        isAI = aiScore > adjustedThreshold;
+                        isHuman = aiScore <= adjustedThreshold;
                     }
                     
                     // Apply highlighting
-                    if (classification === 'ai') {
-                        highlightedHTML += `<span class="ai-highlight">${trimmedSentence}</span>`;
-                    } else if (classification === 'human') {
-                        highlightedHTML += `<span class="human-highlight">${trimmedSentence}</span>`;
+                    if (isAI) {
+                        highlightedHTML += `<span class="ai-highlight">${sentence}</span>`;
+                    } else if (isHuman) {
+                        highlightedHTML += `<span class="human-highlight">${sentence}</span>`;
                     } else {
-                        highlightedHTML += `<span class="neutral-text">${trimmedSentence}</span>`;
+                        highlightedHTML += `<span class="neutral-text">${sentence}</span>`;
                     }
                     
-                    // Add space between sentences
-                    if (index < sentences.length - 1) {
+                    // Add space after sentence (but not if next is punctuation)
+                    if (i < sentences.length - 1 && !/^[.!?]+$/.test(sentences[i + 1])) {
                         highlightedHTML += ' ';
                     }
-                });
-                
-                // Handle any remaining text (if regex didn't capture everything)
-                const remainingText = text.replace(sentenceRegex, '');
-                if (remainingText.trim().length > 0) {
-                    highlightedHTML += `<span class="neutral-text">${remainingText}</span>`;
                 }
                 
                 return highlightedHTML;
             }
             
-            // Generate Quillbot-style suggestions
-            function generateQuillbotSuggestions(text, analysis) {
+            // Generate suggestions based on analysis
+            function generateSuggestions(text, analysis) {
                 const suggestions = [];
                 
-                // Overall assessment
-                if (analysis.aiScore > 80) {
+                // Always show the overall score interpretation
+                if (analysis.aiScore > 70) {
                     suggestions.push({
-                        title: "High Probability of AI Content",
-                        description: "Your text shows strong indicators of AI generation. Consider rewriting with more personal voice and varied sentence structures."
-                    });
-                } else if (analysis.aiScore > 60) {
-                    suggestions.push({
-                        title: "Likely AI-Generated Content",
-                        description: "Your text has several AI markers. To humanize it, add personal anecdotes and vary your vocabulary."
+                        title: "High AI Probability Detected",
+                        description: "Your text shows strong AI indicators. Consider rewriting with more personal voice, anecdotes, and varied sentence structures."
                     });
                 } else if (analysis.aiScore > 40) {
                     suggestions.push({
                         title: "Mixed AI/Human Characteristics",
-                        description: "Your text contains both AI and human elements. Focus on adding unique perspectives and emotional language."
-                    });
-                } else if (analysis.aiScore > 20) {
-                    suggestions.push({
-                        title: "Mostly Human with Some AI Markers",
-                        description: "Your text reads as mostly human-written. To eliminate remaining AI markers, vary sentence lengths and add informal expressions."
+                        description: "Your text has both AI and human elements. To make it more human, add personal insights and vary your vocabulary."
                     });
                 } else {
                     suggestions.push({
-                        title: "Primarily Human-Written",
-                        description: "Your text shows strong human characteristics. Maintain your authentic voice and personal touch."
+                        title: "Primarily Human Characteristics",
+                        description: "Your text reads as mostly human-written. To maintain authenticity, keep your unique voice and perspective."
                     });
                 }
                 
-                // Specific suggestions based on metrics
-                if (analysis.perplexity < 30) {
+                // Specific suggestions based on analysis
+                if (analysis.sentenceVariation < 40) {
                     suggestions.push({
-                        title: "Increase Text Unpredictability",
-                        description: `Your perplexity score is ${analysis.perplexity}. AI text is often too predictable. Add unexpected word choices and creative phrasing.`
-                    });
-                }
-                
-                if (analysis.burstiness < 40) {
-                    suggestions.push({
-                        title: "Vary Sentence Structures",
-                        description: `Your burstiness score is ${analysis.burstiness}. Mix short, medium, and long sentences to create natural rhythm.`
+                        title: "Vary Sentence Lengths",
+                        description: `Your sentence variation score is ${analysis.sentenceVariation}%. Mix short, medium, and long sentences to create more natural rhythm.`
                     });
                 }
                 
                 if (analysis.vocabDiversity < 50) {
                     suggestions.push({
-                        title: "Expand Vocabulary",
-                        description: `Your vocabulary diversity is ${analysis.vocabDiversity}%. Use synonyms and avoid repeating the same phrases.`
+                        title: "Increase Vocabulary Diversity",
+                        description: `Your vocabulary diversity is ${analysis.vocabDiversity}%. Try using synonyms and avoiding repeated phrases.`
                     });
                 }
                 
-                if (analysis.sentenceVariation < 40) {
-                    suggestions.push({
-                        title: "Diversify Sentence Starters",
-                        description: `Your sentence starter variation is ${analysis.sentenceVariation}%. Begin sentences with different words and phrases.`
-                    });
-                }
-                
-                // Check for specific AI patterns
+                // Check for passive voice
                 const lowerText = text.toLowerCase();
-                if (lowerText.includes("artificial intelligence") && lowerText.includes("machine learning") && 
-                    lowerText.includes("neural networks")) {
+                const passiveWords = [" is ", " was ", " were ", " are ", " been ", " being "];
+                let passiveCount = 0;
+                passiveWords.forEach(word => {
+                    const regex = new RegExp(word, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) passiveCount += matches.length;
+                });
+                
+                if (passiveCount > 5) {
                     suggestions.push({
-                        title: "Reduce Technical Jargon",
-                        description: "Your text contains multiple AI-related technical terms. Balance technical language with everyday expressions."
+                        title: "Reduce Passive Voice",
+                        description: `Found ${passiveCount} passive voice constructions. Use active voice for more direct, engaging writing.`
                     });
                 }
                 
-                // Ensure minimum suggestions
-                if (suggestions.length < 4) {
+                // Check for lack of personal pronouns
+                const personalPronouns = [" i ", " we ", " my ", " our ", " me ", " us "];
+                let pronounCount = 0;
+                personalPronouns.forEach(pronoun => {
+                    const regex = new RegExp(pronoun, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) pronounCount += matches.length;
+                });
+                
+                if (pronounCount < 2 && text.length > 200) {
                     suggestions.push({
-                        title: "Add Personal Pronouns",
-                        description: "AI often avoids personal pronouns. Use 'I', 'we', 'my' to make writing more relatable."
+                        title: "Add Personal Perspective",
+                        description: "Your text lacks personal pronouns. Consider adding 'I', 'we', or 'my' to make it more relatable."
+                    });
+                }
+                
+                // Check for overly formal language
+                const formalTransitions = ["however", "therefore", "consequently", "thus", "hence", "nevertheless"];
+                let formalTransitionCount = 0;
+                formalTransitions.forEach(word => {
+                    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                    const matches = lowerText.match(regex);
+                    if (matches) formalTransitionCount += matches.length;
+                });
+                
+                if (formalTransitionCount > 3) {
+                    suggestions.push({
+                        title: "Simplify Transition Words",
+                        description: `Found ${formalTransitionCount} formal transitions. Try simpler alternatives like 'but', 'so', or 'and'.`
+                    });
+                }
+                
+                // Ensure we have enough suggestions
+                if (suggestions.length < 3) {
+                    suggestions.push({
+                        title: "Read Aloud for Natural Flow",
+                        description: "Reading your text aloud can help identify unnatural phrasing that might sound AI-generated."
                     });
                     
                     suggestions.push({
-                        title: "Include Informal Expressions",
-                        description: "Add conversational phrases like 'you know', 'I mean', or 'actually' to sound more human."
+                        title: "Add Specific Examples",
+                        description: "AI text often lacks specific, concrete examples. Include real-world instances to increase authenticity."
                     });
                 }
                 
-                return suggestions.slice(0, 5);
+                return suggestions.slice(0, 5); // Return max 5 suggestions
             }
             
             // Update the chart with results
             function updateChart(aiScore, humanScore) {
+                // Destroy existing chart if it exists
                 if (detectionChart) {
                     detectionChart.destroy();
                 }
                 
+                // Create new chart
                 detectionChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: ['AI-Generated', 'Human-Written'],
                         datasets: [{
                             data: [aiScore, humanScore],
-                            backgroundColor: ['#ff6b6b', '#4facfe'],
+                            backgroundColor: ['#fc00ff', '#00dbde'],
                             borderColor: ['rgba(255,255,255,0.2)', 'rgba(255,255,255,0.2)'],
                             borderWidth: 2,
                             hoverOffset: 15
@@ -1059,28 +1076,37 @@ The key is finding the right balance - using AI for what it does well (processin
                 confidenceFill.style.width = `${results.confidence}%`;
                 
                 // Update metrics
-                perplexityScore.textContent = results.perplexity;
-                burstinessScore.textContent = results.burstiness;
+                wordCount.textContent = results.wordCount;
+                readabilityScore.textContent = results.readability;
                 sentenceVariation.textContent = `${results.sentenceVariation}%`;
                 vocabDiversity.textContent = `${results.vocabDiversity}%`;
                 
-                // Color code metrics
-                const metrics = [
-                    {element: perplexityScore, value: results.perplexity, lowIsBad: true},
-                    {element: burstinessScore, value: results.burstiness, lowIsBad: true},
-                    {element: sentenceVariation, value: results.sentenceVariation, lowIsBad: true},
-                    {element: vocabDiversity, value: results.vocabDiversity, lowIsBad: true}
-                ];
+                // Color code readability
+                if (results.readability < 30) {
+                    readabilityScore.className = "detail-value red-flag";
+                } else if (results.readability < 60) {
+                    readabilityScore.className = "detail-value yellow-flag";
+                } else {
+                    readabilityScore.className = "detail-value green-flag";
+                }
                 
-                metrics.forEach(metric => {
-                    if (metric.value < 30) {
-                        metric.element.className = "detail-value red-flag";
-                    } else if (metric.value < 60) {
-                        metric.element.className = "detail-value yellow-flag";
-                    } else {
-                        metric.element.className = "detail-value green-flag";
-                    }
-                });
+                // Color code sentence variation
+                if (results.sentenceVariation < 30) {
+                    sentenceVariation.className = "detail-value red-flag";
+                } else if (results.sentenceVariation < 60) {
+                    sentenceVariation.className = "detail-value yellow-flag";
+                } else {
+                    sentenceVariation.className = "detail-value green-flag";
+                }
+                
+                // Color code vocabulary diversity
+                if (results.vocabDiversity < 40) {
+                    vocabDiversity.className = "detail-value red-flag";
+                } else if (results.vocabDiversity < 70) {
+                    vocabDiversity.className = "detail-value yellow-flag";
+                } else {
+                    vocabDiversity.className = "detail-value green-flag";
+                }
                 
                 // Update suggestions
                 suggestionsList.innerHTML = '';
@@ -1100,30 +1126,30 @@ The key is finding the right balance - using AI for what it does well (processin
                 });
                 
                 // Update highlighted text
-                highlightedText.innerHTML = highlightTextQuillbotStyle(text, results.aiScore);
+                highlightedText.innerHTML = highlightText(text, results.aiScore);
             }
             
             // Analyze button click handler
             analyzeBtn.addEventListener('click', function() {
                 const text = inputText.value.trim();
                 
-                if (text.length < 20) {
-                    alert("Please enter at least 20 characters for accurate detection.");
+                if (text.length < 10) {
+                    alert("Please enter at least 10 characters for analysis.");
                     return;
                 }
                 
                 // Show loading state
                 const originalText = analyzeBtn.innerHTML;
-                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
                 analyzeBtn.disabled = true;
                 
                 // Update highlighted text with loading state
-                highlightedText.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Analyzing text with Quillbot-style detection patterns...</p></div>';
+                highlightedText.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Analyzing text and highlighting AI vs human sections...</p></div>';
                 
                 // Simulate analysis delay
                 setTimeout(() => {
-                    const results = quillbotStyleAnalysis(text);
-                    const suggestions = generateQuillbotSuggestions(text, results);
+                    const results = analyzeTextDeterministically(text);
+                    const suggestions = generateSuggestions(text, results);
                     
                     updateUI(results, suggestions, text);
                     
@@ -1142,8 +1168,8 @@ The key is finding the right balance - using AI for what it does well (processin
                 humanPercentage.textContent = '0%';
                 confidenceValue.textContent = '0%';
                 confidenceFill.style.width = '0%';
-                perplexityScore.textContent = '0';
-                burstinessScore.textContent = '0';
+                wordCount.textContent = '0';
+                readabilityScore.textContent = '0';
                 sentenceVariation.textContent = '0%';
                 vocabDiversity.textContent = '0%';
                 
@@ -1163,36 +1189,37 @@ The key is finding the right balance - using AI for what it does well (processin
                             <i class="fas fa-exclamation-circle"></i>
                             <span>Analyze text to get suggestions</span>
                         </div>
-                        <p>Click "Detect AI Content" to see specific recommendations for making your content sound more natural and human-like.</p>
+                        <p>Click "Analyze Text" to see specific recommendations for making your content sound more natural and human-like.</p>
                     </div>
                 `;
                 
                 // Reset highlighted text
-                highlightedText.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-highlighter fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Your text will appear here with AI parts highlighted in red and human parts in blue after analysis.</p></div>';
+                highlightedText.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;"><i class="fas fa-highlighter fa-2x" style="margin-bottom: 15px; display: block;"></i><p>Your text will appear here with AI parts highlighted in purple and human parts in blue after analysis.</p></div>';
             });
             
             // Save button click handler
             saveBtn.addEventListener('click', function() {
                 const text = inputText.value.trim();
                 
-                if (text.length < 20) {
-                    alert("Please analyze some text first before exporting.");
+                if (text.length < 10) {
+                    alert("Please analyze some text first before saving.");
                     return;
                 }
                 
                 // Create a summary of the analysis
-                const summary = `Quillbot-Style AI Detection Analysis
+                const aiPercent = aiPercentage.textContent;
+                const humanPercent = humanPercentage.textContent;
+                const confidence = confidenceValue.textContent;
                 
-Text Length: ${wordCountValue || 0} words
-AI Probability: ${aiPercentage.textContent}
-Human Probability: ${humanPercentage.textContent}
-Confidence: ${confidenceValue.textContent}
-
-Detailed Metrics:
-- Perplexity Score: ${perplexityScore.textContent}
-- Burstiness Score: ${burstinessScore.textContent}
-- Sentence Variation: ${sentenceVariation.textContent}
-- Vocabulary Diversity: ${vocabDiversity.textContent}
+                const summary = `AI Detector Analysis Summary:
+                
+Text Length: ${wordCount.textContent} words
+AI Probability: ${aiPercent}
+Human Probability: ${humanPercent}
+Confidence: ${confidence}
+Readability: ${readabilityScore.textContent}
+Sentence Variation: ${sentenceVariation.textContent}
+Vocabulary Diversity: ${vocabDiversity.textContent}
 
 Analysis Date: ${new Date().toLocaleString()}
                 `;
@@ -1202,7 +1229,7 @@ Analysis Date: ${new Date().toLocaleString()}
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'ai-detection-analysis.txt';
+                a.download = 'ai-detector-analysis.txt';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -1210,7 +1237,7 @@ Analysis Date: ${new Date().toLocaleString()}
                 
                 // Show confirmation
                 const originalText = saveBtn.innerHTML;
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Exported!';
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
                 setTimeout(() => {
                     saveBtn.innerHTML = originalText;
                 }, 2000);
