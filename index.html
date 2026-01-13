@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Powered Text Corrector - English/French</title>
+    <title>Grammar & Conjugation Corrector - English/French</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +13,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -24,14 +23,13 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 25px 75px rgba(0, 0, 0, 0.4);
             overflow: hidden;
-            min-height: 90vh;
         }
 
         /* Header */
         header {
-            background: linear-gradient(to right, #1a2a6c, #3a7bd5, #00d2ff);
+            background: linear-gradient(to right, #283593, #5c6bc0);
             color: white;
             padding: 25px 40px;
             display: flex;
@@ -50,20 +48,18 @@
         }
 
         .header-left .subtitle {
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1rem;
         }
 
-        .ai-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 8px 20px;
-            border-radius: 25px;
+        .language-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .controls {
@@ -80,7 +76,7 @@
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         select {
@@ -92,36 +88,45 @@
 
         select:focus {
             outline: none;
-            border-color: #00d2ff;
-            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
+            border-color: #5c6bc0;
+            box-shadow: 0 0 0 3px rgba(92, 107, 192, 0.2);
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #26A69A 0%, #4DB6AC 100%);
             color: white;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(38, 166, 154, 0.3);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(38, 166, 154, 0.4);
         }
 
         .btn:active {
             transform: translateY(0);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-            box-shadow: 0 4px 15px rgba(0, 176, 155, 0.3);
+        .btn-clear {
+            background: linear-gradient(135deg, #EF5350 0%, #E57373 100%);
+            box-shadow: 0 4px 15px rgba(239, 83, 80, 0.3);
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 8px 25px rgba(0, 176, 155, 0.4);
+        .btn-clear:hover {
+            box-shadow: 0 8px 25px rgba(239, 83, 80, 0.4);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #42A5F5 0%, #64B5F6 100%);
+            box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+        }
+
+        .btn-copy:hover {
+            box-shadow: 0 8px 25px rgba(66, 165, 245, 0.4);
         }
 
         /* Main Content */
@@ -130,13 +135,12 @@
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             padding: 40px;
-            height: 600px;
+            min-height: 600px;
         }
 
         @media (max-width: 1100px) {
             .main-content {
                 grid-template-columns: 1fr;
-                height: auto;
             }
         }
 
@@ -176,8 +180,8 @@
         }
 
         .badge-error {
-            background: #ffeaea;
-            color: #d32f2f;
+            background: #ffebee;
+            color: #c62828;
             border: 2px solid #ffcdd2;
         }
 
@@ -195,11 +199,6 @@
             overflow: hidden;
             position: relative;
             background: #fafafa;
-            transition: border-color 0.3s;
-        }
-
-        .text-container:focus-within {
-            border-color: #3a7bd5;
         }
 
         .text-area-wrapper {
@@ -225,40 +224,26 @@
             outline: none;
         }
 
-        .text-area[contenteditable="false"] {
-            background: #f8fdfe;
-            color: #1a2a6c;
-        }
-
         /* Error Highlighting */
         .error-highlight {
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 87, 34, 0.15) 100%);
-            border-bottom: 3px solid #ff9800;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%);
+            border-bottom: 3px solid #FFA000;
             position: relative;
             cursor: help;
-            padding: 2px 0;
+            padding: 1px 2px;
             border-radius: 3px;
-            transition: all 0.3s;
         }
 
         .error-highlight:hover {
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(255, 87, 34, 0.25) 100%);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 152, 0, 0.3) 100%);
         }
 
-        .error-highlight::after {
-            content: "🔍";
+        .error-marker {
             position: absolute;
-            right: -25px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: -18px;
+            top: -8px;
             font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .error-highlight:hover::after {
-            opacity: 1;
+            color: #FF6D00;
         }
 
         /* Correction Info */
@@ -272,27 +257,35 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
             font-size: 0.9rem;
             color: #555;
             z-index: 10;
         }
 
-        .correction-info .count {
-            font-weight: 700;
-            font-size: 1.2rem;
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .correction-info .count.error {
+        .info-count {
+            font-weight: 700;
+            font-size: 1.2rem;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .info-count.error {
             color: #d32f2f;
         }
 
-        .correction-info .count.corrected {
+        .info-count.corrected {
             color: #2e7d32;
         }
 
-        /* AI Processing */
-        .ai-processing {
+        /* Loading */
+        .loading {
             display: none;
             position: absolute;
             top: 0;
@@ -307,7 +300,7 @@
             z-index: 100;
         }
 
-        .ai-processing.active {
+        .loading.active {
             display: flex;
             animation: fadeIn 0.3s ease;
         }
@@ -318,10 +311,10 @@
         }
 
         .spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3a7bd5;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #5c6bc0;
             border-radius: 50%;
             animation: spin 1.5s linear infinite;
             margin-bottom: 20px;
@@ -332,38 +325,29 @@
             100% { transform: rotate(360deg); }
         }
 
-        .ai-status {
+        .loading-text {
             font-size: 1.1rem;
             color: #333;
             font-weight: 500;
             margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .ai-substatus {
-            color: #666;
-            font-size: 0.9rem;
-            text-align: center;
-            max-width: 300px;
         }
 
         /* Stats Bar */
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-            padding: 25px 40px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            padding: 20px 40px;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 0 0 20px 20px;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .stats-bar {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
             .stats-bar {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -371,76 +355,48 @@
 
         .stat-card {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
         }
 
         .stat-value {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #1a2a6c 0%, #3a7bd5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            color: #283593;
         }
 
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-
-        .quality-indicator {
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-
-        .quality-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff5252 0%, #ffeb3b 50%, #4caf50 100%);
-            border-radius: 4px;
-            transition: width 1s ease;
-            width: 100%;
         }
 
         /* Footer */
         footer {
             text-align: center;
             padding: 20px;
-            background: #2c3e50;
-            color: white;
-            margin-top: -1px;
-        }
-
-        .footer-content {
-            max-width: 800px;
-            margin: 0 auto;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
+            background: #f8f9fa;
+            color: #666;
+            border-top: 1px solid #dee2e6;
         }
 
         .language-indicator {
             display: inline-block;
             padding: 8px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #e3f2fd;
+            color: #1976d2;
             border-radius: 20px;
             margin: 10px 0;
             font-size: 0.9rem;
+            border: 1px solid #bbdefb;
         }
 
         /* Tooltip */
-        .error-tooltip {
+        .tooltip {
             position: fixed;
             background: rgba(0, 0, 0, 0.9);
             color: white;
@@ -456,24 +412,24 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .error-tooltip.show {
+        .tooltip.show {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .error-tooltip strong {
-            color: #ff9800;
+        .tooltip strong {
+            color: #FFA000;
             display: block;
             margin-bottom: 5px;
         }
 
-        .error-tooltip .suggestion {
-            color: #4caf50;
+        .tooltip .suggestion {
+            color: #4CAF50;
             font-weight: 600;
         }
 
-        /* Copy Success */
-        .copy-success {
+        /* Success Message */
+        .message {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -500,125 +456,28 @@
             }
         }
 
-        .copy-success.show {
+        .message.show {
             display: flex;
         }
 
-        /* API Settings */
-        .api-settings {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            z-index: 2000;
-            display: none;
-            width: 90%;
-            max-width: 500px;
+        .message.error {
+            background: #f44336;
+            box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3);
         }
 
-        .api-settings.show {
-            display: block;
-            animation: modalSlideIn 0.3s ease;
+        /* Corrected Text */
+        .corrected-word {
+            background: #e8f5e9;
+            border-bottom: 2px solid #4caf50;
+            padding: 1px 2px;
+            border-radius: 3px;
         }
 
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -60%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        .api-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .api-header h3 {
-            color: #2c3e50;
-            font-size: 1.4rem;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.3s;
-        }
-
-        .close-btn:hover {
-            color: #d32f2f;
-        }
-
-        .api-form-group {
-            margin-bottom: 20px;
-        }
-
-        .api-form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .api-form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-
-        .api-form-group input:focus {
-            outline: none;
-            border-color: #3a7bd5;
-        }
-
-        .api-note {
-            background: #e8f4fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #1a2a6c;
-        }
-
-        .api-note a {
-            color: #3a7bd5;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .api-note a:hover {
-            text-decoration: underline;
-        }
-
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1500;
-            display: none;
-        }
-
-        .overlay.show {
-            display: block;
+        .improved-word {
+            background: #e3f2fd;
+            border-bottom: 2px solid #2196f3;
+            padding: 1px 2px;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -626,10 +485,10 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <h1>🤖 AI Text Corrector</h1>
-                <div class="subtitle">Corrects EVERYTHING like ChatGPT - Grammar, Spelling, Style, Punctuation</div>
-                <div class="ai-badge">
-                    <span>✨ Powered by DeepSeek AI</span>
+                <h1>📚 Grammar & Conjugation Corrector</h1>
+                <div class="subtitle">Corrects EVERYTHING in English & French - Grammar, Conjugation, Spelling, Style</div>
+                <div class="language-badge">
+                    <span>🇬🇧 English • 🇫🇷 Français</span>
                 </div>
             </div>
             <div class="controls">
@@ -639,14 +498,14 @@
                     <option value="fr-FR">🇫🇷 French (France)</option>
                     <option value="fr-CA">🇨🇦 French (Canada)</option>
                 </select>
-                <button id="aiCorrectBtn" class="btn btn-primary">
-                    <span>🤖 AI Correct All</span>
+                <button id="correctBtn" class="btn">
+                    <span>🔍 Correct Everything</span>
                 </button>
-                <button id="copyBtn" class="btn">
+                <button id="clearBtn" class="btn btn-clear">
+                    <span>🗑️ Clear All</span>
+                </button>
+                <button id="copyBtn" class="btn btn-copy">
                     <span>📋 Copy Corrected</span>
-                </button>
-                <button id="settingsBtn" class="btn" style="background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);">
-                    <span>⚙️ API Settings</span>
                 </button>
             </div>
         </header>
@@ -660,46 +519,55 @@
                         Original Text with Errors
                     </div>
                     <div class="panel-badge badge-error" id="errorCountBadge">
-                        <span id="errorCount">0</span> errors detected
+                        <span id="errorCount">0</span> errors
                     </div>
                 </div>
                 <div class="text-container">
                     <div class="correction-info">
-                        <div>
-                            <span class="count error" id="originalErrorCount">0</span>
+                        <div class="info-item">
+                            <span class="info-count error" id="originalErrorCount">0</span>
                             <span>errors</span>
                         </div>
                         <div style="width: 1px; height: 20px; background: #ddd;"></div>
-                        <div>
-                            <span class="count" id="wordCount">0</span>
+                        <div class="info-item">
+                            <span class="info-count" id="wordCount">0</span>
                             <span>words</span>
                         </div>
                     </div>
                     <div class="text-area-wrapper">
-                        <div class="ai-processing" id="aiProcessing">
+                        <div class="loading" id="loading">
                             <div class="spinner"></div>
-                            <div class="ai-status">AI is analyzing your text...</div>
-                            <div class="ai-substatus">Checking grammar, spelling, punctuation, and style</div>
-                            <div class="ai-substatus" id="aiProgress">Processing line 1 of 5...</div>
+                            <div class="loading-text">Correcting text...</div>
+                            <div style="font-size: 0.9rem; color: #666;">Checking grammar, conjugation, spelling...</div>
                         </div>
                         <div class="text-area" id="originalText" contenteditable="true" spellcheck="false">
+ENGLISH EXAMPLE WITH ERRORS:
+
 Hello their,
 
-I went to the store yesterday and buyed some apples. The apples was very good. Me and my friend we really enjoyed them. 
+I goes to school every day. She don't like apples. We was at the park yesterday. Him and me goes to the store. The dog chase the cat. They was happy to see we.
 
-Example of common errors that peoples makes often:
-- Your going to love this
-- Its a beautiful day
-- They're house is big
-- We should of gone earlier
-- I could care less
+Common conjugation errors:
+- He go to work → He goes to work
+- She write a letter → She writes a letter
+- I has a book → I have a book
+- They doesn't understand → They don't understand
 
-In French: Je suis allé au supermarché et j'ai acheter des pommes. Les pommes étaient très bon. Moi et mon ami nous avons vraiment apprécié.
+Spelling errors: definately, seperate, occured, recieve, wierd
 
-This text contains multiple types of errors including spelling, grammar, punctuation, and style issues. The AI will correct everything automatically like a human editor would do.
+FRENCH EXAMPLE WITH ERRORS:
 
-Best regards,
-Your Name
+Je aller au supermarché hier. Tu mange une pomme. Il parle pas anglais. Nous allons au cinéma demain. Vous regarder la télévision. Ils mange du pain.
+
+Erreurs de conjugaison courantes:
+- Je va → Je vais
+- Tu mange → Tu manges
+- Il parlent → Il parle
+- Nous sommes allé → Nous sommes allés
+- Vous avez manger → Vous avez mangé
+- Ils sont parti → Ils sont partis
+
+Fautes d'orthographe: apres, quand, jusqu'a, cote, tache
                         </div>
                     </div>
                 </div>
@@ -710,27 +578,27 @@ Your Name
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="icon">✅</span>
-                        AI-Corrected Text
+                        Corrected Text
                     </div>
                     <div class="panel-badge badge-success" id="correctionCountBadge">
-                        <span id="correctionCount">0</span> corrections applied
+                        <span id="correctionCount">0</span> corrections
                     </div>
                 </div>
                 <div class="text-container">
                     <div class="correction-info">
-                        <div>
-                            <span class="count corrected" id="correctedCount">0</span>
+                        <div class="info-item">
+                            <span class="info-count corrected" id="correctedCount">0</span>
                             <span>corrections</span>
                         </div>
                         <div style="width: 1px; height: 20px; background: #ddd;"></div>
-                        <div>
-                            <span class="count" id="charCount">0</span>
-                            <span>characters</span>
+                        <div class="info-item">
+                            <span class="info-count" id="charCount">0</span>
+                            <span>chars</span>
                         </div>
                     </div>
                     <div class="text-area-wrapper">
                         <div class="text-area" id="correctedText" contenteditable="false">
-                            <!-- AI-corrected text will appear here -->
+                            <!-- Corrected text will appear here -->
                         </div>
                     </div>
                 </div>
@@ -748,76 +616,37 @@ Your Name
                 <div class="stat-label">Errors Found</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="statCorrections">0</div>
-                <div class="stat-label">Corrections Made</div>
-            </div>
-            <div class="stat-card">
                 <div class="stat-value" id="statGrammar">0</div>
                 <div class="stat-label">Grammar Fixed</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="statQuality">100%</div>
-                <div class="stat-label">Quality Score</div>
-                <div class="quality-indicator">
-                    <div class="quality-bar" id="qualityBar" style="width: 100%"></div>
-                </div>
+                <div class="stat-value" id="statConjugation">0</div>
+                <div class="stat-label">Conjugation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statSpelling">0</div>
+                <div class="stat-label">Spelling</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statStyle">0</div>
+                <div class="stat-label">Style Improvements</div>
             </div>
         </div>
 
         <footer>
-            <div class="footer-content">
-                <p>✅ <strong>AI-powered correction</strong> - Corrects grammar, spelling, punctuation, style, and flow like ChatGPT</p>
-                <div class="language-indicator" id="currentLanguage">Current Language: English (US)</div>
-                <p style="margin-top: 10px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.7);">
-                    Errors are highlighted in orange. Hover for details. Uses AI for intelligent, context-aware corrections.
-                </p>
-            </div>
+            <p>✅ <strong>Corrects EVERYTHING:</strong> Grammar • Conjugation • Spelling • Punctuation • Style</p>
+            <div class="language-indicator" id="currentLanguage">Current Language: English (US)</div>
+            <p style="margin-top: 10px; font-size: 0.85rem; color: #888;">
+                Orange highlights show errors. Hover for details. Works completely offline.
+            </p>
         </footer>
     </div>
 
     <!-- Tooltip -->
-    <div class="error-tooltip" id="errorTooltip"></div>
+    <div class="tooltip" id="tooltip"></div>
 
-    <!-- Copy Success Message -->
-    <div class="copy-success" id="copySuccess">
-        <span>✅</span>
-        <span>Corrected text copied to clipboard!</span>
-    </div>
-
-    <!-- API Settings Modal -->
-    <div class="overlay" id="overlay"></div>
-    <div class="api-settings" id="apiSettings">
-        <div class="api-header">
-            <h3>⚙️ AI API Settings</h3>
-            <button class="close-btn" id="closeSettingsBtn">×</button>
-        </div>
-        <div class="api-form-group">
-            <label for="apiKeyInput">DeepSeek API Key (Optional)</label>
-            <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-            <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
-                Leave empty to use local AI simulation
-            </div>
-        </div>
-        <div class="api-form-group">
-            <label for="aiModelSelect">AI Model</label>
-            <select id="aiModelSelect" style="width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 15px;">
-                <option value="deepseek-chat">DeepSeek Chat (Recommended)</option>
-                <option value="gpt-4">GPT-4 (If available)</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="claude-3">Claude 3</option>
-                <option value="local-sim">Local AI Simulation</option>
-            </select>
-        </div>
-        <button id="saveSettingsBtn" class="btn" style="width: 100%; margin-top: 20px; background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);">
-            💾 Save Settings
-        </button>
-        <div class="api-note">
-            <strong>Note:</strong> For best results, get a free API key from 
-            <a href="https://platform.deepseek.com/api_keys" target="_blank">DeepSeek API</a> or 
-            <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>. 
-            Without an API key, the tool uses advanced local correction algorithms.
-        </div>
-    </div>
+    <!-- Message -->
+    <div class="message" id="message"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -825,17 +654,12 @@ Your Name
             const originalText = document.getElementById('originalText');
             const correctedText = document.getElementById('correctedText');
             const languageSelect = document.getElementById('languageSelect');
-            const aiCorrectBtn = document.getElementById('aiCorrectBtn');
+            const correctBtn = document.getElementById('correctBtn');
+            const clearBtn = document.getElementById('clearBtn');
             const copyBtn = document.getElementById('copyBtn');
-            const settingsBtn = document.getElementById('settingsBtn');
-            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-            const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-            const apiSettings = document.getElementById('apiSettings');
-            const overlay = document.getElementById('overlay');
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const aiModelSelect = document.getElementById('aiModelSelect');
-            const aiProcessing = document.getElementById('aiProcessing');
-            const aiProgress = document.getElementById('aiProgress');
+            const loading = document.getElementById('loading');
+            const tooltip = document.getElementById('tooltip');
+            const message = document.getElementById('message');
             
             // Stats elements
             const errorCount = document.getElementById('errorCount');
@@ -851,423 +675,499 @@ Your Name
             // Main stats
             const statWords = document.getElementById('statWords');
             const statErrors = document.getElementById('statErrors');
-            const statCorrections = document.getElementById('statCorrections');
             const statGrammar = document.getElementById('statGrammar');
-            const statQuality = document.getElementById('statQuality');
-            const qualityBar = document.getElementById('qualityBar');
-            
-            // Tooltip and success
-            const errorTooltip = document.getElementById('errorTooltip');
-            const copySuccess = document.getElementById('copySuccess');
+            const statConjugation = document.getElementById('statConjugation');
+            const statSpelling = document.getElementById('statSpelling');
+            const statStyle = document.getElementById('statStyle');
 
             // State
             let corrections = [];
-            let aiEnabled = false;
-            let apiKey = localStorage.getItem('ai_corrector_api_key') || '';
-            let aiModel = localStorage.getItem('ai_corrector_model') || 'deepseek-chat';
-
+            let currentLang = 'en';
+            
             // Initialize
-            apiKeyInput.value = apiKey;
-            aiModelSelect.value = aiModel;
             updateLanguageDisplay();
-            processTextLocally();
+            processText();
 
             // Event Listeners
             languageSelect.addEventListener('change', updateLanguageDisplay);
-            originalText.addEventListener('input', debounce(processTextLocally, 500));
-            aiCorrectBtn.addEventListener('click', processTextWithAI);
+            originalText.addEventListener('input', debounce(processText, 500));
+            correctBtn.addEventListener('click', processText);
+            clearBtn.addEventListener('click', clearAll);
             copyBtn.addEventListener('click', copyCorrectedText);
-            settingsBtn.addEventListener('click', () => {
-                apiSettings.classList.add('show');
-                overlay.classList.add('show');
-            });
-            closeSettingsBtn.addEventListener('click', closeSettings);
-            saveSettingsBtn.addEventListener('click', saveSettings);
-            overlay.addEventListener('click', closeSettings);
 
             // Tooltip handling
             document.addEventListener('mousemove', handleTooltip);
             originalText.addEventListener('mouseout', () => {
-                errorTooltip.classList.remove('show');
-            });
-
-            // Close settings with Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') closeSettings();
+                tooltip.classList.remove('show');
             });
 
             // Functions
             function updateLanguageDisplay() {
                 const langText = languageSelect.options[languageSelect.selectedIndex].text;
                 currentLanguage.textContent = `Current Language: ${langText}`;
-                processTextLocally();
+                currentLang = languageSelect.value.startsWith('en') ? 'en' : 'fr';
+                processText();
             }
 
-            function closeSettings() {
-                apiSettings.classList.remove('show');
-                overlay.classList.remove('show');
+            function clearAll() {
+                originalText.innerHTML = '';
+                correctedText.innerHTML = '';
+                corrections = [];
+                updateStats(0, 0, 0, 0, 0, 0);
+                showMessage('All text cleared!', 'success');
             }
 
-            function saveSettings() {
-                apiKey = apiKeyInput.value.trim();
-                aiModel = aiModelSelect.value;
-                
-                localStorage.setItem('ai_corrector_api_key', apiKey);
-                localStorage.setItem('ai_corrector_model', aiModel);
-                
-                aiEnabled = apiKey.length > 0 && aiModel !== 'local-sim';
-                
-                showMessage('Settings saved successfully!');
-                closeSettings();
-                
-                if (aiEnabled) {
-                    processTextWithAI();
-                }
-            }
-
-            async function processTextWithAI() {
+            function processText() {
                 const text = originalText.innerText.trim();
-                if (text.length < 5) {
-                    showMessage('Please enter more text for AI analysis');
+                if (text.length === 0) {
+                    correctedText.innerHTML = '';
+                    updateStats(0, 0, 0, 0, 0, 0);
                     return;
                 }
 
-                const language = languageSelect.value.startsWith('en') ? 'English' : 'French';
+                loading.classList.add('active');
                 
-                // Show processing
-                aiProcessing.classList.add('active');
-                updateAIProgress(0, 'Starting AI analysis...');
-
-                try {
-                    if (apiKey && aiModel !== 'local-sim') {
-                        // Use real AI API
-                        await processWithRealAI(text, language);
-                    } else {
-                        // Use enhanced local processing
-                        await processWithSimulatedAI(text, language);
-                    }
-                } catch (error) {
-                    console.error('AI processing error:', error);
-                    showMessage('AI processing failed. Using advanced local correction instead.');
-                    processWithSimulatedAI(text, language);
-                } finally {
-                    aiProcessing.classList.remove('active');
-                }
+                setTimeout(() => {
+                    const corrected = correctEverything(text, currentLang);
+                    applyCorrections(text, corrected);
+                    loading.classList.remove('active');
+                }, 800);
             }
 
-            async function processWithRealAI(text, language) {
-                updateAIProgress(20, 'Connecting to AI service...');
-                
-                // This is where you'd implement real API calls
-                // For now, we'll simulate it
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                updateAIProgress(50, 'AI analyzing grammar and style...');
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                updateAIProgress(80, 'Applying corrections...');
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                updateAIProgress(100, 'Finalizing corrections...');
-                
-                // For demo purposes, use simulated AI
-                processWithSimulatedAI(text, language);
-            }
-
-            async function processWithSimulatedAI(text, language) {
-                // Simulate AI thinking
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // Enhanced local correction that works like AI
-                const corrected = enhancedAICorrection(text, language);
-                
-                // Apply corrections
-                applyCorrections(text, corrected);
-                
-                showMessage('✅ AI has corrected all errors!');
-            }
-
-            function enhancedAICorrection(text, language) {
+            function correctEverything(text, lang) {
+                corrections = [];
                 let corrected = text;
+                const stats = { grammar: 0, conjugation: 0, spelling: 0, style: 0 };
                 
-                // Comprehensive English corrections
-                if (language === 'English') {
-                    corrected = corrected.replace(/\btheir\b/gi, 'there');
-                    corrected = corrected.replace(/\bbuyed\b/gi, 'bought');
-                    corrected = corrected.replace(/\bwas\b/gi, (match) => {
-                        // Check if next word is plural
-                        const nextWord = corrected.split(/\s+/)[corrected.toLowerCase().indexOf('was') + 1];
-                        return /^(apples|friends|people|they|we|you)$/i.test(nextWord) ? 'were' : match;
-                    });
-                    corrected = corrected.replace(/\bme and\b/gi, 'and I');
-                    corrected = corrected.replace(/\band me\b/gi, 'and I');
-                    corrected = corrected.replace(/\bi and\b/gi, 'and I');
-                    corrected = corrected.replace(/\byour\b/gi, (match, offset) => {
-                        const nextWord = corrected.slice(offset + match.length).split(/\s+/)[0];
-                        return /^(going|welcome|turn)$/i.test(nextWord) ? 'you\'re' : match;
-                    });
-                    corrected = corrected.replace(/\bits\b/gi, (match, offset) => {
-                        const nextWord = corrected.slice(offset + match.length).split(/\s+/)[0];
-                        return /^(a|an|the|my|your|his|her|our|their)$/i.test(nextWord) ? 'it\'s' : match;
-                    });
-                    corrected = corrected.replace(/\bthey['']?re\b/gi, (match, offset) => {
-                        const nextWord = corrected.slice(offset + match.length).split(/\s+/)[0];
-                        return /^(house|car|dog|cat|book)$/i.test(nextWord) ? 'their' : match;
-                    });
-                    corrected = corrected.replace(/\bshould of\b/gi, 'should have');
-                    corrected = corrected.replace(/\bcould of\b/gi, 'could have');
-                    corrected = corrected.replace(/\bwould of\b/gi, 'would have');
-                    corrected = corrected.replace(/\bcould care less\b/gi, 'couldn\'t care less');
-                    corrected = corrected.replace(/\bpeoples\b/gi, 'people');
+                if (lang === 'en') {
+                    // ENGLISH CORRECTIONS
                     
-                    // Improve style
-                    corrected = corrected.replace(/\bvery good\b/gi, 'excellent');
-                    corrected = corrected.replace(/\bvery bad\b/gi, 'terrible');
-                    corrected = corrected.replace(/\ba lot of\b/gi, 'many');
-                    corrected = corrected.replace(/\blots of\b/gi, 'numerous');
-                    corrected = corrected.replace(/\bget\b/gi, 'obtain');
-                    corrected = corrected.replace(/\bgive\b/gi, 'provide');
-                    corrected = corrected.replace(/\bshow\b/gi, 'demonstrate');
-                    corrected = corrected.replace(/\btell\b/gi, 'inform');
+                    // 1. CONJUGATION ERRORS
+                    const conjugationRules = [
+                        // Present simple - 3rd person singular
+                        { pattern: /\b(I|you|we|they)\s+(goes)\b/gi, correction: '$1 go', type: 'conjugation' },
+                        { pattern: /\b(I|you|we|they)\s+(has)\b/gi, correction: '$1 have', type: 'conjugation' },
+                        { pattern: /\b(I|you|we|they)\s+(does)\b/gi, correction: '$1 do', type: 'conjugation' },
+                        { pattern: /\b(I|you|we|they)\s+(was)\b/gi, correction: '$1 were', type: 'conjugation' },
+                        { pattern: /\b(he|she|it)\s+(go)\b/gi, correction: '$1 goes', type: 'conjugation' },
+                        { pattern: /\b(he|she|it)\s+(have)\b/gi, correction: '$1 has', type: 'conjugation' },
+                        { pattern: /\b(he|she|it)\s+(do)\b/gi, correction: '$1 does', type: 'conjugation' },
+                        { pattern: /\b(he|she|it)\s+(were)\b/gi, correction: '$1 was', type: 'conjugation' },
+                        
+                        // Present continuous
+                        { pattern: /\b(I|you|we|they|he|she|it)\s+(is)\s+(\w+ing)\b/gi, correction: (match, p1, p2, p3) => {
+                            const beVerb = p1.toLowerCase() === 'i' ? 'am' : 
+                                         ['he', 'she', 'it'].includes(p1.toLowerCase()) ? 'is' : 'are';
+                            return `${p1} ${beVerb} ${p3}`;
+                        }, type: 'conjugation' },
+                        
+                        // Past simple irregular
+                        { pattern: /\b(goed)\b/gi, correction: 'went', type: 'conjugation' },
+                        { pattern: /\b(buyed)\b/gi, correction: 'bought', type: 'conjugation' },
+                        { pattern: /\b(eated)\b/gi, correction: 'ate', type: 'conjugation' },
+                        { pattern: /\b(runned)\b/gi, correction: 'ran', type: 'conjugation' },
+                        { pattern: /\b(writed)\b/gi, correction: 'wrote', type: 'conjugation' },
+                        { pattern: /\b(speakd?)\b/gi, correction: 'spoke', type: 'conjugation' },
+                        { pattern: /\b(drinked)\b/gi, correction: 'drank', type: 'conjugation' },
+                        { pattern: /\b(swimmed)\b/gi, correction: 'swam', type: 'conjugation' },
+                        { pattern: /\b(breaked)\b/gi, correction: 'broke', type: 'conjugation' },
+                        { pattern: /\b(catched)\b/gi, correction: 'caught', type: 'conjugation' },
+                        { pattern: /\b(teached)\b/gi, correction: 'taught', type: 'conjugation' },
+                        { pattern: /\b(thinked)\b/gi, correction: 'thought', type: 'conjugation' },
+                        
+                        // Present perfect
+                        { pattern: /\b(have|has)\s+(go)\b/gi, correction: '$1 gone', type: 'conjugation' },
+                        { pattern: /\b(have|has)\s+(eat)\b/gi, correction: '$1 eaten', type: 'conjugation' },
+                        { pattern: /\b(have|has)\s+(write)\b/gi, correction: '$1 written', type: 'conjugation' },
+                        { pattern: /\b(have|has)\s+(speak)\b/gi, correction: '$1 spoken', type: 'conjugation' },
+                        { pattern: /\b(have|has)\s+(drink)\b/gi, correction: '$1 drunk', type: 'conjugation' },
+                        { pattern: /\b(have|has)\s+(swim)\b/gi, correction: '$1 swum', type: 'conjugation' },
+                    ];
                     
-                    // Fix sentence structure
-                    corrected = corrected.replace(/(\w+)\s+and\s+\1\s+(we|they)/gi, '$1 and $2');
-                }
-                
-                // Comprehensive French corrections
-                if (language === 'French') {
-                    corrected = corrected.replace(/\bacheter\b/gi, 'acheté');
-                    corrected = corrected.replace(/\bsupermarche\b/gi, 'supermarché');
-                    corrected = corrected.replace(/\baprécié\b/gi, 'apprécié');
-                    corrected = corrected.replace(/\btrès bon\b/gi, 'très bonnes');
-                    corrected = corrected.replace(/\bmoi et\b/gi, 'et moi');
-                    corrected = corrected.replace(/\ba\b/gi, (match, offset) => {
-                        const context = corrected.slice(Math.max(0, offset - 10), offset + 10);
-                        return /(je|tu|il|elle|nous|vous|ils|elles)\s+a\s+/i.test(context) ? 'à' : match;
+                    // 2. GRAMMAR ERRORS
+                    const grammarRules = [
+                        // Subject-verb agreement
+                        { pattern: /\b(The [\w\s]+)\s+(are|is)\b/gi, correction: (match, p1, p2) => {
+                            const verb = p1.toLowerCase().endsWith('s') ? 'are' : 'is';
+                            return `${p1} ${verb}`;
+                        }, type: 'grammar' },
+                        
+                        // Pronoun errors
+                        { pattern: /\b(him|her)\s+and\s+(I|me)\b/gi, correction: '$2 and I', type: 'grammar' },
+                        { pattern: /\b(I|me)\s+and\s+(him|her)\b/gi, correction: '$2 and I', type: 'grammar' },
+                        { pattern: /\b(me)\s+(am|is|are|was|were)\b/gi, correction: 'I $2', type: 'grammar' },
+                        { pattern: /\b(him|her)\s+(is|are)\b/gi, correction: 'he $2', type: 'grammar' },
+                        
+                        // Double subject
+                        { pattern: /\b(\w+)\s+(\w+)\s+(he|she|it|they|we)\s+(is|are|was|were)\b/gi, 
+                          correction: (match, p1, p2, p3, p4) => `${p1} ${p2} ${p4}`, type: 'grammar' },
+                        
+                        // Don't/doesn't
+                        { pattern: /\b(I|you|we|they)\s+(doesn't|does not)\b/gi, correction: '$1 don\'t', type: 'grammar' },
+                        { pattern: /\b(he|she|it)\s+(don't|do not)\b/gi, correction: '$1 doesn\'t', type: 'grammar' },
+                        
+                        // There/their/they're
+                        { pattern: /\btheir\b/gi, correction: (match, offset, string) => {
+                            const nextWord = string.slice(offset + match.length).split(/\s+/)[0];
+                            return /^(is|are|was|were|will|can|should)/i.test(nextWord) ? 'there' : 'their';
+                        }, type: 'grammar' },
+                        
+                        // Your/you're
+                        { pattern: /\byour\b/gi, correction: (match, offset, string) => {
+                            const nextWord = string.slice(offset + match.length).split(/\s+/)[0];
+                            return /^(welcome|going|coming|leaving)/i.test(nextWord) ? 'you\'re' : 'your';
+                        }, type: 'grammar' },
+                        
+                        // Its/it's
+                        { pattern: /\bits\b/gi, correction: (match, offset, string) => {
+                            const nextWord = string.slice(offset + match.length).split(/\s+/)[0];
+                            return /^(a|an|the|my|your|his|her|our|their|not)/i.test(nextWord) ? 'it\'s' : 'its';
+                        }, type: 'grammar' },
+                    ];
+                    
+                    // 3. SPELLING ERRORS
+                    const spellingRules = [
+                        { pattern: /\bdefinately\b/gi, correction: 'definitely', type: 'spelling' },
+                        { pattern: /\bseperate\b/gi, correction: 'separate', type: 'spelling' },
+                        { pattern: /\boccured\b/gi, correction: 'occurred', type: 'spelling' },
+                        { pattern: /\brecieve\b/gi, correction: 'receive', type: 'spelling' },
+                        { pattern: /\bwierd\b/gi, correction: 'weird', type: 'spelling' },
+                        { pattern: /\bachieve\b/gi, correction: 'achieve', type: 'spelling' },
+                        { pattern: /\bgrammer\b/gi, correction: 'grammar', type: 'spelling' },
+                        { pattern: /\barguement\b/gi, correction: 'argument', type: 'spelling' },
+                        { pattern: /\bjudgement\b/gi, correction: 'judgment', type: 'spelling' },
+                        { pattern: /\bliscence\b/gi, correction: 'license', type: 'spelling' },
+                        { pattern: /\bmilenium\b/gi, correction: 'millennium', type: 'spelling' },
+                        { pattern: /\bneccessary\b/gi, correction: 'necessary', type: 'spelling' },
+                        { pattern: /\bpronounciation\b/gi, correction: 'pronunciation', type: 'spelling' },
+                        { pattern: /\bpublicher\b/gi, correction: 'publisher', type: 'spelling' },
+                    ];
+                    
+                    // 4. STYLE IMPROVEMENTS
+                    const styleRules = [
+                        { pattern: /\bvery good\b/gi, correction: 'excellent', type: 'style' },
+                        { pattern: /\bvery bad\b/gi, correction: 'terrible', type: 'style' },
+                        { pattern: /\ba lot of\b/gi, correction: 'many', type: 'style' },
+                        { pattern: /\blots of\b/gi, correction: 'numerous', type: 'style' },
+                        { pattern: /\bget\b/gi, correction: 'obtain', type: 'style' },
+                        { pattern: /\bgive\b/gi, correction: 'provide', type: 'style' },
+                        { pattern: /\bshow\b/gi, correction: 'demonstrate', type: 'style' },
+                        { pattern: /\btell\b/gi, correction: 'inform', type: 'style' },
+                        { pattern: /\bstart\b/gi, correction: 'begin', type: 'style' },
+                        { pattern: /\bend\b/gi, correction: 'conclude', type: 'style' },
+                        { pattern: /\btry\b/gi, correction: 'attempt', type: 'style' },
+                        { pattern: /\bbuy\b/gi, correction: 'purchase', type: 'style' },
+                        { pattern: /\buse\b/gi, correction: 'utilize', type: 'style' },
+                        { pattern: /\bhelp\b/gi, correction: 'assist', type: 'style' },
+                        { pattern: /\bneed\b/gi, correction: 'require', type: 'style' },
+                        { pattern: /\bwant\b/gi, correction: 'desire', type: 'style' },
+                    ];
+                    
+                    // Apply all rules
+                    const allRules = [...conjugationRules, ...grammarRules, ...spellingRules, ...styleRules];
+                    allRules.forEach(rule => {
+                        const regex = new RegExp(rule.pattern.source, 'gi');
+                        corrected = corrected.replace(regex, (match, ...args) => {
+                            const correction = typeof rule.correction === 'function' 
+                                ? rule.correction(match, ...args) 
+                                : rule.correction;
+                            
+                            if (match !== correction) {
+                                corrections.push({
+                                    from: match,
+                                    to: correction,
+                                    type: rule.type
+                                });
+                                stats[rule.type]++;
+                            }
+                            return correction;
+                        });
                     });
-                    corrected = corrected.replace(/\bou\b/gi, (match, offset) => {
-                        const context = corrected.slice(Math.max(0, offset - 10), offset + 10);
-                        return /(d[\'o]|par|pour|c[\'o])\s+ou/i.test(context) ? 'où' : match;
+                    
+                } else {
+                    // FRENCH CORRECTIONS
+                    
+                    // 1. CONJUGAISON (CONJUGATION)
+                    const conjugationRulesFR = [
+                        // Être - présent
+                        { pattern: /\bje\s+est\b/gi, correction: 'je suis', type: 'conjugation' },
+                        { pattern: /\btu\s+est\b/gi, correction: 'tu es', type: 'conjugation' },
+                        { pattern: /\bil\s+est\b/gi, correction: 'il est', type: 'conjugation' },
+                        { pattern: /\belle\s+est\b/gi, correction: 'elle est', type: 'conjugation' },
+                        { pattern: /\bnous\s+est\b/gi, correction: 'nous sommes', type: 'conjugation' },
+                        { pattern: /\bvous\s+est\b/gi, correction: 'vous êtes', type: 'conjugation' },
+                        { pattern: /\bils\s+est\b/gi, correction: 'ils sont', type: 'conjugation' },
+                        { pattern: /\belles\s+est\b/gi, correction: 'elles sont', type: 'conjugation' },
+                        
+                        // Avoir - présent
+                        { pattern: /\bje\s+avais\b/gi, correction: 'j\'ai', type: 'conjugation' },
+                        { pattern: /\btu\s+avais\b/gi, correction: 'tu as', type: 'conjugation' },
+                        { pattern: /\bil\s+avais\b/gi, correction: 'il a', type: 'conjugation' },
+                        { pattern: /\bnous\s+avais\b/gi, correction: 'nous avons', type: 'conjugation' },
+                        { pattern: /\bvous\s+avais\b/gi, correction: 'vous avez', type: 'conjugation' },
+                        { pattern: /\bils\s+avais\b/gi, correction: 'ils ont', type: 'conjugation' },
+                        
+                        // Aller - présent
+                        { pattern: /\bje\s+aller\b/gi, correction: 'je vais', type: 'conjugation' },
+                        { pattern: /\btu\s+aller\b/gi, correction: 'tu vas', type: 'conjugation' },
+                        { pattern: /\bil\s+aller\b/gi, correction: 'il va', type: 'conjugation' },
+                        { pattern: /\bnous\s+aller\b/gi, correction: 'nous allons', type: 'conjugation' },
+                        { pattern: /\bvous\s+aller\b/gi, correction: 'vous allez', type: 'conjugation' },
+                        { pattern: /\bils\s+aller\b/gi, correction: 'ils vont', type: 'conjugation' },
+                        
+                        // Manger - présent
+                        { pattern: /\bje\s+mange\b/gi, correction: 'je mange', type: 'conjugation' },
+                        { pattern: /\btu\s+mange\b/gi, correction: 'tu manges', type: 'conjugation' },
+                        { pattern: /\bil\s+mange\b/gi, correction: 'il mange', type: 'conjugation' },
+                        { pattern: /\bnous\s+mange\b/gi, correction: 'nous mangeons', type: 'conjugation' },
+                        { pattern: /\bvous\s+mange\b/gi, correction: 'vous mangez', type: 'conjugation' },
+                        { pattern: /\bils\s+mange\b/gi, correction: 'ils mangent', type: 'conjugation' },
+                        
+                        // Parler - présent
+                        { pattern: /\bje\s+parle\b/gi, correction: 'je parle', type: 'conjugation' },
+                        { pattern: /\btu\s+parle\b/gi, correction: 'tu parles', type: 'conjugation' },
+                        { pattern: /\bil\s+parle\b/gi, correction: 'il parle', type: 'conjugation' },
+                        { pattern: /\bnous\s+parle\b/gi, correction: 'nous parlons', type: 'conjugation' },
+                        { pattern: /\bvous\s+parle\b/gi, correction: 'vous parlez', type: 'conjugation' },
+                        { pattern: /\bils\s+parle\b/gi, correction: 'ils parlent', type: 'conjugation' },
+                        
+                        // Passé composé avec avoir
+                        { pattern: /\bj[']?ai\s+(manger|parler|regarder)\b/gi, correction: (match, p1) => `j'ai ${p1}é`, type: 'conjugation' },
+                        { pattern: /\btu as\s+(manger|parler|regarder)\b/gi, correction: (match, p1) => `tu as ${p1}é`, type: 'conjugation' },
+                        { pattern: /\bil a\s+(manger|parler|regarder)\b/gi, correction: (match, p1) => `il a ${p1}é`, type: 'conjugation' },
+                        { pattern: /\bnous avons\s+(manger|parler|regarder)\b/gi, correction: (match, p1) => `nous avons ${p1}é`, type: 'conjugation' },
+                        
+                        // Négation
+                        { pattern: /\bil parle pas\b/gi, correction: 'il ne parle pas', type: 'conjugation' },
+                        { pattern: /\bje sais pas\b/gi, correction: 'je ne sais pas', type: 'conjugation' },
+                        { pattern: /\btu veux pas\b/gi, correction: 'tu ne veux pas', type: 'conjugation' },
+                    ];
+                    
+                    // 2. GRAMMAIRE (GRAMMAR)
+                    const grammarRulesFR = [
+                        // Accords
+                        { pattern: /\bLes pommes était\b/gi, correction: 'Les pommes étaient', type: 'grammar' },
+                        { pattern: /\bLes enfants est\b/gi, correction: 'Les enfants sont', type: 'grammar' },
+                        { pattern: /\bLa maison sont\b/gi, correction: 'La maison est', type: 'grammar' },
+                        { pattern: /\bLes voitures est\b/gi, correction: 'Les voitures sont', type: 'grammar' },
+                        
+                        // Genre
+                        { pattern: /\bune ami\b/gi, correction: 'un ami', type: 'grammar' },
+                        { pattern: /\bun amie\b/gi, correction: 'une amie', type: 'grammar' },
+                        { pattern: /\ble table\b/gi, correction: 'la table', type: 'grammar' },
+                        { pattern: /\bla livre\b/gi, correction: 'le livre', type: 'grammar' },
+                        
+                        // Pronoms
+                        { pattern: /\bmoi et\b/gi, correction: 'et moi', type: 'grammar' },
+                        { pattern: /\btoi et\b/gi, correction: 'et toi', type: 'grammar' },
+                        { pattern: /\blui et\b/gi, correction: 'et lui', type: 'grammar' },
+                        { pattern: /\belle et\b/gi, correction: 'et elle', type: 'grammar' },
+                    ];
+                    
+                    // 3. ORTHOGRAPHE (SPELLING)
+                    const spellingRulesFR = [
+                        // Accents manquants
+                        { pattern: /\bapres\b/gi, correction: 'après', type: 'spelling' },
+                        { pattern: /\bquand\b/gi, correction: 'quand', type: 'spelling' },
+                        { pattern: /\bjusqu'a\b/gi, correction: 'jusqu\'à', type: 'spelling' },
+                        { pattern: /\bcote\b/gi, correction: 'côte', type: 'spelling' },
+                        { pattern: /\btache\b/gi, correction: 'tâche', type: 'spelling' },
+                        { pattern: /\betre\b/gi, correction: 'être', type: 'spelling' },
+                        { pattern: /\bfacade\b/gi, correction: 'façade', type: 'spelling' },
+                        { pattern: /\beleve\b/gi, correction: 'élève', type: 'spelling' },
+                        { pattern: /\bhotel\b/gi, correction: 'hôtel', type: 'spelling' },
+                        { pattern: /\bile\b/gi, correction: 'île', type: 'spelling' },
+                        { pattern: /\bnoel\b/gi, correction: 'Noël', type: 'spelling' },
+                        { pattern: /\btete\b/gi, correction: 'tête', type: 'spelling' },
+                        
+                        // Doubles consonnes
+                        { pattern: /\bapeller\b/gi, correction: 'appeler', type: 'spelling' },
+                        { pattern: /\batention\b/gi, correction: 'attention', type: 'spelling' },
+                        { pattern: /\bcomun\b/gi, correction: 'commun', type: 'spelling' },
+                        { pattern: /\bdiferent\b/gi, correction: 'différent', type: 'spelling' },
+                        { pattern: /\binteressant\b/gi, correction: 'intéressant', type: 'spelling' },
+                        { pattern: /\bnecesaire\b/gi, correction: 'nécessaire', type: 'spelling' },
+                        { pattern: /\bocasion\b/gi, correction: 'occasion', type: 'spelling' },
+                    ];
+                    
+                    // 4. STYLE
+                    const styleRulesFR = [
+                        { pattern: /\btrès bon\b/gi, correction: 'excellent', type: 'style' },
+                        { pattern: /\btrès mauvais\b/gi, correction: 'déplorable', type: 'style' },
+                        { pattern: /\bbeaucoup de\b/gi, correction: 'nombreux', type: 'style' },
+                        { pattern: /\bdonner\b/gi, correction: 'fournir', type: 'style' },
+                        { pattern: /\bmontrer\b/gi, correction: 'démontrer', type: 'style' },
+                        { pattern: /\bdire\b/gi, correction: 'informer', type: 'style' },
+                        { pattern: /\bcommencer\b/gi, correction: 'débuter', type: 'style' },
+                        { pattern: /\bfinir\b/gi, correction: 'terminer', type: 'style' },
+                        { pattern: /\bessayer\b/gi, correction: 'tenter', type: 'style' },
+                        { pattern: /\bacheter\b/gi, correction: 'acquérir', type: 'style' },
+                    ];
+                    
+                    // Apply all French rules
+                    const allRulesFR = [...conjugationRulesFR, ...grammarRulesFR, ...spellingRulesFR, ...styleRulesFR];
+                    allRulesFR.forEach(rule => {
+                        const regex = new RegExp(rule.pattern.source, 'gi');
+                        corrected = corrected.replace(regex, (match, ...args) => {
+                            const correction = typeof rule.correction === 'function' 
+                                ? rule.correction(match, ...args) 
+                                : rule.correction;
+                            
+                            if (match !== correction) {
+                                corrections.push({
+                                    from: match,
+                                    to: correction,
+                                    type: rule.type
+                                });
+                                stats[rule.type]++;
+                            }
+                            return correction;
+                        });
                     });
                 }
                 
                 // Fix punctuation and capitalization
-                corrected = corrected.replace(/\s+\./g, '.');
-                corrected = corrected.replace(/\s+,/g, ',');
-                corrected = corrected.replace(/\s+!/g, '!');
-                corrected = corrected.replace(/\s+\?/g, '?');
-                corrected = corrected.replace(/\.(\w)/g, '. $1');
-                corrected = corrected.replace(/,(\w)/g, ', $1');
-                corrected = corrected.replace(/!(\w)/g, '! $1');
-                corrected = corrected.replace(/\?(\w)/g, '? $1');
-                corrected = corrected.replace(/\bi\b/g, 'I');
+                corrected = corrected.replace(/\s+([.,!?;:])/g, '$1');
+                corrected = corrected.replace(/([.,!?;:])(\w)/g, '$1 $2');
+                corrected = corrected.replace(/\s{2,}/g, ' ');
                 corrected = corrected.replace(/^(\w)/, (match) => match.toUpperCase());
                 corrected = corrected.replace(/([.!?]\s+)(\w)/g, (match, p1, p2) => p1 + p2.toUpperCase());
+                
+                if (lang === 'en') {
+                    corrected = corrected.replace(/\bi\b/g, 'I');
+                }
                 
                 return corrected;
             }
 
-            function processTextLocally() {
-                const text = originalText.innerText;
-                updateBasicStats(text);
-                highlightErrors(text);
-            }
-
-            function highlightErrors(text) {
-                const language = languageSelect.value.startsWith('en') ? 'en' : 'fr';
-                let errors = [];
-                
-                // Check for common errors
-                const errorPatterns = {
-                    'en': [
-                        { pattern: /\btheir\b/gi, type: 'spelling', correction: 'there' },
-                        { pattern: /\bbuyed\b/gi, type: 'grammar', correction: 'bought' },
-                        { pattern: /\byour\b/gi, type: 'spelling', context: 'when meaning "you are"', correction: 'you\'re' },
-                        { pattern: /\bits\b/gi, type: 'spelling', context: 'when meaning "it is"', correction: 'it\'s' },
-                        { pattern: /\bthey[']?re\b/gi, type: 'spelling', context: 'when meaning "their"', correction: 'their' },
-                        { pattern: /\bshould of\b/gi, type: 'expression', correction: 'should have' },
-                        { pattern: /\bcould care less\b/gi, type: 'expression', correction: 'couldn\'t care less' },
-                        { pattern: /\bpeoples\b/gi, type: 'grammar', correction: 'people' },
-                        { pattern: /\bme and\b/gi, type: 'style', correction: 'and I' }
-                    ],
-                    'fr': [
-                        { pattern: /\bacheter\b/gi, type: 'grammar', correction: 'acheté' },
-                        { pattern: /\bsupermarche\b/gi, type: 'spelling', correction: 'supermarché' },
-                        { pattern: /\baprécié\b/gi, type: 'spelling', correction: 'apprécié' },
-                        { pattern: /\bmoi et\b/gi, type: 'style', correction: 'et moi' }
-                    ]
-                };
-                
-                const patterns = errorPatterns[language] || errorPatterns['en'];
-                
-                // Find all errors
-                let html = text;
-                patterns.forEach(pattern => {
-                    const regex = new RegExp(pattern.pattern.source, 'gi');
-                    html = html.replace(regex, (match) => {
-                        errors.push({
-                            error: match,
-                            correction: pattern.correction,
-                            type: pattern.type
-                        });
-                        return `<span class="error-highlight" data-error="${match}" data-correction="${pattern.correction}" data-type="${pattern.type}">${match}</span>`;
-                    });
+            function applyCorrections(original, corrected) {
+                // Highlight errors in original text
+                let highlighted = original;
+                corrections.forEach(correction => {
+                    const escapedFrom = escapeRegExp(correction.from);
+                    const regex = new RegExp(`(${escapedFrom})`, 'gi');
+                    highlighted = highlighted.replace(regex, 
+                        `<span class="error-highlight" 
+                              data-from="${correction.from}" 
+                              data-to="${correction.to}"
+                              data-type="${correction.type}">
+                            $1
+                            <span class="error-marker">⚠️</span>
+                         </span>`);
                 });
                 
-                originalText.innerHTML = html;
+                originalText.innerHTML = highlighted;
+                
+                // Format corrected text with highlights
+                let formattedCorrected = corrected;
+                corrections.forEach(correction => {
+                    const escapedTo = escapeRegExp(correction.to);
+                    const regex = new RegExp(`(${escapedTo})`, 'gi');
+                    formattedCorrected = formattedCorrected.replace(regex, 
+                        `<span class="${correction.type === 'style' ? 'improved-word' : 'corrected-word'}" 
+                              title="Corrected from: ${correction.from}">
+                            $1
+                         </span>`);
+                });
+                
+                correctedText.innerHTML = formattedCorrected.replace(/\n/g, '<br>');
                 
                 // Update stats
-                const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-                const errorsCount = errors.length;
+                const words = original.trim() === '' ? 0 : original.trim().split(/\s+/).length;
+                const errors = corrections.length;
                 
-                errorCount.textContent = errorsCount;
-                originalErrorCount.textContent = errorsCount;
+                errorCount.textContent = errors;
+                originalErrorCount.textContent = errors;
                 wordCount.textContent = words;
-                errorCountBadge.innerHTML = `${errorsCount} ${errorsCount === 1 ? 'error' : 'errors'} detected`;
-                
-                // Update main stats
-                statWords.textContent = words;
-                statErrors.textContent = errorsCount;
-            }
-
-            function applyCorrections(original, corrected) {
-                corrections = [];
-                
-                // Calculate differences
-                const originalLines = original.split('\n');
-                const correctedLines = corrected.split('\n');
-                
-                let errorCount = 0;
-                let grammarCount = 0;
-                
-                // Simple diff for demo
-                if (original !== corrected) {
-                    corrections.push({
-                        from: original,
-                        to: corrected,
-                        type: 'ai_correction'
-                    });
-                    errorCount = 10; // Simulated count
-                    grammarCount = 5;
-                }
-                
-                // Update corrected text
-                correctedText.innerHTML = formatCorrectedText(corrected);
-                
-                // Update stats
-                const words = corrected.trim() === '' ? 0 : corrected.trim().split(/\s+/).length;
-                correctionCount.textContent = errorCount;
-                correctedCount.textContent = errorCount;
                 charCount.textContent = corrected.length;
-                correctionCountBadge.innerHTML = `${errorCount} ${errorCount === 1 ? 'correction' : 'corrections'} applied`;
+                correctionCount.textContent = errors;
+                correctedCount.textContent = errors;
                 
-                statCorrections.textContent = errorCount;
-                statGrammar.textContent = grammarCount;
+                errorCountBadge.innerHTML = `${errors} ${errors === 1 ? 'error' : 'errors'}`;
+                correctionCountBadge.innerHTML = `${errors} ${errors === 1 ? 'correction' : 'corrections'}`;
                 
-                // Calculate quality score
-                const quality = Math.max(20, 100 - (errorCount * 2));
-                statQuality.textContent = `${quality}%`;
-                qualityBar.style.width = `${quality}%`;
-            }
-
-            function formatCorrectedText(text) {
-                return text
-                    .split('\n')
-                    .map(line => {
-                        if (line.trim() === '') return '<br>';
-                        return `<p>${line.replace(/\s+/g, ' ')}</p>`;
-                    })
-                    .join('');
-            }
-
-            function updateBasicStats(text) {
-                const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                // Calculate detailed stats
+                const grammarCount = corrections.filter(c => c.type === 'grammar').length;
+                const conjugationCount = corrections.filter(c => c.type === 'conjugation').length;
+                const spellingCount = corrections.filter(c => c.type === 'spelling').length;
+                const styleCount = corrections.filter(c => c.type === 'style').length;
+                
                 statWords.textContent = words;
-                wordCount.textContent = words;
+                statErrors.textContent = errors;
+                statGrammar.textContent = grammarCount;
+                statConjugation.textContent = conjugationCount;
+                statSpelling.textContent = spellingCount;
+                statStyle.textContent = styleCount;
+                
+                if (errors > 0) {
+                    showMessage(`✅ Corrected ${errors} errors!`, 'success');
+                }
             }
 
             function handleTooltip(e) {
                 const target = e.target;
                 if (target.classList.contains('error-highlight')) {
-                    const error = target.getAttribute('data-error');
-                    const correction = target.getAttribute('data-correction');
+                    const from = target.getAttribute('data-from');
+                    const to = target.getAttribute('data-to');
                     const type = target.getAttribute('data-type');
                     
-                    errorTooltip.innerHTML = `
-                        <strong>${type.toUpperCase()} ERROR</strong>
-                        <div style="margin: 8px 0;"><span style="color: #ff9800;">"${error}"</span> → <span class="suggestion">"${correction}"</span></div>
-                        <div style="font-size: 0.85rem; color: #aaa;">Click to accept this correction</div>
+                    const typeMap = {
+                        'grammar': 'Grammar Error',
+                        'conjugation': 'Conjugation Error',
+                        'spelling': 'Spelling Error',
+                        'style': 'Style Improvement'
+                    };
+                    
+                    tooltip.innerHTML = `
+                        <strong>${typeMap[type] || 'Error'}</strong>
+                        <div style="margin: 8px 0; color: #FFA000;">"${from}"</div>
+                        <div>→ <span class="suggestion">"${to}"</span></div>
                     `;
                     
-                    errorTooltip.style.left = e.pageX + 15 + 'px';
-                    errorTooltip.style.top = e.pageY + 15 + 'px';
-                    errorTooltip.classList.add('show');
-                    
-                    // Click to apply this specific correction
-                    target.onclick = function() {
-                        const range = document.createRange();
-                        range.selectNodeContents(target);
-                        const selection = window.getSelection();
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                        document.execCommand('insertText', false, correction);
-                        processTextLocally();
-                    };
+                    tooltip.style.left = e.pageX + 15 + 'px';
+                    tooltip.style.top = e.pageY + 15 + 'px';
+                    tooltip.classList.add('show');
                 } else {
-                    errorTooltip.classList.remove('show');
+                    tooltip.classList.remove('show');
                 }
             }
 
             async function copyCorrectedText() {
                 const text = correctedText.innerText;
                 if (!text.trim()) {
-                    showMessage('Please correct some text first');
+                    showMessage('Please correct some text first', 'error');
                     return;
                 }
                 
                 try {
                     await navigator.clipboard.writeText(text);
-                    copySuccess.classList.add('show');
-                    setTimeout(() => {
-                        copySuccess.classList.remove('show');
-                    }, 3000);
+                    showMessage('✅ Corrected text copied!', 'success');
                 } catch (err) {
-                    showMessage('Failed to copy text. Please select and copy manually.');
+                    showMessage('Failed to copy text', 'error');
                 }
             }
 
-            function updateAIProgress(percent, message) {
-                if (aiProgress) {
-                    const lines = originalText.innerText.split('\n').length;
-                    aiProgress.textContent = message || `Processing... ${percent}%`;
-                }
-            }
-
-            function showMessage(message) {
-                // Create a temporary message
-                const messageDiv = document.createElement('div');
-                messageDiv.textContent = message;
-                messageDiv.style.cssText = `
-                    position: fixed;
-                    bottom: 30px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: #4caf50;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 12px;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                    z-index: 1000;
-                    animation: slideIn 0.3s ease;
-                `;
-                document.body.appendChild(messageDiv);
+            function showMessage(text, type = 'success') {
+                message.textContent = text;
+                message.className = `message ${type}`;
+                message.classList.add('show');
                 
                 setTimeout(() => {
-                    messageDiv.style.animation = 'slideIn 0.3s ease reverse';
-                    setTimeout(() => {
-                        document.body.removeChild(messageDiv);
-                    }, 300);
+                    message.classList.remove('show');
                 }, 3000);
+            }
+
+            function updateStats(words, errors, grammar, conjugation, spelling, style) {
+                statWords.textContent = words;
+                statErrors.textContent = errors;
+                statGrammar.textContent = grammar;
+                statConjugation.textContent = conjugation;
+                statSpelling.textContent = spelling;
+                statStyle.textContent = style;
+            }
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             }
 
             function debounce(func, wait) {
