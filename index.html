@@ -2,101 +2,713 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Correcteur Français / Anglais</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correcteur Français / Anglais - Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --warning-color: #f72585;
+            --gray-color: #6c757d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        header h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            color: var(--gray-color);
+            font-size: 1.1rem;
+        }
+
+        .logo {
+            color: var(--primary-color);
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+        }
+
+        .card-title i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
         textarea {
             width: 100%;
-            height: 150px;
+            min-height: 250px;
+            padding: 20px;
             font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
         }
-        select {
-            padding: 5px;
-            font-size: 16px;
-        }
-        .result {
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-top: 20px;
-            background: white;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            background: var(--light-color);
+            padding: 10px 15px;
+            border-radius: 10px;
+            flex-grow: 1;
+        }
+
+        .language-selector i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            background: transparent;
+            color: var(--dark-color);
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        select:focus {
+            outline: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: var(--dark-color);
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: scale(1.05);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: var(--light-color);
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-top: 5px;
+        }
+
+        .result-card {
+            margin-top: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .result-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-content {
+            padding: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error-list {
+            list-style-type: none;
+        }
+
+        .error-item {
+            padding: 15px;
+            border-left: 4px solid var(--warning-color);
+            background: #fff5f7;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .error-item .error-text {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+        }
+
+        .error-item .error-suggestion {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .error-item .error-context {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .corrected-text {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--success-color);
+            font-size: 16px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .highlight {
+            background-color: rgba(67, 97, 238, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .copy-btn:hover {
+            background: #3ab8d8;
+            transform: scale(1.05);
+        }
+
+        .copy-btn i {
+            margin-right: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .message.error {
+            background: #ffe6e6;
+            color: #d32f2f;
+            border-left: 5px solid #d32f2f;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .message i {
+            margin-right: 10px;
+            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-spell-check"></i>
+            </div>
+            <h1>Correcteur Orthographe & Grammaire</h1>
+            <p>Correction automatique en français et anglais - Outil professionnel gratuit</p>
+        </header>
 
-<h2>Correcteur Orthographe & Conjugaison</h2>
+        <div class="main-content">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-edit"></i>
+                    <span>Texte à corriger</span>
+                </div>
+                
+                <textarea id="text" placeholder="Collez ou écrivez votre texte ici pour le corriger...">Le correcteur automatique est un outil incroyablement pratique pour les rédacteurs. Il permet de détecter les fotes d'ortographe, les erreur de grammaire et les problèmes de conjuguaison. Avec cette application, vous pouvez améliorer la qualité de vos textes en quelques secondes seulement. Essayez le avec du text en français ou en anglais!</textarea>
+                
+                <div class="controls">
+                    <div class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <select id="language">
+                            <option value="fr">Français</option>
+                            <option value="en">Anglais</option>
+                            <option value="es">Espagnol</option>
+                            <option value="de">Allemand</option>
+                            <option value="it">Italien</option>
+                        </select>
+                    </div>
+                    
+                    <div class="buttons">
+                        <button class="btn btn-secondary" onclick="effacerTexte()">
+                            <i class="fas fa-eraser"></i> Effacer
+                        </button>
+                        <button class="btn btn-primary" onclick="corriger()">
+                            <i class="fas fa-magic"></i> Corriger le texte
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="charCount">0</div>
+                        <div class="stat-label">Caractères</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="wordCount">0</div>
+                        <div class="stat-label">Mots</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">Erreurs</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="correctionCount">0</div>
+                        <div class="stat-label">Corrections</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Résultats de la correction</span>
+                </div>
+                
+                <div id="resultContainer">
+                    <div class="loading" id="loading" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Analyse du texte en cours...</p>
+                    </div>
+                    
+                    <div id="messageArea"></div>
+                    
+                    <div id="errorSection" style="display: none;">
+                        <h3 style="margin-bottom: 15px; color: var(--warning-color);">
+                            <i class="fas fa-exclamation-triangle"></i> Erreurs détectées
+                        </h3>
+                        <ul class="error-list" id="errorList"></ul>
+                    </div>
+                    
+                    <div id="correctedSection" style="display: none;">
+                        <h3 style="margin-bottom: 15px; color: var(--success-color);">
+                            <i class="fas fa-check"></i> Texte corrigé
+                        </h3>
+                        <div class="corrected-text" id="correctedText"></div>
+                        <button class="copy-btn" onclick="copierTexte()">
+                            <i class="fas fa-copy"></i> Copier le texte corrigé
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Correcteur utilisant l'API LanguageTool • Outil gratuit pour les rédacteurs, étudiants et professionnels</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">
+                <i class="fas fa-info-circle"></i> Pour des textes très longs ou une utilisation intensive, envisagez d'utiliser une solution premium.
+            </p>
+        </footer>
+    </div>
 
-<textarea id="text" placeholder="Écris ton texte ici..."></textarea>
-
-<br><br>
-
-<select id="language">
-    <option value="fr">Français</option>
-    <option value="en">Anglais</option>
-</select>
-
-<br><br>
-
-<button onclick="corriger()">Corriger</button>
-
-<div class="result" id="result"></div>
-
-<script>
-async function corriger() {
-    const text = document.getElementById("text").value;
-    const lang = document.getElementById("language").value;
-    const resultDiv = document.getElementById("result");
-
-    if (!text.trim()) {
-        resultDiv.innerHTML = "❌ Entre un texte.";
-        return;
-    }
-
-    resultDiv.innerHTML = "⏳ Correction en cours...";
-
-    try {
-        const response = await fetch("https://api.languagetool.org/v2/check", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: new URLSearchParams({
-                text: text,
-                language: lang
-            })
+    <script>
+        // Initialiser les compteurs
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('text');
+            mettreAJourCompteurs();
+            
+            // Mettre à jour les compteurs à chaque saisie
+            textarea.addEventListener('input', mettreAJourCompteurs);
+            
+            // Exemple de texte par défaut
+            mettreAJourCompteurs();
         });
 
-        const data = await response.json();
-        let correctedText = text;
+        // Fonction pour mettre à jour les compteurs de caractères et mots
+        function mettreAJourCompteurs() {
+            const text = document.getElementById('text').value;
+            const charCount = text.length;
+            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('wordCount').textContent = wordCount;
+        }
 
-        // Appliquer les corrections (de la fin vers le début)
-        data.matches.reverse().forEach(match => {
-            if (match.replacements.length > 0) {
-                correctedText =
-                    correctedText.slice(0, match.offset) +
-                    match.replacements[0].value +
-                    correctedText.slice(match.offset + match.length);
+        // Fonction pour effacer le texte
+        function effacerTexte() {
+            document.getElementById('text').value = '';
+            document.getElementById('messageArea').innerHTML = '';
+            document.getElementById('errorSection').style.display = 'none';
+            document.getElementById('correctedSection').style.display = 'none';
+            document.getElementById('errorCount').textContent = '0';
+            document.getElementById('correctionCount').textContent = '0';
+            mettreAJourCompteurs();
+            
+            // Afficher un message de confirmation
+            afficherMessage('Texte effacé avec succès.', 'success');
+        }
+
+        // Fonction pour afficher un message
+        function afficherMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            const icon = type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle';
+            const messageClass = type === 'error' ? 'error' : 'success';
+            
+            messageArea.innerHTML = `
+                <div class="message ${messageClass}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Effacer le message après 5 secondes
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // Fonction principale de correction
+        async function corriger() {
+            const text = document.getElementById('text').value;
+            const lang = document.getElementById('language').value;
+            const resultContainer = document.getElementById('resultContainer');
+            
+            if (!text.trim()) {
+                afficherMessage('Veuillez entrer un texte à corriger.', 'error');
+                return;
             }
-        });
+            
+            // Afficher l'indicateur de chargement
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('errorSection').style.display = 'none';
+            document.getElementById('correctedSection').style.display = 'none';
+            document.getElementById('messageArea').innerHTML = '';
+            
+            try {
+                const response = await fetch("https://api.languagetool.org/v2/check", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams({
+                        text: text,
+                        language: lang,
+                        enabledOnly: "false"
+                    })
+                });
 
-        resultDiv.innerHTML = "<strong>Texte corrigé :</strong><br><br>" +
-                              correctedText.replace(/\n/g, "<br>");
+                const data = await response.json();
+                
+                // Cacher l'indicateur de chargement
+                document.getElementById('loading').style.display = 'none';
+                
+                // Traiter les erreurs
+                if (data.matches && data.matches.length > 0) {
+                    afficherErreurs(data.matches, text);
+                    appliquerCorrections(data.matches, text);
+                    
+                    // Mettre à jour les compteurs
+                    document.getElementById('errorCount').textContent = data.matches.length;
+                    document.getElementById('correctionCount').textContent = data.matches.filter(m => m.replacements && m.replacements.length > 0).length;
+                    
+                    // Afficher un message de réussite
+                    afficherMessage(`${data.matches.length} erreur(s) détectée(s) et corrigée(s).`, 'success');
+                } else {
+                    // Aucune erreur trouvée
+                    document.getElementById('errorSection').style.display = 'none';
+                    document.getElementById('correctedText').innerHTML = text.replace(/\n/g, '<br>');
+                    document.getElementById('correctedSection').style.display = 'block';
+                    document.getElementById('errorCount').textContent = '0';
+                    document.getElementById('correctionCount').textContent = '0';
+                    
+                    afficherMessage('Aucune erreur détectée dans le texte!', 'success');
+                }
+                
+            } catch (error) {
+                // Cacher l'indicateur de chargement
+                document.getElementById('loading').style.display = 'none';
+                
+                // Afficher un message d'erreur
+                afficherMessage('Erreur de connexion au serveur de correction. Veuillez réessayer.', 'error');
+                console.error('Erreur:', error);
+            }
+        }
 
-    } catch (error) {
-        resultDiv.innerHTML = "❌ Erreur de connexion.";
-    }
-}
-</script>
+        // Fonction pour afficher la liste des erreurs
+        function afficherErreurs(matches, originalText) {
+            const errorList = document.getElementById('errorList');
+            errorList.innerHTML = '';
+            
+            matches.forEach((match, index) => {
+                const context = originalText.substring(
+                    Math.max(0, match.offset - 20),
+                    Math.min(originalText.length, match.offset + match.length + 20)
+                );
+                
+                const errorItem = document.createElement('li');
+                errorItem.className = 'error-item';
+                
+                let suggestions = 'Aucune suggestion disponible';
+                if (match.replacements && match.replacements.length > 0) {
+                    suggestions = match.replacements.slice(0, 3).map(r => r.value).join(', ');
+                }
+                
+                errorItem.innerHTML = `
+                    <div class="error-text">${match.message}</div>
+                    <div class="error-suggestion"><strong>Suggestion :</strong> ${suggestions}</div>
+                    <div class="error-context">"...${context}..."</div>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: #6c757d;">
+                        <i class="fas fa-tag"></i> Règle : ${match.rule.category}
+                    </div>
+                `;
+                
+                errorList.appendChild(errorItem);
+            });
+            
+            document.getElementById('errorSection').style.display = 'block';
+        }
 
+        // Fonction pour appliquer les corrections et afficher le texte corrigé
+        function appliquerCorrections(matches, originalText) {
+            let correctedText = originalText;
+            let highlightedText = originalText;
+            
+            // Appliquer les corrections (de la fin vers le début pour éviter les décalages d'index)
+            matches.reverse().forEach(match => {
+                if (match.replacements && match.replacements.length > 0) {
+                    // Appliquer la correction
+                    correctedText =
+                        correctedText.slice(0, match.offset) +
+                        match.replacements[0].value +
+                        correctedText.slice(match.offset + match.length);
+                    
+                    // Créer une version avec surlignage pour l'affichage
+                    if (match.offset < highlightedText.length) {
+                        const before = highlightedText.slice(0, match.offset);
+                        const error = highlightedText.slice(match.offset, match.offset + match.length);
+                        const after = highlightedText.slice(match.offset + match.length);
+                        
+                        highlightedText = before + 
+                            `<span class="highlight">${match.replacements[0].value}</span>` + 
+                            after;
+                    }
+                }
+            });
+            
+            // Afficher le texte corrigé
+            document.getElementById('correctedText').innerHTML = highlightedText.replace(/\n/g, '<br>');
+            document.getElementById('correctedSection').style.display = 'block';
+            
+            // Stocker le texte corrigé (sans HTML) pour la fonction de copie
+            document.getElementById('correctedText').dataset.plainText = correctedText;
+        }
+
+        // Fonction pour copier le texte corrigé
+        function copierTexte() {
+            const correctedText = document.getElementById('correctedText').dataset.plainText;
+            
+            // Utiliser l'API Clipboard
+            navigator.clipboard.writeText(correctedText)
+                .then(() => {
+                    // Afficher un message de confirmation
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalHTML = copyBtn.innerHTML;
+                    
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Texte copié!';
+                    copyBtn.style.background = '#2e7d32';
+                    
+                    // Revenir à l'état initial après 2 secondes
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Erreur lors de la copie: ', err);
+                    afficherMessage('Erreur lors de la copie du texte.', 'error');
+                });
+        }
+
+        // Fonction pour insérer un exemple de texte
+        function insererExemple() {
+            const examples = {
+                fr: "Le correcteur automatique est un outil incroyablement pratique pour les rédacteurs. Il permet de détecter les fotes d'ortographe, les erreur de grammaire et les problèmes de conjuguaison. Avec cette application, vous pouvez améliorer la qualité de vos textes en quelques secondes seulement.",
+                en: "The automatic corrector is an incredibly usefull tool for writers. It help detect spelling misteaks, grammar errors and conjugation problems. With this application, you can improve the quality of your texts in just a few seconds.",
+                es: "El corrector automático es una herramienta increíblemente útil para los escritores. Permite detectar errores de ortografía, errores de gramática y problemas de conjugación. Con esta aplicación, puedes mejorar la calidad de tus textos en solo unos segundos.",
+                de: "Die automatische Korrektur ist ein unglaublich nützliches Werkzeug für Schriftsteller. Es ermöglicht die Erkennung von Rechtschreibfehlern, Grammatikfehlern und Konjugationsproblemen. Mit dieser Anwendung können Sie die Qualität Ihrer Texte in nur wenigen Sekunden verbessern.",
+                it: "Il correttore automatico è uno strumento incredibilmente utile per gli scrittori. Consente di rilevare errori di ortografia, errori grammaticali e problemi di coniugazione. Con questa applicazione, puoi migliorare la qualità dei tuoi testi in pochi secondi."
+            };
+            
+            const lang = document.getElementById('language').value;
+            document.getElementById('text').value = examples[lang] || examples.fr;
+            mettreAJourCompteurs();
+        }
+    </script>
 </body>
 </html>
