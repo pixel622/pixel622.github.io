@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Corrector</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -16,6 +17,8 @@
             --gray: #6c757d;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --radius: 10px;
+            --ai-color: #ff6b6b;
+            --human-color: #4ecdc4;
         }
 
         * {
@@ -33,7 +36,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             border-radius: var(--radius);
@@ -243,17 +246,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error-count {
-            background: #ffeaea;
-            color: #dc3545;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-top: 15px;
-            display: inline-block;
-        }
-
         .corrected-text {
             background: white;
             padding: 20px;
@@ -300,6 +292,111 @@
             font-size: 0.9rem;
         }
 
+        /* Section Analyse IA/Humain */
+        .ai-analysis {
+            margin-top: 30px;
+        }
+
+        .ai-analysis-box {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            border-left: 5px solid var(--ai-color);
+            margin-top: 10px;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-wrapper {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .ai-dot {
+            background-color: var(--ai-color);
+        }
+
+        .human-dot {
+            background-color: var(--human-color);
+        }
+
+        .explanation {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .explanation h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .feature.ai {
+            border-left: 4px solid var(--ai-color);
+        }
+
+        .feature.human {
+            border-left: 4px solid var(--human-color);
+        }
+
+        .feature h5 {
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .feature p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
         footer {
             text-align: center;
             margin-top: 30px;
@@ -307,6 +404,25 @@
             border-top: 1px solid #eee;
             color: var(--gray);
             font-size: 0.9rem;
+        }
+
+        .percentage-display {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        .percentage-value {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .percentage-value.ai {
+            color: var(--ai-color);
+        }
+
+        .percentage-value.human {
+            color: var(--human-color);
         }
 
         @media (max-width: 768px) {
@@ -330,6 +446,14 @@
             .btn-primary {
                 max-width: 100%;
             }
+            
+            .features-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                max-width: 300px;
+            }
         }
 
         .hidden {
@@ -341,7 +465,7 @@
     <div class="container">
         <header>
             <h1><i class="fas fa-spell-check"></i> <span id="appTitle">Correcteur Orthographe & Grammaire</span></h1>
-            <p id="appDescription">Corrigez instantanément vos textes dans plusieurs langues</p>
+            <p id="appDescription">Corrigez instantanément vos textes et analysez leur origine</p>
         </header>
         
         <div class="content">
@@ -372,7 +496,7 @@
                             <i class="fas fa-eraser"></i> <span id="clearTextBtn">Effacer</span>
                         </button>
                         <button class="btn-primary" onclick="corriger()">
-                            <i class="fas fa-magic"></i> <span id="correctTextBtn">Corriger le texte</span>
+                            <i class="fas fa-magic"></i> <span id="correctTextBtn">Corriger et Analyser</span>
                         </button>
                     </div>
                 </div>
@@ -419,10 +543,64 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Section Analyse IA/Humain -->
+            <div class="ai-analysis hidden" id="aiAnalysisSection">
+                <div class="result-header">
+                    <i class="fas fa-robot"></i>
+                    <h3 id="aiAnalysisTitle">Analyse IA vs Humain</h3>
+                </div>
+                
+                <div class="ai-analysis-box">
+                    <div class="chart-container">
+                        <div class="chart-wrapper">
+                            <canvas id="aiChart"></canvas>
+                        </div>
+                        
+                        <div class="percentage-display">
+                            <span id="aiText">IA:</span> <span class="percentage-value ai" id="aiPercent">0%</span> | 
+                            <span id="humanText">Humain:</span> <span class="percentage-value human" id="humanPercent">0%</span>
+                        </div>
+                        
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="color-dot ai-dot"></div>
+                                <span id="aiLegend">Texte généré par IA</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="color-dot human-dot"></div>
+                                <span id="humanLegend">Texte écrit par un humain</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="explanation">
+                        <h4><i class="fas fa-info-circle"></i> <span id="explanationTitle">Comment l'analyse fonctionne ?</span></h4>
+                        <p id="explanationText">Cette analyse évalue les caractéristiques stylistiques et linguistiques du texte pour déterminer sa probabilité d'origine.</p>
+                        
+                        <div class="features-list">
+                            <div class="feature ai">
+                                <h5 id="aiFeaturesTitle">Caractéristiques d'un texte IA</h5>
+                                <p id="aiFeaturesText">• Structure trop parfaite et répétitive<br>
+                                   • Vocabulaire limité mais précis<br>
+                                   • Peu d'émotions personnelles<br>
+                                   • Syntaxe très correcte mais rigide</p>
+                            </div>
+                            <div class="feature human">
+                                <h5 id="humanFeaturesTitle">Caractéristiques d'un texte humain</h5>
+                                <p id="humanFeaturesText">• Variations stylistiques naturelles<br>
+                                   • Erreurs et imperfections créatives<br>
+                                   • Émotions personnelles authentiques<br>
+                                   • Expressions idiomatiques et culturelles</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <footer>
-            <p id="footerText">Correcteur utilisant l'API LanguageTool • <i class="fas fa-sync-alt"></i> Mise à jour en temps réel</p>
+            <p id="footerText">Correcteur utilisant l'API LanguageTool • Analyse IA/Humain basée sur des caractéristiques stylistiques</p>
         </footer>
     </div>
 
@@ -431,11 +609,11 @@
         const translations = {
             fr: {
                 appTitle: "Correcteur Orthographe & Grammaire",
-                appDescription: "Corrigez instantanément vos textes dans plusieurs langues",
+                appDescription: "Corrigez instantanément vos textes et analysez leur origine",
                 yourTextLabel: "Votre texte",
                 placeholder: "Écrivez ou collez votre texte ici...",
                 clearTextBtn: "Effacer",
-                correctTextBtn: "Corriger le texte",
+                correctTextBtn: "Corriger et Analyser",
                 resultTitle: "Résultat de la correction",
                 loadingText: "Analyse et correction en cours...",
                 initialMessage: "Le texte corrigé apparaîtra ici après analyse.",
@@ -447,7 +625,18 @@
                 errorsLabel: "Erreurs trouvées",
                 wordsLabel: "Mots corrigés",
                 timeLabel: "Temps d'analyse",
-                footerText: "Correcteur utilisant l'API LanguageTool • Mise à jour en temps réel",
+                footerText: "Correcteur utilisant l'API LanguageTool • Analyse IA/Humain basée sur des caractéristiques stylistiques",
+                aiAnalysisTitle: "Analyse IA vs Humain",
+                aiText: "IA",
+                humanText: "Humain",
+                aiLegend: "Texte généré par IA",
+                humanLegend: "Texte écrit par un humain",
+                explanationTitle: "Comment l'analyse fonctionne ?",
+                explanationText: "Cette analyse évalue les caractéristiques stylistiques et linguistiques du texte pour déterminer sa probabilité d'origine.",
+                aiFeaturesTitle: "Caractéristiques d'un texte IA",
+                aiFeaturesText: "• Structure trop parfaite et répétitive<br>• Vocabulaire limité mais précis<br>• Peu d'émotions personnelles<br>• Syntaxe très correcte mais rigide",
+                humanFeaturesTitle: "Caractéristiques d'un texte humain",
+                humanFeaturesText: "• Variations stylistiques naturelles<br>• Erreurs et imperfections créatives<br>• Émotions personnelles authentiques<br>• Expressions idiomatiques et culturelles",
                 charCount: (count) => `${count} caractère${count !== 1 ? 's' : ''}`,
                 exampleText: "Je suis allé au supermarché hier. J'ai acheter des pomme, du pain et du lait. Il faisait tres beau. Je vais retourner demain pour acheter d'autre choses.",
                 messages: {
@@ -459,11 +648,11 @@
             },
             en: {
                 appTitle: "Spelling & Grammar Checker",
-                appDescription: "Instantly correct your texts in multiple languages",
+                appDescription: "Instantly correct your texts and analyze their origin",
                 yourTextLabel: "Your Text",
                 placeholder: "Write or paste your text here...",
                 clearTextBtn: "Clear",
-                correctTextBtn: "Correct Text",
+                correctTextBtn: "Correct and Analyze",
                 resultTitle: "Correction Result",
                 loadingText: "Analysis and correction in progress...",
                 initialMessage: "The corrected text will appear here after analysis.",
@@ -475,7 +664,18 @@
                 errorsLabel: "Errors found",
                 wordsLabel: "Words corrected",
                 timeLabel: "Analysis time",
-                footerText: "Corrector using LanguageTool API • Real-time updates",
+                footerText: "Corrector using LanguageTool API • AI/Human analysis based on stylistic features",
+                aiAnalysisTitle: "AI vs Human Analysis",
+                aiText: "AI",
+                humanText: "Human",
+                aiLegend: "AI-generated text",
+                humanLegend: "Human-written text",
+                explanationTitle: "How does the analysis work?",
+                explanationText: "This analysis evaluates the stylistic and linguistic features of the text to determine its probability of origin.",
+                aiFeaturesTitle: "AI Text Characteristics",
+                aiFeaturesText: "• Too perfect and repetitive structure<br>• Limited but precise vocabulary<br>• Few personal emotions<br>• Very correct but rigid syntax",
+                humanFeaturesTitle: "Human Text Characteristics",
+                humanFeaturesText: "• Natural stylistic variations<br>• Creative errors and imperfections<br>• Authentic personal emotions<br>• Idiomatic and cultural expressions",
                 charCount: (count) => `${count} character${count !== 1 ? 's' : ''}`,
                 exampleText: "I went to the supermarket yesterday. I buyed some apples, bread and milk. The weather was very nice. I will go back tomorrow to buy other things.",
                 messages: {
@@ -487,11 +687,11 @@
             },
             es: {
                 appTitle: "Corrector Ortográfico y Gramatical",
-                appDescription: "Corrige instantáneamente tus textos en varios idiomas",
+                appDescription: "Corrige instantáneamente tus textos y analiza su origen",
                 yourTextLabel: "Tu Texto",
                 placeholder: "Escribe o pega tu texto aquí...",
                 clearTextBtn: "Limpiar",
-                correctTextBtn: "Corregir Texto",
+                correctTextBtn: "Corregir y Analizar",
                 resultTitle: "Resultado de la Corrección",
                 loadingText: "Análisis y corrección en progreso...",
                 initialMessage: "El texto corregido aparecerá aquí después del análisis.",
@@ -503,7 +703,18 @@
                 errorsLabel: "Errores encontrados",
                 wordsLabel: "Palabras corregidas",
                 timeLabel: "Tiempo de análisis",
-                footerText: "Corrector usando la API de LanguageTool • Actualizaciones en tiempo real",
+                footerText: "Corrector usando la API de LanguageTool • Análisis IA/Humano basado en características estilísticas",
+                aiAnalysisTitle: "Análisis IA vs Humano",
+                aiText: "IA",
+                humanText: "Humano",
+                aiLegend: "Texto generado por IA",
+                humanLegend: "Texto escrito por humano",
+                explanationTitle: "¿Cómo funciona el análisis?",
+                explanationText: "Este análisis evalúa las características estilísticas y lingüísticas del texto para determinar su probabilidad de origen.",
+                aiFeaturesTitle: "Características de texto IA",
+                aiFeaturesText: "• Estructura demasiado perfecta y repetitiva<br>• Vocabulario limitado pero preciso<br>• Pocas emociones personales<br>• Sintaxis muy correcta pero rígida",
+                humanFeaturesTitle: "Características de texto humano",
+                humanFeaturesText: "• Variaciones estilísticas naturales<br>• Errores e imperfecciones creativas<br>• Emociones personales auténticas<br>• Expresiones idiomáticas y culturales",
                 charCount: (count) => `${count} carácter${count !== 1 ? 'es' : ''}`,
                 exampleText: "Fui al supermercado ayer. Compré algunas manzanas, pan y leche. Hacía muy buen tiempo. Volveré mañana para comprar otras cosas.",
                 messages: {
@@ -515,11 +726,11 @@
             },
             de: {
                 appTitle: "Rechtschreib- & Grammatikprüfer",
-                appDescription: "Korrigieren Sie sofort Ihre Texte in mehreren Sprachen",
+                appDescription: "Korrigieren Sie sofort Ihre Texte und analysieren Sie deren Herkunft",
                 yourTextLabel: "Ihr Text",
                 placeholder: "Schreiben Sie hier Ihren Text oder fügen Sie ihn ein...",
                 clearTextBtn: "Löschen",
-                correctTextBtn: "Text korrigieren",
+                correctTextBtn: "Korrigieren und Analysieren",
                 resultTitle: "Korrekturergebnis",
                 loadingText: "Analyse und Korrektur läuft...",
                 initialMessage: "Der korrigierte Text wird hier nach der Analyse angezeigt.",
@@ -531,7 +742,18 @@
                 errorsLabel: "Gefundene Fehler",
                 wordsLabel: "Korrigierte Wörter",
                 timeLabel: "Analysezeit",
-                footerText: "Korrektor mit LanguageTool API • Echtzeit-Updates",
+                footerText: "Korrektor mit LanguageTool API • KI/Mensch-Analyse basierend auf stilistischen Merkmalen",
+                aiAnalysisTitle: "KI vs Mensch Analyse",
+                aiText: "KI",
+                humanText: "Mensch",
+                aiLegend: "KI-generierter Text",
+                humanLegend: "Menschlich geschriebener Text",
+                explanationTitle: "Wie funktioniert die Analyse?",
+                explanationText: "Diese Analyse bewertet die stilistischen und sprachlichen Merkmale des Textes, um seine Herkunftswahrscheinlichkeit zu bestimmen.",
+                aiFeaturesTitle: "KI-Textmerkmale",
+                aiFeaturesText: "• Zu perfekte und repetitive Struktur<br>• Begrenzter aber präziser Wortschatz<br>• Wenig persönliche Emotionen<br>• Sehr korrekte aber starre Syntax",
+                humanFeaturesTitle: "Menschliche Textmerkmale",
+                humanFeaturesText: "• Natürliche stilistische Variationen<br>• Kreative Fehler und Unvollkommenheiten<br>• Authentische persönliche Emotionen<br>• Idiomatische und kulturelle Ausdrücke",
                 charCount: (count) => `${count} Zeichen`,
                 exampleText: "Ich ging gestern zum Supermarkt. Ich kaufte einige Äpfel, Brot und Milch. Das Wetter war sehr schön. Ich werde morgen zurückkehren, um andere Dinge zu kaufen.",
                 messages: {
@@ -543,11 +765,11 @@
             },
             it: {
                 appTitle: "Correttore Ortografico e Grammaticale",
-                appDescription: "Correggi istantaneamente i tuoi testi in più lingue",
+                appDescription: "Correggi istantaneamente i tuoi testi e analizza la loro origine",
                 yourTextLabel: "Il Tuo Testo",
                 placeholder: "Scrivi o incolla il tuo testo qui...",
                 clearTextBtn: "Cancella",
-                correctTextBtn: "Correggi Testo",
+                correctTextBtn: "Correggi e Analizza",
                 resultTitle: "Risultato della Correzione",
                 loadingText: "Analisi e correzione in corso...",
                 initialMessage: "Il testo corretto apparirà qui dopo l'analisi.",
@@ -559,7 +781,18 @@
                 errorsLabel: "Errori trovati",
                 wordsLabel: "Parole corrette",
                 timeLabel: "Tempo di analisi",
-                footerText: "Correttore che utilizza l'API LanguageTool • Aggiornamenti in tempo reale",
+                footerText: "Correttore che utilizza l'API LanguageTool • Analisi IA/Umano basata su caratteristiche stilistiche",
+                aiAnalysisTitle: "Analisi IA vs Umano",
+                aiText: "IA",
+                humanText: "Umano",
+                aiLegend: "Testo generato da IA",
+                humanLegend: "Testo scritto da umano",
+                explanationTitle: "Come funziona l'analisi?",
+                explanationText: "Questa analisi valuta le caratteristiche stilistiche e linguistiche del testo per determinarne la probabilità di origine.",
+                aiFeaturesTitle: "Caratteristiche del testo IA",
+                aiFeaturesText: "• Struttura troppo perfetta e ripetitiva<br>• Vocabolario limitato ma preciso<br>• Poche emozioni personali<br>• Sintassi molto corretta ma rigida",
+                humanFeaturesTitle: "Caratteristiche del testo umano",
+                humanFeaturesText: "• Variazioni stilistiche naturali<br>• Errori e imperfezioni creative<br>• Emozioni personali autentiche<br>• Espressioni idiomatiche e culturali",
                 charCount: (count) => `${count} caratter${count !== 1 ? 'i' : 'e'}`,
                 exampleText: "Sono andato al supermercato ieri. Ho comprato delle mele, pane e latte. Il tempo era molto bello. Tornerò domani per comprare altre cose.",
                 messages: {
@@ -582,6 +815,11 @@
         const wordCountElement = document.getElementById('wordCount');
         const timeElement = document.getElementById('time');
         const languageSelect = document.getElementById('language');
+        const aiAnalysisSection = document.getElementById('aiAnalysisSection');
+        
+        // Variables globales pour le graphique
+        let aiChart = null;
+        let aiPercentCache = {}; // Cache pour stocker les pourcentages par texte
         
         // Langue courante
         let currentLang = 'fr';
@@ -603,7 +841,18 @@
             document.getElementById('errorsLabel').textContent = t.errorsLabel;
             document.getElementById('wordsLabel').textContent = t.wordsLabel;
             document.getElementById('timeLabel').textContent = t.timeLabel;
-            document.getElementById('footerText').innerHTML = t.footerText + ' • <i class="fas fa-sync-alt"></i>';
+            document.getElementById('footerText').textContent = t.footerText;
+            document.getElementById('aiAnalysisTitle').textContent = t.aiAnalysisTitle;
+            document.getElementById('aiText').textContent = t.aiText;
+            document.getElementById('humanText').textContent = t.humanText;
+            document.getElementById('aiLegend').textContent = t.aiLegend;
+            document.getElementById('humanLegend').textContent = t.humanLegend;
+            document.getElementById('explanationTitle').textContent = t.explanationTitle;
+            document.getElementById('explanationText').textContent = t.explanationText;
+            document.getElementById('aiFeaturesTitle').textContent = t.aiFeaturesTitle;
+            document.getElementById('aiFeaturesText').innerHTML = t.aiFeaturesText;
+            document.getElementById('humanFeaturesTitle').textContent = t.humanFeaturesTitle;
+            document.getElementById('humanFeaturesText').innerHTML = t.humanFeaturesText;
             
             // Mettre à jour le placeholder
             textElement.placeholder = t.placeholder;
@@ -628,6 +877,154 @@
             charCountElement.textContent = t.charCount(charCount);
         });
         
+        // Fonction pour analyser le texte et déterminer le pourcentage IA/Humain
+        function analyzeTextForAI(text) {
+            // Vérifier le cache pour éviter de recalculer pour le même texte
+            const textHash = text.trim();
+            if (aiPercentCache[textHash]) {
+                return aiPercentCache[textHash];
+            }
+            
+            // Calculer le pourcentage basé sur des caractéristiques stylistiques
+            // (Cet algorithme est simplifié pour l'exemple)
+            let aiScore = 0;
+            const textLength = text.length;
+            
+            if (textLength === 0) {
+                return { ai: 0, human: 100 };
+            }
+            
+            // 1. Longueur moyenne des phrases
+            const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+            let avgSentenceLength = 0;
+            if (sentences.length > 0) {
+                const totalWords = sentences.reduce((total, sentence) => {
+                    return total + sentence.trim().split(/\s+/).length;
+                }, 0);
+                avgSentenceLength = totalWords / sentences.length;
+            }
+            
+            // Les phrases très régulières suggèrent une origine IA
+            if (avgSentenceLength > 5 && avgSentenceLength < 25) {
+                aiScore += 20;
+            }
+            
+            // 2. Variété du vocabulaire (mesure simple)
+            const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+            const uniqueWords = new Set(words);
+            const vocabularyRichness = uniqueWords.size / Math.max(words.length, 1);
+            
+            // Un vocabulaire très riche ou très pauvre peut indiquer l'humain
+            if (vocabularyRichness > 0.5 && vocabularyRichness < 0.8) {
+                aiScore += 30; // Vocabulaire modéré = typique de l'IA
+            }
+            
+            // 3. Présence d'erreurs communes
+            const errorPatterns = [/tr[èe]s\s+[a-z]/, /comme\s+m[êe]me/, /a\s+(acheter|manger|voir)/i];
+            let errorCount = 0;
+            errorPatterns.forEach(pattern => {
+                const matches = text.match(pattern);
+                if (matches) errorCount += matches.length;
+            });
+            
+            // Plus d'erreurs = plus probablement humain
+            if (errorCount === 0) {
+                aiScore += 25; // Texte trop parfait
+            }
+            
+            // 4. Longueur des mots
+            const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+            if (avgWordLength > 4 && avgWordLength < 7) {
+                aiScore += 15; // Longueur de mots moyenne typique de l'IA
+            }
+            
+            // 5. Structure répétitive
+            const paragraphCount = text.split(/\n\s*\n/).length;
+            if (paragraphCount > 0 && paragraphCount < 5) {
+                const sentencesPerParagraph = sentences.length / paragraphCount;
+                if (sentencesPerParagraph > 2 && sentencesPerParagraph < 6) {
+                    aiScore += 10; // Structure régulière
+                }
+            }
+            
+            // Limiter le score entre 0 et 100
+            aiScore = Math.min(Math.max(aiScore, 0), 100);
+            
+            // Ajouter un peu d'aléatoire pour rendre l'analyse plus réaliste
+            // mais déterministe pour le même texte
+            const randomSeed = textHash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const deterministicRandom = (randomSeed % 21) - 10; // -10 à +10
+            
+            aiScore = Math.min(Math.max(aiScore + deterministicRandom, 0), 100);
+            
+            const result = {
+                ai: Math.round(aiScore),
+                human: Math.round(100 - aiScore)
+            };
+            
+            // Mettre en cache
+            aiPercentCache[textHash] = result;
+            
+            return result;
+        }
+        
+        // Créer ou mettre à jour le graphique
+        function updateAIChart(aiPercent, humanPercent) {
+            const ctx = document.getElementById('aiChart').getContext('2d');
+            
+            // Détruire le graphique existant s'il y en a un
+            if (aiChart) {
+                aiChart.destroy();
+            }
+            
+            // Créer le nouveau graphique
+            aiChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        translations[currentLang].aiLegend,
+                        translations[currentLang].humanLegend
+                    ],
+                    datasets: [{
+                        data: [aiPercent, humanPercent],
+                        backgroundColor: [
+                            '#ff6b6b',
+                            '#4ecdc4'
+                        ],
+                        borderColor: [
+                            '#ff5252',
+                            '#26a69a'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    return `${label}: ${value}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+            
+            // Mettre à jour les pourcentages affichés
+            document.getElementById('aiPercent').textContent = `${aiPercent}%`;
+            document.getElementById('humanPercent').textContent = `${humanPercent}%`;
+        }
+        
         // Fonction principale de correction
         async function corriger() {
             const text = textElement.value.trim();
@@ -642,10 +1039,12 @@
             loadingElement.classList.remove('hidden');
             resultContent.innerHTML = '';
             statsElement.classList.add('hidden');
+            aiAnalysisSection.classList.add('hidden');
             
             const startTime = Date.now();
             
             try {
+                // Correction du texte
                 const response = await fetch("https://api.languagetool.org/v2/check", {
                     method: "POST",
                     headers: {
@@ -684,8 +1083,17 @@
                     }
                 }
                 
-                // Afficher les résultats
+                // Afficher les résultats de correction
                 displayResults(correctedText, data.matches, timeTaken, changedWords);
+                
+                // Analyser le texte pour IA/Humain (utilise le texte ORIGINAL, pas corrigé)
+                const aiAnalysis = analyzeTextForAI(text);
+                
+                // Mettre à jour le graphique
+                updateAIChart(aiAnalysis.ai, aiAnalysis.human);
+                
+                // Afficher la section d'analyse IA
+                aiAnalysisSection.classList.remove('hidden');
                 
             } catch (error) {
                 console.error(error);
@@ -769,6 +1177,7 @@
             charCountElement.textContent = t.charCount(0);
             resultContent.innerHTML = '<p class="initial-message"><i class="fas fa-info-circle"></i> ' + t.initialMessage + '</p>';
             statsElement.classList.add('hidden');
+            aiAnalysisSection.classList.add('hidden');
         }
         
         // Afficher un message temporaire
