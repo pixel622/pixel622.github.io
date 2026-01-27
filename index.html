@@ -2,1478 +2,941 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Complete Ski Mountain - Full Script</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Game</title>
     <style>
-        /* RESET EVERYTHING */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-            touch-action: manipulation;
         }
-
-        html, body {
-            width: 100%;
-            height: 100%;
+        body {
             overflow: hidden;
-            position: fixed;
-            background: linear-gradient(to bottom, #1a2980, #26d0ce);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: Arial, sans-serif;
         }
-
-        canvas {
+        #gameCanvas {
             display: block;
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
-
-        /* START SCREEN */
-        #start-screen {
+        #ui {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            text-align: center;
-            transition: opacity 1s ease;
-        }
-
-        #title {
-            font-size: 4.5rem;
-            font-weight: 900;
+            top: 20px;
+            left: 20px;
             color: white;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            background: linear-gradient(to right, #ffffff, #a8e6cf, #74b9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 3px;
-        }
-
-        #subtitle {
-            font-size: 1.4rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 60px;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            font-weight: 300;
-        }
-
-        #start-btn {
-            padding: 25px 60px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(145deg, #0984e3, #74b9ff);
-            border: none;
-            border-radius: 60px;
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-            border: 4px solid rgba(255, 255, 255, 0.5);
-            margin-top: 40px;
-            transition: all 0.2s ease;
-            letter-spacing: 1px;
-        }
-
-        #start-btn:active {
-            transform: scale(0.95);
-            background: linear-gradient(145deg, #74b9ff, #0984e3);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        #instructions {
-            margin-top: 30px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 350px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        #instructions strong {
-            color: #74b9ff;
-            font-weight: 600;
-        }
-
-        #instructions em {
-            color: #a8e6cf;
-            font-style: italic;
-        }
-
-        /* GAME UI */
-        #game-ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 100;
         }
-
-        /* CONTROLS */
-        #controls {
-            position: absolute;
-            bottom: 25px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 25px;
-            pointer-events: none;
-        }
-
-        .joystick {
-            width: 140px;
-            height: 140px;
-            pointer-events: auto;
-            position: relative;
-            touch-action: none;
-        }
-
-        .joystick-base {
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .joystick-base::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .joystick-handle {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            transition: transform 0.08s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-        }
-
-        .joystick-center {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-        /* ACTION BUTTONS */
-        #buttons {
-            position: absolute;
-            right: 25px;
-            bottom: 180px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: none;
-        }
-
-        .game-btn {
-            width: 100px;
-            height: 100px;
-            border-radius: 25px;
-            background: linear-gradient(145deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.85));
-            border: 3px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            pointer-events: auto;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transition: all 0.12s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            touch-action: manipulation;
-            user-select: none;
-            cursor: pointer;
-        }
-
-        .game-btn:active {
-            transform: scale(0.92);
-            background: linear-gradient(145deg, rgba(41, 128, 185, 0.95), rgba(52, 152, 219, 0.9));
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-label {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-top: 6px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        /* STATS DISPLAY */
-        #stats {
-            position: absolute;
-            top: 25px;
-            left: 25px;
-            color: white;
-            font-family: system-ui, -apple-system;
-            font-size: 18px;
-            font-weight: 600;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
-            padding: 18px 22px;
-            border-radius: 18px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            min-width: 220px;
-            line-height: 1.6;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-value {
-            color: #81ecec;
-            font-weight: 700;
-            float: right;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        /* SPEED INDICATOR */
-        #speed-bar {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 250px;
-            height: 35px;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
-            border-radius: 18px;
-            overflow: hidden;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        #speed-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #00b894, #81ecec, #74b9ff, #a55eea);
-            border-radius: 15px;
-            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        #speed-text {
+        #loading {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-weight: 700;
-            font-size: 16px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            pointer-events: none;
-        }
-
-        /* SNOW EFFECT OVERLAY */
-        #snow-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-            opacity: 0.6;
-        }
-
-        .snowflake {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            filter: blur(1.5px);
-            opacity: 0.8;
-        }
-
-        /* CAMERA HINT */
-        #camera-hint {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 18px;
-            font-weight: 500;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3));
-            padding: 18px 28px;
-            border-radius: 15px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            pointer-events: none;
-            text-align: center;
-            opacity: 1;
-            transition: opacity 2s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 300px;
-        }
-
-        #camera-hint span {
-            color: #74b9ff;
-            font-weight: 600;
-        }
-
-        /* MOUNTAIN VIEW INDICATOR */
-        #mountain-view {
-            position: absolute;
-            bottom: 200px;
-            left: 25px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
-            padding: 12px 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            pointer-events: none;
-        }
-
-        /* DEBUG INFO (hidden by default) */
-        #debug-info {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            font-family: monospace;
-            pointer-events: none;
-            display: none; /* Hidden by default */
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <!-- START SCREEN -->
-    <div id="start-screen">
-        <h1 id="title">SKI MOUNTAIN</h1>
-        <div id="subtitle">FPS MOUNTAIN DESCENT</div>
-        <button id="start-btn">START SKIING 🎿</button>
-        <div id="instructions">
-            <strong>CONTROLS:</strong><br>
-            • <span style="color:#74b9ff">LEFT JOYSTICK:</span> Move forward/backward, Turn<br>
-            • <span style="color:#81ecec">RIGHT JOYSTICK:</span> Look around (360° FPS Camera)<br>
-            • <span style="color:#00b894">JUMP:</span> Jump over obstacles and terrain<br>
-            • <span style="color:#fdcb6e">CROUCH:</span> Tuck position for maximum speed<br><br>
-            <em>Use the right joystick to look around and see the entire mountain!</em>
-        </div>
+    <div id="loading">Loading Game...</div>
+    <div id="ui">
+        <div>WASD: Move | Space: Jump | Mouse: Look around</div>
+        <div id="score">Score: 0</div>
+        <div id="position">Position: (0, 0, 0)</div>
     </div>
 
-    <!-- SNOW EFFECT OVERLAY -->
-    <div id="snow-overlay"></div>
-
-    <!-- GAME UI -->
-    <div id="game-ui">
-        <div id="camera-hint">
-            Use the <span>RIGHT JOYSTICK</span> to look around<br>
-            and see the mountain!
-        </div>
-        
-        <div id="mountain-view">
-            🏔️ ON MOUNTAIN PEAK
-        </div>
-
-        <div id="stats">
-            <div>ALTITUDE <span class="stat-value" id="altitude">500m</span></div>
-            <div>SPEED <span class="stat-value" id="speed">0 km/h</span></div>
-            <div>DISTANCE <span class="stat-value" id="distance">0m</span></div>
-            <div>VIEW ANGLE <span class="stat-value" id="view-angle">0°</span></div>
-            <div>TREES PASSED <span class="stat-value" id="tree-count">0</span></div>
-        </div>
-
-        <div id="speed-bar">
-            <div id="speed-fill"></div>
-            <div id="speed-text">0 km/h</div>
-        </div>
-
-        <div id="controls">
-            <div class="joystick" id="left-joystick">
-                <div class="joystick-base">
-                    <div class="joystick-handle" id="left-handle"></div>
-                    <div class="joystick-center"></div>
-                </div>
-            </div>
-            
-            <div class="joystick" id="right-joystick">
-                <div class="joystick-base">
-                    <div class="joystick-handle" id="right-handle"></div>
-                    <div class="joystick-center"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="buttons">
-            <div class="game-btn" id="jump-btn">
-                JUMP
-                <span class="btn-label">↑ AIR TIME</span>
-            </div>
-            <div class="game-btn" id="crouch-btn">
-                CROUCH
-                <span class="btn-label">↓ MAX SPEED</span>
-            </div>
-        </div>
-
-        <div id="debug-info">
-            DEBUG: X:0.00 Y:0.00 Z:0.00
-        </div>
-    </div>
-
-    <!-- THREE.JS SCRIPT - NO CUTS, FULL IMPLEMENTATION -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // ============================================
-        // GAME CONFIGURATION AND STATE
-        // ============================================
-        const CONFIG = {
-            MOUNTAIN_SIZE: 1200,
-            MOUNTAIN_SEGMENTS: 200,
-            START_ALTITUDE: 500,
-            MAX_SPEED: 180,
-            TURN_SENSITIVITY: 0.035,
-            LOOK_SENSITIVITY: 0.025,
-            JUMP_FORCE: 0.35,
-            GRAVITY: 0.018,
-            CROUCH_MULTIPLIER: 1.4,
-            MAX_TREES: 120,
-            SNOW_PARTICLES: 1000
-        };
-
-        let gameStarted = false;
-        let scene, camera, renderer;
-        let skier, mountain, snowParticleSystem;
-        let trees = [];
-        let terrainVertices = [];
-        let joystickLeft = { x: 0, y: 0, active: false, touchId: null };
-        let joystickRight = { x: 0, y: 0, active: false, touchId: null };
-        let isJumping = false;
-        let isCrouching = false;
-        let jumpForce = 0;
-        let speed = 0;
-        let altitude = CONFIG.START_ALTITUDE;
-        let distanceTraveled = 0;
-        let treesPassed = 0;
-        let cameraPitch = 0;
-        let cameraYaw = 0;
-        let lastFrameTime = 0;
-        let snowflakes = [];
-        let terrainHeightMap = [];
-
-        // ============================================
-        // SNOW EFFECT CREATION
-        // ============================================
-        function createSnowfall() {
-            const container = document.getElementById('snow-overlay');
-            
-            for (let i = 0; i < 150; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                
-                const size = Math.random() * 5 + 2;
-                snowflake.style.width = size + 'px';
-                snowflake.style.height = size + 'px';
-                snowflake.style.opacity = Math.random() * 0.7 + 0.3;
-                snowflake.style.left = Math.random() * 100 + 'vw';
-                snowflake.style.top = Math.random() * 100 + 'vh';
-                snowflake.style.filter = `blur(${Math.random() * 2}px)`;
-                
-                const fallSpeed = Math.random() * 0.5 + 0.3;
-                const driftAmount = Math.random() * 2 - 1;
-                
-                function animateSnowflake() {
-                    let currentTop = parseFloat(snowflake.style.top);
-                    let currentLeft = parseFloat(snowflake.style.left);
-                    
-                    currentTop += fallSpeed;
-                    currentLeft += driftAmount * 0.3;
-                    
-                    if (currentTop > 100) {
-                        currentTop = -5;
-                        currentLeft = Math.random() * 100;
-                    }
-                    
-                    if (currentLeft > 100) currentLeft = 0;
-                    if (currentLeft < 0) currentLeft = 100;
-                    
-                    snowflake.style.top = currentTop + 'vh';
-                    snowflake.style.left = currentLeft + 'vw';
-                    
-                    requestAnimationFrame(animateSnowflake);
-                }
-                
-                container.appendChild(snowflake);
-                snowflakes.push(snowflake);
-                animateSnowflake();
-            }
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
         }
+    }
+    </script>
 
-        // ============================================
-        // MOBILE CONTROLS SETUP - FULL IMPLEMENTATION
-        // ============================================
-        function setupMobileControls() {
-            const leftJoystick = document.getElementById('left-joystick');
-            const rightJoystick = document.getElementById('right-joystick');
-            const leftHandle = document.getElementById('left-handle');
-            const rightHandle = document.getElementById('right-handle');
-            const jumpBtn = document.getElementById('jump-btn');
-            const crouchBtn = document.getElementById('crouch-btn');
-            const startBtn = document.getElementById('start-btn');
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
-            // Start button with both mouse and touch support
-            startBtn.addEventListener('click', startGame);
-            startBtn.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                startGame();
-            });
+        // ==================== SCENE SETUP ====================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 10, 100);
 
-            // Prevent default touch behaviors that could interfere
-            document.addEventListener('touchstart', function(e) {
-                if (e.target === leftJoystick || e.target === rightJoystick || 
-                    e.target === leftHandle || e.target === rightHandle ||
-                    e.target === jumpBtn || e.target === crouchBtn) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+        // ==================== CAMERA ====================
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 10);
+        camera.lookAt(0, 0, 0);
 
-            document.addEventListener('touchmove', function(e) {
-                if (e.target === leftJoystick || e.target === rightJoystick || 
-                    e.target === leftHandle || e.target === rightHandle) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+        // ==================== RENDERER ====================
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        document.body.appendChild(renderer.domElement);
 
-            // Left joystick for movement
-            leftJoystick.addEventListener('touchstart', function(e) {
-                if (!gameStarted) return;
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const touch = e.changedTouches[0];
-                joystickLeft.touchId = touch.identifier;
-                joystickLeft.active = true;
-                
-                const rect = leftJoystick.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                function handleMove(moveEvent) {
-                    for (const touch of moveEvent.touches) {
-                        if (touch.identifier === joystickLeft.touchId) {
-                            moveEvent.preventDefault();
-                            updateJoystickPosition(touch, leftHandle, 'left', centerX, centerY);
-                            break;
-                        }
-                    }
-                }
-                
-                function handleEnd(endEvent) {
-                    for (const touch of endEvent.changedTouches) {
-                        if (touch.identifier === joystickLeft.touchId) {
-                            leftHandle.style.transform = 'translate(-50%, -50%)';
-                            joystickLeft.x = 0;
-                            joystickLeft.y = 0;
-                            joystickLeft.active = false;
-                            joystickLeft.touchId = null;
-                            document.removeEventListener('touchmove', handleMove);
-                            document.removeEventListener('touchend', handleEnd);
-                            break;
-                        }
-                    }
-                }
-                
-                updateJoystickPosition(touch, leftHandle, 'left', centerX, centerY);
-                document.addEventListener('touchmove', handleMove);
-                document.addEventListener('touchend', handleEnd);
-            });
+        // ==================== CONTROLS ====================
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 5;
+        controls.maxDistance = 50;
+        controls.maxPolarAngle = Math.PI / 2 - 0.1;
+        controls.target.set(0, 2, 0);
 
-            // Right joystick for camera look
-            rightJoystick.addEventListener('touchstart', function(e) {
-                if (!gameStarted) return;
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const touch = e.changedTouches[0];
-                joystickRight.touchId = touch.identifier;
-                joystickRight.active = true;
-                
-                const rect = rightJoystick.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                function handleMove(moveEvent) {
-                    for (const touch of moveEvent.touches) {
-                        if (touch.identifier === joystickRight.touchId) {
-                            moveEvent.preventDefault();
-                            updateJoystickPosition(touch, rightHandle, 'right', centerX, centerY);
-                            break;
-                        }
-                    }
-                }
-                
-                function handleEnd(endEvent) {
-                    for (const touch of endEvent.changedTouches) {
-                        if (touch.identifier === joystickRight.touchId) {
-                            rightHandle.style.transform = 'translate(-50%, -50%)';
-                            joystickRight.x = 0;
-                            joystickRight.y = 0;
-                            joystickRight.active = false;
-                            joystickRight.touchId = null;
-                            document.removeEventListener('touchmove', handleMove);
-                            document.removeEventListener('touchend', handleEnd);
-                            break;
-                        }
-                    }
-                }
-                
-                updateJoystickPosition(touch, rightHandle, 'right', centerX, centerY);
-                document.addEventListener('touchmove', handleMove);
-                document.addEventListener('touchend', handleEnd);
-            });
+        // ==================== LIGHTING ====================
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
 
-            function updateJoystickPosition(touch, handle, side, centerX, centerY) {
-                const deltaX = touch.clientX - centerX;
-                const deltaY = touch.clientY - centerY;
+        // Directional light (sun)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.left = -20;
+        directionalLight.shadow.camera.right = 20;
+        directionalLight.shadow.camera.top = 20;
+        directionalLight.shadow.camera.bottom = -20;
+        directionalLight.shadow.camera.near = 0.1;
+        directionalLight.shadow.camera.far = 100;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.bias = -0.001;
+        scene.add(directionalLight);
+
+        // Hemisphere light for sky/ground color
+        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x808080, 0.4);
+        scene.add(hemisphereLight);
+
+        // ==================== CAPSULE GEOMETRY FIX ====================
+        // Custom CapsuleGeometry implementation since it might not be available
+        function createCapsuleGeometry(radius = 0.35, height = 1.4, radialSegments = 8, heightSegments = 16) {
+            const geometry = new THREE.BufferGeometry();
+            
+            const vertices = [];
+            const indices = [];
+            const normals = [];
+            const uvs = [];
+            
+            // Helper function to add a vertex with normal and UV
+            function addVertex(x, y, z, u, v) {
+                vertices.push(x, y, z);
+                const length = Math.sqrt(x * x + y * y + z * z);
+                normals.push(x / length, y / length, z / length);
+                uvs.push(u, v);
+            }
+            
+            // Create top hemisphere vertices
+            const topOffset = height / 2;
+            for (let y = 0; y <= heightSegments / 2; y++) {
+                const v = y / (heightSegments / 2);
+                const theta = v * Math.PI / 2;
+                const sinTheta = Math.sin(theta);
+                const cosTheta = Math.cos(theta);
                 
-                const maxDistance = 45;
-                const currentDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                
-                let constrainedDeltaX = deltaX;
-                let constrainedDeltaY = deltaY;
-                
-                if (currentDistance > maxDistance) {
-                    constrainedDeltaX = (deltaX / currentDistance) * maxDistance;
-                    constrainedDeltaY = (deltaY / currentDistance) * maxDistance;
-                }
-                
-                handle.style.transform = `translate(calc(-50% + ${constrainedDeltaX}px), calc(-50% + ${constrainedDeltaY}px))`;
-                
-                if (side === 'left') {
-                    joystickLeft.x = constrainedDeltaX / maxDistance;
-                    joystickLeft.y = -constrainedDeltaY / maxDistance; // Invert Y for intuitive movement
-                } else {
-                    joystickRight.x = constrainedDeltaX / maxDistance;
-                    joystickRight.y = constrainedDeltaY / maxDistance;
+                for (let x = 0; x <= radialSegments; x++) {
+                    const u = x / radialSegments;
+                    const phi = u * Math.PI * 2;
+                    const sinPhi = Math.sin(phi);
+                    const cosPhi = Math.cos(phi);
+                    
+                    const px = radius * cosPhi * sinTheta;
+                    const py = radius * cosTheta + topOffset;
+                    const pz = radius * sinPhi * sinTheta;
+                    
+                    addVertex(px, py, pz, u, 1 - v * 0.5);
                 }
             }
-
-            // Jump button
-            jumpBtn.addEventListener('touchstart', function(e) {
-                if (!gameStarted) return;
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isJumping) {
-                    isJumping = true;
-                    jumpForce = CONFIG.JUMP_FORCE;
-                }
-            });
-
-            // Crouch button with press and hold
-            let crouchTouchId = null;
-            crouchBtn.addEventListener('touchstart', function(e) {
-                if (!gameStarted) return;
-                e.preventDefault();
-                e.stopPropagation();
-                crouchTouchId = e.changedTouches[0].identifier;
-                isCrouching = true;
-            });
-
-            crouchBtn.addEventListener('touchend', function(e) {
-                for (const touch of e.changedTouches) {
-                    if (touch.identifier === crouchTouchId) {
-                        isCrouching = false;
-                        crouchTouchId = null;
-                        break;
-                    }
-                }
-            });
-
-            // Keyboard controls for testing on desktop
-            document.addEventListener('keydown', function(e) {
-                if (!gameStarted) return;
+            
+            // Create bottom hemisphere vertices
+            const bottomOffset = -height / 2;
+            const vertexOffset = (Math.floor(heightSegments / 2) + 1) * (radialSegments + 1);
+            for (let y = 0; y <= heightSegments / 2; y++) {
+                const v = y / (heightSegments / 2);
+                const theta = Math.PI / 2 + v * Math.PI / 2;
+                const sinTheta = Math.sin(theta);
+                const cosTheta = Math.cos(theta);
                 
-                switch(e.key.toLowerCase()) {
-                    case 'w':
-                        joystickLeft.y = 1;
-                        break;
-                    case 's':
-                        joystickLeft.y = -1;
-                        break;
-                    case 'a':
-                        joystickLeft.x = -1;
-                        break;
-                    case 'd':
-                        joystickLeft.x = 1;
-                        break;
-                    case 'arrowleft':
-                        joystickRight.x = -1;
-                        break;
-                    case 'arrowright':
-                        joystickRight.x = 1;
-                        break;
-                    case 'arrowup':
-                        joystickRight.y = 1;
-                        break;
-                    case 'arrowdown':
-                        joystickRight.y = -1;
-                        break;
-                    case ' ':
-                        if (!isJumping) {
-                            isJumping = true;
-                            jumpForce = CONFIG.JUMP_FORCE;
-                        }
-                        break;
-                    case 'shift':
-                        isCrouching = true;
-                        break;
+                for (let x = 0; x <= radialSegments; x++) {
+                    const u = x / radialSegments;
+                    const phi = u * Math.PI * 2;
+                    const sinPhi = Math.sin(phi);
+                    const cosPhi = Math.cos(phi);
+                    
+                    const px = radius * cosPhi * sinTheta;
+                    const py = radius * cosTheta + bottomOffset;
+                    const pz = radius * sinPhi * sinTheta;
+                    
+                    addVertex(px, py, pz, u, 0.5 - v * 0.5);
                 }
-            });
-
-            document.addEventListener('keyup', function(e) {
-                switch(e.key.toLowerCase()) {
-                    case 'w':
-                    case 's':
-                        joystickLeft.y = 0;
-                        break;
-                    case 'a':
-                    case 'd':
-                        joystickLeft.x = 0;
-                        break;
-                    case 'arrowleft':
-                    case 'arrowright':
-                        joystickRight.x = 0;
-                        break;
-                    case 'arrowup':
-                    case 'arrowdown':
-                        joystickRight.y = 0;
-                        break;
-                    case 'shift':
-                        isCrouching = false;
-                        break;
+            }
+            
+            // Create indices for top hemisphere
+            for (let y = 0; y < heightSegments / 2; y++) {
+                for (let x = 0; x < radialSegments; x++) {
+                    const a = y * (radialSegments + 1) + x;
+                    const b = a + radialSegments + 1;
+                    const c = a + 1;
+                    const d = b + 1;
+                    
+                    indices.push(a, b, c);
+                    indices.push(b, d, c);
                 }
-            });
+            }
+            
+            // Create indices for bottom hemisphere
+            for (let y = 0; y < heightSegments / 2; y++) {
+                for (let x = 0; x < radialSegments; x++) {
+                    const a = vertexOffset + y * (radialSegments + 1) + x;
+                    const b = a + radialSegments + 1;
+                    const c = a + 1;
+                    const d = b + 1;
+                    
+                    indices.push(a, c, b);
+                    indices.push(b, c, d);
+                }
+            }
+            
+            // Create cylinder vertices (middle section if needed)
+            // Note: For a proper capsule, we also need the cylindrical middle
+            // This is a simplified version that works for the player model
+            
+            geometry.setIndex(indices);
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+            geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            
+            geometry.computeBoundingBox();
+            geometry.computeBoundingSphere();
+            
+            return geometry;
         }
 
-        // ============================================
-        // THREE.JS GAME INITIALIZATION - FULL
-        // ============================================
-        function initThreeJS() {
-            try {
-                // Create scene with atmospheric fog
-                scene = new THREE.Scene();
-                scene.fog = new THREE.FogExp2(0x87CEEB, 0.001);
-                
-                // Create perspective camera for FPS view
-                camera = new THREE.PerspectiveCamera(
-                    75, // Field of view
-                    window.innerWidth / window.innerHeight, // Aspect ratio
-                    0.1, // Near clipping plane
-                    3000 // Far clipping plane
-                );
-                camera.position.set(0, 1.7, 0);
-                
-                // Create WebGL renderer with high quality settings
-                renderer = new THREE.WebGLRenderer({
-                    antialias: true,
-                    alpha: true,
-                    powerPreference: "high-performance"
+        // ==================== PLAYER CLASS ====================
+        class Player {
+            constructor() {
+                // Create capsule geometry using our custom function
+                this.geometry = createCapsuleGeometry(0.35, 1.4, 8, 16);
+                this.material = new THREE.MeshStandardMaterial({ 
+                    color: 0x00ff00,
+                    roughness: 0.7,
+                    metalness: 0.1,
+                    emissive: 0x003300,
+                    emissiveIntensity: 0.1
                 });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                renderer.outputEncoding = THREE.sRGBEncoding;
-                renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.2;
-                document.body.appendChild(renderer.domElement);
+                this.mesh = new THREE.Mesh(this.geometry, this.material);
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+                this.mesh.name = 'Player';
                 
-                // Setup advanced lighting
-                setupLighting();
+                // Physics properties
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.direction = new THREE.Vector3(0, 0, 0);
+                this.speed = 5.0;
+                this.jumpForce = 8.0;
+                this.isOnGround = false;
+                this.gravity = 9.8;
+                this.friction = 0.9;
+                this.airResistance = 0.98;
                 
-                // Create the mountain terrain
-                createMountainTerrain();
+                // Player state
+                this.health = 100;
+                this.score = 0;
                 
-                // Create the skier character
-                createSkierCharacter();
+                // Add player to scene
+                scene.add(this.mesh);
                 
-                // Create environment (trees, rocks, etc.)
-                createMountainEnvironment();
+                // Player collision box (simplified sphere)
+                this.boundingSphere = new THREE.Sphere(this.mesh.position, 0.5);
+            }
+            
+            update(deltaTime) {
+                // Apply gravity if not on ground
+                if (!this.isOnGround) {
+                    this.velocity.y -= this.gravity * deltaTime;
+                }
                 
-                // Create snow particle system
-                createSnowParticleSystem();
+                // Apply friction and air resistance
+                if (this.isOnGround) {
+                    this.velocity.x *= this.friction;
+                    this.velocity.z *= this.friction;
+                } else {
+                    this.velocity.x *= this.airResistance;
+                    this.velocity.z *= this.airResistance;
+                }
                 
-                // Create sky dome
-                createSkyDome();
+                // Update position
+                this.mesh.position.x += this.velocity.x * deltaTime;
+                this.mesh.position.y += this.velocity.y * deltaTime;
+                this.mesh.position.z += this.velocity.z * deltaTime;
                 
-                // Start the animation loop
-                requestAnimationFrame(animateGameLoop);
+                // Update bounding sphere position
+                this.boundingSphere.center.copy(this.mesh.position);
                 
-                // Handle window resize
-                window.addEventListener('resize', handleWindowResize);
+                // Ground collision (simple ground at y=0)
+                if (this.mesh.position.y < 0) {
+                    this.mesh.position.y = 0;
+                    this.velocity.y = 0;
+                    this.isOnGround = true;
+                }
                 
-                console.log("Three.js game initialized successfully");
+                // Boundary constraints
+                const boundary = 45;
+                this.mesh.position.x = Math.max(-boundary, Math.min(boundary, this.mesh.position.x));
+                this.mesh.position.z = Math.max(-boundary, Math.min(boundary, this.mesh.position.z));
+                
+                // Rotate player based on movement direction
+                if (this.velocity.x !== 0 || this.velocity.z !== 0) {
+                    const angle = Math.atan2(this.velocity.x, this.velocity.z);
+                    this.mesh.rotation.y = angle;
+                }
+            }
+            
+            move(forward, right) {
+                this.direction.set(right, 0, -forward).normalize();
+                
+                // Apply movement to velocity
+                if (this.isOnGround) {
+                    this.velocity.x = this.direction.x * this.speed;
+                    this.velocity.z = this.direction.z * this.speed;
+                } else {
+                    // Allow some air control
+                    this.velocity.x += this.direction.x * this.speed * 0.1;
+                    this.velocity.z += this.direction.z * this.speed * 0.1;
+                    
+                    // Limit horizontal speed in air
+                    const horizontalSpeed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.z * this.velocity.z);
+                    const maxAirSpeed = this.speed * 0.8;
+                    if (horizontalSpeed > maxAirSpeed) {
+                        const scale = maxAirSpeed / horizontalSpeed;
+                        this.velocity.x *= scale;
+                        this.velocity.z *= scale;
+                    }
+                }
+            }
+            
+            jump() {
+                if (this.isOnGround) {
+                    this.velocity.y = this.jumpForce;
+                    this.isOnGround = false;
+                    return true;
+                }
+                return false;
+            }
+            
+            stop() {
+                if (this.isOnGround) {
+                    this.velocity.x = 0;
+                    this.velocity.z = 0;
+                }
+            }
+            
+            takeDamage(amount) {
+                this.health = Math.max(0, this.health - amount);
+                return this.health > 0;
+            }
+            
+            addScore(points) {
+                this.score += points;
+                return this.score;
+            }
+            
+            getPosition() {
+                return this.mesh.position.clone();
+            }
+            
+            reset() {
+                this.mesh.position.set(0, 2, 0);
+                this.velocity.set(0, 0, 0);
+                this.health = 100;
+                this.isOnGround = false;
+            }
+        }
+
+        // ==================== GAME MANAGER ====================
+        class Game {
+            constructor() {
+                this.player = new Player();
+                this.keys = {};
+                this.clock = new THREE.Clock();
+                this.platforms = [];
+                this.collectibles = [];
+                this.obstacles = [];
+                this.gameTime = 0;
+                this.isPaused = false;
+                this.gameOver = false;
+                
+                this.init();
+                this.setupEventListeners();
+                this.hideLoadingScreen();
+                this.animate();
+            }
+            
+            init() {
+                // ==================== GROUND ====================
+                const groundGeometry = new THREE.PlaneGeometry(100, 100, 20, 20);
+                const groundMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x808080,
+                    roughness: 0.8,
+                    metalness: 0.2,
+                    side: THREE.DoubleSide
+                });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                ground.name = 'Ground';
+                scene.add(ground);
+                
+                // Add ground texture variation
+                const groundColors = [0x808080, 0x707070, 0x909090];
+                const groundVertices = groundGeometry.attributes.position;
+                const groundColorsAttr = new Float32Array(groundVertices.count * 3);
+                
+                for (let i = 0; i < groundVertices.count; i++) {
+                    const x = groundVertices.getX(i);
+                    const z = groundVertices.getY(i);
+                    const colorIndex = Math.floor((x + z) * 2) % groundColors.length;
+                    const color = new THREE.Color(groundColors[colorIndex]);
+                    
+                    groundColorsAttr[i * 3] = color.r;
+                    groundColorsAttr[i * 3 + 1] = color.g;
+                    groundColorsAttr[i * 3 + 2] = color.b;
+                }
+                
+                groundGeometry.setAttribute('color', new THREE.BufferAttribute(groundColorsAttr, 3));
+                groundMaterial.vertexColors = true;
+                
+                // ==================== PLATFORMS ====================
+                const platformGeometry = new THREE.BoxGeometry(5, 0.5, 5);
+                const platformMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x4a90e2,
+                    roughness: 0.6,
+                    metalness: 0.3
+                });
+                
+                // Create multiple platforms at different heights and positions
+                const platformPositions = [
+                    { x: -15, y: 3, z: -10 },
+                    { x: 10, y: 5, z: -5 },
+                    { x: -5, y: 7, z: 15 },
+                    { x: 20, y: 4, z: 10 },
+                    { x: -20, y: 6, z: 20 },
+                    { x: 15, y: 8, z: -15 },
+                    { x: -10, y: 10, z: -20 },
+                    { x: 5, y: 12, z: 5 }
+                ];
+                
+                for (let i = 0; i < platformPositions.length; i++) {
+                    const pos = platformPositions[i];
+                    const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+                    platform.position.set(pos.x, pos.y, pos.z);
+                    platform.castShadow = true;
+                    platform.receiveShadow = true;
+                    platform.name = `Platform_${i}`;
+                    
+                    // Add subtle rotation for visual interest
+                    platform.rotation.y = Math.random() * Math.PI;
+                    
+                    scene.add(platform);
+                    this.platforms.push({
+                        mesh: platform,
+                        boundingBox: new THREE.Box3().setFromObject(platform)
+                    });
+                }
+                
+                // ==================== OBSTACLES ====================
+                const obstacleGeometry = new THREE.CylinderGeometry(0.5, 0.5, 2, 16);
+                const obstacleMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xff4444,
+                    roughness: 0.5,
+                    metalness: 0.5,
+                    emissive: 0x440000,
+                    emissiveIntensity: 0.2
+                });
+                
+                // Create multiple obstacles
+                for (let i = 0; i < 15; i++) {
+                    const obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+                    obstacle.position.set(
+                        (Math.random() - 0.5) * 80,
+                        1,
+                        (Math.random() - 0.5) * 80
+                    );
+                    obstacle.castShadow = true;
+                    obstacle.receiveShadow = true;
+                    obstacle.name = `Obstacle_${i}`;
+                    
+                    // Add rotation animation
+                    obstacle.userData.rotationSpeed = (Math.random() - 0.5) * 2;
+                    
+                    scene.add(obstacle);
+                    this.obstacles.push({
+                        mesh: obstacle,
+                        boundingSphere: new THREE.Sphere(obstacle.position, 0.7)
+                    });
+                }
+                
+                // ==================== COLLECTIBLES ====================
+                const collectibleGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const collectibleMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xffdd00,
+                    emissive: 0xffaa00,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.3,
+                    metalness: 0.8
+                });
+                
+                // Create multiple collectibles
+                for (let i = 0; i < 30; i++) {
+                    const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
+                    
+                    // Place collectibles on platforms or near ground
+                    let x, y, z;
+                    if (i < 15) {
+                        // On ground
+                        x = (Math.random() - 0.5) * 90;
+                        y = 0.5;
+                        z = (Math.random() - 0.5) * 90;
+                    } else {
+                        // On platforms
+                        const platformIndex = Math.floor(Math.random() * this.platforms.length);
+                        const platform = this.platforms[platformIndex];
+                        x = platform.mesh.position.x + (Math.random() - 0.5) * 3;
+                        y = platform.mesh.position.y + 0.8;
+                        z = platform.mesh.position.z + (Math.random() - 0.5) * 3;
+                    }
+                    
+                    collectible.position.set(x, y, z);
+                    collectible.castShadow = true;
+                    collectible.name = `Collectible_${i}`;
+                    
+                    // Add floating animation
+                    collectible.userData.floatSpeed = 0.5 + Math.random() * 1.0;
+                    collectible.userData.floatHeight = 0.2 + Math.random() * 0.3;
+                    collectible.userData.floatOffset = Math.random() * Math.PI * 2;
+                    collectible.userData.rotationSpeed = (Math.random() - 0.5) * 3;
+                    collectible.userData.collected = false;
+                    
+                    scene.add(collectible);
+                    this.collectibles.push(collectible);
+                }
+                
+                // ==================== SKYBOX ====================
+                const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+                const skyMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x87ceeb,
+                    side: THREE.BackSide
+                });
+                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+                scene.add(sky);
+                
+                // ==================== TREES/ENVIRONMENT ====================
+                // Create some simple trees
+                const treeTrunkGeometry = new THREE.CylinderGeometry(0.2, 0.3, 2, 8);
+                const treeCrownGeometry = new THREE.SphereGeometry(1, 8, 8);
+                const treeTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.9 });
+                const treeCrownMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22, roughness: 0.8 });
+                
+                for (let i = 0; i < 20; i++) {
+                    const treeTrunk = new THREE.Mesh(treeTrunkGeometry, treeTrunkMaterial);
+                    const treeCrown = new THREE.Mesh(treeCrownGeometry, treeCrownMaterial);
+                    
+                    treeTrunk.position.set(
+                        (Math.random() - 0.5) * 80,
+                        1,
+                        (Math.random() - 0.5) * 80
+                    );
+                    treeCrown.position.copy(treeTrunk.position);
+                    treeCrown.position.y += 1.8;
+                    
+                    treeTrunk.castShadow = true;
+                    treeTrunk.receiveShadow = true;
+                    treeCrown.castShadow = true;
+                    treeCrown.receiveShadow = true;
+                    
+                    scene.add(treeTrunk);
+                    scene.add(treeCrown);
+                }
+                
+                console.log('Game initialized with:', this.platforms.length, 'platforms,', 
+                          this.obstacles.length, 'obstacles,', 
+                          this.collectibles.length, 'collectibles');
+            }
+            
+            hideLoadingScreen() {
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            }
+            
+            setupEventListeners() {
+                // Keyboard input
+                window.addEventListener('keydown', (event) => {
+                    const key = event.key.toLowerCase();
+                    this.keys[key] = true;
+                    
+                    // Prevent space bar from scrolling page
+                    if (key === ' ') {
+                        event.preventDefault();
+                    }
+                    
+                    // Jump on space bar
+                    if (key === ' ') {
+                        this.player.jump();
+                    }
+                    
+                    // Pause game on Escape
+                    if (key === 'escape') {
+                        this.isPaused = !this.isPaused;
+                        console.log('Game', this.isPaused ? 'paused' : 'resumed');
+                    }
+                    
+                    // Reset game on R
+                    if (key === 'r') {
+                        this.resetGame();
+                    }
+                });
+                
+                window.addEventListener('keyup', (event) => {
+                    const key = event.key.toLowerCase();
+                    this.keys[key] = false;
+                });
+                
+                // Window resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+                
+                // Prevent right-click menu
+                renderer.domElement.addEventListener('contextmenu', (event) => {
+                    event.preventDefault();
+                });
+                
+                // Mouse click for testing
+                window.addEventListener('click', () => {
+                    if (document.pointerLockElement === renderer.domElement) {
+                        // Player clicked while pointer is locked
+                    }
+                });
+            }
+            
+            handleInput() {
+                if (this.isPaused || this.gameOver) return;
+                
+                let forward = 0;
+                let right = 0;
+                
+                // Movement keys
+                if (this.keys['w'] || this.keys['arrowup']) forward += 1;
+                if (this.keys['s'] || this.keys['arrowdown']) forward -= 1;
+                if (this.keys['a'] || this.keys['arrowleft']) right -= 1;
+                if (this.keys['d'] || this.keys['arrowright']) right += 1;
+                
+                // Move player if any movement key is pressed
+                if (forward !== 0 || right !== 0) {
+                    this.player.move(forward, right);
+                } else {
+                    this.player.stop();
+                }
+            }
+            
+            checkCollisions() {
+                const playerPos = this.player.getPosition();
+                const playerSphere = this.player.boundingSphere;
+                
+                // ==================== PLATFORM COLLISIONS ====================
+                for (const platform of this.platforms) {
+                    const platformBox = platform.boundingBox;
+                    
+                    // Check if player is above platform and within its bounds
+                    if (playerPos.y >= platform.mesh.position.y - 0.5 && 
+                        playerPos.y <= platform.mesh.position.y + 1) {
+                        
+                        const platformCenter = new THREE.Vector3();
+                        platformBox.getCenter(platformCenter);
+                        
+                        const distanceX = Math.abs(playerPos.x - platformCenter.x);
+                        const distanceZ = Math.abs(playerPos.z - platformCenter.z);
+                        
+                        // Platform is 5x5 units
+                        if (distanceX < 2.5 && distanceZ < 2.5) {
+                            // Player is on platform
+                            if (playerPos.y < platform.mesh.position.y + 0.5) {
+                                playerPos.y = platform.mesh.position.y + 0.5;
+                                this.player.mesh.position.y = playerPos.y;
+                                this.player.velocity.y = 0;
+                                this.player.isOnGround = true;
+                            }
+                        }
+                    }
+                }
+                
+                // ==================== OBSTACLE COLLISIONS ====================
+                for (const obstacle of this.obstacles) {
+                    const distance = playerPos.distanceTo(obstacle.mesh.position);
+                    
+                    if (distance < 1.2) { // Player radius + obstacle radius
+                        // Player hit obstacle
+                        this.player.takeDamage(10);
+                        
+                        // Knockback effect
+                        const knockbackDir = playerPos.clone().sub(obstacle.mesh.position).normalize();
+                        this.player.velocity.x = knockbackDir.x * 5;
+                        this.player.velocity.z = knockbackDir.z * 5;
+                        this.player.velocity.y = 3;
+                        this.player.isOnGround = false;
+                        
+                        // Visual feedback
+                        obstacle.mesh.material.emissiveIntensity = 1.0;
+                        setTimeout(() => {
+                            obstacle.mesh.material.emissiveIntensity = 0.2;
+                        }, 200);
+                        
+                        console.log('Player hit obstacle! Health:', this.player.health);
+                        break;
+                    }
+                }
+                
+                // ==================== COLLECTIBLE COLLECTIONS ====================
+                for (let i = this.collectibles.length - 1; i >= 0; i--) {
+                    const collectible = this.collectibles[i];
+                    
+                    if (collectible.userData.collected) continue;
+                    
+                    const distance = playerPos.distanceTo(collectible.position);
+                    
+                    if (distance < 0.8) { // Player radius + collectible radius
+                        // Collect the item
+                        collectible.userData.collected = true;
+                        this.player.addScore(10);
+                        
+                        // Visual effect
+                        collectible.material.emissiveIntensity = 2.0;
+                        collectible.material.opacity = 0.5;
+                        collectible.material.transparent = true;
+                        
+                        // Remove from scene after animation
+                        setTimeout(() => {
+                            scene.remove(collectible);
+                            this.collectibles.splice(i, 1);
+                        }, 300);
+                        
+                        console.log('Collected item! Score:', this.player.score);
+                    }
+                }
+                
+                // ==================== BOUNDARY CHECK ====================
+                if (playerPos.y < -10) {
+                    // Player fell off
+                    this.player.takeDamage(20);
+                    this.player.reset();
+                    console.log('Player fell! Health:', this.player.health);
+                }
+                
+                // ==================== GAME OVER CHECK ====================
+                if (this.player.health <= 0 && !this.gameOver) {
+                    this.gameOver = true;
+                    console.log('GAME OVER! Final Score:', this.player.score);
+                    alert(`Game Over! Your score: ${this.player.score}`);
+                }
+            }
+            
+            updateCollectibles(deltaTime) {
+                // Animate collectibles (floating and rotating)
+                for (const collectible of this.collectibles) {
+                    if (collectible.userData.collected) continue;
+                    
+                    // Floating animation
+                    const floatTime = this.gameTime * collectible.userData.floatSpeed + collectible.userData.floatOffset;
+                    collectible.position.y += Math.sin(floatTime) * 0.005;
+                    
+                    // Rotation animation
+                    collectible.rotation.y += collectible.userData.rotationSpeed * deltaTime;
+                    collectible.rotation.x = Math.sin(floatTime) * 0.1;
+                }
+            }
+            
+            updateObstacles(deltaTime) {
+                // Animate obstacles (rotating)
+                for (const obstacle of this.obstacles) {
+                    obstacle.mesh.rotation.y += obstacle.mesh.userData.rotationSpeed * deltaTime;
+                }
+            }
+            
+            updateUI() {
+                const scoreElement = document.getElementById('score');
+                const positionElement = document.getElementById('position');
+                
+                if (scoreElement) {
+                    scoreElement.textContent = `Score: ${this.player.score} | Health: ${this.player.health}`;
+                }
+                
+                if (positionElement) {
+                    const pos = this.player.getPosition();
+                    positionElement.textContent = `Position: (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)})`;
+                }
+            }
+            
+            resetGame() {
+                // Reset player
+                this.player.reset();
+                this.player.score = 0;
+                this.player.health = 100;
+                
+                // Reset collectibles
+                for (const collectible of this.collectibles) {
+                    scene.remove(collectible);
+                }
+                this.collectibles = [];
+                
+                // Recreate collectibles
+                const collectibleGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+                const collectibleMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xffdd00,
+                    emissive: 0xffaa00,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.3,
+                    metalness: 0.8
+                });
+                
+                for (let i = 0; i < 30; i++) {
+                    const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
+                    
+                    let x, y, z;
+                    if (i < 15) {
+                        x = (Math.random() - 0.5) * 90;
+                        y = 0.5;
+                        z = (Math.random() - 0.5) * 90;
+                    } else {
+                        const platformIndex = Math.floor(Math.random() * this.platforms.length);
+                        const platform = this.platforms[platformIndex];
+                        x = platform.mesh.position.x + (Math.random() - 0.5) * 3;
+                        y = platform.mesh.position.y + 0.8;
+                        z = platform.mesh.position.z + (Math.random() - 0.5) * 3;
+                    }
+                    
+                    collectible.position.set(x, y, z);
+                    collectible.castShadow = true;
+                    collectible.name = `Collectible_${i}`;
+                    
+                    collectible.userData.floatSpeed = 0.5 + Math.random() * 1.0;
+                    collectible.userData.floatHeight = 0.2 + Math.random() * 0.3;
+                    collectible.userData.floatOffset = Math.random() * Math.PI * 2;
+                    collectible.userData.rotationSpeed = (Math.random() - 0.5) * 3;
+                    collectible.userData.collected = false;
+                    
+                    scene.add(collectible);
+                    this.collectibles.push(collectible);
+                }
+                
+                // Reset game state
+                this.gameOver = false;
+                this.isPaused = false;
+                this.gameTime = 0;
+                
+                console.log('Game reset!');
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                if (this.isPaused) return;
+                
+                const deltaTime = Math.min(this.clock.getDelta(), 0.1);
+                this.gameTime += deltaTime;
+                
+                // Handle input
+                this.handleInput();
+                
+                // Update player
+                this.player.update(deltaTime);
+                
+                // Update animations
+                this.updateCollectibles(deltaTime);
+                this.updateObstacles(deltaTime);
+                
+                // Check collisions
+                this.checkCollisions();
+                
+                // Update UI
+                this.updateUI();
+                
+                // Update controls
+                controls.update();
+                
+                // Render scene
+                renderer.render(scene, camera);
+            }
+        }
+
+        // ==================== INITIALIZE GAME ====================
+        // Wait for page to load completely
+        window.addEventListener('load', () => {
+            try {
+                console.log('Initializing game...');
+                
+                // Create and start the game
+                const game = new Game();
+                
+                // Make game globally accessible for debugging
+                window.game = game;
+                
+                console.log('Game loaded successfully!');
+                console.log('Controls: WASD to move, Space to jump, Escape to pause, R to reset');
                 
             } catch (error) {
-                console.error("Failed to initialize Three.js:", error);
-                document.getElementById('start-screen').innerHTML = `
-                    <h1 style="color: #ff6b6b">Initialization Error</h1>
-                    <p>Failed to load the game. Please try refreshing.</p>
-                    <p style="font-size: 14px; color: rgba(255,255,255,0.7)">${error.message}</p>
+                console.error('Game initialization error:', error);
+                
+                // Show error message to user
+                const errorMessage = document.createElement('div');
+                errorMessage.style.position = 'absolute';
+                errorMessage.style.top = '50%';
+                errorMessage.style.left = '50%';
+                errorMessage.style.transform = 'translate(-50%, -50%)';
+                errorMessage.style.color = 'red';
+                errorMessage.style.fontSize = '20px';
+                errorMessage.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                errorMessage.style.padding = '20px';
+                errorMessage.style.borderRadius = '10px';
+                errorMessage.style.textAlign = 'center';
+                errorMessage.innerHTML = `
+                    <h2>Game Failed to Load</h2>
+                    <p>${error.message}</p>
+                    <p>Please check the browser console for details.</p>
+                    <p>Try refreshing the page or check your internet connection.</p>
                 `;
-            }
-        }
-
-        function setupLighting() {
-            // Ambient light for overall illumination
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-            
-            // Main directional light (sun)
-            const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
-            sunLight.position.set(100, 200, 100);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 2048;
-            sunLight.shadow.mapSize.height = 2048;
-            sunLight.shadow.camera.left = -200;
-            sunLight.shadow.camera.right = 200;
-            sunLight.shadow.camera.top = 200;
-            sunLight.shadow.camera.bottom = -200;
-            sunLight.shadow.bias = -0.0001;
-            scene.add(sunLight);
-            
-            // Fill light for softer shadows
-            const fillLight = new THREE.DirectionalLight(0x74b9ff, 0.4);
-            fillLight.position.set(-50, 50, -50);
-            scene.add(fillLight);
-            
-            // Hemisphere light for sky/ground color bleeding
-            const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x2d3436, 0.3);
-            scene.add(hemisphereLight);
-        }
-
-        function createMountainTerrain() {
-            const size = CONFIG.MOUNTAIN_SIZE;
-            const segments = CONFIG.MOUNTAIN_SEGMENTS;
-            
-            const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-            const vertices = geometry.attributes.position.array;
-            terrainHeightMap = [];
-            
-            // Generate complex mountain terrain using multiple noise layers
-            for (let i = 0; i < vertices.length; i += 3) {
-                const x = vertices[i];
-                const z = vertices[i + 2];
+                document.body.appendChild(errorMessage);
                 
-                let height = 0;
-                
-                // Layer 1: Central peak - highest point in the middle
-                const distanceFromCenter = Math.sqrt(x * x + z * z);
-                height += Math.max(0, CONFIG.START_ALTITUDE - distanceFromCenter * 0.25);
-                
-                // Layer 2: Major mountain ranges (low frequency)
-                height += Math.sin(x * 0.002) * 200;
-                height += Math.sin(z * 0.0015) * 180;
-                
-                // Layer 3: Secondary ridges (medium frequency)
-                height += Math.sin(x * 0.008 + z * 0.005) * 80;
-                height += Math.sin(z * 0.006 - x * 0.003) * 70;
-                
-                // Layer 4: Rocky terrain details (high frequency)
-                height += Math.sin(x * 0.03) * 30;
-                height += Math.sin(z * 0.025) * 25;
-                
-                // Layer 5: Small bumps and imperfections
-                height += Math.sin(x * 0.1) * 12;
-                height += Math.sin(z * 0.08) * 10;
-                
-                // Layer 6: Perlin-like noise for natural variation
-                height += Math.sin((x + z) * 0.02) * 40;
-                height += Math.sin(Math.sqrt(x * x + z * z) * 0.005) * 60;
-                
-                // Layer 7: Random terrain features
-                height += (Math.random() - 0.5) * 20;
-                
-                vertices[i + 1] = height;
-                
-                // Store height data for terrain following
-                terrainHeightMap.push({
-                    x: x,
-                    z: z,
-                    height: height
-                });
-            }
-            
-            geometry.computeVertexNormals();
-            
-            // Create realistic snow material
-            const material = new THREE.MeshPhysicalMaterial({
-                color: 0xffffff,
-                roughness: 0.1,
-                metalness: 0.0,
-                clearcoat: 0.6,
-                clearcoatRoughness: 0.1,
-                envMapIntensity: 0.7,
-                side: THREE.DoubleSide,
-                transparent: false,
-                depthWrite: true,
-                depthTest: true
-            });
-            
-            mountain = new THREE.Mesh(geometry, material);
-            mountain.rotation.x = -Math.PI / 2;
-            mountain.receiveShadow = true;
-            mountain.castShadow = true;
-            scene.add(mountain);
-            
-            // Create distant mountain peaks for visual depth
-            createDistantMountainPeaks();
-            
-            // Create rocky cliffs and formations
-            createRockFormations();
-        }
-
-        function createDistantMountainPeaks() {
-            const material = mountain.material;
-            
-            for (let i = 0; i < 10; i++) {
-                const angle = (i / 10) * Math.PI * 2;
-                const distance = 600 + Math.random() * 400;
-                const peakSize = 60 + Math.random() * 50;
-                const peakHeight = 120 + Math.random() * 80;
-                
-                const peakGeometry = new THREE.ConeGeometry(peakSize, peakHeight, 12);
-                const peak = new THREE.Mesh(peakGeometry, material);
-                
-                peak.position.set(
-                    Math.cos(angle) * distance,
-                    0,
-                    Math.sin(angle) * distance
-                );
-                peak.castShadow = true;
-                peak.receiveShadow = true;
-                scene.add(peak);
-                
-                // Add snow caps to peaks
-                const snowCapGeometry = new THREE.SphereGeometry(peakSize * 0.8, 8, 8);
-                const snowCap = new THREE.Mesh(snowCapGeometry, material);
-                snowCap.position.set(
-                    Math.cos(angle) * distance,
-                    peakHeight * 0.7,
-                    Math.sin(angle) * distance
-                );
-                snowCap.scale.y = 0.5;
-                scene.add(snowCap);
-            }
-        }
-
-        function createRockFormations() {
-            const rockMaterial = new THREE.MeshStandardMaterial({
-                color: 0x7f8c8d,
-                roughness: 0.8,
-                metalness: 0.1
-            });
-            
-            for (let i = 0; i < 25; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 200 + Math.random() * 300;
-                
-                const rockGeometry = new THREE.DodecahedronGeometry(15 + Math.random() * 20, 1);
-                const rock = new THREE.Mesh(rockGeometry, rockMaterial);
-                
-                rock.position.set(
-                    Math.cos(angle) * distance,
-                    30 + Math.random() * 40,
-                    Math.sin(angle) * distance
-                );
-                rock.scale.set(
-                    Math.random() * 2 + 1,
-                    Math.random() * 1.5 + 0.5,
-                    Math.random() * 2 + 1
-                );
-                rock.rotation.set(
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI,
-                    Math.random() * Math.PI
-                );
-                rock.castShadow = true;
-                scene.add(rock);
-            }
-        }
-
-        function createSkierCharacter() {
-            skier = new THREE.Group();
-            
-            // Skier body (upper body)
-            const bodyGeometry = new THREE.CapsuleGeometry(0.35, 1.4, 8, 16);
-            const bodyMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xff4757,
-                roughness: 0.4,
-                metalness: 0.1
-            });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.castShadow = true;
-            skier.add(body);
-            
-            // Skis with realistic proportions
-            const skiGeometry = new THREE.BoxGeometry(2.0, 0.12, 0.3);
-            const skiMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x2f3542,
-                roughness: 0.2,
-                metalness: 0.7
-            });
-            
-            const leftSki = new THREE.Mesh(skiGeometry, skiMaterial);
-            leftSki.position.set(-0.5, -0.85, 0);
-            leftSki.castShadow = true;
-            skier.add(leftSki);
-            
-            const rightSki = new THREE.Mesh(skiGeometry, skiMaterial);
-            rightSki.position.set(0.5, -0.85, 0);
-            rightSki.castShadow = true;
-            skier.add(rightSki);
-            
-            // Ski poles
-            const poleGeometry = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8);
-            const poleMaterial = new THREE.MeshStandardMaterial({
-                color: 0x34495e,
-                roughness: 0.3,
-                metalness: 0.5
-            });
-            
-            const leftPole = new THREE.Mesh(poleGeometry, poleMaterial);
-            leftPole.position.set(-0.3, -0.3, 0.3);
-            leftPole.rotation.x = Math.PI / 6;
-            skier.add(leftPole);
-            
-            const rightPole = new THREE.Mesh(poleGeometry, poleMaterial);
-            rightPole.position.set(0.3, -0.3, 0.3);
-            rightPole.rotation.x = Math.PI / 6;
-            skier.add(rightPole);
-            
-            // Position skier at the mountain peak
-            skier.position.set(0, CONFIG.START_ALTITUDE + 5, 0);
-            skier.rotation.y = Math.PI; // Face downhill
-            
-            scene.add(skier);
-            
-            // Camera is separate but follows skier
-            camera.position.set(0, 1.7, 0);
-        }
-
-        function createMountainEnvironment() {
-            trees = [];
-            treesPassed = 0;
-            
-            // Pine tree components
-            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
-            const leavesGeometry = new THREE.ConeGeometry(3.5, 9, 8);
-            
-            const trunkMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x8B4513,
-                roughness: 0.9,
-                metalness: 0.0
-            });
-            
-            const leavesMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x2ecc71,
-                roughness: 0.8,
-                metalness: 0.0,
-                transparent: false
-            });
-            
-            // Create tree clusters at various altitudes
-            for (let cluster = 0; cluster < 20; cluster++) {
-                const clusterAngle = Math.random() * Math.PI * 2;
-                const clusterDistance = 150 + Math.random() * 350;
-                
-                // Avoid placing trees on the peak
-                if (clusterDistance < 200) continue;
-                
-                const clusterX = Math.cos(clusterAngle) * clusterDistance;
-                const clusterZ = Math.sin(clusterAngle) * clusterDistance;
-                
-                const treesInCluster = Math.floor(Math.random() * 5) + 2;
-                
-                for (let i = 0; i < treesInCluster; i++) {
-                    const treeAngle = Math.random() * Math.PI * 2;
-                    const treeDistance = Math.random() * 25;
-                    
-                    const treeX = clusterX + Math.cos(treeAngle) * treeDistance;
-                    const treeZ = clusterZ + Math.sin(treeAngle) * treeDistance;
-                    
-                    const tree = new THREE.Group();
-                    
-                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-                    trunk.position.y = 2.5;
-                    trunk.castShadow = true;
-                    tree.add(trunk);
-                    
-                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-                    leaves.position.y = 7;
-                    leaves.castShadow = true;
-                    tree.add(leaves);
-                    
-                    tree.position.set(treeX, 0, treeZ);
-                    const scale = 0.7 + Math.random() * 0.8;
-                    tree.scale.setScalar(scale);
-                    tree.rotation.y = Math.random() * Math.PI * 2;
-                    
-                    scene.add(tree);
-                    trees.push(tree);
+                // Hide loading screen
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
                 }
             }
-            
-            document.getElementById('tree-count').textContent = trees.length;
-        }
+        });
 
-        function createSnowParticleSystem() {
-            const particleCount = CONFIG.SNOW_PARTICLES;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const sizes = new Float32Array(particleCount);
-            
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                positions[i] = (Math.random() - 0.5) * 150;
-                positions[i + 1] = Math.random() * 80 + 40;
-                positions[i + 2] = (Math.random() - 0.5) * 150;
-                sizes[i / 3] = Math.random() * 0.8 + 0.3;
-            }
-            
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-            
-            const material = new THREE.PointsMaterial({
-                color: 0xffffff,
-                size: 1.2,
-                transparent: true,
-                opacity: 0.9,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false,
-                sizeAttenuation: true
-            });
-            
-            snowParticleSystem = new THREE.Points(geometry, material);
-            scene.add(snowParticleSystem);
-        }
+        // ==================== ERROR HANDLING ====================
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            event.preventDefault();
+        });
 
-        function createSkyDome() {
-            const skyGeometry = new THREE.SphereGeometry(2000, 32, 32);
-            const skyMaterial = new THREE.MeshBasicMaterial({
-                color: 0x87CEEB,
-                side: THREE.BackSide,
-                fog: false
-            });
-            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-            scene.add(sky);
-        }
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            event.preventDefault();
+        });
 
-        function handleWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        // ============================================
-        // GAME LOGIC AND UPDATES - FULL
-        // ============================================
-        function updateGameLogic(deltaTime) {
-            if (!gameStarted) return;
-            
-            // Hide camera hint after 5 seconds
-            if (gameStarted) {
-                setTimeout(() => {
-                    const hint = document.getElementById('camera-hint');
-                    if (hint) hint.style.opacity = '0';
-                }, 5000);
-            }
-            
-            // Calculate acceleration based on slope and crouch state
-            const acceleration = 0.0008;
-            speed += acceleration * deltaTime * 60;
-            if (isCrouching) {
-                speed += acceleration * 0.5 * deltaTime * 60 * CONFIG.CROUCH_MULTIPLIER;
-            }
-            speed = Math.min(speed, CONFIG.MAX_SPEED / 100);
-            
-            // Apply turning from left joystick
-            if (Math.abs(joystickLeft.x) > 0.1) {
-                skier.rotation.y -= joystickLeft.x * CONFIG.TURN_SENSITIVITY * (speed + 0.2);
-            }
-            
-            // Apply forward/backward movement from left joystick
-            if (Math.abs(joystickLeft.y) > 0.1) {
-                const forwardX = Math.sin(skier.rotation.y);
-                const forwardZ = Math.cos(skier.rotation.y);
-                
-                skier.position.x += forwardX * joystickLeft.y * speed * deltaTime * 120;
-                skier.position.z += forwardZ * joystickLeft.y * speed * deltaTime * 120;
-            }
-            
-            // Apply camera look from right joystick (FPS controls)
-            if (Math.abs(joystickRight.x) > 0.1 || Math.abs(joystickRight.y) > 0.1) {
-                cameraYaw -= joystickRight.x * CONFIG.LOOK_SENSITIVITY;
-                cameraPitch -= joystickRight.y * CONFIG.LOOK_SENSITIVITY * 0.7;
-                
-                // Limit vertical look to prevent looking straight up/down
-                cameraPitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraPitch));
-            }
-            
-            // Jump physics
-            if (isJumping) {
-                jumpForce -= CONFIG.GRAVITY * deltaTime * 60;
-                skier.position.y += jumpForce * deltaTime * 100;
-                
-                if (skier.position.y <= altitude) {
-                    skier.position.y = altitude;
-                    isJumping = false;
-                    jumpForce = 0;
-                }
-            } else {
-                // Follow terrain height
-                updateAltitudeFromTerrain();
-                skier.position.y = altitude + 1;
-            }
-            
-            // Update distance traveled
-            distanceTraveled += speed * deltaTime * 80;
-            
-            // Update camera position and rotation
-            updateCameraPosition();
-            
-            // Update UI elements
-            updateGameUI();
-            
-            // Update particle systems
-            updateSnowParticles();
-            
-            // Update tree positions and check for collisions
-            updateTrees();
-            
-            // Update mountain view indicator
-            updateMountainViewIndicator();
-        }
-
-        function updateAltitudeFromTerrain() {
-            // Simple terrain following - in a full game you'd use raycasting
-            const terrainHeight = Math.max(10, CONFIG.START_ALTITUDE - distanceTraveled * 0.004);
-            altitude = terrainHeight;
-        }
-
-        function updateCameraPosition() {
-            // FPS camera: Position is relative to skier's head
-            const cameraDistance = 0.1;
-            const cameraHeight = isCrouching ? 1.2 : 1.7;
-            
-            // Calculate camera offset based on look angles
-            const cameraOffsetX = Math.sin(cameraYaw) * Math.cos(cameraPitch) * cameraDistance;
-            const cameraOffsetY = Math.sin(cameraPitch) * cameraDistance + cameraHeight;
-            const cameraOffsetZ = Math.cos(cameraYaw) * Math.cos(cameraPitch) * cameraDistance;
-            
-            // Position camera relative to skier
-            camera.position.x = skier.position.x + cameraOffsetX;
-            camera.position.y = skier.position.y + cameraOffsetY;
-            camera.position.z = skier.position.z + cameraOffsetZ;
-            
-            // Make camera look in the direction of view
-            const lookAtX = skier.position.x + Math.sin(cameraYaw);
-            const lookAtY = skier.position.y + cameraHeight + Math.sin(cameraPitch) * 2;
-            const lookAtZ = skier.position.z + Math.cos(cameraYaw);
-            
-            camera.lookAt(lookAtX, lookAtY, lookAtZ);
-        }
-
-        function updateGameUI() {
-            const speedKmh = Math.round(speed * 180);
-            const speedPercentage = Math.min(speed * 83, 100);
-            const viewAngleDegrees = Math.round(cameraYaw * 180 / Math.PI);
-            
-            document.getElementById('altitude').textContent = Math.round(altitude) + 'm';
-            document.getElementById('speed').textContent = speedKmh + ' km/h';
-            document.getElementById('distance').textContent = Math.round(distanceTraveled) + 'm';
-            document.getElementById('view-angle').textContent = viewAngleDegrees + '°';
-            document.getElementById('tree-count').textContent = treesPassed;
-            document.getElementById('speed-fill').style.width = speedPercentage + '%';
-            document.getElementById('speed-text').textContent = speedKmh + ' km/h';
-            
-            // Update debug info
-            document.getElementById('debug-info').innerHTML = `
-                DEBUG:<br>
-                X: ${skier.position.x.toFixed(1)}<br>
-                Y: ${skier.position.y.toFixed(1)}<br>
-                Z: ${skier.position.z.toFixed(1)}<br>
-                Speed: ${speed.toFixed(3)}<br>
-                Cam: ${cameraYaw.toFixed(2)}/${cameraPitch.toFixed(2)}
-            `;
-        }
-
-        function updateSnowParticles() {
-            if (!snowParticleSystem) return;
-            
-            const positions = snowParticleSystem.geometry.attributes.position.array;
-            
-            for (let i = 0; i < positions.length; i += 3) {
-                // Snow falling effect
-                positions[i + 1] -= 0.15;
-                
-                // Wind effect with slight variation
-                positions[i] += Math.sin(Date.now() * 0.0003 + i) * 0.04;
-                positions[i + 2] += Math.cos(Date.now() * 0.0003 + i) * 0.04;
-                
-                // Reset particles that fall below
-                if (positions[i + 1] < 0) {
-                    positions[i] = (Math.random() - 0.5) * 200;
-                    positions[i + 1] = Math.random() * 100 + 100;
-                    positions[i + 2] = (Math.random() - 0.5) * 200;
-                }
-            }
-            
-            snowParticleSystem.geometry.attributes.position.needsUpdate = true;
-            
-            // Center particle system on player
-            snowParticleSystem.position.x = skier.position.x;
-            snowParticleSystem.position.z = skier.position.z;
-        }
-
-        function updateTrees() {
-            // Count trees passed (simple distance check)
-            trees.forEach(tree => {
-                const distanceToTree = Math.sqrt(
-                    Math.pow(tree.position.x - skier.position.x, 2) +
-                    Math.pow(tree.position.z - skier.position.z, 2)
-                );
-                
-                if (distanceToTree < 10) {
-                    treesPassed = Math.max(treesPassed, treesPassed + 1);
-                }
-                
-                // Gentle tree animation
-                tree.rotation.y += Math.sin(Date.now() * 0.0002 + tree.position.x) * 0.0002;
-            });
-        }
-
-        function updateMountainViewIndicator() {
-            const viewIndicator = document.getElementById('mountain-view');
-            
-            if (altitude > 400) {
-                viewIndicator.textContent = '🏔️ ON MOUNTAIN PEAK';
-                viewIndicator.style.background = 'linear-gradient(145deg, rgba(52, 152, 219, 0.4), rgba(41, 128, 185, 0.3))';
-            } else if (altitude > 250) {
-                viewIndicator.textContent = '⛰️ ON UPPER SLOPES';
-                viewIndicator.style.background = 'linear-gradient(145deg, rgba(46, 204, 113, 0.4), rgba(39, 174, 96, 0.3))';
-            } else if (altitude > 100) {
-                viewIndicator.textContent = '🌲 IN PINE FOREST';
-                viewIndicator.style.background = 'linear-gradient(145deg, rgba(39, 174, 96, 0.4), rgba(46, 204, 113, 0.3))';
-            } else {
-                viewIndicator.textContent = '🏔️ NEAR MOUNTAIN BASE';
-                viewIndicator.style.background = 'linear-gradient(145deg, rgba(155, 89, 182, 0.4), rgba(142, 68, 173, 0.3))';
-            }
-        }
-
-        function animateGameLoop(currentTime) {
-            requestAnimationFrame(animateGameLoop);
-            
-            const deltaTime = currentTime ? (currentTime - lastFrameTime) / 1000 : 0.016;
-            lastFrameTime = currentTime;
-            
-            // Cap deltaTime to prevent physics issues
-            const safeDeltaTime = Math.min(deltaTime, 0.1);
-            
-            updateGameLogic(safeDeltaTime);
-            
-            // Render the scene
-            renderer.render(scene, camera);
-        }
-
-        // ============================================
-        // GAME START FUNCTION
-        // ============================================
-        function startGame() {
-            if (gameStarted) return;
-            
-            gameStarted = true;
-            
-            // Fade out start screen
-            const startScreen = document.getElementById('start-screen');
-            startScreen.style.opacity = '0';
-            
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-            }, 1000);
-            
-            // Start with a little speed
-            speed = 0.05;
-            
-            console.log("Game started!");
-        }
-
-        // ============================================
-        // INITIALIZE EVERYTHING WHEN PAGE LOADS
-        // ============================================
-        function initializeGame() {
-            console.log("Initializing Ski Mountain game...");
-            
-            // Create snow effect
-            createSnowfall();
-            
-            // Setup mobile controls
-            setupMobileControls();
-            
-            // Initialize Three.js game
-            initThreeJS();
-            
-            console.log("Game initialization complete!");
-        }
-
-        // Start everything when the page loads
-        window.addEventListener('load', initializeGame);
     </script>
 </body>
 </html>
