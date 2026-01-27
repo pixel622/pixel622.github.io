@@ -1,164 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Mobile Ski Mountain</title>
+<title>Mobile Downhill Ski</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body {
-  margin: 0;
-  overflow: hidden;
-  background: #bcd;
-  touch-action: none;
+html,body{
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#87bde5;
+  touch-action:none;
 }
-canvas {
-  display: block;
-}
+canvas{display:block}
 
-/* JOYSTICKS */
-.joystick {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  border: 2px solid rgba(255,255,255,0.3);
+/* joysticks */
+.joy {
+  position:absolute;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  border:2px solid rgba(255,255,255,0.35);
 }
 .stick {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  left: 35px;
-  top: 35px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.5);
+  position:absolute;
+  width:50px;
+  height:50px;
+  left:35px;
+  top:35px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.6);
 }
-#moveJoy { left: 20px; bottom: 20px; }
-#lookJoy { right: 20px; bottom: 20px; }
-
-#crosshair {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: white;
-  transform: translate(-50%,-50%);
-}
+#move {left:20px;bottom:20px}
+#look {right:20px;bottom:20px}
 </style>
 </head>
 <body>
 
-<div id="moveJoy" class="joystick"><div class="stick"></div></div>
-<div id="lookJoy" class="joystick"><div class="stick"></div></div>
-<div id="crosshair"></div>
+<div id="move" class="joy"><div class="stick"></div></div>
+<div id="look" class="joy"><div class="stick"></div></div>
 
 <canvas id="c"></canvas>
 
 <script>
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-resize();
-window.onresize = resize;
 
 function resize(){
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 }
+resize();
+addEventListener("resize", resize);
 
-/* PLAYER */
+// player
 let px = 0;
 let pz = 0;
 let yaw = 0;
-let speed = 0;
-let gravity = 0.02;
+let speed = 0.5;
 
-/* TERRAIN HEIGHT FUNCTION (BUMPS) */
+// terrain height (BUMPS)
 function heightAt(x,z){
   return (
-    Math.sin(x*0.2)*1.5 +
     Math.sin(z*0.15)*2 +
-    Math.sin((x+z)*0.1)*1
+    Math.sin(x*0.2)*1.5 +
+    Math.sin((x+z)*0.1)
   );
 }
 
-/* JOYSTICK SYSTEM */
-function joystick(elem, cb){
-  const stick = elem.children[0];
-  let active = false;
-  let sx=0, sy=0;
+// joystick helper
+function makeJoy(el, cb){
+  const stick = el.querySelector(".stick");
+  let active=false, sx=0, sy=0;
 
-  elem.addEventListener("touchstart", e=>{
-    active = true;
-    sx = e.touches[0].clientX;
-    sy = e.touches[0].clientY;
+  el.addEventListener("touchstart", e=>{
+    active=true;
+    sx=e.touches[0].clientX;
+    sy=e.touches[0].clientY;
   });
 
-  elem.addEventListener("touchmove", e=>{
+  el.addEventListener("touchmove", e=>{
     if(!active) return;
-    let dx = e.touches[0].clientX - sx;
-    let dy = e.touches[0].clientY - sy;
-    let d = Math.hypot(dx,dy);
-    if(d>40){ dx*=40/d; dy*=40/d; }
-    stick.style.transform = `translate(${dx}px,${dy}px)`;
+    let dx=e.touches[0].clientX-sx;
+    let dy=e.touches[0].clientY-sy;
+    let d=Math.hypot(dx,dy);
+    if(d>40){dx*=40/d;dy*=40/d;}
+    stick.style.transform=`translate(${dx}px,${dy}px)`;
     cb(dx/40,dy/40);
   });
 
-  elem.addEventListener("touchend", ()=>{
-    active = false;
-    stick.style.transform = "translate(0,0)";
+  el.addEventListener("touchend", ()=>{
+    active=false;
+    stick.style.transform="translate(0,0)";
     cb(0,0);
   });
 }
 
-let moveX = 0;
-let lookX = 0;
-let lookY = 0;
+let steer=0;
+let look=0;
 
-joystick(document.getElementById("moveJoy"), (x,y)=>{
-  moveX = x;
-});
-joystick(document.getElementById("lookJoy"), (x,y)=>{
-  lookX = x;
-  lookY = y;
-});
+makeJoy(document.getElementById("move"), (x)=>steer=x);
+makeJoy(document.getElementById("look"), (x)=>look=x);
 
-/* GAME LOOP */
 function update(){
-  yaw -= lookX * 0.04;
+  yaw -= look*0.04;
 
-  speed += gravity;
-  speed = Math.min(speed, 2.5);
+  // gravity downhill
+  speed += 0.015;
+  speed = Math.min(speed, 2.8);
 
-  px += Math.sin(yaw) * speed + moveX * 0.5;
-  pz -= Math.cos(yaw) * speed;
+  // steering
+  px += Math.sin(yaw)*speed + steer*0.6;
+  pz -= Math.cos(yaw)*speed;
 
-  // slow uphill bumps
+  // bumps affect speed
   let slope = heightAt(px,pz) - heightAt(px,pz+1);
-  speed -= slope * 0.05;
-  speed = Math.max(speed,0.2);
+  speed -= slope*0.05;
+  speed = Math.max(speed,0.3);
 }
 
 function draw(){
-  ctx.fillStyle = "#cfe8ff";
+  // sky
+  ctx.fillStyle="#87bde5";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  for(let i=1;i<200;i++){
-    let dz = i*2;
-    let wx = px;
-    let wz = pz - dz;
-    let h = heightAt(wx,wz);
+  // snow ground
+  for(let i=1;i<240;i++){
+    let dz=i*3;
+    let wz=pz-dz;
+    let h=heightAt(px,wz);
 
-    let scale = 400/dz;
-    let y = canvas.height/2 + h*40*scale;
-    let w = canvas.width * scale;
+    let scale=400/dz;
+    let y=canvas.height/2 + h*50*scale;
+    let w=canvas.width*scale;
 
-    ctx.fillStyle = `rgb(${240-i/2},${240-i/2},${240-i/2})`;
+    ctx.fillStyle = i%2
+      ? "rgb(245,245,245)"
+      : "rgb(235,235,235)";
+
     ctx.fillRect(
       canvas.width/2 - w/2,
       y,
       w,
-      3
+      4
     );
   }
 }
