@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile 3D Adventure Game</title>
+    <title>Mobile Mountain Skiing</title>
     <style>
         /* RESET & BASE STYLES */
         * {
@@ -43,7 +43,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1a237e, #311b92);
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -57,7 +57,7 @@
             height: 80px;
             border: 5px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            border-top-color: #00e5ff;
+            border-top-color: #4fc3f7;
             animation: spin 1s ease-in-out infinite;
             margin-bottom: 30px;
         }
@@ -92,7 +92,7 @@
             z-index: 100;
         }
         
-        /* TOP UI */
+        /* TOP UI - SKIING STATS */
         #topUI {
             position: absolute;
             top: 10px;
@@ -134,45 +134,183 @@
             font-size: 14px;
         }
         
+        #speedDisplay { color: #4fc3f7; }
+        #altitudeDisplay { color: #81c784; }
+        #distanceDisplay { color: #ffb74d; }
         #scoreDisplay { color: #ffd700; }
-        #healthDisplay { color: #ff4444; }
-        #glideDisplay { color: #00e5ff; }
-        #levelDisplay { color: #7c4dff; }
         
-        /* HEALTH BAR */
-        #healthBarContainer {
-            width: 120px;
-            height: 8px;
-            background: rgba(255, 68, 68, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 4px;
+        /* SPEED INDICATOR */
+        #speedIndicator {
+            position: absolute;
+            bottom: 180px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            z-index: 100;
         }
         
-        #healthBar {
+        .speed-circle {
+            position: absolute;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, #ff4444, #ff8888);
-            border-radius: 4px;
-            transition: width 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
         
-        /* GLIDE BAR */
-        #glideBarContainer {
-            width: 120px;
-            height: 8px;
-            background: rgba(0, 229, 255, 0.2);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-        
-        #glideBar {
+        .speed-fill {
+            position: absolute;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, #00e5ff, #80deea);
-            border-radius: 4px;
-            transition: width 0.3s ease;
+            border: 3px solid transparent;
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 0, 50% 0);
+            transform: rotate(45deg);
+        }
+        
+        .speed-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .speed-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+        }
+        
+        /* TILT INDICATOR */
+        #tiltIndicator {
+            position: absolute;
+            bottom: 180px;
+            left: 20px;
+            width: 100px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .tilt-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+        
+        .tilt-marker {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .tilt-pointer {
+            position: absolute;
+            width: 30px;
+            height: 4px;
+            background: #4fc3f7;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            transform: translateY(-50%);
+            transition: transform 0.1s;
+        }
+        
+        .tilt-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        /* SKI CONTROLS */
+        #skiControls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .ski-control {
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            pointer-events: auto;
+            touch-action: none;
+            transition: all 0.1s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .ski-control:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        #leftControl {
+            border-color: rgba(76, 175, 80, 0.8);
+        }
+        
+        #rightControl {
+            border-color: rgba(244, 67, 54, 0.8);
+        }
+        
+        #jumpControl {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, rgba(33, 150, 243, 0.8), rgba(21, 101, 192, 0.9));
+            border-color: rgba(33, 150, 243, 0.9);
+            font-size: 28px;
+        }
+        
+        .control-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
         
         /* CENTER MESSAGES */
@@ -196,141 +334,30 @@
             z-index: 150;
         }
         
-        /* JOYSTICK */
-        #joystickContainer {
+        /* SNOW EFFECT OVERLAY */
+        #snowOverlay {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 180px;
-            height: 180px;
-            pointer-events: none;
-        }
-        
-        #joystickBase {
-            position: absolute;
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            bottom: 0;
+            top: 0;
             left: 0;
-            pointer-events: auto;
-            touch-action: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        #joystickHandle {
-            position: absolute;
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle at 30% 30%, #4fc3f7, #1976d2);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* ACTION BUTTONS */
-        #actionButtons {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 20px;
-            width: 200px;
-            height: 200px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
+            z-index: 50;
+            opacity: 0.3;
         }
         
-        .action-btn {
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .snowflake {
+            position: absolute;
+            background: white;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            pointer-events: auto;
-            touch-action: none;
-            user-select: none;
-            transition: all 0.1s ease;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
+            opacity: 0.8;
+            animation: fall linear infinite;
         }
         
-        .action-btn:active {
-            transform: scale(0.9);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .action-btn::after {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .action-btn:active::after {
-            opacity: 1;
-        }
-        
-        #jumpBtn {
-            background: radial-gradient(circle at 30% 30%, #66bb6a, #388e3c);
-            border-color: rgba(102, 187, 106, 0.8);
-            grid-column: 2;
-            grid-row: 1;
-        }
-        
-        #glideBtn {
-            background: radial-gradient(circle at 30% 30%, #29b6f6, #0288d1);
-            border-color: rgba(41, 182, 246, 0.8);
-            grid-column: 2;
-            grid-row: 2;
-        }
-        
-        #attackBtn {
-            background: radial-gradient(circle at 30% 30%, #ff7043, #d84315);
-            border-color: rgba(255, 112, 67, 0.8);
-            grid-column: 1;
-            grid-row: 1;
-        }
-        
-        #specialBtn {
-            background: radial-gradient(circle at 30% 30%, #ba68c8, #7b1fa2);
-            border-color: rgba(186, 104, 200, 0.8);
-            grid-column: 1;
-            grid-row: 2;
-            font-size: 24px;
-        }
-        
-        /* BUTTON LABELS */
-        .btn-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
         }
         
         /* PAUSE MENU */
@@ -386,47 +413,25 @@
         #restartBtn { background: linear-gradient(135deg, #ff9800, #f57c00); }
         #quitBtn { background: linear-gradient(135deg, #f44336, #d32f2f); }
         
-        /* COMBAT TEXT */
-        .combat-text {
+        /* INSTRUCTIONS */
+        #instructions {
             position: absolute;
-            color: #ff4444;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            z-index: 50;
-            animation: floatUp 1s ease-out forwards;
+            bottom: 300px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeOut 5s 10s forwards;
         }
         
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-        }
-        
-        /* LEVEL UP EFFECT */
-        .level-up-effect {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-            animation: pulse 1s ease-in-out;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
         }
         
         /* GAME OVER SCREEN */
@@ -446,11 +451,11 @@
         }
         
         .game-over-title {
-            color: #ff4444;
+            color: #4fc3f7;
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
         }
         
         .final-stats {
@@ -465,43 +470,22 @@
             font-weight: bold;
         }
         
-        /* INSTRUCTIONS */
-        #instructions {
-            position: absolute;
-            bottom: 250px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 14px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeOut 5s 10s forwards;
-        }
-        
-        @keyframes fadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
-        
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            .action-btn {
+            .ski-control {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            #jumpControl {
                 width: 70px;
                 height: 70px;
                 font-size: 24px;
             }
             
-            #joystickBase {
-                width: 120px;
-                height: 120px;
-            }
-            
-            #joystickHandle {
-                width: 60px;
-                height: 60px;
+            #speedIndicator, #tiltIndicator {
+                bottom: 160px;
             }
             
             .pause-title {
@@ -516,20 +500,27 @@
         }
         
         @media (max-width: 480px) {
-            .action-btn {
+            .ski-control {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+            
+            #jumpControl {
                 width: 60px;
                 height: 60px;
                 font-size: 20px;
             }
             
-            #joystickBase {
-                width: 100px;
-                height: 100px;
+            #speedIndicator, #tiltIndicator {
+                bottom: 140px;
+                width: 80px;
+                height: 80px;
             }
             
-            #joystickHandle {
-                width: 50px;
+            #tiltIndicator {
                 height: 50px;
+                width: 80px;
             }
             
             #topUI {
@@ -546,12 +537,15 @@
     <!-- LOADING SCREEN -->
     <div id="loadingScreen">
         <div class="loader"></div>
-        <div id="loadingText">Loading Adventure...</div>
-        <div id="loadingSubtext">Touch screen to begin</div>
+        <div id="loadingText">Loading Mountain Skiing...</div>
+        <div id="loadingSubtext">Touch screen to begin your descent</div>
     </div>
     
     <!-- CANVAS -->
     <canvas id="gameCanvas"></canvas>
+    
+    <!-- SNOW OVERLAY -->
+    <div id="snowOverlay"></div>
     
     <!-- UI CONTAINER -->
     <div id="uiContainer">
@@ -559,86 +553,90 @@
         <div id="topUI">
             <div class="ui-section">
                 <div class="ui-item">
-                    <div class="ui-icon">⭐</div>
-                    <div id="scoreDisplay">Score: 0</div>
+                    <div class="ui-icon">⚡</div>
+                    <div id="speedDisplay">Speed: 0 km/h</div>
                 </div>
                 <div class="ui-item">
-                    <div class="ui-icon">❤️</div>
-                    <div id="healthDisplay">Health: 100</div>
-                </div>
-                <div id="healthBarContainer">
-                    <div id="healthBar"></div>
+                    <div class="ui-icon">⛰️</div>
+                    <div id="altitudeDisplay">Altitude: 1000m</div>
                 </div>
             </div>
             
             <div class="ui-section">
                 <div class="ui-item">
-                    <div class="ui-icon">✈️</div>
-                    <div id="glideDisplay">Glide: 100%</div>
-                </div>
-                <div id="glideBarContainer">
-                    <div id="glideBar"></div>
+                    <div class="ui-icon">📏</div>
+                    <div id="distanceDisplay">Distance: 0m</div>
                 </div>
                 <div class="ui-item">
-                    <div class="ui-icon">🏆</div>
-                    <div id="levelDisplay">Level: 1</div>
+                    <div class="ui-icon">⭐</div>
+                    <div id="scoreDisplay">Score: 0</div>
                 </div>
             </div>
+        </div>
+        
+        <!-- SPEED INDICATOR -->
+        <div id="speedIndicator">
+            <div class="speed-circle"></div>
+            <div class="speed-fill" id="speedFill"></div>
+            <div class="speed-text">
+                <span id="speedValue">0</span>
+                <div class="speed-label">KM/H</div>
+            </div>
+        </div>
+        
+        <!-- TILT INDICATOR -->
+        <div id="tiltIndicator">
+            <div class="tilt-line"></div>
+            <div class="tilt-marker"></div>
+            <div class="tilt-pointer" id="tiltPointer"></div>
+            <div class="tilt-label">TILT</div>
+        </div>
+        
+        <!-- SKI CONTROLS -->
+        <div id="skiControls">
+            <div class="ski-control" id="leftControl">
+                ←
+                <div class="control-label">LEFT</div>
+            </div>
+            <div class="ski-control" id="rightControl">
+                →
+                <div class="control-label">RIGHT</div>
+            </div>
+        </div>
+        
+        <!-- JUMP CONTROL -->
+        <div class="ski-control" id="jumpControl">
+            🦘
+            <div class="control-label">JUMP</div>
         </div>
         
         <!-- CENTER MESSAGE -->
         <div id="centerMessage"></div>
         
-        <!-- JOYSTICK -->
-        <div id="joystickContainer">
-            <div id="joystickBase">
-                <div id="joystickHandle"></div>
-            </div>
-        </div>
-        
-        <!-- ACTION BUTTONS -->
-        <div id="actionButtons">
-            <div class="action-btn" id="attackBtn">
-                ⚔️
-                <div class="btn-label">ATTACK</div>
-            </div>
-            <div class="action-btn" id="jumpBtn">
-                🦘
-                <div class="btn-label">JUMP</div>
-            </div>
-            <div class="action-btn" id="specialBtn">
-                ⚡
-                <div class="btn-label">POWER</div>
-            </div>
-            <div class="action-btn" id="glideBtn">
-                🪂
-                <div class="btn-label">GLIDE</div>
-            </div>
-        </div>
-        
         <!-- INSTRUCTIONS -->
         <div id="instructions">
-            <div>Use joystick to move</div>
-            <div>Press buttons for actions</div>
-            <div>Glide from high places!</div>
+            <div>Use LEFT/RIGHT buttons to steer</div>
+            <div>Press JUMP for tricks</div>
+            <div>Ski down the mountain as far as you can!</div>
         </div>
     </div>
     
     <!-- PAUSE MENU -->
     <div id="pauseMenu">
-        <div class="pause-title">GAME PAUSED</div>
+        <div class="pause-title">SKIING PAUSED</div>
         <button class="menu-btn" id="resumeBtn">RESUME</button>
-        <button class="menu-btn" id="restartBtn">RESTART</button>
+        <button class="menu-btn" id="restartBtn">RESTART RUN</button>
         <button class="menu-btn" id="quitBtn">QUIT</button>
     </div>
     
     <!-- GAME OVER SCREEN -->
     <div id="gameOverScreen">
-        <div class="game-over-title">GAME OVER</div>
-        <div class="final-stats">Final Score: <span class="stat-value" id="finalScore">0</span></div>
-        <div class="final-stats">Level Reached: <span class="stat-value" id="finalLevel">1</span></div>
-        <div class="final-stats">Enemies Defeated: <span class="stat-value" id="finalEnemies">0</span></div>
-        <button class="menu-btn" id="playAgainBtn">PLAY AGAIN</button>
+        <div class="game-over-title">RUN COMPLETE</div>
+        <div class="final-stats">Distance: <span class="stat-value" id="finalDistance">0m</span></div>
+        <div class="final-stats">Top Speed: <span class="stat-value" id="finalSpeed">0 km/h</span></div>
+        <div class="final-stats">Score: <span class="stat-value" id="finalScore">0</span></div>
+        <div class="final-stats">Jumps: <span class="stat-value" id="finalJumps">0</span></div>
+        <button class="menu-btn" id="playAgainBtn">SKI AGAIN</button>
         <button class="menu-btn" id="menuBtn">MAIN MENU</button>
     </div>
 
@@ -657,178 +655,57 @@
 
         // ==================== GAME CONFIGURATION ====================
         const GameConfig = {
-            player: {
-                speed: 8,
-                jumpForce: 12,
-                doubleJumpForce: 10,
-                glideSpeed: 15,
-                glideLift: 5,
-                maxHealth: 100,
-                attackDamage: 20,
-                specialAttackDamage: 50,
-                specialAttackCooldown: 10
-            },
-            world: {
+            skiing: {
+                baseSpeed: 5,
+                maxSpeed: 120,
+                acceleration: 8,
+                deceleration: 3,
+                turnSpeed: 2.5,
+                jumpForce: 8,
                 gravity: 15,
-                friction: 0.9,
-                airResistance: 0.95,
-                boundarySize: 100
+                airControl: 0.5,
+                slopeAcceleration: 10,
+                friction: 0.95
             },
-            enemies: {
-                baseHealth: 30,
-                damage: 10,
-                spawnRate: 5,
-                maxEnemies: 15
+            mountain: {
+                width: 200,
+                length: 1000,
+                height: 300,
+                peakHeight: 350,
+                snowLevel: 0.7,
+                treeDensity: 0.01,
+                rockDensity: 0.005
             },
-            collectibles: {
-                healthRestore: 25,
-                scoreValue: 100,
-                specialCharge: 25
-            },
-            levels: {
-                experiencePerLevel: 1000,
-                levelScale: 1.2
+            scoring: {
+                distanceMultiplier: 1,
+                speedMultiplier: 2,
+                jumpMultiplier: 10,
+                trickMultiplier: 50,
+                comboMultiplier: 1.5
             },
             visuals: {
-                particleCount: 50,
-                trailLength: 20,
-                effectsDuration: 2
+                fogDensity: 0.002,
+                snowflakeCount: 100,
+                particleCount: 20
             }
         };
 
         // ==================== GLOBAL VARIABLES ====================
         let scene, camera, renderer, controls;
-        let game, joystick, buttonController;
+        let game, buttonController;
         let deltaTime = 0;
         let gameTime = 0;
         let isGameStarted = false;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-        // ==================== JOYSTICK CONTROLLER ====================
-        class JoystickController {
-            constructor() {
-                this.base = document.getElementById('joystickBase');
-                this.handle = document.getElementById('joystickHandle');
-                this.active = false;
-                this.maxDistance = 45;
-                this.position = { x: 0, y: 0 };
-                this.normalized = { x: 0, y: 0 };
-                this.baseRect = null;
-                this.centerX = 0;
-                this.centerY = 0;
-                
-                this.init();
-            }
-            
-            init() {
-                this.updateBaseRect();
-                
-                // Touch events
-                this.base.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    this.onStart(touch.clientX, touch.clientY);
-                }, { passive: false });
-                
-                document.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    if (this.active) {
-                        const touch = e.touches[0];
-                        this.onMove(touch.clientX, touch.clientY);
-                    }
-                }, { passive: false });
-                
-                document.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.onEnd();
-                }, { passive: false });
-                
-                // Mouse events for testing on desktop
-                if (!isMobile) {
-                    this.base.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        this.onStart(e.clientX, e.clientY);
-                    });
-                    
-                    document.addEventListener('mousemove', (e) => {
-                        e.preventDefault();
-                        if (this.active) {
-                            this.onMove(e.clientX, e.clientY);
-                        }
-                    });
-                    
-                    document.addEventListener('mouseup', (e) => {
-                        e.preventDefault();
-                        this.onEnd();
-                    });
-                }
-                
-                // Update rect on resize
-                window.addEventListener('resize', () => this.updateBaseRect());
-            }
-            
-            updateBaseRect() {
-                this.baseRect = this.base.getBoundingClientRect();
-                this.centerX = this.baseRect.left + this.baseRect.width / 2;
-                this.centerY = this.baseRect.top + this.baseRect.height / 2;
-            }
-            
-            onStart(clientX, clientY) {
-                this.active = true;
-                this.updateBaseRect();
-                this.onMove(clientX, clientY);
-            }
-            
-            onMove(clientX, clientY) {
-                if (!this.active) return;
-                
-                let dx = clientX - this.centerX;
-                let dy = clientY - this.centerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > this.maxDistance) {
-                    dx = (dx / distance) * this.maxDistance;
-                    dy = (dy / distance) * this.maxDistance;
-                }
-                
-                this.handle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                this.normalized.x = dx / this.maxDistance;
-                this.normalized.y = -dy / this.maxDistance;
-                this.position.x = dx;
-                this.position.y = dy;
-            }
-            
-            onEnd() {
-                this.active = false;
-                this.normalized.x = 0;
-                this.normalized.y = 0;
-                this.position.x = 0;
-                this.position.y = 0;
-                this.handle.style.transform = 'translate(-50%, -50%)';
-            }
-            
-            getDirection() {
-                const magnitude = Math.sqrt(this.normalized.x * this.normalized.x + this.normalized.y * this.normalized.y);
-                return {
-                    x: this.normalized.x,
-                    y: this.normalized.y,
-                    magnitude: magnitude > 1 ? 1 : magnitude
-                };
-            }
-            
-            isActive() {
-                return this.active;
-            }
-        }
+        let snowflakes = [];
 
         // ==================== BUTTON CONTROLLER ====================
         class ButtonController {
             constructor() {
                 this.buttons = {
-                    jump: false,
-                    glide: false,
-                    attack: false,
-                    special: false
+                    left: false,
+                    right: false,
+                    jump: false
                 };
                 
                 this.buttonElements = {};
@@ -836,11 +713,11 @@
             }
             
             init() {
-                const buttons = ['jumpBtn', 'glideBtn', 'attackBtn', 'specialBtn'];
+                const buttons = ['leftControl', 'rightControl', 'jumpControl'];
                 
                 buttons.forEach(btnId => {
                     const element = document.getElementById(btnId);
-                    const buttonName = btnId.replace('Btn', '');
+                    const buttonName = btnId.replace('Control', '');
                     this.buttonElements[buttonName] = element;
                     
                     // Touch events
@@ -911,676 +788,645 @@
             getAllButtons() {
                 return { ...this.buttons };
             }
-            
-            setButtonCooldown(buttonName, cooldownTime) {
-                const element = this.buttonElements[buttonName];
-                if (element) {
-                    element.style.opacity = '0.5';
-                    setTimeout(() => {
-                        element.style.opacity = '1';
-                    }, cooldownTime * 1000);
-                }
-            }
         }
 
-        // ==================== PARTICLE SYSTEM ====================
-        class ParticleSystem {
+        // ==================== SNOW EFFECT ====================
+        class SnowEffect {
             constructor() {
-                this.particles = [];
-                this.geometry = new THREE.BufferGeometry();
-                this.material = new THREE.PointsMaterial({
-                    color: 0xffffff,
-                    size: 0.2,
-                    transparent: true,
-                    blending: THREE.AdditiveBlending
-                });
-                this.points = new THREE.Points(this.geometry, this.material);
-                scene.add(this.points);
+                this.container = document.getElementById('snowOverlay');
+                this.snowflakes = [];
+                this.createSnowflakes();
             }
             
-            emit(position, color, count = 20, speed = 2, life = 1) {
-                for (let i = 0; i < count; i++) {
-                    this.particles.push({
-                        position: position.clone(),
-                        velocity: new THREE.Vector3(
-                            (Math.random() - 0.5) * speed,
-                            Math.random() * speed,
-                            (Math.random() - 0.5) * speed
-                        ),
-                        color: new THREE.Color(color),
-                        life: life,
-                        maxLife: life,
-                        size: Math.random() * 0.3 + 0.1
+            createSnowflakes() {
+                for (let i = 0; i < GameConfig.visuals.snowflakeCount; i++) {
+                    const snowflake = document.createElement('div');
+                    snowflake.className = 'snowflake';
+                    
+                    const size = Math.random() * 5 + 2;
+                    const startX = Math.random() * 100;
+                    const duration = Math.random() * 10 + 5;
+                    const delay = Math.random() * 5;
+                    const opacity = Math.random() * 0.5 + 0.3;
+                    
+                    snowflake.style.width = `${size}px`;
+                    snowflake.style.height = `${size}px`;
+                    snowflake.style.left = `${startX}%`;
+                    snowflake.style.opacity = opacity;
+                    snowflake.style.animationDuration = `${duration}s`;
+                    snowflake.style.animationDelay = `${delay}s`;
+                    
+                    this.container.appendChild(snowflake);
+                    this.snowflakes.push({
+                        element: snowflake,
+                        x: startX,
+                        speed: duration,
+                        size: size
                     });
                 }
             }
             
-            update(deltaTime) {
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    const particle = this.particles[i];
-                    particle.life -= deltaTime;
-                    
-                    if (particle.life <= 0) {
-                        this.particles.splice(i, 1);
-                        continue;
+            update(intensity = 1) {
+                this.snowflakes.forEach(snowflake => {
+                    // Reset snowflake if it's off screen
+                    const rect = snowflake.element.getBoundingClientRect();
+                    if (rect.top > window.innerHeight) {
+                        snowflake.element.style.top = '-10px';
+                        snowflake.element.style.left = `${Math.random() * 100}%`;
                     }
                     
-                    particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
-                    particle.velocity.y -= 5 * deltaTime;
-                }
-                
-                this.updateGeometry();
-            }
-            
-            updateGeometry() {
-                if (this.particles.length === 0) return;
-                
-                const positions = new Float32Array(this.particles.length * 3);
-                const colors = new Float32Array(this.particles.length * 3);
-                const sizes = new Float32Array(this.particles.length);
-                
-                this.particles.forEach((particle, i) => {
-                    positions[i * 3] = particle.position.x;
-                    positions[i * 3 + 1] = particle.position.y;
-                    positions[i * 3 + 2] = particle.position.z;
-                    
-                    const lifeRatio = particle.life / particle.maxLife;
-                    colors[i * 3] = particle.color.r * lifeRatio;
-                    colors[i * 3 + 1] = particle.color.g * lifeRatio;
-                    colors[i * 3 + 2] = particle.color.b * lifeRatio;
-                    
-                    sizes[i] = particle.size * lifeRatio;
+                    // Adjust speed based on intensity
+                    snowflake.element.style.animationDuration = `${snowflake.speed / intensity}s`;
                 });
-                
-                this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-                this.geometry.attributes.position.needsUpdate = true;
-                this.geometry.attributes.color.needsUpdate = true;
-                this.geometry.attributes.size.needsUpdate = true;
             }
         }
 
-        // ==================== PLAYER CLASS ====================
-        class Player {
+        // ==================== SKIER CLASS ====================
+        class Skier {
             constructor() {
-                // Create capsule geometry for player
-                this.geometry = this.createCapsuleGeometry(0.4, 1.6, 12, 20);
-                this.material = new THREE.MeshStandardMaterial({ 
-                    color: 0x4fc3f7,
-                    roughness: 0.3,
-                    metalness: 0.2,
-                    emissive: 0x0066cc,
-                    emissiveIntensity: 0.3
-                });
-                this.mesh = new THREE.Mesh(this.geometry, this.material);
-                this.mesh.castShadow = true;
-                this.mesh.receiveShadow = true;
-                this.mesh.name = 'Player';
+                // First-person view - no visible player model
+                this.mesh = new THREE.Object3D();
+                this.mesh.position.set(0, GameConfig.mountain.peakHeight - 10, -GameConfig.mountain.length / 4);
+                
+                // Ski physics
+                this.velocity = new THREE.Vector3(0, 0, 0);
+                this.direction = new THREE.Vector3(0, 0, 1); // Start facing downhill
+                this.speed = 0;
+                this.turnAngle = 0;
+                this.turnSpeed = GameConfig.skiing.turnSpeed;
+                this.isOnGround = true;
+                this.isJumping = false;
+                this.jumpCooldown = 0;
+                
+                // Ski poles (visual only, not rendered)
+                this.leftPole = new THREE.Vector3(-0.5, 0, 1);
+                this.rightPole = new THREE.Vector3(0.5, 0, 1);
                 
                 // Stats
-                this.health = GameConfig.player.maxHealth;
-                this.maxHealth = GameConfig.player.maxHealth;
+                this.distance = 0;
+                this.maxSpeed = 0;
+                this.jumpCount = 0;
+                this.trickCount = 0;
+                this.combo = 0;
                 this.score = 0;
-                this.level = 1;
-                this.experience = 0;
-                this.enemiesDefeated = 0;
                 
-                // Movement
-                this.velocity = new THREE.Vector3();
-                this.direction = new THREE.Vector3();
-                this.speed = GameConfig.player.speed;
-                this.isOnGround = false;
-                this.canDoubleJump = true;
+                // Ski tracks
+                this.trackPositions = [];
+                this.trackMesh = this.createTrackMesh();
+                scene.add(this.trackMesh);
                 
-                // Combat
-                this.attackCooldown = 0;
-                this.specialAttackCooldown = 0;
-                this.specialCharge = 0;
-                this.maxSpecialCharge = 100;
-                this.invincible = 0;
-                
-                // Glide
-                this.isGliding = false;
-                this.glideStamina = 100;
-                this.maxGlideStamina = 100;
-                
-                // Visual effects
-                this.trailParticles = [];
-                this.trailMesh = this.createTrailMesh();
-                scene.add(this.trailMesh);
+                // Particle system for snow spray
+                this.particleSystem = this.createParticleSystem();
+                scene.add(this.particleSystem);
                 
                 // Add to scene
                 scene.add(this.mesh);
-                this.resetPosition();
             }
             
-            createCapsuleGeometry(radius, height, radialSegments, heightSegments) {
-                const geometry = new THREE.BufferGeometry();
-                const vertices = [];
-                const indices = [];
-                const normals = [];
-                const uvs = [];
-                
-                // Helper function
-                const addVertex = (x, y, z, u, v) => {
-                    vertices.push(x, y, z);
-                    const length = Math.sqrt(x * x + y * y + z * z);
-                    normals.push(x / length, y / length, z / length);
-                    uvs.push(u, v);
-                };
-                
-                // Top hemisphere
-                for (let y = 0; y <= heightSegments / 2; y++) {
-                    const v = y / (heightSegments / 2);
-                    const theta = v * Math.PI / 2;
-                    const sinTheta = Math.sin(theta);
-                    const cosTheta = Math.cos(theta);
-                    
-                    for (let x = 0; x <= radialSegments; x++) {
-                        const u = x / radialSegments;
-                        const phi = u * Math.PI * 2;
-                        const sinPhi = Math.sin(phi);
-                        const cosPhi = Math.cos(phi);
-                        
-                        const px = radius * cosPhi * sinTheta;
-                        const py = radius * cosTheta + height / 2;
-                        const pz = radius * sinPhi * sinTheta;
-                        
-                        addVertex(px, py, pz, u, 1 - v * 0.5);
-                    }
-                }
-                
-                // Bottom hemisphere
-                const vertexOffset = (Math.floor(heightSegments / 2) + 1) * (radialSegments + 1);
-                for (let y = 0; y <= heightSegments / 2; y++) {
-                    const v = y / (heightSegments / 2);
-                    const theta = Math.PI / 2 + v * Math.PI / 2;
-                    const sinTheta = Math.sin(theta);
-                    const cosTheta = Math.cos(theta);
-                    
-                    for (let x = 0; x <= radialSegments; x++) {
-                        const u = x / radialSegments;
-                        const phi = u * Math.PI * 2;
-                        const sinPhi = Math.sin(phi);
-                        const cosPhi = Math.cos(phi);
-                        
-                        const px = radius * cosPhi * sinTheta;
-                        const py = radius * cosTheta - height / 2;
-                        const pz = radius * sinPhi * sinTheta;
-                        
-                        addVertex(px, py, pz, u, 0.5 - v * 0.5);
-                    }
-                }
-                
-                // Indices
-                for (let y = 0; y < heightSegments / 2; y++) {
-                    for (let x = 0; x < radialSegments; x++) {
-                        const a = y * (radialSegments + 1) + x;
-                        const b = a + radialSegments + 1;
-                        const c = a + 1;
-                        const d = b + 1;
-                        
-                        indices.push(a, b, c);
-                        indices.push(b, d, c);
-                    }
-                }
-                
-                for (let y = 0; y < heightSegments / 2; y++) {
-                    for (let x = 0; x < radialSegments; x++) {
-                        const a = vertexOffset + y * (radialSegments + 1) + x;
-                        const b = a + radialSegments + 1;
-                        const c = a + 1;
-                        const d = b + 1;
-                        
-                        indices.push(a, c, b);
-                        indices.push(b, c, d);
-                    }
-                }
-                
-                geometry.setIndex(indices);
-                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-                geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-                geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-                
-                return geometry;
-            }
-            
-            createTrailMesh() {
+            createTrackMesh() {
                 const geometry = new THREE.BufferGeometry();
                 const material = new THREE.LineBasicMaterial({
-                    color: 0x4fc3f7,
+                    color: 0xffffff,
                     transparent: true,
-                    opacity: 0.6,
+                    opacity: 0.3,
                     linewidth: 2
                 });
                 return new THREE.Line(geometry, material);
             }
             
-            updateTrail() {
-                if (this.trailParticles.length > GameConfig.visuals.trailLength) {
-                    this.trailParticles.shift();
-                }
-                
-                this.trailParticles.push(this.mesh.position.clone());
-                
-                if (this.trailParticles.length > 1) {
-                    const positions = new Float32Array(this.trailParticles.length * 3);
-                    this.trailParticles.forEach((pos, i) => {
-                        positions[i * 3] = pos.x;
-                        positions[i * 3 + 1] = pos.y;
-                        positions[i * 3 + 2] = pos.z;
-                    });
-                    
-                    this.trailMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                    this.trailMesh.geometry.attributes.position.needsUpdate = true;
-                }
-            }
-            
-            resetPosition() {
-                this.mesh.position.set(0, 5, 0);
-                this.velocity.set(0, 0, 0);
-                this.isOnGround = false;
-                this.canDoubleJump = true;
-                this.stopGlide();
+            createParticleSystem() {
+                const geometry = new THREE.BufferGeometry();
+                const material = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size: 0.2,
+                    transparent: true,
+                    opacity: 0.6,
+                    blending: THREE.AdditiveBlending
+                });
+                return new THREE.Points(geometry, material);
             }
             
             update(deltaTime) {
                 // Update cooldowns
-                if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
-                if (this.specialAttackCooldown > 0) this.specialAttackCooldown -= deltaTime;
-                if (this.invincible > 0) this.invincible -= deltaTime;
+                if (this.jumpCooldown > 0) this.jumpCooldown -= deltaTime;
                 
-                // Apply gravity if not gliding
-                if (!this.isGliding || this.glideStamina <= 0) {
-                    this.velocity.y -= GameConfig.world.gravity * deltaTime;
-                }
+                // Handle input
+                this.handleSteering(deltaTime);
                 
-                // Apply glide if active
-                if (this.isGliding && this.glideStamina > 0 && !this.isOnGround) {
-                    this.glideStamina -= 20 * deltaTime;
-                    this.velocity.y = Math.max(this.velocity.y, -GameConfig.player.glideLift);
-                    
-                    // Boost forward speed while gliding
-                    if (this.direction.length() > 0.1) {
-                        const boost = this.direction.clone().multiplyScalar(GameConfig.player.glideSpeed * deltaTime);
-                        this.velocity.x += boost.x;
-                        this.velocity.z += boost.z;
-                    }
-                    
-                    // Visual feedback
-                    this.mesh.material.emissiveIntensity = 0.5 + Math.sin(gameTime * 10) * 0.2;
-                } else {
-                    // Recharge glide stamina
-                    this.glideStamina = Math.min(this.maxGlideStamina, this.glideStamina + 15 * deltaTime);
-                    this.mesh.material.emissiveIntensity = 0.3;
-                }
-                
-                // Apply air resistance
-                if (!this.isOnGround) {
-                    this.velocity.x *= GameConfig.world.airResistance;
-                    this.velocity.z *= GameConfig.world.airResistance;
-                }
+                // Apply physics
+                this.applyPhysics(deltaTime);
                 
                 // Update position
-                this.mesh.position.x += this.velocity.x * deltaTime;
-                this.mesh.position.y += this.velocity.y * deltaTime;
-                this.mesh.position.z += this.velocity.z * deltaTime;
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(deltaTime));
+                
+                // Get terrain height at current position
+                const terrainHeight = game.getTerrainHeight(this.mesh.position.x, this.mesh.position.z);
                 
                 // Ground collision
-                if (this.mesh.position.y < 0) {
-                    this.mesh.position.y = 0;
+                if (this.mesh.position.y <= terrainHeight + 0.5) {
+                    this.mesh.position.y = terrainHeight + 0.5;
                     this.velocity.y = 0;
                     this.isOnGround = true;
-                    this.canDoubleJump = true;
-                    this.stopGlide();
+                    this.isJumping = false;
+                    
+                    // Add snow spray particles when moving fast
+                    if (this.speed > 20) {
+                        this.createSnowSpray();
+                    }
+                } else {
+                    // In air - apply gravity
+                    this.velocity.y -= GameConfig.skiing.gravity * deltaTime;
+                    this.isOnGround = false;
                 }
                 
-                // Boundary check
-                const boundary = GameConfig.world.boundarySize / 2;
-                this.mesh.position.x = Math.max(-boundary, Math.min(boundary, this.mesh.position.x));
-                this.mesh.position.z = Math.max(-boundary, Math.min(boundary, this.mesh.position.z));
+                // Calculate slope angle for acceleration
+                const slopeVector = game.getSlopeVector(this.mesh.position.x, this.mesh.position.z);
+                const slopeAngle = Math.acos(Math.abs(slopeVector.y));
                 
-                // Update trail
-                this.updateTrail();
-                
-                // Update rotation based on movement
-                if (this.velocity.x !== 0 || this.velocity.z !== 0) {
-                    const angle = Math.atan2(this.velocity.x, this.velocity.z);
-                    this.mesh.rotation.y = THREE.MathUtils.lerp(this.mesh.rotation.y, angle, 0.1);
+                // Accelerate based on slope
+                if (this.isOnGround && slopeAngle > 0.1) {
+                    const slopeAcceleration = GameConfig.skiing.slopeAcceleration * Math.sin(slopeAngle);
+                    this.speed += slopeAcceleration * deltaTime;
                 }
                 
-                // Bobbing animation when on ground
-                if (this.isOnGround && (Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1)) {
-                    const bob = Math.sin(gameTime * 10) * 0.1;
-                    this.mesh.position.y += bob;
+                // Apply friction
+                if (this.isOnGround) {
+                    this.speed *= GameConfig.skiing.friction;
+                }
+                
+                // Limit speed
+                this.speed = Math.min(this.speed, GameConfig.skiing.maxSpeed);
+                
+                // Update velocity based on speed and direction
+                this.velocity.x = Math.sin(this.turnAngle) * this.speed;
+                this.velocity.z = Math.cos(this.turnAngle) * this.speed;
+                
+                // Update distance
+                const distanceTraveled = this.velocity.length() * deltaTime;
+                this.distance += distanceTraveled;
+                
+                // Update max speed
+                if (this.speed > this.maxSpeed) {
+                    this.maxSpeed = this.speed;
+                }
+                
+                // Update score
+                this.updateScore(deltaTime);
+                
+                // Update tracks
+                this.updateTracks();
+                
+                // Update particles
+                this.updateParticles(deltaTime);
+                
+                // Update tilt indicator
+                this.updateTiltIndicator();
+                
+                // Check if fallen off mountain
+                if (this.mesh.position.y < -100) {
+                    game.endRun();
                 }
             }
             
-            move(forward, right) {
-                this.direction.set(right, 0, -forward).normalize();
+            handleSteering(deltaTime) {
+                // Get button states
+                const buttons = buttonController.getAllButtons();
                 
-                if (this.isOnGround) {
-                    this.velocity.x = this.direction.x * this.speed;
-                    this.velocity.z = this.direction.z * this.speed;
-                } else {
-                    // Air control
-                    this.velocity.x += this.direction.x * this.speed * 0.5 * deltaTime;
-                    this.velocity.z += this.direction.z * this.speed * 0.5 * deltaTime;
+                // Turning
+                if (buttons.left) {
+                    this.turnAngle += this.turnSpeed * deltaTime;
+                }
+                if (buttons.right) {
+                    this.turnAngle -= this.turnSpeed * deltaTime;
+                }
+                
+                // Normalize turn angle
+                this.turnAngle = (this.turnAngle + Math.PI * 2) % (Math.PI * 2);
+                
+                // Jumping
+                if (buttons.jump && this.jumpCooldown <= 0) {
+                    this.jump();
+                }
+                
+                // Apply turning to direction
+                this.direction.x = Math.sin(this.turnAngle);
+                this.direction.z = Math.cos(this.turnAngle);
+                this.direction.normalize();
+            }
+            
+            applyPhysics(deltaTime) {
+                // If in air, allow some air control
+                if (!this.isOnGround) {
+                    const airControl = GameConfig.skiing.airControl;
+                    if (buttonController.isPressed('left')) {
+                        this.turnAngle += this.turnSpeed * airControl * deltaTime;
+                    }
+                    if (buttonController.isPressed('right')) {
+                        this.turnAngle -= this.turnSpeed * airControl * deltaTime;
+                    }
+                }
+                
+                // Update combo based on air time
+                if (!this.isOnGround) {
+                    this.combo += deltaTime * 10;
+                } else if (this.combo > 0) {
+                    // Add score for completed combo
+                    const comboScore = Math.floor(this.combo * GameConfig.scoring.comboMultiplier);
+                    this.score += comboScore;
+                    this.combo = 0;
                 }
             }
             
             jump() {
-                if (this.isOnGround) {
-                    this.velocity.y = GameConfig.player.jumpForce;
+                if (this.isOnGround && this.jumpCooldown <= 0) {
+                    this.velocity.y = GameConfig.skiing.jumpForce;
                     this.isOnGround = false;
-                    game.particleSystem.emit(this.mesh.position, 0x4fc3f7, 15, 3);
-                    return true;
-                } else if (this.canDoubleJump) {
-                    this.velocity.y = GameConfig.player.doubleJumpForce;
-                    this.canDoubleJump = false;
-                    game.particleSystem.emit(this.mesh.position, 0xffd700, 20, 4);
-                    return true;
-                }
-                return false;
-            }
-            
-            startGlide() {
-                if (!this.isOnGround && this.glideStamina > 10) {
-                    this.isGliding = true;
+                    this.isJumping = true;
+                    this.jumpCooldown = 1;
+                    this.jumpCount++;
+                    
+                    // Add jump score
+                    const jumpScore = GameConfig.scoring.jumpMultiplier * (1 + this.speed / 50);
+                    this.score += Math.floor(jumpScore);
+                    
+                    // Show jump text
+                    game.createFloatingText(this.mesh.position, 'JUMP!', 0x4fc3f7);
+                    
                     return true;
                 }
                 return false;
             }
             
-            stopGlide() {
-                this.isGliding = false;
-            }
-            
-            attack() {
-                if (this.attackCooldown <= 0) {
-                    this.attackCooldown = 0.5;
-                    game.particleSystem.emit(this.mesh.position, 0xff4444, 30, 5);
-                    game.createCombatText(this.mesh.position, 'ATTACK!', 0xff4444);
-                    return true;
+            createSnowSpray() {
+                // Create snow spray particles
+                const particleCount = Math.floor(this.speed / 10);
+                const positions = new Float32Array(particleCount * 3);
+                const velocities = new Float32Array(particleCount * 3);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = Math.random() * 0.5;
+                    const height = Math.random() * 0.3;
+                    
+                    positions[i * 3] = Math.cos(angle) * radius;
+                    positions[i * 3 + 1] = height;
+                    positions[i * 3 + 2] = Math.sin(angle) * radius;
+                    
+                    velocities[i * 3] = (Math.random() - 0.5) * 2;
+                    velocities[i * 3 + 1] = Math.random() * 3;
+                    velocities[i * 3 + 2] = (Math.random() - 0.5) * 2;
                 }
-                return false;
+                
+                // Store particle data
+                this.particleSystem.userData.positions = positions;
+                this.particleSystem.userData.velocities = velocities;
+                this.particleSystem.userData.lifetimes = new Float32Array(particleCount).fill(1);
+                
+                // Update geometry
+                this.particleSystem.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             }
             
-            specialAttack() {
-                if (this.specialCharge >= this.maxSpecialCharge && this.specialAttackCooldown <= 0) {
-                    this.specialCharge = 0;
-                    this.specialAttackCooldown = GameConfig.player.specialAttackCooldown;
-                    game.particleSystem.emit(this.mesh.position, 0xba68c8, 50, 8);
-                    game.createCombatText(this.mesh.position, 'POWER STRIKE!', 0xba68c8);
-                    return true;
+            updateParticles(deltaTime) {
+                if (!this.particleSystem.userData.positions) return;
+                
+                const positions = this.particleSystem.userData.positions;
+                const velocities = this.particleSystem.userData.velocities;
+                const lifetimes = this.particleSystem.userData.lifetimes;
+                
+                for (let i = 0; i < positions.length / 3; i++) {
+                    lifetimes[i] -= deltaTime;
+                    
+                    if (lifetimes[i] <= 0) continue;
+                    
+                    positions[i * 3] += velocities[i * 3] * deltaTime;
+                    positions[i * 3 + 1] += velocities[i * 3 + 1] * deltaTime;
+                    positions[i * 3 + 2] += velocities[i * 3 + 2] * deltaTime;
+                    
+                    velocities[i * 3 + 1] -= 5 * deltaTime; // Gravity
                 }
-                return false;
+                
+                this.particleSystem.geometry.attributes.position.needsUpdate = true;
             }
             
-            takeDamage(amount) {
-                if (this.invincible > 0) return false;
+            updateTracks() {
+                // Add current position to track
+                this.trackPositions.push(this.mesh.position.clone());
                 
-                this.health = Math.max(0, this.health - amount);
-                this.invincible = 1;
-                game.particleSystem.emit(this.mesh.position, 0xff4444, 20, 3);
-                game.createCombatText(this.mesh.position, `-${amount}`, 0xff4444);
-                
-                // Flash effect
-                this.mesh.material.color.setHex(0xff4444);
-                setTimeout(() => {
-                    this.mesh.material.color.setHex(0x4fc3f7);
-                }, 100);
-                
-                return this.health <= 0;
-            }
-            
-            heal(amount) {
-                this.health = Math.min(this.maxHealth, this.health + amount);
-                game.particleSystem.emit(this.mesh.position, 0x4caf50, 20, 2);
-                game.createCombatText(this.mesh.position, `+${amount}`, 0x4caf50);
-            }
-            
-            addScore(points) {
-                this.score += points;
-                this.experience += points;
-                
-                // Check for level up
-                const neededXP = this.level * GameConfig.levels.experiencePerLevel;
-                if (this.experience >= neededXP) {
-                    this.levelUp();
+                // Limit track length
+                if (this.trackPositions.length > 100) {
+                    this.trackPositions.shift();
                 }
-            }
-            
-            levelUp() {
-                this.level++;
-                this.experience = 0;
                 
-                // Increase stats
-                this.maxHealth = Math.floor(this.maxHealth * GameConfig.levels.levelScale);
-                this.health = this.maxHealth;
-                this.speed += 1;
-                
-                // Visual effect
-                game.showCenterMessage('LEVEL UP!', 0xffd700, 2);
-                game.createLevelUpEffect();
-                
-                // Play sound if available
-                if (game.audioContext) {
-                    game.playLevelUpSound();
+                // Update track mesh
+                if (this.trackPositions.length > 1) {
+                    const positions = new Float32Array(this.trackPositions.length * 3);
+                    this.trackPositions.forEach((pos, i) => {
+                        positions[i * 3] = pos.x;
+                        positions[i * 3 + 1] = pos.y + 0.1; // Slightly above ground
+                        positions[i * 3 + 2] = pos.z;
+                    });
+                    
+                    this.trackMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    this.trackMesh.geometry.attributes.position.needsUpdate = true;
                 }
             }
             
-            addSpecialCharge(amount) {
-                this.specialCharge = Math.min(this.maxSpecialCharge, this.specialCharge + amount);
+            updateScore(deltaTime) {
+                // Score for distance
+                const distanceScore = this.speed * GameConfig.scoring.distanceMultiplier * deltaTime;
+                
+                // Score for speed
+                const speedScore = this.speed * GameConfig.scoring.speedMultiplier * deltaTime;
+                
+                // Total score
+                this.score += Math.floor(distanceScore + speedScore);
+            }
+            
+            updateTiltIndicator() {
+                const tiltPointer = document.getElementById('tiltPointer');
+                if (tiltPointer) {
+                    // Calculate tilt based on turn angle and slope
+                    const slopeVector = game.getSlopeVector(this.mesh.position.x, this.mesh.position.z);
+                    const tiltAngle = this.turnAngle * 0.5 + (slopeVector.x * 30);
+                    const tiltDegrees = THREE.MathUtils.radToDeg(tiltAngle) % 360;
+                    
+                    // Update pointer rotation
+                    tiltPointer.style.transform = `translateY(-50%) rotate(${tiltDegrees}deg)`;
+                }
+            }
+            
+            getAltitude() {
+                return this.mesh.position.y;
+            }
+            
+            getSpeedKmh() {
+                return Math.floor(this.speed * 3.6); // Convert m/s to km/h
             }
             
             updateUI() {
+                // Update speed display
+                document.getElementById('speedDisplay').textContent = `Speed: ${this.getSpeedKmh()} km/h`;
+                document.getElementById('altitudeDisplay').textContent = `Altitude: ${Math.floor(this.getAltitude())}m`;
+                document.getElementById('distanceDisplay').textContent = `Distance: ${Math.floor(this.distance)}m`;
                 document.getElementById('scoreDisplay').textContent = `Score: ${this.score}`;
-                document.getElementById('healthDisplay').textContent = `Health: ${Math.floor(this.health)}`;
-                document.getElementById('glideDisplay').textContent = `Glide: ${Math.floor(this.glideStamina)}%`;
-                document.getElementById('levelDisplay').textContent = `Level: ${this.level}`;
                 
-                // Update bars
-                document.getElementById('healthBar').style.width = `${(this.health / this.maxHealth) * 100}%`;
-                document.getElementById('glideBar').style.width = `${(this.glideStamina / this.maxGlideStamina) * 100}%`;
+                // Update speed indicator
+                const speedFill = document.getElementById('speedFill');
+                const speedValue = document.getElementById('speedValue');
                 
-                // Update special button
-                const specialBtn = document.getElementById('specialBtn');
-                if (this.specialCharge >= this.maxSpecialCharge) {
-                    specialBtn.innerHTML = '⚡';
-                    specialBtn.style.background = 'radial-gradient(circle at 30% 30%, #ffd700, #ff9800)';
+                const speedPercent = this.getSpeedKmh() / GameConfig.skiing.maxSpeed;
+                const rotation = 45 + (speedPercent * 270); // 45 to 315 degrees
+                
+                speedFill.style.transform = `rotate(${rotation}deg)`;
+                speedValue.textContent = this.getSpeedKmh();
+                
+                // Update speed fill color based on speed
+                if (this.getSpeedKmh() < 30) {
+                    speedFill.style.borderTopColor = '#4fc3f7'; // Blue
+                } else if (this.getSpeedKmh() < 60) {
+                    speedFill.style.borderTopColor = '#4caf50'; // Green
+                } else if (this.getSpeedKmh() < 90) {
+                    speedFill.style.borderTopColor = '#ff9800'; // Orange
                 } else {
-                    specialBtn.innerHTML = `${Math.floor(this.specialCharge)}%`;
-                    specialBtn.style.background = 'radial-gradient(circle at 30% 30%, #ba68c8, #7b1fa2)';
+                    speedFill.style.borderTopColor = '#f44336'; // Red
                 }
+            }
+            
+            reset() {
+                this.mesh.position.set(0, GameConfig.mountain.peakHeight - 10, -GameConfig.mountain.length / 4);
+                this.velocity.set(0, 0, 0);
+                this.speed = GameConfig.skiing.baseSpeed;
+                this.turnAngle = 0;
+                this.distance = 0;
+                this.jumpCount = 0;
+                this.trickCount = 0;
+                this.combo = 0;
+                this.score = 0;
+                this.trackPositions = [];
+                this.isOnGround = true;
+                this.isJumping = false;
             }
         }
 
-        // ==================== ENEMY CLASS ====================
-        class Enemy {
-            constructor(position) {
-                this.geometry = new THREE.ConeGeometry(0.5, 1.5, 8);
-                this.material = new THREE.MeshStandardMaterial({
-                    color: 0xff4444,
-                    roughness: 0.5,
-                    metalness: 0.3,
-                    emissive: 0x440000,
-                    emissiveIntensity: 0.3
-                });
-                this.mesh = new THREE.Mesh(this.geometry, this.material);
-                this.mesh.position.copy(position);
-                this.mesh.castShadow = true;
-                this.mesh.receiveShadow = true;
-                this.mesh.name = 'Enemy';
-                
-                this.health = GameConfig.enemies.baseHealth + (game.player.level - 1) * 10;
-                this.speed = 3 + game.player.level * 0.5;
-                this.damage = GameConfig.enemies.damage;
-                this.attackCooldown = 0;
-                
-                scene.add(this.mesh);
+        // ==================== MOUNTAIN TERRAIN ====================
+        class MountainTerrain {
+            constructor() {
+                this.geometry = null;
+                this.mesh = null;
+                this.heightData = null;
+                this.createTerrain();
             }
             
-            update(deltaTime) {
-                // Move towards player
-                const direction = new THREE.Vector3().subVectors(game.player.mesh.position, this.mesh.position);
-                const distance = direction.length();
+            createTerrain() {
+                const width = GameConfig.mountain.width;
+                const length = GameConfig.mountain.length;
+                const height = GameConfig.mountain.height;
+                const peakHeight = GameConfig.mountain.peakHeight;
                 
-                if (distance > 0.1) {
-                    direction.normalize();
-                    this.mesh.position.add(direction.multiplyScalar(this.speed * deltaTime));
+                // Create plane geometry
+                const geometry = new THREE.PlaneGeometry(width, length, 100, 200);
+                
+                // Generate height data
+                this.heightData = new Float32Array(geometry.attributes.position.count);
+                const positions = geometry.attributes.position;
+                
+                for (let i = 0; i < positions.count; i++) {
+                    const x = positions.getX(i);
+                    const z = positions.getZ(i);
                     
-                    // Rotate to face player
-                    const angle = Math.atan2(direction.x, direction.z);
-                    this.mesh.rotation.y = angle;
+                    // Base mountain shape (cone)
+                    let y = peakHeight - Math.sqrt(x * x + z * z) * 0.5;
+                    
+                    // Add some randomness for realism
+                    y += Math.sin(x * 0.1) * 10;
+                    y += Math.cos(z * 0.08) * 8;
+                    
+                    // Add ridges
+                    y += Math.sin(Math.atan2(z, x) * 10) * 5;
+                    
+                    // Ensure minimum height
+                    y = Math.max(0, y);
+                    
+                    this.heightData[i] = y;
+                    positions.setY(i, y);
                 }
                 
-                // Attack if close
-                if (distance < 2 && this.attackCooldown <= 0) {
-                    if (game.player.takeDamage(this.damage)) {
-                        game.checkGameOver();
+                geometry.computeVertexNormals();
+                
+                // Create material
+                const material = new THREE.MeshStandardMaterial({
+                    vertexColors: true,
+                    roughness: 0.8,
+                    metalness: 0.1
+                });
+                
+                // Set vertex colors based on height (snow at top)
+                const colors = new Float32Array(positions.count * 3);
+                for (let i = 0; i < positions.count; i++) {
+                    const y = positions.getY(i);
+                    const snowLevel = GameConfig.mountain.snowLevel * peakHeight;
+                    
+                    let color;
+                    if (y > snowLevel) {
+                        // Snow
+                        const snowIntensity = (y - snowLevel) / (peakHeight - snowLevel);
+                        color = new THREE.Color(0xffffff).lerp(new THREE.Color(0xe0e0e0), snowIntensity);
+                    } else if (y > snowLevel * 0.7) {
+                        // Rocky terrain
+                        color = new THREE.Color(0x795548);
+                    } else {
+                        // Forest/grass
+                        color = new THREE.Color(0x2e7d32);
                     }
-                    this.attackCooldown = 2;
+                    
+                    colors[i * 3] = color.r;
+                    colors[i * 3 + 1] = color.g;
+                    colors[i * 3 + 2] = color.b;
                 }
                 
-                if (this.attackCooldown > 0) {
-                    this.attackCooldown -= deltaTime;
-                }
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                 
-                // Bobbing animation
-                this.mesh.position.y += Math.sin(gameTime * 5 + this.mesh.position.x) * 0.02;
-            }
-            
-            takeDamage(amount) {
-                this.health -= amount;
-                
-                // Visual feedback
-                this.mesh.material.emissiveIntensity = 1;
-                setTimeout(() => {
-                    this.mesh.material.emissiveIntensity = 0.3;
-                }, 100);
-                
-                if (this.health <= 0) {
-                    this.destroy();
-                    return true;
-                }
-                return false;
-            }
-            
-            destroy() {
-                scene.remove(this.mesh);
-                game.particleSystem.emit(this.mesh.position, 0xff4444, 30, 4);
-                game.player.addScore(100);
-                game.player.addSpecialCharge(25);
-                game.player.enemiesDefeated++;
-                game.enemies = game.enemies.filter(e => e !== this);
-            }
-        }
-
-        // ==================== COLLECTIBLE CLASS ====================
-        class Collectible {
-            constructor(position, type = 'health') {
-                this.type = type;
-                
-                switch (type) {
-                    case 'health':
-                        this.geometry = new THREE.SphereGeometry(0.5, 16, 16);
-                        this.material = new THREE.MeshStandardMaterial({
-                            color: 0x4caf50,
-                            emissive: 0x2e7d32,
-                            emissiveIntensity: 0.5,
-                            roughness: 0.2,
-                            metalness: 0.8
-                        });
-                        break;
-                    case 'score':
-                        this.geometry = new THREE.OctahedronGeometry(0.6);
-                        this.material = new THREE.MeshStandardMaterial({
-                            color: 0xffd700,
-                            emissive: 0xff9800,
-                            emissiveIntensity: 0.5,
-                            roughness: 0.1,
-                            metalness: 0.9
-                        });
-                        break;
-                    case 'special':
-                        this.geometry = new THREE.TetrahedronGeometry(0.5);
-                        this.material = new THREE.MeshStandardMaterial({
-                            color: 0xba68c8,
-                            emissive: 0x7b1fa2,
-                            emissiveIntensity: 0.6,
-                            roughness: 0.1,
-                            metalness: 0.8
-                        });
-                        break;
-                }
-                
-                this.mesh = new THREE.Mesh(this.geometry, this.material);
-                this.mesh.position.copy(position);
+                // Create mesh
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.rotation.x = -Math.PI / 2;
+                this.mesh.receiveShadow = true;
                 this.mesh.castShadow = true;
-                this.mesh.name = `Collectible_${type}`;
-                
-                this.floatOffset = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 3;
+                this.mesh.name = 'Mountain';
                 
                 scene.add(this.mesh);
+                
+                // Add trees
+                this.addTrees();
+                
+                // Add rocks
+                this.addRocks();
             }
             
-            update(deltaTime) {
-                // Floating animation
-                const floatTime = gameTime * 2 + this.floatOffset;
-                this.mesh.position.y += Math.sin(floatTime) * 0.01;
+            addTrees() {
+                const treeTrunkGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
+                const treeLeavesGeometry = new THREE.ConeGeometry(1.5, 3, 8);
                 
-                // Rotation
-                this.mesh.rotation.y += this.rotationSpeed * deltaTime;
-                this.mesh.rotation.x = Math.sin(floatTime * 0.5) * 0.2;
+                const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 });
+                const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 });
                 
-                // Pulsing emission
-                this.mesh.material.emissiveIntensity = 0.4 + Math.sin(floatTime * 3) * 0.2;
+                const treeCount = Math.floor(GameConfig.mountain.width * GameConfig.mountain.length * GameConfig.mountain.treeDensity);
                 
-                // Check collision with player
-                const distance = this.mesh.position.distanceTo(game.player.mesh.position);
-                if (distance < 1.5) {
-                    this.collect();
+                for (let i = 0; i < treeCount; i++) {
+                    const x = (Math.random() - 0.5) * GameConfig.mountain.width * 0.8;
+                    const z = (Math.random() - 0.5) * GameConfig.mountain.length * 0.8;
+                    const y = this.getHeight(x, z);
+                    
+                    // Only add trees below snow line
+                    if (y < GameConfig.mountain.snowLevel * GameConfig.mountain.peakHeight * 0.9) {
+                        const trunk = new THREE.Mesh(treeTrunkGeometry, trunkMaterial);
+                        const leaves = new THREE.Mesh(treeLeavesGeometry, leavesMaterial);
+                        
+                        trunk.position.set(x, y + 1.5, z);
+                        leaves.position.set(x, y + 3.5, z);
+                        
+                        // Random rotation
+                        const rotation = Math.random() * Math.PI * 2;
+                        trunk.rotation.y = rotation;
+                        leaves.rotation.y = rotation;
+                        
+                        // Random scale variation
+                        const scale = 0.8 + Math.random() * 0.4;
+                        trunk.scale.setScalar(scale);
+                        leaves.scale.setScalar(scale);
+                        
+                        trunk.castShadow = true;
+                        leaves.castShadow = true;
+                        
+                        scene.add(trunk);
+                        scene.add(leaves);
+                    }
                 }
             }
             
-            collect() {
-                switch (this.type) {
-                    case 'health':
-                        game.player.heal(GameConfig.collectibles.healthRestore);
-                        break;
-                    case 'score':
-                        game.player.addScore(GameConfig.collectibles.scoreValue);
-                        break;
-                    case 'special':
-                        game.player.addSpecialCharge(GameConfig.collectibles.specialCharge);
-                        break;
+            addRocks() {
+                const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
+                const rockMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x795548,
+                    roughness: 0.9,
+                    metalness: 0.1
+                });
+                
+                const rockCount = Math.floor(GameConfig.mountain.width * GameConfig.mountain.length * GameConfig.mountain.rockDensity);
+                
+                for (let i = 0; i < rockCount; i++) {
+                    const x = (Math.random() - 0.5) * GameConfig.mountain.width * 0.9;
+                    const z = (Math.random() - 0.5) * GameConfig.mountain.length * 0.9;
+                    const y = this.getHeight(x, z);
+                    
+                    // Rocks can be anywhere
+                    const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+                    rock.position.set(x, y + 0.5, z);
+                    
+                    // Random rotation and scale
+                    rock.rotation.set(
+                        Math.random() * Math.PI * 2,
+                        Math.random() * Math.PI * 2,
+                        Math.random() * Math.PI * 2
+                    );
+                    
+                    const scale = 0.5 + Math.random() * 2;
+                    rock.scale.setScalar(scale);
+                    
+                    rock.castShadow = true;
+                    scene.add(rock);
+                }
+            }
+            
+            getHeight(x, z) {
+                // Simple interpolation for height
+                const width = GameConfig.mountain.width;
+                const length = GameConfig.mountain.length;
+                
+                // Convert to normalized coordinates
+                const nx = (x / width) + 0.5;
+                const nz = (z / length) + 0.5;
+                
+                // Clamp to valid range
+                if (nx < 0 || nx > 1 || nz < 0 || nz > 1) {
+                    return 0;
                 }
                 
-                // Visual effect
-                game.particleSystem.emit(this.mesh.position, this.mesh.material.color, 25, 3);
+                // Simple approximation - in a real game, you'd use proper interpolation
+                // with the height data
+                const distanceFromPeak = Math.sqrt(x * x + z * z);
+                let height = GameConfig.mountain.peakHeight - distanceFromPeak * 0.5;
                 
-                // Remove from scene
-                scene.remove(this.mesh);
-                game.collectibles = game.collectibles.filter(c => c !== this);
+                // Add some terrain variation
+                height += Math.sin(x * 0.1) * 10;
+                height += Math.cos(z * 0.08) * 8;
+                
+                return Math.max(0, height);
+            }
+            
+            getSlopeVector(x, z) {
+                // Calculate approximate slope at position
+                const delta = 0.1;
+                const height = this.getHeight(x, z);
+                const heightX = this.getHeight(x + delta, z);
+                const heightZ = this.getHeight(x, z + delta);
+                
+                const slopeX = (heightX - height) / delta;
+                const slopeZ = (heightZ - height) / delta;
+                
+                return new THREE.Vector3(-slopeX, 1, -slopeZ).normalize();
             }
         }
 
         // ==================== GAME CLASS ====================
         class Game {
             constructor() {
-                this.player = null;
-                this.enemies = [];
-                this.collectibles = [];
-                this.particleSystem = null;
+                this.skier = null;
+                this.terrain = null;
+                this.snowEffect = null;
                 this.clock = new THREE.Clock();
                 this.isPaused = false;
-                this.gameOver = false;
-                this.enemySpawnTimer = 0;
-                this.collectibleSpawnTimer = 0;
-                this.audioContext = null;
+                this.isGameOver = false;
+                this.floatingTexts = [];
                 
                 this.init();
             }
@@ -1590,20 +1436,16 @@
                 this.initThreeJS();
                 
                 // Initialize controllers
-                joystick = new JoystickController();
                 buttonController = new ButtonController();
                 
-                // Initialize particle system
-                this.particleSystem = new ParticleSystem();
+                // Initialize terrain
+                this.terrain = new MountainTerrain();
                 
-                // Initialize player
-                this.player = new Player();
+                // Initialize skier
+                this.skier = new Skier();
                 
-                // Initialize audio
-                this.initAudio();
-                
-                // Create initial environment
-                this.createEnvironment();
+                // Initialize snow effect
+                this.snowEffect = new SnowEffect();
                 
                 // Start game loop
                 this.startGame();
@@ -1616,11 +1458,11 @@
                 // Scene
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color(0x87ceeb);
-                scene.fog = new THREE.Fog(0x87ceeb, 10, 200);
+                scene.fog = new THREE.Fog(0x87ceeb, 50, 500);
                 
-                // Camera
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.set(0, 10, 15);
+                // Camera (FIRST PERSON - attached to skier)
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+                camera.position.set(0, 1.7, 0); // Eye height
                 
                 // Renderer
                 const canvas = document.getElementById('gameCanvas');
@@ -1633,35 +1475,26 @@
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.0;
                 
-                // Controls (for camera following)
-                controls = new OrbitControls(camera, canvas);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.05;
-                controls.enableZoom = false;
-                controls.enablePan = false;
-                controls.maxPolarAngle = Math.PI / 2;
-                controls.minDistance = 8;
-                controls.maxDistance = 20;
-                controls.target.set(0, 3, 0);
-                
                 // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                // Sun light
+                const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                sunLight.position.set(100, 200, 100);
+                sunLight.castShadow = true;
+                sunLight.shadow.camera.left = -100;
+                sunLight.shadow.camera.right = 100;
+                sunLight.shadow.camera.top = 100;
+                sunLight.shadow.camera.bottom = -100;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                scene.add(sunLight);
+                
+                // Ambient light
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
                 scene.add(ambientLight);
                 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(10, 30, 10);
-                directionalLight.castShadow = true;
-                directionalLight.shadow.camera.left = -30;
-                directionalLight.shadow.camera.right = 30;
-                directionalLight.shadow.camera.top = 30;
-                directionalLight.shadow.camera.bottom = -30;
-                directionalLight.shadow.mapSize.width = 1024;
-                directionalLight.shadow.mapSize.height = 1024;
-                scene.add(directionalLight);
-                
-                // Hemisphere light for sky/ground
-                const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x3a3a3a, 0.4);
-                scene.add(hemisphereLight);
+                // Sky light (blue-ish for snow)
+                const skyLight = new THREE.HemisphereLight(0x87ceeb, 0x3a3a3a, 0.3);
+                scene.add(skyLight);
                 
                 // Window resize handler
                 window.addEventListener('resize', () => {
@@ -1671,129 +1504,13 @@
                 });
             }
             
-            initAudio() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Create audio nodes for future sounds
-                    this.gainNode = this.audioContext.createGain();
-                    this.gainNode.connect(this.audioContext.destination);
-                    this.gainNode.gain.value = 0.5;
-                } catch (e) {
-                    console.log('Web Audio API not supported');
-                }
-            }
-            
-            playLevelUpSound() {
-                if (!this.audioContext) return;
-                
-                const oscillator = this.audioContext.createOscillator();
-                const gainNode = this.audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(this.gainNode);
-                
-                oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // C5
-                oscillator.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); // E5
-                oscillator.frequency.setValueAtTime(783.99, this.audioContext.currentTime + 0.2); // G5
-                
-                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
-                
-                oscillator.start();
-                oscillator.stop(this.audioContext.currentTime + 0.5);
-            }
-            
-            createEnvironment() {
-                // Ground
-                const groundGeometry = new THREE.PlaneGeometry(GameConfig.world.boundarySize, GameConfig.world.boundarySize, 20, 20);
-                const groundMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x2e7d32,
-                    roughness: 0.8,
-                    metalness: 0.1,
-                    side: THREE.DoubleSide
-                });
-                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-                ground.rotation.x = -Math.PI / 2;
-                ground.receiveShadow = true;
-                ground.name = 'Ground';
-                scene.add(ground);
-                
-                // Add grass texture variation
-                const groundColors = [0x2e7d32, 0x388e3c, 0x43a047];
-                const groundVertices = groundGeometry.attributes.position;
-                const groundColorsAttr = new Float32Array(groundVertices.count * 3);
-                
-                for (let i = 0; i < groundVertices.count; i++) {
-                    const x = groundVertices.getX(i);
-                    const z = groundVertices.getY(i);
-                    const colorIndex = Math.floor((x + z) * 0.5) % groundColors.length;
-                    const color = new THREE.Color(groundColors[colorIndex]);
-                    
-                    groundColorsAttr[i * 3] = color.r;
-                    groundColorsAttr[i * 3 + 1] = color.g;
-                    groundColorsAttr[i * 3 + 2] = color.b;
-                }
-                
-                groundGeometry.setAttribute('color', new THREE.BufferAttribute(groundColorsAttr, 3));
-                groundMaterial.vertexColors = true;
-                
-                // Platforms
-                const platformGeometry = new THREE.BoxGeometry(6, 1, 6);
-                const platformMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x795548,
-                    roughness: 0.7,
-                    metalness: 0.2
-                });
-                
-                // Create platforms at different heights
-                for (let i = 0; i < 8; i++) {
-                    const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-                    platform.position.set(
-                        (Math.random() - 0.5) * 60,
-                        3 + i * 4,
-                        (Math.random() - 0.5) * 60
-                    );
-                    platform.castShadow = true;
-                    platform.receiveShadow = true;
-                    scene.add(platform);
-                }
-                
-                // Trees
-                const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.5, 3, 8);
-                const leavesGeometry = new THREE.SphereGeometry(2, 8, 8);
-                const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 });
-                const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 });
-                
-                for (let i = 0; i < 20; i++) {
-                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-                    
-                    trunk.position.set(
-                        (Math.random() - 0.5) * 80,
-                        1.5,
-                        (Math.random() - 0.5) * 80
-                    );
-                    leaves.position.copy(trunk.position);
-                    leaves.position.y += 2.5;
-                    
-                    trunk.castShadow = true;
-                    trunk.receiveShadow = true;
-                    leaves.castShadow = true;
-                    leaves.receiveShadow = true;
-                    
-                    scene.add(trunk);
-                    scene.add(leaves);
-                }
-            }
-            
             hideLoadingScreen() {
                 const loadingScreen = document.getElementById('loadingScreen');
                 loadingScreen.style.opacity = '0';
                 
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
-                    this.showCenterMessage('TOUCH TO START', 0x4fc3f7, 2);
+                    this.showCenterMessage('READY TO SKI', 0x4fc3f7, 2);
                     
                     // Start on touch
                     document.addEventListener('touchstart', () => {
@@ -1813,117 +1530,80 @@
                 }, 500);
             }
             
-            handleInput() {
-                if (!isGameStarted || this.isPaused || this.gameOver) return;
-                
-                // Get joystick direction
-                const joystickDir = joystick.getDirection();
-                const forward = joystickDir.y;
-                const right = joystickDir.x;
-                
-                // Move player if joystick is active
-                if (joystickDir.magnitude > 0.1) {
-                    this.player.move(forward, right);
-                } else {
-                    this.player.velocity.x *= 0.9;
-                    this.player.velocity.z *= 0.9;
-                }
-                
-                // Handle buttons
-                if (buttonController.isPressed('jump')) {
-                    if (this.player.jump()) {
-                        buttonController.setButtonCooldown('jump', 0.3);
-                    }
-                }
-                
-                if (buttonController.isPressed('glide')) {
-                    this.player.startGlide();
-                } else if (this.player.isGliding) {
-                    this.player.stopGlide();
-                }
-                
-                if (buttonController.isPressed('attack')) {
-                    if (this.player.attack()) {
-                        // Check for enemy hits
-                        this.checkAttackHit();
-                        buttonController.setButtonCooldown('attack', 0.5);
-                    }
-                }
-                
-                if (buttonController.isPressed('special')) {
-                    if (this.player.specialAttack()) {
-                        // Special attack hits all enemies
-                        this.enemies.forEach(enemy => {
-                            enemy.takeDamage(GameConfig.player.specialAttackDamage);
-                        });
-                        buttonController.setButtonCooldown('special', GameConfig.player.specialAttackCooldown);
-                    }
-                }
+            getTerrainHeight(x, z) {
+                return this.terrain.getHeight(x, z);
             }
             
-            checkAttackHit() {
-                const playerPos = this.player.mesh.position;
-                
-                this.enemies.forEach(enemy => {
-                    const distance = playerPos.distanceTo(enemy.mesh.position);
-                    if (distance < 3) {
-                        enemy.takeDamage(GameConfig.player.attackDamage);
-                    }
-                });
-            }
-            
-            updateEnemies(deltaTime) {
-                // Spawn new enemies
-                this.enemySpawnTimer += deltaTime;
-                if (this.enemySpawnTimer >= GameConfig.enemies.spawnRate && 
-                    this.enemies.length < GameConfig.enemies.maxEnemies) {
-                    this.enemySpawnTimer = 0;
-                    
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = 15 + Math.random() * 10;
-                    const x = Math.cos(angle) * distance;
-                    const z = Math.sin(angle) * distance;
-                    
-                    const enemy = new Enemy(new THREE.Vector3(x, 2, z));
-                    this.enemies.push(enemy);
-                }
-                
-                // Update existing enemies
-                this.enemies.forEach(enemy => enemy.update(deltaTime));
-            }
-            
-            updateCollectibles(deltaTime) {
-                // Spawn new collectibles
-                this.collectibleSpawnTimer += deltaTime;
-                if (this.collectibleSpawnTimer >= 10 && this.collectibles.length < 10) {
-                    this.collectibleSpawnTimer = 0;
-                    
-                    const types = ['health', 'score', 'special'];
-                    const type = types[Math.floor(Math.random() * types.length)];
-                    
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = 10 + Math.random() * 20;
-                    const x = Math.cos(angle) * distance;
-                    const z = Math.sin(angle) * distance;
-                    const y = 2 + Math.random() * 5;
-                    
-                    const collectible = new Collectible(new THREE.Vector3(x, y, z), type);
-                    this.collectibles.push(collectible);
-                }
-                
-                // Update existing collectibles
-                this.collectibles.forEach(collectible => collectible.update(deltaTime));
+            getSlopeVector(x, z) {
+                return this.terrain.getSlopeVector(x, z);
             }
             
             updateCamera() {
-                // Smooth camera follow
-                const targetPosition = this.player.mesh.position.clone();
-                targetPosition.y += 8;
-                targetPosition.z += 10;
+                // First-person camera follows skier
+                camera.position.copy(this.skier.mesh.position);
+                camera.position.y += 1.7; // Eye height
                 
-                camera.position.lerp(targetPosition, 0.05);
-                controls.target.lerp(this.player.mesh.position, 0.05);
-                controls.update();
+                // Look in direction of movement with some smoothing
+                const lookTarget = this.skier.mesh.position.clone().add(this.skier.direction.clone().multiplyScalar(10));
+                lookTarget.y = camera.position.y - 1; // Look slightly downhill
+                
+                camera.lookAt(lookTarget);
+                
+                // Add slight camera bob when skiing
+                if (this.skier.isOnGround && this.skier.speed > 10) {
+                    const bob = Math.sin(gameTime * 10) * 0.05;
+                    camera.position.y += bob;
+                }
+                
+                // Add head tilt when turning
+                const tilt = this.skier.turnAngle * 0.1;
+                camera.rotation.z = tilt;
+            }
+            
+            createFloatingText(position, text, color) {
+                const floatingText = {
+                    element: document.createElement('div'),
+                    position: position.clone(),
+                    life: 2,
+                    velocity: new THREE.Vector3(0, 2, 0)
+                };
+                
+                floatingText.element.style.position = 'absolute';
+                floatingText.element.style.color = `#${color.toString(16).padStart(6, '0')}`;
+                floatingText.element.style.fontSize = '20px';
+                floatingText.element.style.fontWeight = 'bold';
+                floatingText.element.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+                floatingText.element.style.whiteSpace = 'nowrap';
+                floatingText.element.textContent = text;
+                
+                document.getElementById('uiContainer').appendChild(floatingText.element);
+                this.floatingTexts.push(floatingText);
+            }
+            
+            updateFloatingTexts(deltaTime) {
+                for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+                    const text = this.floatingTexts[i];
+                    text.life -= deltaTime;
+                    
+                    if (text.life <= 0) {
+                        text.element.remove();
+                        this.floatingTexts.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Update position
+                    text.position.add(text.velocity.clone().multiplyScalar(deltaTime));
+                    
+                    // Convert world position to screen position
+                    const screenPos = text.position.clone().project(camera);
+                    
+                    const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+                    
+                    text.element.style.left = `${x}px`;
+                    text.element.style.top = `${y}px`;
+                    text.element.style.opacity = text.life;
+                }
             }
             
             showCenterMessage(text, color = 0xffffff, duration = 2) {
@@ -1937,50 +1617,18 @@
                 }, duration * 1000);
             }
             
-            createCombatText(position, text, color) {
-                const combatText = document.createElement('div');
-                combatText.className = 'combat-text';
-                combatText.textContent = text;
-                combatText.style.color = `#${color.toString(16).padStart(6, '0')}`;
-                combatText.style.left = '50%';
-                combatText.style.top = '50%';
+            endRun() {
+                if (this.isGameOver) return;
                 
-                document.getElementById('uiContainer').appendChild(combatText);
-                
-                // Position based on world position (simplified)
-                const screenPos = position.clone().project(camera);
-                combatText.style.left = `${(screenPos.x * 0.5 + 0.5) * 100}%`;
-                combatText.style.top = `${(-screenPos.y * 0.5 + 0.5) * 100}%`;
-                
-                // Remove after animation
-                setTimeout(() => {
-                    combatText.remove();
-                }, 1000);
-            }
-            
-            createLevelUpEffect() {
-                const levelUp = document.createElement('div');
-                levelUp.className = 'level-up-effect';
-                levelUp.textContent = 'LEVEL UP!';
-                
-                document.getElementById('uiContainer').appendChild(levelUp);
-                
-                setTimeout(() => {
-                    levelUp.remove();
-                }, 1000);
-            }
-            
-            checkGameOver() {
-                if (this.player.health <= 0 && !this.gameOver) {
-                    this.gameOver = true;
-                    this.showGameOverScreen();
-                }
+                this.isGameOver = true;
+                this.showGameOverScreen();
             }
             
             showGameOverScreen() {
-                document.getElementById('finalScore').textContent = this.player.score;
-                document.getElementById('finalLevel').textContent = this.player.level;
-                document.getElementById('finalEnemies').textContent = this.player.enemiesDefeated;
+                document.getElementById('finalDistance').textContent = `${Math.floor(this.skier.distance)}m`;
+                document.getElementById('finalSpeed').textContent = `${this.skier.getSpeedKmh()} km/h`;
+                document.getElementById('finalScore').textContent = this.skier.score;
+                document.getElementById('finalJumps').textContent = this.skier.jumpCount;
                 
                 document.getElementById('gameOverScreen').style.display = 'flex';
                 
@@ -1995,7 +1643,7 @@
             }
             
             togglePause() {
-                if (this.gameOver) return;
+                if (this.isGameOver) return;
                 
                 this.isPaused = !this.isPaused;
                 document.getElementById('pauseMenu').style.display = this.isPaused ? 'flex' : 'none';
@@ -2007,22 +1655,15 @@
             
             restartGame() {
                 // Reset game state
-                this.gameOver = false;
+                this.isGameOver = false;
                 this.isPaused = false;
                 
-                // Clear enemies and collectibles
-                this.enemies.forEach(enemy => scene.remove(enemy.mesh));
-                this.collectibles.forEach(collectible => scene.remove(collectible.mesh));
-                this.enemies = [];
-                this.collectibles = [];
+                // Reset skier
+                this.skier.reset();
                 
-                // Reset player
-                this.player.reset();
-                this.player.score = 0;
-                this.player.level = 1;
-                this.player.health = this.player.maxHealth;
-                this.player.experience = 0;
-                this.player.enemiesDefeated = 0;
+                // Clear floating texts
+                this.floatingTexts.forEach(text => text.element.remove());
+                this.floatingTexts = [];
                 
                 // Hide screens
                 document.getElementById('gameOverScreen').style.display = 'none';
@@ -2048,26 +1689,24 @@
                 deltaTime = Math.min(this.clock.getDelta(), 0.1);
                 gameTime += deltaTime;
                 
-                if (!isGameStarted || this.gameOver) return;
+                if (!isGameStarted || this.isGameOver) return;
                 
                 if (!this.isPaused) {
-                    // Handle input
-                    this.handleInput();
+                    // Update skier
+                    this.skier.update(deltaTime);
                     
-                    // Update game objects
-                    this.player.update(deltaTime);
-                    this.updateEnemies(deltaTime);
-                    this.updateCollectibles(deltaTime);
-                    this.particleSystem.update(deltaTime);
-                    
-                    // Update camera
+                    // Update camera (first-person follows skier)
                     this.updateCamera();
                     
                     // Update UI
-                    this.player.updateUI();
+                    this.skier.updateUI();
                     
-                    // Check game over
-                    this.checkGameOver();
+                    // Update snow effect based on speed
+                    const snowIntensity = 0.5 + (this.skier.speed / GameConfig.skiing.maxSpeed) * 0.5;
+                    this.snowEffect.update(snowIntensity);
+                    
+                    // Update floating texts
+                    this.updateFloatingTexts(deltaTime);
                 }
                 
                 // Render scene
@@ -2078,8 +1717,9 @@
         // ==================== INITIALIZE GAME ====================
         window.addEventListener('load', () => {
             try {
-                console.log('Initializing Mobile 3D Adventure Game...');
-                console.log('Touch controls: Joystick + 4 Action Buttons');
+                console.log('Initializing Mountain Skiing Game...');
+                console.log('First-person skiing on snowy mountain');
+                console.log('Controls: LEFT/RIGHT to steer, JUMP for tricks');
                 console.log('Double-tap screen to pause');
                 
                 game = new Game();
@@ -2126,7 +1766,7 @@
 
         // Prevent default touch behaviors
         document.addEventListener('touchmove', (e) => {
-            if (e.target.id === 'joystickBase' || e.target.classList.contains('action-btn')) {
+            if (e.target.classList.contains('ski-control')) {
                 e.preventDefault();
             }
         }, { passive: false });
