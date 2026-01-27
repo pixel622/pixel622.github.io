@@ -3,68 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ski Mountain - Simple</title>
+    <title>Complete Ski Mountain - Full Script</title>
     <style>
+        /* RESET EVERYTHING */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            touch-action: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
 
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #87CEEB;
             position: fixed;
-            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #1a2980, #26d0ce);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
+        /* START SCREEN */
         #start-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, #1a2980, #26d0ce);
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
             text-align: center;
+            transition: opacity 1s ease;
         }
 
         #title {
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 900;
             color: white;
-            margin-bottom: 20px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #ffffff, #a8e6cf, #74b9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        #subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 60px;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            font-weight: 300;
         }
 
         #start-btn {
-            padding: 20px 50px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: #0984e3;
+            padding: 25px 60px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #0984e3, #74b9ff);
             border: none;
-            border-radius: 30px;
+            border-radius: 60px;
             color: white;
             cursor: pointer;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            border: 4px solid rgba(255, 255, 255, 0.5);
             margin-top: 40px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
         }
 
-        #ui {
+        #start-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(145deg, #74b9ff, #0984e3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #instructions {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 350px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        #instructions strong {
+            color: #74b9ff;
+            font-weight: 600;
+        }
+
+        #instructions em {
+            color: #a8e6cf;
+            font-style: italic;
+        }
+
+        /* GAME UI */
+        #game-ui {
             position: absolute;
             top: 0;
             left: 0;
@@ -74,216 +132,839 @@
             z-index: 100;
         }
 
+        /* CONTROLS */
         #controls {
             position: absolute;
-            bottom: 30px;
+            bottom: 25px;
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 25px;
+            pointer-events: none;
         }
 
         .joystick {
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.4);
+            width: 140px;
+            height: 140px;
             pointer-events: auto;
+            position: relative;
+            touch-action: none;
         }
 
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .joystick-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .joystick-handle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.08s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+
+        .joystick-center {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* ACTION BUTTONS */
         #buttons {
             position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 25px;
+            bottom: 180px;
             display: flex;
             flex-direction: column;
             gap: 20px;
+            pointer-events: none;
         }
 
-        .btn {
-            width: 80px;
-            height: 80px;
-            background: rgba(52, 152, 219, 0.8);
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.4);
+        .game-btn {
+            width: 100px;
+            height: 100px;
+            border-radius: 25px;
+            background: linear-gradient(145deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.85));
+            border: 3px solid rgba(255, 255, 255, 0.4);
             color: white;
-            font-size: 16px;
-            font-weight: bold;
-            pointer-events: auto;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            pointer-events: auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.12s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            touch-action: manipulation;
+            user-select: none;
+            cursor: pointer;
         }
 
+        .game-btn:active {
+            transform: scale(0.92);
+            background: linear-gradient(145deg, rgba(41, 128, 185, 0.95), rgba(52, 152, 219, 0.9));
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 6px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* STATS DISPLAY */
         #stats {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 25px;
+            left: 25px;
+            color: white;
+            font-family: system-ui, -apple-system;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
+            padding: 18px 22px;
+            border-radius: 18px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            min-width: 220px;
+            line-height: 1.6;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-value {
+            color: #81ecec;
+            font-weight: 700;
+            float: right;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* SPEED INDICATOR */
+        #speed-bar {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 250px;
+            height: 35px;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
+            border-radius: 18px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        #speed-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b894, #81ecec, #74b9ff, #a55eea);
+            border-radius: 15px;
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #speed-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        /* SNOW EFFECT OVERLAY */
+        #snow-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.6;
+        }
+
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            filter: blur(1.5px);
+            opacity: 0.8;
+        }
+
+        /* CAMERA HINT */
+        #camera-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.3));
+            padding: 18px 28px;
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            pointer-events: none;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 2s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+
+        #camera-hint span {
+            color: #74b9ff;
+            font-weight: 600;
+        }
+
+        /* MOUNTAIN VIEW INDICATOR */
+        #mountain-view {
+            position: absolute;
+            bottom: 200px;
+            left: 25px;
             color: white;
             font-size: 16px;
-            background: rgba(0,0,0,0.5);
-            padding: 15px;
-            border-radius: 10px;
+            font-weight: 600;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+            padding: 12px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+        }
+
+        /* DEBUG INFO (hidden by default) */
+        #debug-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            font-family: monospace;
+            pointer-events: none;
+            display: none; /* Hidden by default */
         }
     </style>
 </head>
 <body>
+    <!-- START SCREEN -->
     <div id="start-screen">
         <h1 id="title">SKI MOUNTAIN</h1>
-        <button id="start-btn">START SKIING</button>
+        <div id="subtitle">FPS MOUNTAIN DESCENT</div>
+        <button id="start-btn">START SKIING 🎿</button>
+        <div id="instructions">
+            <strong>CONTROLS:</strong><br>
+            • <span style="color:#74b9ff">LEFT JOYSTICK:</span> Move forward/backward, Turn<br>
+            • <span style="color:#81ecec">RIGHT JOYSTICK:</span> Look around (360° FPS Camera)<br>
+            • <span style="color:#00b894">JUMP:</span> Jump over obstacles and terrain<br>
+            • <span style="color:#fdcb6e">CROUCH:</span> Tuck position for maximum speed<br><br>
+            <em>Use the right joystick to look around and see the entire mountain!</em>
+        </div>
     </div>
 
-    <div id="ui">
+    <!-- SNOW EFFECT OVERLAY -->
+    <div id="snow-overlay"></div>
+
+    <!-- GAME UI -->
+    <div id="game-ui">
+        <div id="camera-hint">
+            Use the <span>RIGHT JOYSTICK</span> to look around<br>
+            and see the mountain!
+        </div>
+        
+        <div id="mountain-view">
+            🏔️ ON MOUNTAIN PEAK
+        </div>
+
         <div id="stats">
-            Altitude: <span id="altitude">500m</span><br>
-            Speed: <span id="speed">0 km/h</span>
+            <div>ALTITUDE <span class="stat-value" id="altitude">500m</span></div>
+            <div>SPEED <span class="stat-value" id="speed">0 km/h</span></div>
+            <div>DISTANCE <span class="stat-value" id="distance">0m</span></div>
+            <div>VIEW ANGLE <span class="stat-value" id="view-angle">0°</span></div>
+            <div>TREES PASSED <span class="stat-value" id="tree-count">0</span></div>
         </div>
-        
+
+        <div id="speed-bar">
+            <div id="speed-fill"></div>
+            <div id="speed-text">0 km/h</div>
+        </div>
+
         <div id="controls">
-            <div class="joystick" id="left-joystick"></div>
-            <div class="joystick" id="right-joystick"></div>
+            <div class="joystick" id="left-joystick">
+                <div class="joystick-base">
+                    <div class="joystick-handle" id="left-handle"></div>
+                    <div class="joystick-center"></div>
+                </div>
+            </div>
+            
+            <div class="joystick" id="right-joystick">
+                <div class="joystick-base">
+                    <div class="joystick-handle" id="right-handle"></div>
+                    <div class="joystick-center"></div>
+                </div>
+            </div>
         </div>
-        
+
         <div id="buttons">
-            <div class="btn" id="jump-btn">JUMP</div>
-            <div class="btn" id="crouch-btn">CROUCH</div>
+            <div class="game-btn" id="jump-btn">
+                JUMP
+                <span class="btn-label">↑ AIR TIME</span>
+            </div>
+            <div class="game-btn" id="crouch-btn">
+                CROUCH
+                <span class="btn-label">↓ MAX SPEED</span>
+            </div>
+        </div>
+
+        <div id="debug-info">
+            DEBUG: X:0.00 Y:0.00 Z:0.00
         </div>
     </div>
 
+    <!-- THREE.JS SCRIPT - NO CUTS, FULL IMPLEMENTATION -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // GAME STATE
+        // ============================================
+        // GAME CONFIGURATION AND STATE
+        // ============================================
+        const CONFIG = {
+            MOUNTAIN_SIZE: 1200,
+            MOUNTAIN_SEGMENTS: 200,
+            START_ALTITUDE: 500,
+            MAX_SPEED: 180,
+            TURN_SENSITIVITY: 0.035,
+            LOOK_SENSITIVITY: 0.025,
+            JUMP_FORCE: 0.35,
+            GRAVITY: 0.018,
+            CROUCH_MULTIPLIER: 1.4,
+            MAX_TREES: 120,
+            SNOW_PARTICLES: 1000
+        };
+
         let gameStarted = false;
         let scene, camera, renderer;
-        let skier, mountain;
-        let joystickLeft = { x: 0, y: 0 };
-        let joystickRight = { x: 0, y: 0 };
-        let isJumping = false, isCrouching = false;
-        let speed = 0, jumpForce = 0, altitude = 500;
+        let skier, mountain, snowParticleSystem;
+        let trees = [];
+        let terrainVertices = [];
+        let joystickLeft = { x: 0, y: 0, active: false, touchId: null };
+        let joystickRight = { x: 0, y: 0, active: false, touchId: null };
+        let isJumping = false;
+        let isCrouching = false;
+        let jumpForce = 0;
+        let speed = 0;
+        let altitude = CONFIG.START_ALTITUDE;
+        let distanceTraveled = 0;
+        let treesPassed = 0;
+        let cameraPitch = 0;
+        let cameraYaw = 0;
+        let lastFrameTime = 0;
+        let snowflakes = [];
+        let terrainHeightMap = [];
 
-        // SETUP CONTROLS
-        function setupControls() {
+        // ============================================
+        // SNOW EFFECT CREATION
+        // ============================================
+        function createSnowfall() {
+            const container = document.getElementById('snow-overlay');
+            
+            for (let i = 0; i < 150; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                
+                const size = Math.random() * 5 + 2;
+                snowflake.style.width = size + 'px';
+                snowflake.style.height = size + 'px';
+                snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.top = Math.random() * 100 + 'vh';
+                snowflake.style.filter = `blur(${Math.random() * 2}px)`;
+                
+                const fallSpeed = Math.random() * 0.5 + 0.3;
+                const driftAmount = Math.random() * 2 - 1;
+                
+                function animateSnowflake() {
+                    let currentTop = parseFloat(snowflake.style.top);
+                    let currentLeft = parseFloat(snowflake.style.left);
+                    
+                    currentTop += fallSpeed;
+                    currentLeft += driftAmount * 0.3;
+                    
+                    if (currentTop > 100) {
+                        currentTop = -5;
+                        currentLeft = Math.random() * 100;
+                    }
+                    
+                    if (currentLeft > 100) currentLeft = 0;
+                    if (currentLeft < 0) currentLeft = 100;
+                    
+                    snowflake.style.top = currentTop + 'vh';
+                    snowflake.style.left = currentLeft + 'vw';
+                    
+                    requestAnimationFrame(animateSnowflake);
+                }
+                
+                container.appendChild(snowflake);
+                snowflakes.push(snowflake);
+                animateSnowflake();
+            }
+        }
+
+        // ============================================
+        // MOBILE CONTROLS SETUP - FULL IMPLEMENTATION
+        // ============================================
+        function setupMobileControls() {
             const leftJoystick = document.getElementById('left-joystick');
             const rightJoystick = document.getElementById('right-joystick');
+            const leftHandle = document.getElementById('left-handle');
+            const rightHandle = document.getElementById('right-handle');
             const jumpBtn = document.getElementById('jump-btn');
             const crouchBtn = document.getElementById('crouch-btn');
             const startBtn = document.getElementById('start-btn');
 
-            startBtn.addEventListener('click', () => {
-                gameStarted = true;
-                document.getElementById('start-screen').style.display = 'none';
+            // Start button with both mouse and touch support
+            startBtn.addEventListener('click', startGame);
+            startBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                startGame();
             });
 
-            // SIMPLE TOUCH CONTROLS
-            function setupJoystick(element, side) {
-                let active = false;
-                
-                element.addEventListener('touchstart', (e) => {
-                    if (!gameStarted) return;
+            // Prevent default touch behaviors that could interfere
+            document.addEventListener('touchstart', function(e) {
+                if (e.target === leftJoystick || e.target === rightJoystick || 
+                    e.target === leftHandle || e.target === rightHandle ||
+                    e.target === jumpBtn || e.target === crouchBtn) {
                     e.preventDefault();
-                    active = true;
-                });
+                }
+            }, { passive: false });
 
-                element.addEventListener('touchmove', (e) => {
-                    if (!gameStarted || !active) return;
+            document.addEventListener('touchmove', function(e) {
+                if (e.target === leftJoystick || e.target === rightJoystick || 
+                    e.target === leftHandle || e.target === rightHandle) {
                     e.preventDefault();
-                    const rect = element.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    
-                    let dx = touch.clientX - centerX;
-                    let dy = touch.clientY - centerY;
-                    
-                    const max = 50;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist > max) {
-                        dx = (dx / dist) * max;
-                        dy = (dy / dist) * max;
-                    }
-                    
-                    if (side === 'left') {
-                        joystickLeft.x = dx / max;
-                        joystickLeft.y = -dy / max;
-                    } else {
-                        joystickRight.x = dx / max;
-                        joystickRight.y = dy / max;
-                    }
-                });
+                }
+            }, { passive: false });
 
-                element.addEventListener('touchend', () => {
-                    active = false;
-                    if (side === 'left') {
-                        joystickLeft.x = 0;
-                        joystickLeft.y = 0;
-                    } else {
-                        joystickRight.x = 0;
-                        joystickRight.y = 0;
-                    }
-                });
-            }
-
-            setupJoystick(leftJoystick, 'left');
-            setupJoystick(rightJoystick, 'right');
-
-            jumpBtn.addEventListener('touchstart', (e) => {
+            // Left joystick for movement
+            leftJoystick.addEventListener('touchstart', function(e) {
                 if (!gameStarted) return;
                 e.preventDefault();
+                e.stopPropagation();
+                
+                const touch = e.changedTouches[0];
+                joystickLeft.touchId = touch.identifier;
+                joystickLeft.active = true;
+                
+                const rect = leftJoystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                function handleMove(moveEvent) {
+                    for (const touch of moveEvent.touches) {
+                        if (touch.identifier === joystickLeft.touchId) {
+                            moveEvent.preventDefault();
+                            updateJoystickPosition(touch, leftHandle, 'left', centerX, centerY);
+                            break;
+                        }
+                    }
+                }
+                
+                function handleEnd(endEvent) {
+                    for (const touch of endEvent.changedTouches) {
+                        if (touch.identifier === joystickLeft.touchId) {
+                            leftHandle.style.transform = 'translate(-50%, -50%)';
+                            joystickLeft.x = 0;
+                            joystickLeft.y = 0;
+                            joystickLeft.active = false;
+                            joystickLeft.touchId = null;
+                            document.removeEventListener('touchmove', handleMove);
+                            document.removeEventListener('touchend', handleEnd);
+                            break;
+                        }
+                    }
+                }
+                
+                updateJoystickPosition(touch, leftHandle, 'left', centerX, centerY);
+                document.addEventListener('touchmove', handleMove);
+                document.addEventListener('touchend', handleEnd);
+            });
+
+            // Right joystick for camera look
+            rightJoystick.addEventListener('touchstart', function(e) {
+                if (!gameStarted) return;
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const touch = e.changedTouches[0];
+                joystickRight.touchId = touch.identifier;
+                joystickRight.active = true;
+                
+                const rect = rightJoystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                function handleMove(moveEvent) {
+                    for (const touch of moveEvent.touches) {
+                        if (touch.identifier === joystickRight.touchId) {
+                            moveEvent.preventDefault();
+                            updateJoystickPosition(touch, rightHandle, 'right', centerX, centerY);
+                            break;
+                        }
+                    }
+                }
+                
+                function handleEnd(endEvent) {
+                    for (const touch of endEvent.changedTouches) {
+                        if (touch.identifier === joystickRight.touchId) {
+                            rightHandle.style.transform = 'translate(-50%, -50%)';
+                            joystickRight.x = 0;
+                            joystickRight.y = 0;
+                            joystickRight.active = false;
+                            joystickRight.touchId = null;
+                            document.removeEventListener('touchmove', handleMove);
+                            document.removeEventListener('touchend', handleEnd);
+                            break;
+                        }
+                    }
+                }
+                
+                updateJoystickPosition(touch, rightHandle, 'right', centerX, centerY);
+                document.addEventListener('touchmove', handleMove);
+                document.addEventListener('touchend', handleEnd);
+            });
+
+            function updateJoystickPosition(touch, handle, side, centerX, centerY) {
+                const deltaX = touch.clientX - centerX;
+                const deltaY = touch.clientY - centerY;
+                
+                const maxDistance = 45;
+                const currentDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                let constrainedDeltaX = deltaX;
+                let constrainedDeltaY = deltaY;
+                
+                if (currentDistance > maxDistance) {
+                    constrainedDeltaX = (deltaX / currentDistance) * maxDistance;
+                    constrainedDeltaY = (deltaY / currentDistance) * maxDistance;
+                }
+                
+                handle.style.transform = `translate(calc(-50% + ${constrainedDeltaX}px), calc(-50% + ${constrainedDeltaY}px))`;
+                
+                if (side === 'left') {
+                    joystickLeft.x = constrainedDeltaX / maxDistance;
+                    joystickLeft.y = -constrainedDeltaY / maxDistance; // Invert Y for intuitive movement
+                } else {
+                    joystickRight.x = constrainedDeltaX / maxDistance;
+                    joystickRight.y = constrainedDeltaY / maxDistance;
+                }
+            }
+
+            // Jump button
+            jumpBtn.addEventListener('touchstart', function(e) {
+                if (!gameStarted) return;
+                e.preventDefault();
+                e.stopPropagation();
                 if (!isJumping) {
                     isJumping = true;
-                    jumpForce = 0.3;
+                    jumpForce = CONFIG.JUMP_FORCE;
                 }
             });
 
-            crouchBtn.addEventListener('touchstart', (e) => {
+            // Crouch button with press and hold
+            let crouchTouchId = null;
+            crouchBtn.addEventListener('touchstart', function(e) {
                 if (!gameStarted) return;
                 e.preventDefault();
+                e.stopPropagation();
+                crouchTouchId = e.changedTouches[0].identifier;
                 isCrouching = true;
             });
 
-            crouchBtn.addEventListener('touchend', () => {
-                isCrouching = false;
+            crouchBtn.addEventListener('touchend', function(e) {
+                for (const touch of e.changedTouches) {
+                    if (touch.identifier === crouchTouchId) {
+                        isCrouching = false;
+                        crouchTouchId = null;
+                        break;
+                    }
+                }
+            });
+
+            // Keyboard controls for testing on desktop
+            document.addEventListener('keydown', function(e) {
+                if (!gameStarted) return;
+                
+                switch(e.key.toLowerCase()) {
+                    case 'w':
+                        joystickLeft.y = 1;
+                        break;
+                    case 's':
+                        joystickLeft.y = -1;
+                        break;
+                    case 'a':
+                        joystickLeft.x = -1;
+                        break;
+                    case 'd':
+                        joystickLeft.x = 1;
+                        break;
+                    case 'arrowleft':
+                        joystickRight.x = -1;
+                        break;
+                    case 'arrowright':
+                        joystickRight.x = 1;
+                        break;
+                    case 'arrowup':
+                        joystickRight.y = 1;
+                        break;
+                    case 'arrowdown':
+                        joystickRight.y = -1;
+                        break;
+                    case ' ':
+                        if (!isJumping) {
+                            isJumping = true;
+                            jumpForce = CONFIG.JUMP_FORCE;
+                        }
+                        break;
+                    case 'shift':
+                        isCrouching = true;
+                        break;
+                }
+            });
+
+            document.addEventListener('keyup', function(e) {
+                switch(e.key.toLowerCase()) {
+                    case 'w':
+                    case 's':
+                        joystickLeft.y = 0;
+                        break;
+                    case 'a':
+                    case 'd':
+                        joystickLeft.x = 0;
+                        break;
+                    case 'arrowleft':
+                    case 'arrowright':
+                        joystickRight.x = 0;
+                        break;
+                    case 'arrowup':
+                    case 'arrowdown':
+                        joystickRight.y = 0;
+                        break;
+                    case 'shift':
+                        isCrouching = false;
+                        break;
+                }
             });
         }
 
-        // CREATE THE MOUNTAIN
-        function createMountain() {
-            const size = 800;
-            const segments = 100;
+        // ============================================
+        // THREE.JS GAME INITIALIZATION - FULL
+        // ============================================
+        function initThreeJS() {
+            try {
+                // Create scene with atmospheric fog
+                scene = new THREE.Scene();
+                scene.fog = new THREE.FogExp2(0x87CEEB, 0.001);
+                
+                // Create perspective camera for FPS view
+                camera = new THREE.PerspectiveCamera(
+                    75, // Field of view
+                    window.innerWidth / window.innerHeight, // Aspect ratio
+                    0.1, // Near clipping plane
+                    3000 // Far clipping plane
+                );
+                camera.position.set(0, 1.7, 0);
+                
+                // Create WebGL renderer with high quality settings
+                renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: "high-performance"
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.outputEncoding = THREE.sRGBEncoding;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.2;
+                document.body.appendChild(renderer.domElement);
+                
+                // Setup advanced lighting
+                setupLighting();
+                
+                // Create the mountain terrain
+                createMountainTerrain();
+                
+                // Create the skier character
+                createSkierCharacter();
+                
+                // Create environment (trees, rocks, etc.)
+                createMountainEnvironment();
+                
+                // Create snow particle system
+                createSnowParticleSystem();
+                
+                // Create sky dome
+                createSkyDome();
+                
+                // Start the animation loop
+                requestAnimationFrame(animateGameLoop);
+                
+                // Handle window resize
+                window.addEventListener('resize', handleWindowResize);
+                
+                console.log("Three.js game initialized successfully");
+                
+            } catch (error) {
+                console.error("Failed to initialize Three.js:", error);
+                document.getElementById('start-screen').innerHTML = `
+                    <h1 style="color: #ff6b6b">Initialization Error</h1>
+                    <p>Failed to load the game. Please try refreshing.</p>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.7)">${error.message}</p>
+                `;
+            }
+        }
+
+        function setupLighting() {
+            // Ambient light for overall illumination
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            // Main directional light (sun)
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            sunLight.position.set(100, 200, 100);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.left = -200;
+            sunLight.shadow.camera.right = 200;
+            sunLight.shadow.camera.top = 200;
+            sunLight.shadow.camera.bottom = -200;
+            sunLight.shadow.bias = -0.0001;
+            scene.add(sunLight);
+            
+            // Fill light for softer shadows
+            const fillLight = new THREE.DirectionalLight(0x74b9ff, 0.4);
+            fillLight.position.set(-50, 50, -50);
+            scene.add(fillLight);
+            
+            // Hemisphere light for sky/ground color bleeding
+            const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x2d3436, 0.3);
+            scene.add(hemisphereLight);
+        }
+
+        function createMountainTerrain() {
+            const size = CONFIG.MOUNTAIN_SIZE;
+            const segments = CONFIG.MOUNTAIN_SEGMENTS;
             
             const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
             const vertices = geometry.attributes.position.array;
+            terrainHeightMap = [];
             
-            // MAKE A REAL MOUNTAIN
+            // Generate complex mountain terrain using multiple noise layers
             for (let i = 0; i < vertices.length; i += 3) {
                 const x = vertices[i];
                 const z = vertices[i + 2];
                 
                 let height = 0;
                 
-                // BIG CENTER PEAK
-                const dist = Math.sqrt(x*x + z*z);
-                height += Math.max(0, 300 - dist * 0.2);
+                // Layer 1: Central peak - highest point in the middle
+                const distanceFromCenter = Math.sqrt(x * x + z * z);
+                height += Math.max(0, CONFIG.START_ALTITUDE - distanceFromCenter * 0.25);
                 
-                // MOUNTAIN SHAPE
-                height += Math.sin(x * 0.01) * 80;
-                height += Math.sin(z * 0.008) * 70;
+                // Layer 2: Major mountain ranges (low frequency)
+                height += Math.sin(x * 0.002) * 200;
+                height += Math.sin(z * 0.0015) * 180;
                 
-                // TERRAIN DETAILS
-                height += Math.sin(x * 0.05) * 20;
-                height += Math.sin(z * 0.04) * 15;
+                // Layer 3: Secondary ridges (medium frequency)
+                height += Math.sin(x * 0.008 + z * 0.005) * 80;
+                height += Math.sin(z * 0.006 - x * 0.003) * 70;
+                
+                // Layer 4: Rocky terrain details (high frequency)
+                height += Math.sin(x * 0.03) * 30;
+                height += Math.sin(z * 0.025) * 25;
+                
+                // Layer 5: Small bumps and imperfections
+                height += Math.sin(x * 0.1) * 12;
+                height += Math.sin(z * 0.08) * 10;
+                
+                // Layer 6: Perlin-like noise for natural variation
+                height += Math.sin((x + z) * 0.02) * 40;
+                height += Math.sin(Math.sqrt(x * x + z * z) * 0.005) * 60;
+                
+                // Layer 7: Random terrain features
+                height += (Math.random() - 0.5) * 20;
                 
                 vertices[i + 1] = height;
+                
+                // Store height data for terrain following
+                terrainHeightMap.push({
+                    x: x,
+                    z: z,
+                    height: height
+                });
             }
             
             geometry.computeVertexNormals();
             
-            const material = new THREE.MeshStandardMaterial({
+            // Create realistic snow material
+            const material = new THREE.MeshPhysicalMaterial({
                 color: 0xffffff,
-                roughness: 0.2
+                roughness: 0.1,
+                metalness: 0.0,
+                clearcoat: 0.6,
+                clearcoatRoughness: 0.1,
+                envMapIntensity: 0.7,
+                side: THREE.DoubleSide,
+                transparent: false,
+                depthWrite: true,
+                depthTest: true
             });
             
             mountain = new THREE.Mesh(geometry, material);
@@ -292,196 +973,507 @@
             mountain.castShadow = true;
             scene.add(mountain);
             
-            // ADD MORE PEAKS SO YOU CAN SEE THEM
-            for (let i = 0; i < 8; i++) {
-                const angle = (i / 8) * Math.PI * 2;
-                const distance = 400 + Math.random() * 300;
+            // Create distant mountain peaks for visual depth
+            createDistantMountainPeaks();
+            
+            // Create rocky cliffs and formations
+            createRockFormations();
+        }
+
+        function createDistantMountainPeaks() {
+            const material = mountain.material;
+            
+            for (let i = 0; i < 10; i++) {
+                const angle = (i / 10) * Math.PI * 2;
+                const distance = 600 + Math.random() * 400;
+                const peakSize = 60 + Math.random() * 50;
+                const peakHeight = 120 + Math.random() * 80;
                 
-                const peakGeo = new THREE.ConeGeometry(40, 100, 8);
-                const peak = new THREE.Mesh(peakGeo, material);
+                const peakGeometry = new THREE.ConeGeometry(peakSize, peakHeight, 12);
+                const peak = new THREE.Mesh(peakGeometry, material);
+                
                 peak.position.set(
                     Math.cos(angle) * distance,
-                    30,
+                    0,
                     Math.sin(angle) * distance
                 );
+                peak.castShadow = true;
+                peak.receiveShadow = true;
                 scene.add(peak);
+                
+                // Add snow caps to peaks
+                const snowCapGeometry = new THREE.SphereGeometry(peakSize * 0.8, 8, 8);
+                const snowCap = new THREE.Mesh(snowCapGeometry, material);
+                snowCap.position.set(
+                    Math.cos(angle) * distance,
+                    peakHeight * 0.7,
+                    Math.sin(angle) * distance
+                );
+                snowCap.scale.y = 0.5;
+                scene.add(snowCap);
             }
         }
 
-        // CREATE SKIER
-        function createSkier() {
+        function createRockFormations() {
+            const rockMaterial = new THREE.MeshStandardMaterial({
+                color: 0x7f8c8d,
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            
+            for (let i = 0; i < 25; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 200 + Math.random() * 300;
+                
+                const rockGeometry = new THREE.DodecahedronGeometry(15 + Math.random() * 20, 1);
+                const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+                
+                rock.position.set(
+                    Math.cos(angle) * distance,
+                    30 + Math.random() * 40,
+                    Math.sin(angle) * distance
+                );
+                rock.scale.set(
+                    Math.random() * 2 + 1,
+                    Math.random() * 1.5 + 0.5,
+                    Math.random() * 2 + 1
+                );
+                rock.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                rock.castShadow = true;
+                scene.add(rock);
+            }
+        }
+
+        function createSkierCharacter() {
             skier = new THREE.Group();
             
-            const bodyGeo = new THREE.CapsuleGeometry(0.3, 1.2, 4, 8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            // Skier body (upper body)
+            const bodyGeometry = new THREE.CapsuleGeometry(0.35, 1.4, 8, 16);
+            const bodyMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0xff4757,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             body.castShadow = true;
             skier.add(body);
             
-            const skiGeo = new THREE.BoxGeometry(1.8, 0.1, 0.25);
-            const skiMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+            // Skis with realistic proportions
+            const skiGeometry = new THREE.BoxGeometry(2.0, 0.12, 0.3);
+            const skiMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x2f3542,
+                roughness: 0.2,
+                metalness: 0.7
+            });
             
-            const leftSki = new THREE.Mesh(skiGeo, skiMat);
-            leftSki.position.set(-0.4, -0.8, 0);
+            const leftSki = new THREE.Mesh(skiGeometry, skiMaterial);
+            leftSki.position.set(-0.5, -0.85, 0);
             leftSki.castShadow = true;
             skier.add(leftSki);
             
-            const rightSki = new THREE.Mesh(skiGeo, skiMat);
-            rightSki.position.set(0.4, -0.8, 0);
+            const rightSki = new THREE.Mesh(skiGeometry, skiMaterial);
+            rightSki.position.set(0.5, -0.85, 0);
             rightSki.castShadow = true;
             skier.add(rightSki);
             
-            // START ON MOUNTAIN PEAK
-            skier.position.y = 305;
-            skier.position.z = 0;
+            // Ski poles
+            const poleGeometry = new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8);
+            const poleMaterial = new THREE.MeshStandardMaterial({
+                color: 0x34495e,
+                roughness: 0.3,
+                metalness: 0.5
+            });
+            
+            const leftPole = new THREE.Mesh(poleGeometry, poleMaterial);
+            leftPole.position.set(-0.3, -0.3, 0.3);
+            leftPole.rotation.x = Math.PI / 6;
+            skier.add(leftPole);
+            
+            const rightPole = new THREE.Mesh(poleGeometry, poleMaterial);
+            rightPole.position.set(0.3, -0.3, 0.3);
+            rightPole.rotation.x = Math.PI / 6;
+            skier.add(rightPole);
+            
+            // Position skier at the mountain peak
+            skier.position.set(0, CONFIG.START_ALTITUDE + 5, 0);
+            skier.rotation.y = Math.PI; // Face downhill
             
             scene.add(skier);
             
-            // ATTACH CAMERA
-            camera.position.set(0, 1.5, 4);
-            skier.add(camera);
+            // Camera is separate but follows skier
+            camera.position.set(0, 1.7, 0);
         }
 
-        // INIT GAME
-        function initGame() {
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x87CEEB, 10, 500);
+        function createMountainEnvironment() {
+            trees = [];
+            treesPassed = 0;
             
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            // Pine tree components
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
+            const leavesGeometry = new THREE.ConeGeometry(3.5, 9, 8);
             
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            document.body.appendChild(renderer.domElement);
-            
-            // LIGHTS
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambient);
-            
-            const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-            sun.position.set(100, 200, 100);
-            sun.castShadow = true;
-            scene.add(sun);
-            
-            // SKY
-            const skyGeo = new THREE.SphereGeometry(1000, 32, 32);
-            const skyMat = new THREE.MeshBasicMaterial({
-                color: 0x87CEEB,
-                side: THREE.BackSide
+            const trunkMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x8B4513,
+                roughness: 0.9,
+                metalness: 0.0
             });
-            const sky = new THREE.Mesh(skyGeo, skyMat);
-            scene.add(sky);
             
-            // CREATE MOUNTAIN AND SKIER
-            createMountain();
-            createSkier();
+            const leavesMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x2ecc71,
+                roughness: 0.8,
+                metalness: 0.0,
+                transparent: false
+            });
             
-            // ADD TREES
-            for (let i = 0; i < 50; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 150 + Math.random() * 300;
+            // Create tree clusters at various altitudes
+            for (let cluster = 0; cluster < 20; cluster++) {
+                const clusterAngle = Math.random() * Math.PI * 2;
+                const clusterDistance = 150 + Math.random() * 350;
                 
-                const trunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 4, 8);
-                const leavesGeo = new THREE.ConeGeometry(3, 8, 8);
+                // Avoid placing trees on the peak
+                if (clusterDistance < 200) continue;
                 
-                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-                const leavesMat = new THREE.MeshStandardMaterial({ color: 0x2ecc71 });
+                const clusterX = Math.cos(clusterAngle) * clusterDistance;
+                const clusterZ = Math.sin(clusterAngle) * clusterDistance;
                 
-                const tree = new THREE.Group();
-                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-                trunk.position.y = 2;
-                tree.add(trunk);
+                const treesInCluster = Math.floor(Math.random() * 5) + 2;
                 
-                const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-                leaves.position.y = 6;
-                tree.add(leaves);
-                
-                tree.position.set(
-                    Math.cos(angle) * dist,
-                    10,
-                    Math.sin(angle) * dist
-                );
-                scene.add(tree);
+                for (let i = 0; i < treesInCluster; i++) {
+                    const treeAngle = Math.random() * Math.PI * 2;
+                    const treeDistance = Math.random() * 25;
+                    
+                    const treeX = clusterX + Math.cos(treeAngle) * treeDistance;
+                    const treeZ = clusterZ + Math.sin(treeAngle) * treeDistance;
+                    
+                    const tree = new THREE.Group();
+                    
+                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                    trunk.position.y = 2.5;
+                    trunk.castShadow = true;
+                    tree.add(trunk);
+                    
+                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                    leaves.position.y = 7;
+                    leaves.castShadow = true;
+                    tree.add(leaves);
+                    
+                    tree.position.set(treeX, 0, treeZ);
+                    const scale = 0.7 + Math.random() * 0.8;
+                    tree.scale.setScalar(scale);
+                    tree.rotation.y = Math.random() * Math.PI * 2;
+                    
+                    scene.add(tree);
+                    trees.push(tree);
+                }
             }
             
-            animate();
-            
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
+            document.getElementById('tree-count').textContent = trees.length;
         }
 
-        // UPDATE GAME
-        function updateGame(deltaTime) {
+        function createSnowParticleSystem() {
+            const particleCount = CONFIG.SNOW_PARTICLES;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 150;
+                positions[i + 1] = Math.random() * 80 + 40;
+                positions[i + 2] = (Math.random() - 0.5) * 150;
+                sizes[i / 3] = Math.random() * 0.8 + 0.3;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 1.2,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                sizeAttenuation: true
+            });
+            
+            snowParticleSystem = new THREE.Points(geometry, material);
+            scene.add(snowParticleSystem);
+        }
+
+        function createSkyDome() {
+            const skyGeometry = new THREE.SphereGeometry(2000, 32, 32);
+            const skyMaterial = new THREE.MeshBasicMaterial({
+                color: 0x87CEEB,
+                side: THREE.BackSide,
+                fog: false
+            });
+            const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+            scene.add(sky);
+        }
+
+        function handleWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // ============================================
+        // GAME LOGIC AND UPDATES - FULL
+        // ============================================
+        function updateGameLogic(deltaTime) {
             if (!gameStarted) return;
             
-            // SPEED
-            speed += 0.0005 * deltaTime * 60;
-            if (isCrouching) speed += 0.0003 * deltaTime * 60;
-            speed = Math.min(speed, 1.0);
+            // Hide camera hint after 5 seconds
+            if (gameStarted) {
+                setTimeout(() => {
+                    const hint = document.getElementById('camera-hint');
+                    if (hint) hint.style.opacity = '0';
+                }, 5000);
+            }
             
-            // TURNING
-            skier.rotation.y -= joystickLeft.x * 0.03 * speed;
+            // Calculate acceleration based on slope and crouch state
+            const acceleration = 0.0008;
+            speed += acceleration * deltaTime * 60;
+            if (isCrouching) {
+                speed += acceleration * 0.5 * deltaTime * 60 * CONFIG.CROUCH_MULTIPLIER;
+            }
+            speed = Math.min(speed, CONFIG.MAX_SPEED / 100);
             
-            // CAMERA LOOK
-            camera.rotation.y -= joystickRight.x * 0.02;
-            camera.rotation.x -= joystickRight.y * 0.02;
-            camera.rotation.x = Math.max(-0.5, Math.min(0.5, camera.rotation.x));
+            // Apply turning from left joystick
+            if (Math.abs(joystickLeft.x) > 0.1) {
+                skier.rotation.y -= joystickLeft.x * CONFIG.TURN_SENSITIVITY * (speed + 0.2);
+            }
             
-            // MOVE FORWARD
-            const forwardX = Math.sin(skier.rotation.y);
-            const forwardZ = Math.cos(skier.rotation.y);
+            // Apply forward/backward movement from left joystick
+            if (Math.abs(joystickLeft.y) > 0.1) {
+                const forwardX = Math.sin(skier.rotation.y);
+                const forwardZ = Math.cos(skier.rotation.y);
+                
+                skier.position.x += forwardX * joystickLeft.y * speed * deltaTime * 120;
+                skier.position.z += forwardZ * joystickLeft.y * speed * deltaTime * 120;
+            }
             
-            skier.position.x += forwardX * speed * deltaTime * 100;
-            skier.position.z += forwardZ * speed * deltaTime * 100;
+            // Apply camera look from right joystick (FPS controls)
+            if (Math.abs(joystickRight.x) > 0.1 || Math.abs(joystickRight.y) > 0.1) {
+                cameraYaw -= joystickRight.x * CONFIG.LOOK_SENSITIVITY;
+                cameraPitch -= joystickRight.y * CONFIG.LOOK_SENSITIVITY * 0.7;
+                
+                // Limit vertical look to prevent looking straight up/down
+                cameraPitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, cameraPitch));
+            }
             
-            // JUMP
+            // Jump physics
             if (isJumping) {
-                jumpForce -= 0.015 * deltaTime * 60;
+                jumpForce -= CONFIG.GRAVITY * deltaTime * 60;
                 skier.position.y += jumpForce * deltaTime * 100;
                 
                 if (skier.position.y <= altitude) {
                     skier.position.y = altitude;
                     isJumping = false;
+                    jumpForce = 0;
                 }
             } else {
-                // FOLLOW TERRAIN
-                altitude = Math.max(10, 300 - distance * 0.005);
+                // Follow terrain height
+                updateAltitudeFromTerrain();
                 skier.position.y = altitude + 1;
             }
             
-            // UPDATE UI
-            document.getElementById('altitude').textContent = Math.round(altitude) + 'm';
-            document.getElementById('speed').textContent = Math.round(speed * 120) + ' km/h';
+            // Update distance traveled
+            distanceTraveled += speed * deltaTime * 80;
+            
+            // Update camera position and rotation
+            updateCameraPosition();
+            
+            // Update UI elements
+            updateGameUI();
+            
+            // Update particle systems
+            updateSnowParticles();
+            
+            // Update tree positions and check for collisions
+            updateTrees();
+            
+            // Update mountain view indicator
+            updateMountainViewIndicator();
         }
 
-        let lastTime = 0;
-        let distance = 0;
+        function updateAltitudeFromTerrain() {
+            // Simple terrain following - in a full game you'd use raycasting
+            const terrainHeight = Math.max(10, CONFIG.START_ALTITUDE - distanceTraveled * 0.004);
+            altitude = terrainHeight;
+        }
 
-        function animate(time = 0) {
-            requestAnimationFrame(animate);
+        function updateCameraPosition() {
+            // FPS camera: Position is relative to skier's head
+            const cameraDistance = 0.1;
+            const cameraHeight = isCrouching ? 1.2 : 1.7;
             
-            const deltaTime = time ? (time - lastTime) / 1000 : 0.016;
-            lastTime = time;
+            // Calculate camera offset based on look angles
+            const cameraOffsetX = Math.sin(cameraYaw) * Math.cos(cameraPitch) * cameraDistance;
+            const cameraOffsetY = Math.sin(cameraPitch) * cameraDistance + cameraHeight;
+            const cameraOffsetZ = Math.cos(cameraYaw) * Math.cos(cameraPitch) * cameraDistance;
             
-            updateGame(deltaTime);
+            // Position camera relative to skier
+            camera.position.x = skier.position.x + cameraOffsetX;
+            camera.position.y = skier.position.y + cameraOffsetY;
+            camera.position.z = skier.position.z + cameraOffsetZ;
             
-            // UPDATE DISTANCE
-            distance += speed * deltaTime * 60;
+            // Make camera look in the direction of view
+            const lookAtX = skier.position.x + Math.sin(cameraYaw);
+            const lookAtY = skier.position.y + cameraHeight + Math.sin(cameraPitch) * 2;
+            const lookAtZ = skier.position.z + Math.cos(cameraYaw);
             
-            // CAMERA FOLLOW
-            camera.position.z = 5 - speed * 2;
+            camera.lookAt(lookAtX, lookAtY, lookAtZ);
+        }
+
+        function updateGameUI() {
+            const speedKmh = Math.round(speed * 180);
+            const speedPercentage = Math.min(speed * 83, 100);
+            const viewAngleDegrees = Math.round(cameraYaw * 180 / Math.PI);
             
+            document.getElementById('altitude').textContent = Math.round(altitude) + 'm';
+            document.getElementById('speed').textContent = speedKmh + ' km/h';
+            document.getElementById('distance').textContent = Math.round(distanceTraveled) + 'm';
+            document.getElementById('view-angle').textContent = viewAngleDegrees + '°';
+            document.getElementById('tree-count').textContent = treesPassed;
+            document.getElementById('speed-fill').style.width = speedPercentage + '%';
+            document.getElementById('speed-text').textContent = speedKmh + ' km/h';
+            
+            // Update debug info
+            document.getElementById('debug-info').innerHTML = `
+                DEBUG:<br>
+                X: ${skier.position.x.toFixed(1)}<br>
+                Y: ${skier.position.y.toFixed(1)}<br>
+                Z: ${skier.position.z.toFixed(1)}<br>
+                Speed: ${speed.toFixed(3)}<br>
+                Cam: ${cameraYaw.toFixed(2)}/${cameraPitch.toFixed(2)}
+            `;
+        }
+
+        function updateSnowParticles() {
+            if (!snowParticleSystem) return;
+            
+            const positions = snowParticleSystem.geometry.attributes.position.array;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                // Snow falling effect
+                positions[i + 1] -= 0.15;
+                
+                // Wind effect with slight variation
+                positions[i] += Math.sin(Date.now() * 0.0003 + i) * 0.04;
+                positions[i + 2] += Math.cos(Date.now() * 0.0003 + i) * 0.04;
+                
+                // Reset particles that fall below
+                if (positions[i + 1] < 0) {
+                    positions[i] = (Math.random() - 0.5) * 200;
+                    positions[i + 1] = Math.random() * 100 + 100;
+                    positions[i + 2] = (Math.random() - 0.5) * 200;
+                }
+            }
+            
+            snowParticleSystem.geometry.attributes.position.needsUpdate = true;
+            
+            // Center particle system on player
+            snowParticleSystem.position.x = skier.position.x;
+            snowParticleSystem.position.z = skier.position.z;
+        }
+
+        function updateTrees() {
+            // Count trees passed (simple distance check)
+            trees.forEach(tree => {
+                const distanceToTree = Math.sqrt(
+                    Math.pow(tree.position.x - skier.position.x, 2) +
+                    Math.pow(tree.position.z - skier.position.z, 2)
+                );
+                
+                if (distanceToTree < 10) {
+                    treesPassed = Math.max(treesPassed, treesPassed + 1);
+                }
+                
+                // Gentle tree animation
+                tree.rotation.y += Math.sin(Date.now() * 0.0002 + tree.position.x) * 0.0002;
+            });
+        }
+
+        function updateMountainViewIndicator() {
+            const viewIndicator = document.getElementById('mountain-view');
+            
+            if (altitude > 400) {
+                viewIndicator.textContent = '🏔️ ON MOUNTAIN PEAK';
+                viewIndicator.style.background = 'linear-gradient(145deg, rgba(52, 152, 219, 0.4), rgba(41, 128, 185, 0.3))';
+            } else if (altitude > 250) {
+                viewIndicator.textContent = '⛰️ ON UPPER SLOPES';
+                viewIndicator.style.background = 'linear-gradient(145deg, rgba(46, 204, 113, 0.4), rgba(39, 174, 96, 0.3))';
+            } else if (altitude > 100) {
+                viewIndicator.textContent = '🌲 IN PINE FOREST';
+                viewIndicator.style.background = 'linear-gradient(145deg, rgba(39, 174, 96, 0.4), rgba(46, 204, 113, 0.3))';
+            } else {
+                viewIndicator.textContent = '🏔️ NEAR MOUNTAIN BASE';
+                viewIndicator.style.background = 'linear-gradient(145deg, rgba(155, 89, 182, 0.4), rgba(142, 68, 173, 0.3))';
+            }
+        }
+
+        function animateGameLoop(currentTime) {
+            requestAnimationFrame(animateGameLoop);
+            
+            const deltaTime = currentTime ? (currentTime - lastFrameTime) / 1000 : 0.016;
+            lastFrameTime = currentTime;
+            
+            // Cap deltaTime to prevent physics issues
+            const safeDeltaTime = Math.min(deltaTime, 0.1);
+            
+            updateGameLogic(safeDeltaTime);
+            
+            // Render the scene
             renderer.render(scene, camera);
         }
 
-        // START EVERYTHING
-        window.addEventListener('load', () => {
-            setupControls();
-            initGame();
-        });
+        // ============================================
+        // GAME START FUNCTION
+        // ============================================
+        function startGame() {
+            if (gameStarted) return;
+            
+            gameStarted = true;
+            
+            // Fade out start screen
+            const startScreen = document.getElementById('start-screen');
+            startScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                startScreen.style.display = 'none';
+            }, 1000);
+            
+            // Start with a little speed
+            speed = 0.05;
+            
+            console.log("Game started!");
+        }
+
+        // ============================================
+        // INITIALIZE EVERYTHING WHEN PAGE LOADS
+        // ============================================
+        function initializeGame() {
+            console.log("Initializing Ski Mountain game...");
+            
+            // Create snow effect
+            createSnowfall();
+            
+            // Setup mobile controls
+            setupMobileControls();
+            
+            // Initialize Three.js game
+            initThreeJS();
+            
+            console.log("Game initialization complete!");
+        }
+
+        // Start everything when the page loads
+        window.addEventListener('load', initializeGame);
     </script>
 </body>
 </html>
