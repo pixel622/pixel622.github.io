@@ -1,38 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Mobile Snow Ski FPS</title>
+<title>Mobile Ski Mountain</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: #000;
+  background: #bcd;
   touch-action: none;
 }
 canvas {
   display: block;
 }
-.button {
+
+/* JOYSTICKS */
+.joystick {
   position: absolute;
-  background: rgba(255,255,255,0.15);
-  border: 2px solid rgba(255,255,255,0.4);
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  width: 70px;
-  height: 70px;
-  color: white;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
 }
-#left { bottom: 20px; left: 20px; }
-#right { bottom: 20px; left: 110px; }
-#faster { bottom: 110px; left: 65px; }
-#slower { bottom: 20px; right: 20px; }
-#shoot { bottom: 110px; right: 20px; }
+.stick {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  left: 35px;
+  top: 35px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+}
+#moveJoy { left: 20px; bottom: 20px; }
+#lookJoy { right: 20px; bottom: 20px; }
+
 #crosshair {
   position: absolute;
   top: 50%;
@@ -40,127 +43,127 @@ canvas {
   width: 6px;
   height: 6px;
   background: white;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
 }
 </style>
 </head>
 <body>
 
-<div id="left" class="button">⬅️</div>
-<div id="right" class="button">➡️</div>
-<div id="faster" class="button">⏩</div>
-<div id="slower" class="button">⏸️</div>
-<div id="shoot" class="button">🔫</div>
+<div id="moveJoy" class="joystick"><div class="stick"></div></div>
+<div id="lookJoy" class="joystick"><div class="stick"></div></div>
 <div id="crosshair"></div>
 
-<canvas id="game"></canvas>
+<canvas id="c"></canvas>
 
 <script>
-const canvas = document.getElementById("game");
+const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+resize();
+window.onresize = resize;
 
-let yaw = 0;
-let pitch = 0;
-let speed = 2;
-let x = 0;
-let z = 0;
-let bullets = [];
-let enemies = [];
-
-function resize() {
+function resize(){
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 }
-addEventListener("resize", resize);
 
-// Touch look
-let lastTouch = null;
-canvas.addEventListener("touchstart", e => lastTouch = e.touches[0]);
-canvas.addEventListener("touchmove", e => {
-  if (!lastTouch) return;
-  let t = e.touches[0];
-  yaw += (t.clientX - lastTouch.clientX) * 0.002;
-  pitch += (t.clientY - lastTouch.clientY) * 0.002;
-  pitch = Math.max(-1.2, Math.min(1.2, pitch));
-  lastTouch = t;
-});
-canvas.addEventListener("touchend", () => lastTouch = null);
+/* PLAYER */
+let px = 0;
+let pz = 0;
+let yaw = 0;
+let speed = 0;
+let gravity = 0.02;
 
-// Buttons
-const btn = id => document.getElementById(id);
-let controls = { left:false, right:false, fast:false, slow:false };
+/* TERRAIN HEIGHT FUNCTION (BUMPS) */
+function heightAt(x,z){
+  return (
+    Math.sin(x*0.2)*1.5 +
+    Math.sin(z*0.15)*2 +
+    Math.sin((x+z)*0.1)*1
+  );
+}
 
-["left","right","faster","slower"].forEach(id=>{
-  btn(id).ontouchstart = () => controls[id==="left"?"left":id==="right"?"right":id==="faster"?"fast":"slow"] = true;
-  btn(id).ontouchend = () => controls[id==="left"?"left":id==="right"?"right":id==="faster"?"fast":"slow"] = false;
-});
+/* JOYSTICK SYSTEM */
+function joystick(elem, cb){
+  const stick = elem.children[0];
+  let active = false;
+  let sx=0, sy=0;
 
-btn("shoot").ontouchstart = () => {
-  bullets.push({ x, z, dir: yaw });
-};
-
-// Spawn enemies
-setInterval(()=>{
-  enemies.push({
-    x: (Math.random()-0.5)*20,
-    z: z - 80 - Math.random()*50
-  });
-}, 2000);
-
-function update() {
-  if (controls.left) yaw += 0.04;
-  if (controls.right) yaw -= 0.04;
-  if (controls.fast) speed += 0.02;
-  if (controls.slow) speed -= 0.02;
-  speed = Math.max(1, Math.min(5, speed));
-
-  z -= speed;
-  x += Math.sin(yaw) * speed * 0.2;
-
-  bullets.forEach(b=>{
-    b.z -= 6;
-    b.x += Math.sin(b.dir)*6;
+  elem.addEventListener("touchstart", e=>{
+    active = true;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
   });
 
-  bullets = bullets.filter(b => b.z > z-200);
+  elem.addEventListener("touchmove", e=>{
+    if(!active) return;
+    let dx = e.touches[0].clientX - sx;
+    let dy = e.touches[0].clientY - sy;
+    let d = Math.hypot(dx,dy);
+    if(d>40){ dx*=40/d; dy*=40/d; }
+    stick.style.transform = `translate(${dx}px,${dy}px)`;
+    cb(dx/40,dy/40);
+  });
 
-  enemies = enemies.filter(e=>{
-    bullets.forEach(b=>{
-      if (Math.hypot(b.x-e.x, b.z-e.z) < 2) e.hit = true;
-    });
-    return !e.hit && e.z < z+10;
+  elem.addEventListener("touchend", ()=>{
+    active = false;
+    stick.style.transform = "translate(0,0)";
+    cb(0,0);
   });
 }
 
-function draw() {
-  ctx.fillStyle = "#bcd";
+let moveX = 0;
+let lookX = 0;
+let lookY = 0;
+
+joystick(document.getElementById("moveJoy"), (x,y)=>{
+  moveX = x;
+});
+joystick(document.getElementById("lookJoy"), (x,y)=>{
+  lookX = x;
+  lookY = y;
+});
+
+/* GAME LOOP */
+function update(){
+  yaw -= lookX * 0.04;
+
+  speed += gravity;
+  speed = Math.min(speed, 2.5);
+
+  px += Math.sin(yaw) * speed + moveX * 0.5;
+  pz -= Math.cos(yaw) * speed;
+
+  // slow uphill bumps
+  let slope = heightAt(px,pz) - heightAt(px,pz+1);
+  speed -= slope * 0.05;
+  speed = Math.max(speed,0.2);
+}
+
+function draw(){
+  ctx.fillStyle = "#cfe8ff";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // fog ground
-  for (let i=0;i<200;i++) {
-    let dz = i*4;
-    let scale = 300/(dz+1);
-    let sx = canvas.width/2 + (x*scale);
-    let sy = canvas.height/2 + dz*2;
-    ctx.fillStyle = `rgb(240,240,240)`;
-    ctx.fillRect(sx-1000*scale, sy, 2000*scale, 2);
-  }
+  for(let i=1;i<200;i++){
+    let dz = i*2;
+    let wx = px;
+    let wz = pz - dz;
+    let h = heightAt(wx,wz);
 
-  enemies.forEach(e=>{
-    let dz = e.z - z;
-    let dx = e.x - x;
-    let scale = 300/(dz);
-    if (scale<0) return;
-    let sx = canvas.width/2 + dx*scale;
-    let sy = canvas.height/2 + dz*2;
-    ctx.fillStyle = "red";
-    ctx.fillRect(sx-20*scale, sy-40*scale, 40*scale, 40*scale);
-  });
+    let scale = 400/dz;
+    let y = canvas.height/2 + h*40*scale;
+    let w = canvas.width * scale;
+
+    ctx.fillStyle = `rgb(${240-i/2},${240-i/2},${240-i/2})`;
+    ctx.fillRect(
+      canvas.width/2 - w/2,
+      y,
+      w,
+      3
+    );
+  }
 }
 
-function loop() {
+function loop(){
   update();
   draw();
   requestAnimationFrame(loop);
