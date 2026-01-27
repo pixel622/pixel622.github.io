@@ -243,6 +243,125 @@
             white-space: nowrap;
         }
         
+        /* JOYSTICK CONTROLS - NEW */
+        #joystickContainer {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 150px;
+            height: 150px;
+            z-index: 100;
+            pointer-events: none;
+            display: none; /* Hidden by default, shown on mobile */
+        }
+        
+        @media (max-width: 768px) {
+            #joystickContainer {
+                display: block;
+            }
+        }
+        
+        #joystickBase {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            bottom: 0;
+            left: 0;
+            pointer-events: auto;
+            touch-action: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        #joystickHandle {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at 30% 30%, #4fc3f7, #1976d2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* BOOST BUTTON - NEW */
+        #boostControl {
+            position: absolute;
+            bottom: 30px;
+            right: 120px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 193, 7, 0.9), rgba(245, 124, 0, 0.9));
+            border: 2px solid rgba(255, 235, 59, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            pointer-events: auto;
+            touch-action: none;
+            transition: all 0.1s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        
+        #boostControl:active {
+            transform: scale(0.9);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.9), rgba(255, 193, 7, 0.9));
+        }
+        
+        .boost-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* BOOST INDICATOR - NEW */
+        #boostIndicator {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            width: 100px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #boostBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #ff9800);
+            transform: scaleX(1);
+            transform-origin: left;
+            transition: transform 0.1s;
+        }
+        
+        .boost-text {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            color: #ffc107;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
         /* SKI CONTROLS */
         #skiControls {
             position: absolute;
@@ -488,6 +607,13 @@
                 bottom: 160px;
             }
             
+            #boostControl {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+                right: 100px;
+            }
+            
             .pause-title {
                 font-size: 28px;
             }
@@ -521,6 +647,13 @@
             #tiltIndicator {
                 height: 50px;
                 width: 80px;
+            }
+            
+            #boostControl {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+                right: 80px;
             }
             
             #topUI {
@@ -574,6 +707,12 @@
             </div>
         </div>
         
+        <!-- BOOST INDICATOR - NEW -->
+        <div class="boost-text">BOOST</div>
+        <div id="boostIndicator">
+            <div id="boostBar"></div>
+        </div>
+        
         <!-- SPEED INDICATOR -->
         <div id="speedIndicator">
             <div class="speed-circle"></div>
@@ -590,6 +729,19 @@
             <div class="tilt-marker"></div>
             <div class="tilt-pointer" id="tiltPointer"></div>
             <div class="tilt-label">TILT</div>
+        </div>
+        
+        <!-- JOYSTICK - NEW -->
+        <div id="joystickContainer">
+            <div id="joystickBase">
+                <div id="joystickHandle"></div>
+            </div>
+        </div>
+        
+        <!-- BOOST BUTTON - NEW -->
+        <div id="boostControl">
+            🔥
+            <div class="boost-label">BOOST</div>
         </div>
         
         <!-- SKI CONTROLS -->
@@ -615,8 +767,8 @@
         
         <!-- INSTRUCTIONS -->
         <div id="instructions">
-            <div>Use LEFT/RIGHT buttons to steer</div>
-            <div>Press JUMP for tricks</div>
+            <div>Use LEFT/RIGHT buttons or JOYSTICK to steer</div>
+            <div>Press JUMP for tricks | Press BOOST for speed</div>
             <div>Ski down the mountain as far as you can!</div>
         </div>
     </div>
@@ -657,7 +809,7 @@
         const GameConfig = {
             skiing: {
                 baseSpeed: 5,
-                maxSpeed: 120,
+                maxSpeed: 150, // Increased from 120
                 acceleration: 8,
                 deceleration: 3,
                 turnSpeed: 2.5,
@@ -665,7 +817,11 @@
                 gravity: 15,
                 airControl: 0.5,
                 slopeAcceleration: 10,
-                friction: 0.95
+                friction: 0.95,
+                boostMultiplier: 2.0, // NEW: Boost multiplier
+                boostDuration: 3.0, // NEW: Boost duration in seconds
+                boostCooldown: 10.0, // NEW: Boost cooldown in seconds
+                boostChargeRate: 20.0 // NEW: Boost charge per second
             },
             mountain: {
                 width: 200,
@@ -681,7 +837,8 @@
                 speedMultiplier: 2,
                 jumpMultiplier: 10,
                 trickMultiplier: 50,
-                comboMultiplier: 1.5
+                comboMultiplier: 1.5,
+                boostMultiplier: 3 // NEW: Extra points while boosting
             },
             visuals: {
                 fogDensity: 0.002,
@@ -692,20 +849,138 @@
 
         // ==================== GLOBAL VARIABLES ====================
         let scene, camera, renderer, controls;
-        let game, buttonController;
+        let game, buttonController, joystick; // NEW: Added joystick
         let deltaTime = 0;
         let gameTime = 0;
         let isGameStarted = false;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let snowflakes = [];
 
-        // ==================== BUTTON CONTROLLER ====================
+        // ==================== JOYSTICK CONTROLLER - NEW ====================
+        class JoystickController {
+            constructor() {
+                this.base = document.getElementById('joystickBase');
+                this.handle = document.getElementById('joystickHandle');
+                this.active = false;
+                this.maxDistance = 40;
+                this.position = { x: 0, y: 0 };
+                this.normalized = { x: 0, y: 0 };
+                this.baseRect = null;
+                this.centerX = 0;
+                this.centerY = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                this.updateBaseRect();
+                
+                // Touch events
+                this.base.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    this.onStart(touch.clientX, touch.clientY);
+                }, { passive: false });
+                
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (this.active) {
+                        const touch = e.touches[0];
+                        this.onMove(touch.clientX, touch.clientY);
+                    }
+                }, { passive: false });
+                
+                document.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.onEnd();
+                }, { passive: false });
+                
+                // Mouse events for testing
+                if (!isMobile) {
+                    this.base.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        this.onStart(e.clientX, e.clientY);
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        e.preventDefault();
+                        if (this.active) {
+                            this.onMove(e.clientX, e.clientY);
+                        }
+                    });
+                    
+                    document.addEventListener('mouseup', (e) => {
+                        e.preventDefault();
+                        this.onEnd();
+                    });
+                }
+                
+                // Update rect on resize
+                window.addEventListener('resize', () => this.updateBaseRect());
+            }
+            
+            updateBaseRect() {
+                this.baseRect = this.base.getBoundingClientRect();
+                this.centerX = this.baseRect.left + this.baseRect.width / 2;
+                this.centerY = this.baseRect.top + this.baseRect.height / 2;
+            }
+            
+            onStart(clientX, clientY) {
+                this.active = true;
+                this.updateBaseRect();
+                this.onMove(clientX, clientY);
+            }
+            
+            onMove(clientX, clientY) {
+                if (!this.active) return;
+                
+                let dx = clientX - this.centerX;
+                let dy = clientY - this.centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > this.maxDistance) {
+                    dx = (dx / distance) * this.maxDistance;
+                    dy = (dy / distance) * this.maxDistance;
+                }
+                
+                this.handle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                this.normalized.x = dx / this.maxDistance;
+                this.normalized.y = -dy / this.maxDistance;
+                this.position.x = dx;
+                this.position.y = dy;
+            }
+            
+            onEnd() {
+                this.active = false;
+                this.normalized.x = 0;
+                this.normalized.y = 0;
+                this.position.x = 0;
+                this.position.y = 0;
+                this.handle.style.transform = 'translate(-50%, -50%)';
+            }
+            
+            getDirection() {
+                const magnitude = Math.sqrt(this.normalized.x * this.normalized.x + this.normalized.y * this.normalized.y);
+                return {
+                    x: this.normalized.x,
+                    y: this.normalized.y,
+                    magnitude: magnitude > 1 ? 1 : magnitude
+                };
+            }
+            
+            isActive() {
+                return this.active;
+            }
+        }
+
+        // ==================== BUTTON CONTROLLER - MODIFIED ====================
         class ButtonController {
             constructor() {
                 this.buttons = {
                     left: false,
                     right: false,
-                    jump: false
+                    jump: false,
+                    boost: false // NEW: Boost button
                 };
                 
                 this.buttonElements = {};
@@ -713,7 +988,7 @@
             }
             
             init() {
-                const buttons = ['leftControl', 'rightControl', 'jumpControl'];
+                const buttons = ['leftControl', 'rightControl', 'jumpControl', 'boostControl']; // NEW: Added boostControl
                 
                 buttons.forEach(btnId => {
                     const element = document.getElementById(btnId);
@@ -788,6 +1063,16 @@
             getAllButtons() {
                 return { ...this.buttons };
             }
+            
+            setButtonCooldown(buttonName, cooldownTime) {
+                const element = this.buttonElements[buttonName];
+                if (element) {
+                    element.style.opacity = '0.5';
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                    }, cooldownTime * 1000);
+                }
+            }
         }
 
         // ==================== SNOW EFFECT ====================
@@ -841,7 +1126,7 @@
             }
         }
 
-        // ==================== SKIER CLASS ====================
+        // ==================== SKIER CLASS - MODIFIED ====================
         class Skier {
             constructor() {
                 // First-person view - no visible player model
@@ -858,6 +1143,14 @@
                 this.isJumping = false;
                 this.jumpCooldown = 0;
                 
+                // NEW: Boost system
+                this.isBoosting = false;
+                this.boostCharge = 100; // Start with full boost
+                this.maxBoostCharge = 100;
+                this.boostTimer = 0;
+                this.boostCooldown = 0;
+                this.boostEffect = null;
+                
                 // Ski poles (visual only, not rendered)
                 this.leftPole = new THREE.Vector3(-0.5, 0, 1);
                 this.rightPole = new THREE.Vector3(0.5, 0, 1);
@@ -869,6 +1162,7 @@
                 this.trickCount = 0;
                 this.combo = 0;
                 this.score = 0;
+                this.boostUsed = 0; // NEW: Track boost usage
                 
                 // Ski tracks
                 this.trackPositions = [];
@@ -878,6 +1172,10 @@
                 // Particle system for snow spray
                 this.particleSystem = this.createParticleSystem();
                 scene.add(this.particleSystem);
+                
+                // NEW: Boost effect particle system
+                this.boostParticleSystem = this.createBoostParticleSystem();
+                scene.add(this.boostParticleSystem);
                 
                 // Add to scene
                 scene.add(this.mesh);
@@ -906,9 +1204,26 @@
                 return new THREE.Points(geometry, material);
             }
             
+            // NEW: Create boost particle system
+            createBoostParticleSystem() {
+                const geometry = new THREE.BufferGeometry();
+                const material = new THREE.PointsMaterial({
+                    color: 0xff9800,
+                    size: 0.3,
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending
+                });
+                return new THREE.Points(geometry, material);
+            }
+            
             update(deltaTime) {
                 // Update cooldowns
                 if (this.jumpCooldown > 0) this.jumpCooldown -= deltaTime;
+                if (this.boostCooldown > 0) this.boostCooldown -= deltaTime;
+                
+                // NEW: Update boost system
+                this.updateBoost(deltaTime);
                 
                 // Handle input
                 this.handleSteering(deltaTime);
@@ -949,13 +1264,18 @@
                     this.speed += slopeAcceleration * deltaTime;
                 }
                 
+                // NEW: Apply boost multiplier if boosting
+                const currentMaxSpeed = this.isBoosting ? 
+                    GameConfig.skiing.maxSpeed * GameConfig.skiing.boostMultiplier : 
+                    GameConfig.skiing.maxSpeed;
+                
                 // Apply friction
                 if (this.isOnGround) {
                     this.speed *= GameConfig.skiing.friction;
                 }
                 
                 // Limit speed
-                this.speed = Math.min(this.speed, GameConfig.skiing.maxSpeed);
+                this.speed = Math.min(this.speed, currentMaxSpeed);
                 
                 // Update velocity based on speed and direction
                 this.velocity.x = Math.sin(this.turnAngle) * this.speed;
@@ -979,8 +1299,14 @@
                 // Update particles
                 this.updateParticles(deltaTime);
                 
+                // NEW: Update boost particles
+                this.updateBoostParticles(deltaTime);
+                
                 // Update tilt indicator
                 this.updateTiltIndicator();
+                
+                // NEW: Update boost UI
+                this.updateBoostUI();
                 
                 // Check if fallen off mountain
                 if (this.mesh.position.y < -100) {
@@ -988,25 +1314,134 @@
                 }
             }
             
-            handleSteering(deltaTime) {
-                // Get button states
-                const buttons = buttonController.getAllButtons();
-                
-                // Turning
-                if (buttons.left) {
-                    this.turnAngle += this.turnSpeed * deltaTime;
+            // NEW: Update boost system
+            updateBoost(deltaTime) {
+                if (this.isBoosting) {
+                    this.boostTimer -= deltaTime;
+                    
+                    if (this.boostTimer <= 0) {
+                        this.stopBoost();
+                    }
+                } else {
+                    // Recharge boost when not using it
+                    if (this.boostCharge < this.maxBoostCharge) {
+                        this.boostCharge += GameConfig.skiing.boostChargeRate * deltaTime;
+                        if (this.boostCharge > this.maxBoostCharge) {
+                            this.boostCharge = this.maxBoostCharge;
+                        }
+                    }
                 }
-                if (buttons.right) {
-                    this.turnAngle -= this.turnSpeed * deltaTime;
+            }
+            
+            // NEW: Start boost
+            startBoost() {
+                if (this.boostCharge >= 25 && this.boostCooldown <= 0 && !this.isBoosting) {
+                    this.isBoosting = true;
+                    this.boostTimer = GameConfig.skiing.boostDuration;
+                    this.boostCharge -= 25; // Use 25% of boost charge
+                    this.boostUsed++;
+                    
+                    // Visual feedback
+                    game.createFloatingText(this.mesh.position, 'BOOST!', 0xff9800);
+                    
+                    // Sound effect if available
+                    if (game.audioContext) {
+                        game.playBoostSound();
+                    }
+                    
+                    return true;
+                }
+                return false;
+            }
+            
+            // NEW: Stop boost
+            stopBoost() {
+                if (this.isBoosting) {
+                    this.isBoosting = false;
+                    this.boostCooldown = GameConfig.skiing.boostCooldown;
+                    
+                    // Create boost end effect
+                    game.createFloatingText(this.mesh.position, 'Boost Ended', 0xff9800);
+                }
+            }
+            
+            // NEW: Update boost particles
+            updateBoostParticles(deltaTime) {
+                if (!this.isBoosting || this.boostTimer <= 0) {
+                    this.boostParticleSystem.visible = false;
+                    return;
+                }
+                
+                this.boostParticleSystem.visible = true;
+                
+                // Create particles behind the skier
+                const particleCount = 30;
+                const positions = new Float32Array(particleCount * 3);
+                const velocities = new Float32Array(particleCount * 3);
+                const lifetimes = new Float32Array(particleCount);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    // Position behind skier
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = Math.random() * 1.5;
+                    const distance = -2 - Math.random() * 3;
+                    
+                    positions[i * 3] = Math.cos(angle) * radius;
+                    positions[i * 3 + 1] = Math.random() * 0.5;
+                    positions[i * 3 + 2] = distance;
+                    
+                    // Velocity going backward and spreading
+                    velocities[i * 3] = (Math.random() - 0.5) * 3;
+                    velocities[i * 3 + 1] = Math.random() * 2;
+                    velocities[i * 3 + 2] = -5 - Math.random() * 3;
+                    
+                    lifetimes[i] = 0.5 + Math.random() * 0.5;
+                }
+                
+                // Update particle positions
+                for (let i = 0; i < positions.length / 3; i++) {
+                    positions[i * 3] += velocities[i * 3] * deltaTime;
+                    positions[i * 3 + 1] += velocities[i * 3 + 1] * deltaTime;
+                    positions[i * 3 + 2] += velocities[i * 3 + 2] * deltaTime;
+                    
+                    velocities[i * 3 + 1] -= 5 * deltaTime; // Gravity
+                }
+                
+                this.boostParticleSystem.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                this.boostParticleSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            handleSteering(deltaTime) {
+                // NEW: Check joystick input first
+                let turnInput = 0;
+                
+                if (joystick && joystick.isActive()) {
+                    const joystickDir = joystick.getDirection();
+                    turnInput = joystickDir.x;
+                } else {
+                    // Fall back to button input
+                    const buttons = buttonController.getAllButtons();
+                    if (buttons.left) turnInput += 1;
+                    if (buttons.right) turnInput -= 1;
+                }
+                
+                // Apply turning
+                if (Math.abs(turnInput) > 0.1) {
+                    this.turnAngle += turnInput * this.turnSpeed * deltaTime;
+                }
+                
+                // NEW: Check boost button
+                if (buttonController.isPressed('boost')) {
+                    this.startBoost();
+                }
+                
+                // Jumping
+                if (buttonController.isPressed('jump') && this.jumpCooldown <= 0) {
+                    this.jump();
                 }
                 
                 // Normalize turn angle
                 this.turnAngle = (this.turnAngle + Math.PI * 2) % (Math.PI * 2);
-                
-                // Jumping
-                if (buttons.jump && this.jumpCooldown <= 0) {
-                    this.jump();
-                }
                 
                 // Apply turning to direction
                 this.direction.x = Math.sin(this.turnAngle);
@@ -1018,11 +1453,20 @@
                 // If in air, allow some air control
                 if (!this.isOnGround) {
                     const airControl = GameConfig.skiing.airControl;
-                    if (buttonController.isPressed('left')) {
-                        this.turnAngle += this.turnSpeed * airControl * deltaTime;
+                    
+                    // NEW: Check joystick for air control
+                    let turnInput = 0;
+                    if (joystick && joystick.isActive()) {
+                        const joystickDir = joystick.getDirection();
+                        turnInput = joystickDir.x;
+                    } else {
+                        const buttons = buttonController.getAllButtons();
+                        if (buttons.left) turnInput += 1;
+                        if (buttons.right) turnInput -= 1;
                     }
-                    if (buttonController.isPressed('right')) {
-                        this.turnAngle -= this.turnSpeed * airControl * deltaTime;
+                    
+                    if (Math.abs(turnInput) > 0.1) {
+                        this.turnAngle += turnInput * this.turnSpeed * airControl * deltaTime;
                     }
                 }
                 
@@ -1138,8 +1582,14 @@
                 // Score for speed
                 const speedScore = this.speed * GameConfig.scoring.speedMultiplier * deltaTime;
                 
+                // NEW: Extra score while boosting
+                let boostBonus = 0;
+                if (this.isBoosting) {
+                    boostBonus = this.speed * GameConfig.scoring.boostMultiplier * deltaTime;
+                }
+                
                 // Total score
-                this.score += Math.floor(distanceScore + speedScore);
+                this.score += Math.floor(distanceScore + speedScore + boostBonus);
             }
             
             updateTiltIndicator() {
@@ -1152,6 +1602,35 @@
                     
                     // Update pointer rotation
                     tiltPointer.style.transform = `translateY(-50%) rotate(${tiltDegrees}deg)`;
+                }
+            }
+            
+            // NEW: Update boost UI
+            updateBoostUI() {
+                const boostBar = document.getElementById('boostBar');
+                const boostControl = document.getElementById('boostControl');
+                
+                if (boostBar) {
+                    const boostPercent = this.boostCharge / this.maxBoostCharge;
+                    boostBar.style.transform = `scaleX(${boostPercent})`;
+                    
+                    // Change color based on boost status
+                    if (this.isBoosting) {
+                        boostBar.style.background = 'linear-gradient(90deg, #ff5722, #ff9800)';
+                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(255, 87, 34, 0.9), rgba(245, 124, 0, 0.9))';
+                        boostControl.style.borderColor = 'rgba(255, 87, 34, 0.9)';
+                        boostControl.innerHTML = '⚡';
+                    } else if (this.boostCharge >= 25) {
+                        boostBar.style.background = 'linear-gradient(90deg, #ffc107, #ff9800)';
+                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(255, 193, 7, 0.9), rgba(245, 124, 0, 0.9))';
+                        boostControl.style.borderColor = 'rgba(255, 235, 59, 0.9)';
+                        boostControl.innerHTML = '🔥';
+                    } else {
+                        boostBar.style.background = 'linear-gradient(90deg, #757575, #9e9e9e)';
+                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(117, 117, 117, 0.9), rgba(158, 158, 158, 0.9))';
+                        boostControl.style.borderColor = 'rgba(189, 189, 189, 0.9)';
+                        boostControl.innerHTML = '⌛';
+                    }
                 }
             }
             
@@ -1174,7 +1653,11 @@
                 const speedFill = document.getElementById('speedFill');
                 const speedValue = document.getElementById('speedValue');
                 
-                const speedPercent = this.getSpeedKmh() / GameConfig.skiing.maxSpeed;
+                const currentMaxSpeed = this.isBoosting ? 
+                    GameConfig.skiing.maxSpeed * GameConfig.skiing.boostMultiplier : 
+                    GameConfig.skiing.maxSpeed;
+                    
+                const speedPercent = this.getSpeedKmh() / currentMaxSpeed;
                 const rotation = 45 + (speedPercent * 270); // 45 to 315 degrees
                 
                 speedFill.style.transform = `rotate(${rotation}deg)`;
@@ -1187,8 +1670,10 @@
                     speedFill.style.borderTopColor = '#4caf50'; // Green
                 } else if (this.getSpeedKmh() < 90) {
                     speedFill.style.borderTopColor = '#ff9800'; // Orange
-                } else {
+                } else if (this.getSpeedKmh() < 120) {
                     speedFill.style.borderTopColor = '#f44336'; // Red
+                } else {
+                    speedFill.style.borderTopColor = '#9c27b0'; // Purple for extreme speeds
                 }
             }
             
@@ -1202,9 +1687,14 @@
                 this.trickCount = 0;
                 this.combo = 0;
                 this.score = 0;
+                this.boostUsed = 0;
                 this.trackPositions = [];
                 this.isOnGround = true;
                 this.isJumping = false;
+                this.isBoosting = false;
+                this.boostCharge = 100;
+                this.boostTimer = 0;
+                this.boostCooldown = 0;
             }
         }
 
@@ -1253,38 +1743,13 @@
                 
                 geometry.computeVertexNormals();
                 
-                // Create material
+                // Create material - WHITE SNOW MATERIAL
                 const material = new THREE.MeshStandardMaterial({
-                    vertexColors: true,
+                    color: 0xffffff, // WHITE SNOW
                     roughness: 0.8,
-                    metalness: 0.1
+                    metalness: 0.1,
+                    side: THREE.DoubleSide
                 });
-                
-                // Set vertex colors based on height (snow at top)
-                const colors = new Float32Array(positions.count * 3);
-                for (let i = 0; i < positions.count; i++) {
-                    const y = positions.getY(i);
-                    const snowLevel = GameConfig.mountain.snowLevel * peakHeight;
-                    
-                    let color;
-                    if (y > snowLevel) {
-                        // Snow
-                        const snowIntensity = (y - snowLevel) / (peakHeight - snowLevel);
-                        color = new THREE.Color(0xffffff).lerp(new THREE.Color(0xe0e0e0), snowIntensity);
-                    } else if (y > snowLevel * 0.7) {
-                        // Rocky terrain
-                        color = new THREE.Color(0x795548);
-                    } else {
-                        // Forest/grass
-                        color = new THREE.Color(0x2e7d32);
-                    }
-                    
-                    colors[i * 3] = color.r;
-                    colors[i * 3 + 1] = color.g;
-                    colors[i * 3 + 2] = color.b;
-                }
-                
-                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                 
                 // Create mesh
                 this.mesh = new THREE.Mesh(geometry, material);
@@ -1417,7 +1882,7 @@
             }
         }
 
-        // ==================== GAME CLASS ====================
+        // ==================== GAME CLASS - MODIFIED ====================
         class Game {
             constructor() {
                 this.skier = null;
@@ -1427,6 +1892,7 @@
                 this.isPaused = false;
                 this.isGameOver = false;
                 this.floatingTexts = [];
+                this.audioContext = null;
                 
                 this.init();
             }
@@ -1434,6 +1900,9 @@
             async init() {
                 // Initialize Three.js
                 this.initThreeJS();
+                
+                // NEW: Initialize joystick
+                joystick = new JoystickController();
                 
                 // Initialize controllers
                 buttonController = new ButtonController();
@@ -1446,6 +1915,9 @@
                 
                 // Initialize snow effect
                 this.snowEffect = new SnowEffect();
+                
+                // Initialize audio
+                this.initAudio();
                 
                 // Start game loop
                 this.startGame();
@@ -1502,6 +1974,39 @@
                     camera.updateProjectionMatrix();
                     renderer.setSize(window.innerWidth, window.innerHeight);
                 });
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create audio nodes for future sounds
+                    this.gainNode = this.audioContext.createGain();
+                    this.gainNode.connect(this.audioContext.destination);
+                    this.gainNode.gain.value = 0.5;
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+            
+            // NEW: Play boost sound
+            playBoostSound() {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.gainNode);
+                
+                oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); // E5
+                
+                gainNode.gain.setValueAtTime(0.4, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + 0.3);
             }
             
             hideLoadingScreen() {
@@ -1719,7 +2224,8 @@
             try {
                 console.log('Initializing Mountain Skiing Game...');
                 console.log('First-person skiing on snowy mountain');
-                console.log('Controls: LEFT/RIGHT to steer, JUMP for tricks');
+                console.log('Controls: LEFT/RIGHT buttons or JOYSTICK to steer');
+                console.log('JUMP for tricks | BOOST for extra speed');
                 console.log('Double-tap screen to pause');
                 
                 game = new Game();
@@ -1766,7 +2272,9 @@
 
         // Prevent default touch behaviors
         document.addEventListener('touchmove', (e) => {
-            if (e.target.classList.contains('ski-control')) {
+            if (e.target.classList.contains('ski-control') || 
+                e.target.id === 'joystickBase' ||
+                e.target.id === 'boostControl') {
                 e.preventDefault();
             }
         }, { passive: false });
