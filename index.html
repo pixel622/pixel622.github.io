@@ -2,257 +2,644 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Game with Joystick Controls</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile 3D Adventure Game</title>
     <style>
+        /* RESET & BASE STYLES */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        body {
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background: #000;
-            touch-action: none;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            user-select: none;
         }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
         #gameCanvas {
             display: block;
-        }
-        #ui {
+            width: 100%;
+            height: 100%;
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 0;
+            left: 0;
+        }
+        
+        /* LOADING SCREEN */
+        #loadingScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a237e, #311b92);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #00e5ff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        
+        #loadingText {
             color: white;
-            font-size: 18px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        #loadingSubtext {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        /* MAIN UI CONTAINER */
+        #uiContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
             z-index: 100;
         }
-        #loading {
+        
+        /* TOP UI */
+        #topUI {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .ui-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .ui-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .ui-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        #scoreDisplay { color: #ffd700; }
+        #healthDisplay { color: #ff4444; }
+        #glideDisplay { color: #00e5ff; }
+        #levelDisplay { color: #7c4dff; }
+        
+        /* HEALTH BAR */
+        #healthBarContainer {
+            width: 120px;
+            height: 8px;
+            background: rgba(255, 68, 68, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        
+        #healthBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ff8888);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* GLIDE BAR */
+        #glideBarContainer {
+            width: 120px;
+            height: 8px;
+            background: rgba(0, 229, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        
+        #glideBar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00e5ff, #80deea);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        /* CENTER MESSAGES */
+        #centerMessage {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
             font-size: 24px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 150;
         }
         
-        /* Joystick Controls */
+        /* JOYSTICK */
         #joystickContainer {
             position: absolute;
             bottom: 30px;
             left: 30px;
-            width: 200px;
-            height: 200px;
-            z-index: 100;
+            width: 180px;
+            height: 180px;
             pointer-events: none;
         }
         
         #joystickBase {
             position: absolute;
-            width: 120px;
-            height: 120px;
-            background: rgba(0, 0, 0, 0.5);
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             bottom: 0;
             left: 0;
             pointer-events: auto;
             touch-action: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         
         #joystickHandle {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(255, 255, 255, 0.9);
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle at 30% 30%, #4fc3f7, #1976d2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            transition: transform 0.1s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
-        /* Action Buttons */
+        /* ACTION BUTTONS */
         #actionButtons {
             position: absolute;
             bottom: 30px;
             right: 30px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
             width: 200px;
             height: 200px;
-            z-index: 100;
             pointer-events: none;
         }
         
         .action-btn {
-            position: absolute;
             width: 80px;
             height: 80px;
-            background: rgba(0, 0, 0, 0.5);
+            background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            color: white;
-            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
             pointer-events: auto;
             touch-action: none;
             user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            transition: all 0.1s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
         }
         
         .action-btn:active {
             transform: scale(0.9);
-            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .action-btn:active::after {
+            opacity: 1;
         }
         
         #jumpBtn {
-            top: 0;
-            right: 0;
-            background: rgba(76, 175, 80, 0.7);
-            border-color: rgba(76, 175, 80, 0.9);
+            background: radial-gradient(circle at 30% 30%, #66bb6a, #388e3c);
+            border-color: rgba(102, 187, 106, 0.8);
+            grid-column: 2;
+            grid-row: 1;
         }
         
         #glideBtn {
-            bottom: 0;
-            right: 40px;
-            background: rgba(33, 150, 243, 0.7);
-            border-color: rgba(33, 150, 243, 0.9);
+            background: radial-gradient(circle at 30% 30%, #29b6f6, #0288d1);
+            border-color: rgba(41, 182, 246, 0.8);
+            grid-column: 2;
+            grid-row: 2;
         }
         
         #attackBtn {
-            top: 40px;
-            right: 0;
-            background: rgba(244, 67, 54, 0.7);
-            border-color: rgba(244, 67, 54, 0.9);
+            background: radial-gradient(circle at 30% 30%, #ff7043, #d84315);
+            border-color: rgba(255, 112, 67, 0.8);
+            grid-column: 1;
+            grid-row: 1;
         }
         
-        /* Glide Indicator */
-        #glideIndicator {
+        #specialBtn {
+            background: radial-gradient(circle at 30% 30%, #ba68c8, #7b1fa2);
+            border-color: rgba(186, 104, 200, 0.8);
+            grid-column: 1;
+            grid-row: 2;
+            font-size: 24px;
+        }
+        
+        /* BUTTON LABELS */
+        .btn-label {
             position: absolute;
-            top: 80px;
-            right: 20px;
-            width: 100px;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        #glideBar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #2196F3, #64B5F6);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.1s;
-        }
-        
-        #glideText {
-            position: absolute;
-            top: 50px;
-            right: 20px;
-            color: white;
-            font-size: 14px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-        
-        /* Controls Hint */
-        #controlsHint {
-            position: absolute;
-            bottom: 250px;
+            bottom: -25px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
-            font-size: 14px;
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
         
-        /* Mobile Detection */
-        @media (min-width: 768px) {
-            #joystickContainer, #actionButtons, #controlsHint {
-                display: none;
+        /* PAUSE MENU */
+        #pauseMenu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(10px);
+        }
+        
+        .pause-title {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .menu-btn {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            margin: 10px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+        
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+        
+        #resumeBtn { background: linear-gradient(135deg, #4caf50, #388e3c); }
+        #restartBtn { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        #quitBtn { background: linear-gradient(135deg, #f44336, #d32f2f); }
+        
+        /* COMBAT TEXT */
+        .combat-text {
+            position: absolute;
+            color: #ff4444;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 50;
+            animation: floatUp 1s ease-out forwards;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
             }
         }
         
-        /* Desktop Controls Hint */
-        .desktop-hint {
+        /* LEVEL UP EFFECT */
+        .level-up-effect {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            font-size: 14px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: pulse 1s ease-in-out;
+            pointer-events: none;
+            z-index: 100;
         }
         
-        @media (max-width: 767px) {
-            .desktop-hint {
-                display: none;
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+        
+        /* GAME OVER SCREEN */
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            backdrop-filter: blur(20px);
+        }
+        
+        .game-over-title {
+            color: #ff4444;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .final-stats {
+            color: white;
+            font-size: 24px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .stat-value {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        /* INSTRUCTIONS */
+        #instructions {
+            position: absolute;
+            bottom: 250px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeOut 5s 10s forwards;
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .action-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 24px;
+            }
+            
+            #joystickBase {
+                width: 120px;
+                height: 120px;
+            }
+            
+            #joystickHandle {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .pause-title {
+                font-size: 28px;
+            }
+            
+            .menu-btn {
+                width: 180px;
+                padding: 12px 30px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .action-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            #joystickBase {
+                width: 100px;
+                height: 100px;
+            }
+            
+            #joystickHandle {
+                width: 50px;
+                height: 50px;
+            }
+            
+            #topUI {
+                padding: 10px;
+            }
+            
+            .ui-item {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="loading">Loading Game...</div>
-    <div id="ui">
-        <div>Move: WASD/Joystick | Jump: Space/Green Button | Glide: Shift/Blue Button</div>
-        <div id="score">Score: 0 | Health: 100</div>
-        <div id="position">Position: (0, 0, 0)</div>
-        <div id="glideStatus">Glide: READY</div>
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen">
+        <div class="loader"></div>
+        <div id="loadingText">Loading Adventure...</div>
+        <div id="loadingSubtext">Touch screen to begin</div>
     </div>
     
-    <!-- Joystick Controls -->
-    <div id="joystickContainer">
-        <div id="joystickBase">
-            <div id="joystickHandle"></div>
+    <!-- CANVAS -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- UI CONTAINER -->
+    <div id="uiContainer">
+        <!-- TOP UI -->
+        <div id="topUI">
+            <div class="ui-section">
+                <div class="ui-item">
+                    <div class="ui-icon">⭐</div>
+                    <div id="scoreDisplay">Score: 0</div>
+                </div>
+                <div class="ui-item">
+                    <div class="ui-icon">❤️</div>
+                    <div id="healthDisplay">Health: 100</div>
+                </div>
+                <div id="healthBarContainer">
+                    <div id="healthBar"></div>
+                </div>
+            </div>
+            
+            <div class="ui-section">
+                <div class="ui-item">
+                    <div class="ui-icon">✈️</div>
+                    <div id="glideDisplay">Glide: 100%</div>
+                </div>
+                <div id="glideBarContainer">
+                    <div id="glideBar"></div>
+                </div>
+                <div class="ui-item">
+                    <div class="ui-icon">🏆</div>
+                    <div id="levelDisplay">Level: 1</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CENTER MESSAGE -->
+        <div id="centerMessage"></div>
+        
+        <!-- JOYSTICK -->
+        <div id="joystickContainer">
+            <div id="joystickBase">
+                <div id="joystickHandle"></div>
+            </div>
+        </div>
+        
+        <!-- ACTION BUTTONS -->
+        <div id="actionButtons">
+            <div class="action-btn" id="attackBtn">
+                ⚔️
+                <div class="btn-label">ATTACK</div>
+            </div>
+            <div class="action-btn" id="jumpBtn">
+                🦘
+                <div class="btn-label">JUMP</div>
+            </div>
+            <div class="action-btn" id="specialBtn">
+                ⚡
+                <div class="btn-label">POWER</div>
+            </div>
+            <div class="action-btn" id="glideBtn">
+                🪂
+                <div class="btn-label">GLIDE</div>
+            </div>
+        </div>
+        
+        <!-- INSTRUCTIONS -->
+        <div id="instructions">
+            <div>Use joystick to move</div>
+            <div>Press buttons for actions</div>
+            <div>Glide from high places!</div>
         </div>
     </div>
     
-    <!-- Action Buttons -->
-    <div id="actionButtons">
-        <div class="action-btn" id="jumpBtn">↑</div>
-        <div class="action-btn" id="glideBtn">✈</div>
-        <div class="action-btn" id="attackBtn">⚔</div>
+    <!-- PAUSE MENU -->
+    <div id="pauseMenu">
+        <div class="pause-title">GAME PAUSED</div>
+        <button class="menu-btn" id="resumeBtn">RESUME</button>
+        <button class="menu-btn" id="restartBtn">RESTART</button>
+        <button class="menu-btn" id="quitBtn">QUIT</button>
     </div>
     
-    <!-- Glide Indicator -->
-    <div id="glideIndicator">
-        <div id="glideBar"></div>
-    </div>
-    <div id="glideText">GLIDE</div>
-    
-    <!-- Controls Hint -->
-    <div id="controlsHint">
-        Touch joystick to move | Buttons for actions
-    </div>
-    
-    <!-- Desktop Controls Hint -->
-    <div class="desktop-hint">
-        Desktop: WASD to move, Space to jump, Shift to glide
+    <!-- GAME OVER SCREEN -->
+    <div id="gameOverScreen">
+        <div class="game-over-title">GAME OVER</div>
+        <div class="final-stats">Final Score: <span class="stat-value" id="finalScore">0</span></div>
+        <div class="final-stats">Level Reached: <span class="stat-value" id="finalLevel">1</span></div>
+        <div class="final-stats">Enemies Defeated: <span class="stat-value" id="finalEnemies">0</span></div>
+        <button class="menu-btn" id="playAgainBtn">PLAY AGAIN</button>
+        <button class="menu-btn" id="menuBtn">MAIN MENU</button>
     </div>
 
     <script type="importmap">
@@ -268,27 +655,73 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // ==================== TOUCH/JOYSTICK CONTROLLER ====================
+        // ==================== GAME CONFIGURATION ====================
+        const GameConfig = {
+            player: {
+                speed: 8,
+                jumpForce: 12,
+                doubleJumpForce: 10,
+                glideSpeed: 15,
+                glideLift: 5,
+                maxHealth: 100,
+                attackDamage: 20,
+                specialAttackDamage: 50,
+                specialAttackCooldown: 10
+            },
+            world: {
+                gravity: 15,
+                friction: 0.9,
+                airResistance: 0.95,
+                boundarySize: 100
+            },
+            enemies: {
+                baseHealth: 30,
+                damage: 10,
+                spawnRate: 5,
+                maxEnemies: 15
+            },
+            collectibles: {
+                healthRestore: 25,
+                scoreValue: 100,
+                specialCharge: 25
+            },
+            levels: {
+                experiencePerLevel: 1000,
+                levelScale: 1.2
+            },
+            visuals: {
+                particleCount: 50,
+                trailLength: 20,
+                effectsDuration: 2
+            }
+        };
+
+        // ==================== GLOBAL VARIABLES ====================
+        let scene, camera, renderer, controls;
+        let game, joystick, buttonController;
+        let deltaTime = 0;
+        let gameTime = 0;
+        let isGameStarted = false;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // ==================== JOYSTICK CONTROLLER ====================
         class JoystickController {
             constructor() {
                 this.base = document.getElementById('joystickBase');
                 this.handle = document.getElementById('joystickHandle');
                 this.active = false;
-                this.maxDistance = 50;
+                this.maxDistance = 45;
                 this.position = { x: 0, y: 0 };
                 this.normalized = { x: 0, y: 0 };
-                this.baseRect = this.base.getBoundingClientRect();
-                this.centerX = this.baseRect.left + this.baseRect.width / 2;
-                this.centerY = this.baseRect.top + this.baseRect.height / 2;
+                this.baseRect = null;
+                this.centerX = 0;
+                this.centerY = 0;
                 
                 this.init();
             }
             
             init() {
-                // Mouse events
-                this.base.addEventListener('mousedown', (e) => this.onStart(e.clientX, e.clientY));
-                document.addEventListener('mousemove', (e) => this.onMove(e.clientX, e.clientY));
-                document.addEventListener('mouseup', () => this.onEnd());
+                this.updateBaseRect();
                 
                 // Touch events
                 this.base.addEventListener('touchstart', (e) => {
@@ -299,8 +732,10 @@
                 
                 document.addEventListener('touchmove', (e) => {
                     e.preventDefault();
-                    const touch = e.touches[0];
-                    this.onMove(touch.clientX, touch.clientY);
+                    if (this.active) {
+                        const touch = e.touches[0];
+                        this.onMove(touch.clientX, touch.clientY);
+                    }
                 }, { passive: false });
                 
                 document.addEventListener('touchend', (e) => {
@@ -308,15 +743,39 @@
                     this.onEnd();
                 }, { passive: false });
                 
-                // Prevent context menu on joystick
-                this.base.addEventListener('contextmenu', (e) => e.preventDefault());
+                // Mouse events for testing on desktop
+                if (!isMobile) {
+                    this.base.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        this.onStart(e.clientX, e.clientY);
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        e.preventDefault();
+                        if (this.active) {
+                            this.onMove(e.clientX, e.clientY);
+                        }
+                    });
+                    
+                    document.addEventListener('mouseup', (e) => {
+                        e.preventDefault();
+                        this.onEnd();
+                    });
+                }
+                
+                // Update rect on resize
+                window.addEventListener('resize', () => this.updateBaseRect());
+            }
+            
+            updateBaseRect() {
+                this.baseRect = this.base.getBoundingClientRect();
+                this.centerX = this.baseRect.left + this.baseRect.width / 2;
+                this.centerY = this.baseRect.top + this.baseRect.height / 2;
             }
             
             onStart(clientX, clientY) {
                 this.active = true;
-                this.baseRect = this.base.getBoundingClientRect();
-                this.centerX = this.baseRect.left + this.baseRect.width / 2;
-                this.centerY = this.baseRect.top + this.baseRect.height / 2;
+                this.updateBaseRect();
                 this.onMove(clientX, clientY);
             }
             
@@ -327,20 +786,14 @@
                 let dy = clientY - this.centerY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
-                // Limit to max distance
                 if (distance > this.maxDistance) {
                     dx = (dx / distance) * this.maxDistance;
                     dy = (dy / distance) * this.maxDistance;
                 }
                 
-                // Update handle position
                 this.handle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                
-                // Update normalized values
                 this.normalized.x = dx / this.maxDistance;
-                this.normalized.y = -dy / this.maxDistance; // Invert Y for intuitive control
-                
-                // Update raw position
+                this.normalized.y = -dy / this.maxDistance;
                 this.position.x = dx;
                 this.position.y = dy;
             }
@@ -355,10 +808,11 @@
             }
             
             getDirection() {
+                const magnitude = Math.sqrt(this.normalized.x * this.normalized.x + this.normalized.y * this.normalized.y);
                 return {
                     x: this.normalized.x,
                     y: this.normalized.y,
-                    magnitude: Math.sqrt(this.normalized.x * this.normalized.x + this.normalized.y * this.normalized.y)
+                    magnitude: magnitude > 1 ? 1 : magnitude
                 };
             }
             
@@ -373,83 +827,81 @@
                 this.buttons = {
                     jump: false,
                     glide: false,
-                    attack: false
+                    attack: false,
+                    special: false
                 };
                 
+                this.buttonElements = {};
                 this.init();
             }
             
             init() {
-                const jumpBtn = document.getElementById('jumpBtn');
-                const glideBtn = document.getElementById('glideBtn');
-                const attackBtn = document.getElementById('attackBtn');
+                const buttons = ['jumpBtn', 'glideBtn', 'attackBtn', 'specialBtn'];
                 
-                // Jump button
-                this.setupButton(jumpBtn, 'jump');
-                
-                // Glide button
-                this.setupButton(glideBtn, 'glide');
-                
-                // Attack button
-                this.setupButton(attackBtn, 'attack');
-                
-                // Keyboard fallback
-                document.addEventListener('keydown', (e) => {
-                    const key = e.key.toLowerCase();
-                    if (key === ' ') this.buttons.jump = true;
-                    if (key === 'shift') this.buttons.glide = true;
-                    if (key === 'e') this.buttons.attack = true;
+                buttons.forEach(btnId => {
+                    const element = document.getElementById(btnId);
+                    const buttonName = btnId.replace('Btn', '');
+                    this.buttonElements[buttonName] = element;
+                    
+                    // Touch events
+                    element.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.buttons[buttonName] = true;
+                        element.style.transform = 'scale(0.85)';
+                        element.style.opacity = '0.8';
+                    }, { passive: false });
+                    
+                    element.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        this.buttons[buttonName] = false;
+                        element.style.transform = 'scale(1)';
+                        element.style.opacity = '1';
+                    }, { passive: false });
+                    
+                    element.addEventListener('touchcancel', (e) => {
+                        e.preventDefault();
+                        this.buttons[buttonName] = false;
+                        element.style.transform = 'scale(1)';
+                        element.style.opacity = '1';
+                    }, { passive: false });
+                    
+                    // Mouse events for testing
+                    if (!isMobile) {
+                        element.addEventListener('mousedown', (e) => {
+                            e.preventDefault();
+                            this.buttons[buttonName] = true;
+                            element.style.transform = 'scale(0.85)';
+                            element.style.opacity = '0.8';
+                        });
+                        
+                        element.addEventListener('mouseup', (e) => {
+                            e.preventDefault();
+                            this.buttons[buttonName] = false;
+                            element.style.transform = 'scale(1)';
+                            element.style.opacity = '1';
+                        });
+                        
+                        element.addEventListener('mouseleave', (e) => {
+                            e.preventDefault();
+                            this.buttons[buttonName] = false;
+                            element.style.transform = 'scale(1)';
+                            element.style.opacity = '1';
+                        });
+                    }
                 });
                 
-                document.addEventListener('keyup', (e) => {
-                    const key = e.key.toLowerCase();
-                    if (key === ' ') this.buttons.jump = false;
-                    if (key === 'shift') this.buttons.glide = false;
-                    if (key === 'e') this.buttons.attack = false;
+                // Pause button (double tap on screen)
+                let lastTap = 0;
+                document.addEventListener('touchstart', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    
+                    if (tapLength < 300 && tapLength > 0) {
+                        e.preventDefault();
+                        game.togglePause();
+                    }
+                    lastTap = currentTime;
                 });
-            }
-            
-            setupButton(element, buttonName) {
-                // Mouse events
-                element.addEventListener('mousedown', () => {
-                    this.buttons[buttonName] = true;
-                    element.style.transform = 'scale(0.85)';
-                    element.style.opacity = '0.8';
-                });
-                
-                element.addEventListener('mouseup', () => {
-                    this.buttons[buttonName] = false;
-                    element.style.transform = 'scale(1)';
-                    element.style.opacity = '1';
-                });
-                
-                element.addEventListener('mouseleave', () => {
-                    this.buttons[buttonName] = false;
-                    element.style.transform = 'scale(1)';
-                    element.style.opacity = '1';
-                });
-                
-                // Touch events
-                element.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    this.buttons[buttonName] = true;
-                    element.style.transform = 'scale(0.85)';
-                    element.style.opacity = '0.8';
-                }, { passive: false });
-                
-                element.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.buttons[buttonName] = false;
-                    element.style.transform = 'scale(1)';
-                    element.style.opacity = '1';
-                }, { passive: false });
-                
-                element.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    this.buttons[buttonName] = false;
-                    element.style.transform = 'scale(1)';
-                    element.style.opacity = '1';
-                }, { passive: false });
             }
             
             isPressed(buttonName) {
@@ -459,396 +911,315 @@
             getAllButtons() {
                 return { ...this.buttons };
             }
+            
+            setButtonCooldown(buttonName, cooldownTime) {
+                const element = this.buttonElements[buttonName];
+                if (element) {
+                    element.style.opacity = '0.5';
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                    }, cooldownTime * 1000);
+                }
+            }
         }
 
-        // ==================== SCENE SETUP ====================
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87ceeb);
-        scene.fog = new THREE.Fog(0x87ceeb, 10, 200);
-
-        // ==================== CAMERA ====================
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 10, 15);
-        camera.lookAt(0, 0, 0);
-
-        // ==================== RENDERER ====================
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
-        document.body.appendChild(renderer.domElement);
-
-        // ==================== CONTROLS ====================
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 5;
-        controls.maxDistance = 50;
-        controls.maxPolarAngle = Math.PI / 2 - 0.1;
-        controls.target.set(0, 3, 0);
-
-        // ==================== LIGHTING ====================
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 30, 10);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.camera.left = -30;
-        directionalLight.shadow.camera.right = 30;
-        directionalLight.shadow.camera.top = 30;
-        directionalLight.shadow.camera.bottom = -30;
-        directionalLight.shadow.camera.near = 0.1;
-        directionalLight.shadow.camera.far = 150;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.bias = -0.001;
-        scene.add(directionalLight);
-
-        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x3a3a3a, 0.4);
-        scene.add(hemisphereLight);
-
-        // ==================== CAPSULE GEOMETRY FIX ====================
-        function createCapsuleGeometry(radius = 0.35, height = 1.4, radialSegments = 8, heightSegments = 16) {
-            const geometry = new THREE.BufferGeometry();
-            
-            const vertices = [];
-            const indices = [];
-            const normals = [];
-            const uvs = [];
-            
-            function addVertex(x, y, z, u, v) {
-                vertices.push(x, y, z);
-                const length = Math.sqrt(x * x + y * y + z * z);
-                normals.push(x / length, y / length, z / length);
-                uvs.push(u, v);
+        // ==================== PARTICLE SYSTEM ====================
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+                this.geometry = new THREE.BufferGeometry();
+                this.material = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size: 0.2,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending
+                });
+                this.points = new THREE.Points(this.geometry, this.material);
+                scene.add(this.points);
             }
             
-            const topOffset = height / 2;
-            for (let y = 0; y <= heightSegments / 2; y++) {
-                const v = y / (heightSegments / 2);
-                const theta = v * Math.PI / 2;
-                const sinTheta = Math.sin(theta);
-                const cosTheta = Math.cos(theta);
+            emit(position, color, count = 20, speed = 2, life = 1) {
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        position: position.clone(),
+                        velocity: new THREE.Vector3(
+                            (Math.random() - 0.5) * speed,
+                            Math.random() * speed,
+                            (Math.random() - 0.5) * speed
+                        ),
+                        color: new THREE.Color(color),
+                        life: life,
+                        maxLife: life,
+                        size: Math.random() * 0.3 + 0.1
+                    });
+                }
+            }
+            
+            update(deltaTime) {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    particle.life -= deltaTime;
+                    
+                    if (particle.life <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime));
+                    particle.velocity.y -= 5 * deltaTime;
+                }
                 
-                for (let x = 0; x <= radialSegments; x++) {
-                    const u = x / radialSegments;
-                    const phi = u * Math.PI * 2;
-                    const sinPhi = Math.sin(phi);
-                    const cosPhi = Math.cos(phi);
-                    
-                    const px = radius * cosPhi * sinTheta;
-                    const py = radius * cosTheta + topOffset;
-                    const pz = radius * sinPhi * sinTheta;
-                    
-                    addVertex(px, py, pz, u, 1 - v * 0.5);
-                }
+                this.updateGeometry();
             }
             
-            const bottomOffset = -height / 2;
-            const vertexOffset = (Math.floor(heightSegments / 2) + 1) * (radialSegments + 1);
-            for (let y = 0; y <= heightSegments / 2; y++) {
-                const v = y / (heightSegments / 2);
-                const theta = Math.PI / 2 + v * Math.PI / 2;
-                const sinTheta = Math.sin(theta);
-                const cosTheta = Math.cos(theta);
+            updateGeometry() {
+                if (this.particles.length === 0) return;
                 
-                for (let x = 0; x <= radialSegments; x++) {
-                    const u = x / radialSegments;
-                    const phi = u * Math.PI * 2;
-                    const sinPhi = Math.sin(phi);
-                    const cosPhi = Math.cos(phi);
+                const positions = new Float32Array(this.particles.length * 3);
+                const colors = new Float32Array(this.particles.length * 3);
+                const sizes = new Float32Array(this.particles.length);
+                
+                this.particles.forEach((particle, i) => {
+                    positions[i * 3] = particle.position.x;
+                    positions[i * 3 + 1] = particle.position.y;
+                    positions[i * 3 + 2] = particle.position.z;
                     
-                    const px = radius * cosPhi * sinTheta;
-                    const py = radius * cosTheta + bottomOffset;
-                    const pz = radius * sinPhi * sinTheta;
+                    const lifeRatio = particle.life / particle.maxLife;
+                    colors[i * 3] = particle.color.r * lifeRatio;
+                    colors[i * 3 + 1] = particle.color.g * lifeRatio;
+                    colors[i * 3 + 2] = particle.color.b * lifeRatio;
                     
-                    addVertex(px, py, pz, u, 0.5 - v * 0.5);
-                }
+                    sizes[i] = particle.size * lifeRatio;
+                });
+                
+                this.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                this.geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                this.geometry.attributes.position.needsUpdate = true;
+                this.geometry.attributes.color.needsUpdate = true;
+                this.geometry.attributes.size.needsUpdate = true;
             }
-            
-            for (let y = 0; y < heightSegments / 2; y++) {
-                for (let x = 0; x < radialSegments; x++) {
-                    const a = y * (radialSegments + 1) + x;
-                    const b = a + radialSegments + 1;
-                    const c = a + 1;
-                    const d = b + 1;
-                    
-                    indices.push(a, b, c);
-                    indices.push(b, d, c);
-                }
-            }
-            
-            for (let y = 0; y < heightSegments / 2; y++) {
-                for (let x = 0; x < radialSegments; x++) {
-                    const a = vertexOffset + y * (radialSegments + 1) + x;
-                    const b = a + radialSegments + 1;
-                    const c = a + 1;
-                    const d = b + 1;
-                    
-                    indices.push(a, c, b);
-                    indices.push(b, c, d);
-                }
-            }
-            
-            geometry.setIndex(indices);
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
-            geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-            
-            geometry.computeBoundingBox();
-            geometry.computeBoundingSphere();
-            
-            return geometry;
         }
 
-        // ==================== PLAYER CLASS WITH GLIDE ====================
+        // ==================== PLAYER CLASS ====================
         class Player {
             constructor() {
-                this.geometry = createCapsuleGeometry(0.35, 1.4, 8, 16);
+                // Create capsule geometry for player
+                this.geometry = this.createCapsuleGeometry(0.4, 1.6, 12, 20);
                 this.material = new THREE.MeshStandardMaterial({ 
-                    color: 0x00ff00,
-                    roughness: 0.7,
-                    metalness: 0.1,
-                    emissive: 0x003300,
-                    emissiveIntensity: 0.1
+                    color: 0x4fc3f7,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    emissive: 0x0066cc,
+                    emissiveIntensity: 0.3
                 });
                 this.mesh = new THREE.Mesh(this.geometry, this.material);
                 this.mesh.castShadow = true;
                 this.mesh.receiveShadow = true;
                 this.mesh.name = 'Player';
                 
-                // Physics properties
-                this.velocity = new THREE.Vector3(0, 0, 0);
-                this.direction = new THREE.Vector3(0, 0, 0);
-                this.speed = 6.0;
-                this.jumpForce = 10.0;
-                this.isOnGround = false;
-                this.gravity = 9.8;
-                this.friction = 0.9;
-                this.airResistance = 0.98;
+                // Stats
+                this.health = GameConfig.player.maxHealth;
+                this.maxHealth = GameConfig.player.maxHealth;
+                this.score = 0;
+                this.level = 1;
+                this.experience = 0;
+                this.enemiesDefeated = 0;
                 
-                // Glide properties
+                // Movement
+                this.velocity = new THREE.Vector3();
+                this.direction = new THREE.Vector3();
+                this.speed = GameConfig.player.speed;
+                this.isOnGround = false;
+                this.canDoubleJump = true;
+                
+                // Combat
+                this.attackCooldown = 0;
+                this.specialAttackCooldown = 0;
+                this.specialCharge = 0;
+                this.maxSpecialCharge = 100;
+                this.invincible = 0;
+                
+                // Glide
                 this.isGliding = false;
                 this.glideStamina = 100;
                 this.maxGlideStamina = 100;
-                this.glideStaminaRechargeRate = 20;
-                this.glideStaminaDrainRate = 30;
-                this.glideLift = 4.0;
-                this.glideSpeedMultiplier = 1.5;
-                this.glideControlMultiplier = 1.8;
-                this.minGlideHeight = 2.0;
-                this.glideCooldown = 0;
-                
-                // Player state
-                this.health = 100;
-                this.score = 0;
-                this.isDoubleJumpAvailable = true;
-                this.doubleJumpForce = 8.0;
                 
                 // Visual effects
-                this.glideTrail = null;
-                this.createGlideTrail();
+                this.trailParticles = [];
+                this.trailMesh = this.createTrailMesh();
+                scene.add(this.trailMesh);
                 
-                // Add player to scene
+                // Add to scene
                 scene.add(this.mesh);
-                
-                // Player collision box
-                this.boundingSphere = new THREE.Sphere(this.mesh.position, 0.5);
+                this.resetPosition();
             }
             
-            createGlideTrail() {
-                const trailGeometry = new THREE.BufferGeometry();
-                const trailMaterial = new THREE.PointsMaterial({
-                    color: 0x00ffff,
-                    size: 0.2,
+            createCapsuleGeometry(radius, height, radialSegments, heightSegments) {
+                const geometry = new THREE.BufferGeometry();
+                const vertices = [];
+                const indices = [];
+                const normals = [];
+                const uvs = [];
+                
+                // Helper function
+                const addVertex = (x, y, z, u, v) => {
+                    vertices.push(x, y, z);
+                    const length = Math.sqrt(x * x + y * y + z * z);
+                    normals.push(x / length, y / length, z / length);
+                    uvs.push(u, v);
+                };
+                
+                // Top hemisphere
+                for (let y = 0; y <= heightSegments / 2; y++) {
+                    const v = y / (heightSegments / 2);
+                    const theta = v * Math.PI / 2;
+                    const sinTheta = Math.sin(theta);
+                    const cosTheta = Math.cos(theta);
+                    
+                    for (let x = 0; x <= radialSegments; x++) {
+                        const u = x / radialSegments;
+                        const phi = u * Math.PI * 2;
+                        const sinPhi = Math.sin(phi);
+                        const cosPhi = Math.cos(phi);
+                        
+                        const px = radius * cosPhi * sinTheta;
+                        const py = radius * cosTheta + height / 2;
+                        const pz = radius * sinPhi * sinTheta;
+                        
+                        addVertex(px, py, pz, u, 1 - v * 0.5);
+                    }
+                }
+                
+                // Bottom hemisphere
+                const vertexOffset = (Math.floor(heightSegments / 2) + 1) * (radialSegments + 1);
+                for (let y = 0; y <= heightSegments / 2; y++) {
+                    const v = y / (heightSegments / 2);
+                    const theta = Math.PI / 2 + v * Math.PI / 2;
+                    const sinTheta = Math.sin(theta);
+                    const cosTheta = Math.cos(theta);
+                    
+                    for (let x = 0; x <= radialSegments; x++) {
+                        const u = x / radialSegments;
+                        const phi = u * Math.PI * 2;
+                        const sinPhi = Math.sin(phi);
+                        const cosPhi = Math.cos(phi);
+                        
+                        const px = radius * cosPhi * sinTheta;
+                        const py = radius * cosTheta - height / 2;
+                        const pz = radius * sinPhi * sinTheta;
+                        
+                        addVertex(px, py, pz, u, 0.5 - v * 0.5);
+                    }
+                }
+                
+                // Indices
+                for (let y = 0; y < heightSegments / 2; y++) {
+                    for (let x = 0; x < radialSegments; x++) {
+                        const a = y * (radialSegments + 1) + x;
+                        const b = a + radialSegments + 1;
+                        const c = a + 1;
+                        const d = b + 1;
+                        
+                        indices.push(a, b, c);
+                        indices.push(b, d, c);
+                    }
+                }
+                
+                for (let y = 0; y < heightSegments / 2; y++) {
+                    for (let x = 0; x < radialSegments; x++) {
+                        const a = vertexOffset + y * (radialSegments + 1) + x;
+                        const b = a + radialSegments + 1;
+                        const c = a + 1;
+                        const d = b + 1;
+                        
+                        indices.push(a, c, b);
+                        indices.push(b, c, d);
+                    }
+                }
+                
+                geometry.setIndex(indices);
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+                geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+                
+                return geometry;
+            }
+            
+            createTrailMesh() {
+                const geometry = new THREE.BufferGeometry();
+                const material = new THREE.LineBasicMaterial({
+                    color: 0x4fc3f7,
                     transparent: true,
                     opacity: 0.6,
-                    blending: THREE.AdditiveBlending
+                    linewidth: 2
                 });
-                
-                this.glideTrail = new THREE.Points(trailGeometry, trailMaterial);
-                this.glideTrail.visible = false;
-                scene.add(this.glideTrail);
+                return new THREE.Line(geometry, material);
             }
             
-            updateGlideTrail(deltaTime) {
-                if (!this.isGliding || this.glideStamina <= 0) {
-                    this.glideTrail.visible = false;
-                    return;
+            updateTrail() {
+                if (this.trailParticles.length > GameConfig.visuals.trailLength) {
+                    this.trailParticles.shift();
                 }
                 
-                this.glideTrail.visible = true;
+                this.trailParticles.push(this.mesh.position.clone());
                 
-                // Add new trail point
-                const position = this.mesh.position.clone();
-                
-                // Update trail geometry
-                let positions = this.glideTrail.geometry.attributes.position;
-                let count = positions ? positions.count : 0;
-                
-                if (!positions || count >= 50) {
-                    // Create new buffer with current position
-                    const newPositions = new Float32Array(3);
-                    newPositions[0] = position.x;
-                    newPositions[1] = position.y;
-                    newPositions[2] = position.z;
+                if (this.trailParticles.length > 1) {
+                    const positions = new Float32Array(this.trailParticles.length * 3);
+                    this.trailParticles.forEach((pos, i) => {
+                        positions[i * 3] = pos.x;
+                        positions[i * 3 + 1] = pos.y;
+                        positions[i * 3 + 2] = pos.z;
+                    });
                     
-                    const geometry = new THREE.BufferGeometry();
-                    geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
-                    this.glideTrail.geometry = geometry;
-                } else {
-                    // Add to existing buffer
-                    const newCount = count + 1;
-                    const newPositions = new Float32Array(newCount * 3);
-                    
-                    if (count > 0) {
-                        const oldArray = positions.array;
-                        for (let i = 0; i < oldArray.length; i++) {
-                            newPositions[i] = oldArray[i];
-                        }
-                    }
-                    
-                    newPositions[newCount * 3 - 3] = position.x;
-                    newPositions[newCount * 3 - 2] = position.y;
-                    newPositions[newCount * 3 - 1] = position.z;
-                    
-                    this.glideTrail.geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
-                }
-                
-                // Fade trail points
-                const positionsAttr = this.glideTrail.geometry.attributes.position;
-                if (positionsAttr && positionsAttr.count > 1) {
-                    const positionsArray = positionsAttr.array;
-                    for (let i = 0; i < positionsArray.length - 3; i++) {
-                        positionsArray[i] += (positionsArray[i + 3] - positionsArray[i]) * 0.1;
-                    }
-                    positionsAttr.needsUpdate = true;
+                    this.trailMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    this.trailMesh.geometry.attributes.position.needsUpdate = true;
                 }
             }
             
-            startGlide() {
-                if (this.glideStamina > 10 && !this.isOnGround && this.glideCooldown <= 0) {
-                    this.isGliding = true;
-                    console.log("Started gliding!");
-                    return true;
-                }
-                return false;
-            }
-            
-            stopGlide() {
-                if (this.isGliding) {
-                    this.isGliding = false;
-                    this.glideCooldown = 0.5;
-                    console.log("Stopped gliding");
-                    this.glideTrail.visible = false;
-                    return true;
-                }
-                return false;
-            }
-            
-            updateGlide(deltaTime) {
-                // Update cooldown
-                if (this.glideCooldown > 0) {
-                    this.glideCooldown -= deltaTime;
-                }
-                
-                if (this.isGliding) {
-                    // Drain stamina
-                    this.glideStamina -= this.glideStaminaDrainRate * deltaTime;
-                    
-                    if (this.glideStamina <= 0) {
-                        this.glideStamina = 0;
-                        this.stopGlide();
-                        return;
-                    }
-                    
-                    // Apply glide physics
-                    if (this.velocity.y < 0) {
-                        // Reduce fall speed
-                        this.velocity.y = Math.max(this.velocity.y, -this.glideLift);
-                        
-                        // Add forward momentum if moving
-                        if (this.direction.length() > 0.1) {
-                            const glideBoost = this.direction.clone().multiplyScalar(this.speed * this.glideSpeedMultiplier * deltaTime);
-                            this.velocity.x += glideBoost.x;
-                            this.velocity.z += glideBoost.z;
-                        }
-                        
-                        // Better air control while gliding
-                        this.velocity.x *= 0.99;
-                        this.velocity.z *= 0.99;
-                    }
-                    
-                    // Update visual effects
-                    this.updateGlideTrail(deltaTime);
-                    
-                    // Update player material for visual feedback
-                    this.mesh.material.emissive.setHex(0x00ffff);
-                    this.mesh.material.emissiveIntensity = 0.3;
-                    
-                } else {
-                    // Recharge stamina
-                    if (this.glideStamina < this.maxGlideStamina) {
-                        this.glideStamina += this.glideStaminaRechargeRate * deltaTime;
-                        if (this.glideStamina > this.maxGlideStamina) {
-                            this.glideStamina = this.maxGlideStamina;
-                        }
-                    }
-                    
-                    // Reset visual effects
-                    this.mesh.material.emissive.setHex(0x003300);
-                    this.mesh.material.emissiveIntensity = 0.1;
-                }
-                
-                // Update glide indicator
-                this.updateGlideIndicator();
-            }
-            
-            updateGlideIndicator() {
-                const glideBar = document.getElementById('glideBar');
-                const glideText = document.getElementById('glideText');
-                const glideStatus = document.getElementById('glideStatus');
-                
-                if (glideBar) {
-                    const scale = this.glideStamina / this.maxGlideStamina;
-                    glideBar.style.transform = `scaleX(${scale})`;
-                    
-                    if (this.isGliding) {
-                        glideBar.style.background = 'linear-gradient(90deg, #FF5722, #FF9800)';
-                        glideText.textContent = 'GLIDING';
-                        glideText.style.color = '#FF9800';
-                        if (glideStatus) glideStatus.textContent = `Glide: ${Math.round(this.glideStamina)}%`;
-                    } else {
-                        glideBar.style.background = 'linear-gradient(90deg, #2196F3, #64B5F6)';
-                        glideText.textContent = 'GLIDE';
-                        glideText.style.color = '#64B5F6';
-                        if (glideStatus) glideStatus.textContent = `Glide: ${Math.round(this.glideStamina)}%`;
-                    }
-                }
+            resetPosition() {
+                this.mesh.position.set(0, 5, 0);
+                this.velocity.set(0, 0, 0);
+                this.isOnGround = false;
+                this.canDoubleJump = true;
+                this.stopGlide();
             }
             
             update(deltaTime) {
-                // Update glide
-                this.updateGlide(deltaTime);
+                // Update cooldowns
+                if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+                if (this.specialAttackCooldown > 0) this.specialAttackCooldown -= deltaTime;
+                if (this.invincible > 0) this.invincible -= deltaTime;
                 
-                // Apply gravity if not gliding or on ground
-                if (!this.isGliding && !this.isOnGround) {
-                    this.velocity.y -= this.gravity * deltaTime;
+                // Apply gravity if not gliding
+                if (!this.isGliding || this.glideStamina <= 0) {
+                    this.velocity.y -= GameConfig.world.gravity * deltaTime;
                 }
                 
-                // Apply friction/air resistance
-                if (this.isOnGround) {
-                    this.velocity.x *= this.friction;
-                    this.velocity.z *= this.friction;
-                } else if (!this.isGliding) {
-                    this.velocity.x *= this.airResistance;
-                    this.velocity.z *= this.airResistance;
+                // Apply glide if active
+                if (this.isGliding && this.glideStamina > 0 && !this.isOnGround) {
+                    this.glideStamina -= 20 * deltaTime;
+                    this.velocity.y = Math.max(this.velocity.y, -GameConfig.player.glideLift);
+                    
+                    // Boost forward speed while gliding
+                    if (this.direction.length() > 0.1) {
+                        const boost = this.direction.clone().multiplyScalar(GameConfig.player.glideSpeed * deltaTime);
+                        this.velocity.x += boost.x;
+                        this.velocity.z += boost.z;
+                    }
+                    
+                    // Visual feedback
+                    this.mesh.material.emissiveIntensity = 0.5 + Math.sin(gameTime * 10) * 0.2;
+                } else {
+                    // Recharge glide stamina
+                    this.glideStamina = Math.min(this.maxGlideStamina, this.glideStamina + 15 * deltaTime);
+                    this.mesh.material.emissiveIntensity = 0.3;
+                }
+                
+                // Apply air resistance
+                if (!this.isOnGround) {
+                    this.velocity.x *= GameConfig.world.airResistance;
+                    this.velocity.z *= GameConfig.world.airResistance;
                 }
                 
                 // Update position
@@ -856,156 +1227,490 @@
                 this.mesh.position.y += this.velocity.y * deltaTime;
                 this.mesh.position.z += this.velocity.z * deltaTime;
                 
-                // Update bounding sphere
-                this.boundingSphere.center.copy(this.mesh.position);
-                
                 // Ground collision
                 if (this.mesh.position.y < 0) {
                     this.mesh.position.y = 0;
                     this.velocity.y = 0;
                     this.isOnGround = true;
-                    this.isDoubleJumpAvailable = true;
-                    if (this.isGliding) this.stopGlide();
+                    this.canDoubleJump = true;
+                    this.stopGlide();
                 }
                 
-                // Boundary constraints
-                const boundary = 45;
+                // Boundary check
+                const boundary = GameConfig.world.boundarySize / 2;
                 this.mesh.position.x = Math.max(-boundary, Math.min(boundary, this.mesh.position.x));
                 this.mesh.position.z = Math.max(-boundary, Math.min(boundary, this.mesh.position.z));
                 
-                // Rotate player based on movement
+                // Update trail
+                this.updateTrail();
+                
+                // Update rotation based on movement
                 if (this.velocity.x !== 0 || this.velocity.z !== 0) {
                     const angle = Math.atan2(this.velocity.x, this.velocity.z);
-                    this.mesh.rotation.y = angle;
+                    this.mesh.rotation.y = THREE.MathUtils.lerp(this.mesh.rotation.y, angle, 0.1);
                 }
                 
-                // Tilt while gliding
-                if (this.isGliding) {
-                    const tiltX = Math.sin(Date.now() * 0.005) * 0.1;
-                    const tiltZ = Math.cos(Date.now() * 0.005) * 0.1;
-                    this.mesh.rotation.x = tiltX;
-                    this.mesh.rotation.z = tiltZ;
-                } else {
-                    this.mesh.rotation.x = 0;
-                    this.mesh.rotation.z = 0;
+                // Bobbing animation when on ground
+                if (this.isOnGround && (Math.abs(this.velocity.x) > 0.1 || Math.abs(this.velocity.z) > 0.1)) {
+                    const bob = Math.sin(gameTime * 10) * 0.1;
+                    this.mesh.position.y += bob;
                 }
             }
             
             move(forward, right) {
                 this.direction.set(right, 0, -forward).normalize();
                 
-                // Calculate speed multiplier
-                let speedMultiplier = this.speed;
-                let controlMultiplier = 1.0;
-                
-                if (this.isGliding) {
-                    speedMultiplier *= this.glideSpeedMultiplier;
-                    controlMultiplier = this.glideControlMultiplier;
-                } else if (!this.isOnGround) {
-                    speedMultiplier *= 0.5;
-                    controlMultiplier = 0.7;
-                }
-                
-                // Apply movement
                 if (this.isOnGround) {
-                    this.velocity.x = this.direction.x * speedMultiplier;
-                    this.velocity.z = this.direction.z * speedMultiplier;
+                    this.velocity.x = this.direction.x * this.speed;
+                    this.velocity.z = this.direction.z * this.speed;
                 } else {
                     // Air control
-                    this.velocity.x += this.direction.x * speedMultiplier * deltaTime * controlMultiplier;
-                    this.velocity.z += this.direction.z * speedMultiplier * deltaTime * controlMultiplier;
-                    
-                    // Limit horizontal speed
-                    const horizontalSpeed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.z * this.velocity.z);
-                    const maxSpeed = this.isGliding ? this.speed * 2 : this.speed * 0.8;
-                    if (horizontalSpeed > maxSpeed) {
-                        const scale = maxSpeed / horizontalSpeed;
-                        this.velocity.x *= scale;
-                        this.velocity.z *= scale;
-                    }
+                    this.velocity.x += this.direction.x * this.speed * 0.5 * deltaTime;
+                    this.velocity.z += this.direction.z * this.speed * 0.5 * deltaTime;
                 }
             }
             
             jump() {
                 if (this.isOnGround) {
-                    this.velocity.y = this.jumpForce;
+                    this.velocity.y = GameConfig.player.jumpForce;
                     this.isOnGround = false;
-                    console.log("Jumped!");
+                    game.particleSystem.emit(this.mesh.position, 0x4fc3f7, 15, 3);
                     return true;
-                } else if (this.isDoubleJumpAvailable) {
-                    this.velocity.y = this.doubleJumpForce;
-                    this.isDoubleJumpAvailable = false;
-                    console.log("Double jumped!");
+                } else if (this.canDoubleJump) {
+                    this.velocity.y = GameConfig.player.doubleJumpForce;
+                    this.canDoubleJump = false;
+                    game.particleSystem.emit(this.mesh.position, 0xffd700, 20, 4);
                     return true;
                 }
                 return false;
             }
             
-            stop() {
-                if (this.isOnGround) {
-                    this.velocity.x = 0;
-                    this.velocity.z = 0;
+            startGlide() {
+                if (!this.isOnGround && this.glideStamina > 10) {
+                    this.isGliding = true;
+                    return true;
                 }
+                return false;
+            }
+            
+            stopGlide() {
+                this.isGliding = false;
+            }
+            
+            attack() {
+                if (this.attackCooldown <= 0) {
+                    this.attackCooldown = 0.5;
+                    game.particleSystem.emit(this.mesh.position, 0xff4444, 30, 5);
+                    game.createCombatText(this.mesh.position, 'ATTACK!', 0xff4444);
+                    return true;
+                }
+                return false;
+            }
+            
+            specialAttack() {
+                if (this.specialCharge >= this.maxSpecialCharge && this.specialAttackCooldown <= 0) {
+                    this.specialCharge = 0;
+                    this.specialAttackCooldown = GameConfig.player.specialAttackCooldown;
+                    game.particleSystem.emit(this.mesh.position, 0xba68c8, 50, 8);
+                    game.createCombatText(this.mesh.position, 'POWER STRIKE!', 0xba68c8);
+                    return true;
+                }
+                return false;
             }
             
             takeDamage(amount) {
+                if (this.invincible > 0) return false;
+                
                 this.health = Math.max(0, this.health - amount);
-                return this.health > 0;
+                this.invincible = 1;
+                game.particleSystem.emit(this.mesh.position, 0xff4444, 20, 3);
+                game.createCombatText(this.mesh.position, `-${amount}`, 0xff4444);
+                
+                // Flash effect
+                this.mesh.material.color.setHex(0xff4444);
+                setTimeout(() => {
+                    this.mesh.material.color.setHex(0x4fc3f7);
+                }, 100);
+                
+                return this.health <= 0;
+            }
+            
+            heal(amount) {
+                this.health = Math.min(this.maxHealth, this.health + amount);
+                game.particleSystem.emit(this.mesh.position, 0x4caf50, 20, 2);
+                game.createCombatText(this.mesh.position, `+${amount}`, 0x4caf50);
             }
             
             addScore(points) {
                 this.score += points;
-                return this.score;
+                this.experience += points;
+                
+                // Check for level up
+                const neededXP = this.level * GameConfig.levels.experiencePerLevel;
+                if (this.experience >= neededXP) {
+                    this.levelUp();
+                }
             }
             
-            getPosition() {
-                return this.mesh.position.clone();
+            levelUp() {
+                this.level++;
+                this.experience = 0;
+                
+                // Increase stats
+                this.maxHealth = Math.floor(this.maxHealth * GameConfig.levels.levelScale);
+                this.health = this.maxHealth;
+                this.speed += 1;
+                
+                // Visual effect
+                game.showCenterMessage('LEVEL UP!', 0xffd700, 2);
+                game.createLevelUpEffect();
+                
+                // Play sound if available
+                if (game.audioContext) {
+                    game.playLevelUpSound();
+                }
             }
             
-            reset() {
-                this.mesh.position.set(0, 5, 0);
-                this.velocity.set(0, 0, 0);
-                this.health = 100;
-                this.isOnGround = false;
-                this.isDoubleJumpAvailable = true;
-                this.stopGlide();
-                this.glideStamina = this.maxGlideStamina;
-                this.glideCooldown = 0;
+            addSpecialCharge(amount) {
+                this.specialCharge = Math.min(this.maxSpecialCharge, this.specialCharge + amount);
+            }
+            
+            updateUI() {
+                document.getElementById('scoreDisplay').textContent = `Score: ${this.score}`;
+                document.getElementById('healthDisplay').textContent = `Health: ${Math.floor(this.health)}`;
+                document.getElementById('glideDisplay').textContent = `Glide: ${Math.floor(this.glideStamina)}%`;
+                document.getElementById('levelDisplay').textContent = `Level: ${this.level}`;
+                
+                // Update bars
+                document.getElementById('healthBar').style.width = `${(this.health / this.maxHealth) * 100}%`;
+                document.getElementById('glideBar').style.width = `${(this.glideStamina / this.maxGlideStamina) * 100}%`;
+                
+                // Update special button
+                const specialBtn = document.getElementById('specialBtn');
+                if (this.specialCharge >= this.maxSpecialCharge) {
+                    specialBtn.innerHTML = '⚡';
+                    specialBtn.style.background = 'radial-gradient(circle at 30% 30%, #ffd700, #ff9800)';
+                } else {
+                    specialBtn.innerHTML = `${Math.floor(this.specialCharge)}%`;
+                    specialBtn.style.background = 'radial-gradient(circle at 30% 30%, #ba68c8, #7b1fa2)';
+                }
             }
         }
 
-        // ==================== GAME MANAGER ====================
-        class Game {
-            constructor() {
-                // Initialize controllers
-                this.joystick = new JoystickController();
-                this.buttons = new ButtonController();
+        // ==================== ENEMY CLASS ====================
+        class Enemy {
+            constructor(position) {
+                this.geometry = new THREE.ConeGeometry(0.5, 1.5, 8);
+                this.material = new THREE.MeshStandardMaterial({
+                    color: 0xff4444,
+                    roughness: 0.5,
+                    metalness: 0.3,
+                    emissive: 0x440000,
+                    emissiveIntensity: 0.3
+                });
+                this.mesh = new THREE.Mesh(this.geometry, this.material);
+                this.mesh.position.copy(position);
+                this.mesh.castShadow = true;
+                this.mesh.receiveShadow = true;
+                this.mesh.name = 'Enemy';
                 
-                // Initialize player and game state
-                this.player = new Player();
-                this.keys = {};
-                this.clock = new THREE.Clock();
-                this.platforms = [];
-                this.collectibles = [];
-                this.obstacles = [];
-                this.gameTime = 0;
-                this.isPaused = false;
-                this.gameOver = false;
+                this.health = GameConfig.enemies.baseHealth + (game.player.level - 1) * 10;
+                this.speed = 3 + game.player.level * 0.5;
+                this.damage = GameConfig.enemies.damage;
+                this.attackCooldown = 0;
                 
-                // Initialize game
-                this.init();
-                this.setupEventListeners();
-                this.hideLoadingScreen();
-                this.animate();
+                scene.add(this.mesh);
             }
             
-            init() {
+            update(deltaTime) {
+                // Move towards player
+                const direction = new THREE.Vector3().subVectors(game.player.mesh.position, this.mesh.position);
+                const distance = direction.length();
+                
+                if (distance > 0.1) {
+                    direction.normalize();
+                    this.mesh.position.add(direction.multiplyScalar(this.speed * deltaTime));
+                    
+                    // Rotate to face player
+                    const angle = Math.atan2(direction.x, direction.z);
+                    this.mesh.rotation.y = angle;
+                }
+                
+                // Attack if close
+                if (distance < 2 && this.attackCooldown <= 0) {
+                    if (game.player.takeDamage(this.damage)) {
+                        game.checkGameOver();
+                    }
+                    this.attackCooldown = 2;
+                }
+                
+                if (this.attackCooldown > 0) {
+                    this.attackCooldown -= deltaTime;
+                }
+                
+                // Bobbing animation
+                this.mesh.position.y += Math.sin(gameTime * 5 + this.mesh.position.x) * 0.02;
+            }
+            
+            takeDamage(amount) {
+                this.health -= amount;
+                
+                // Visual feedback
+                this.mesh.material.emissiveIntensity = 1;
+                setTimeout(() => {
+                    this.mesh.material.emissiveIntensity = 0.3;
+                }, 100);
+                
+                if (this.health <= 0) {
+                    this.destroy();
+                    return true;
+                }
+                return false;
+            }
+            
+            destroy() {
+                scene.remove(this.mesh);
+                game.particleSystem.emit(this.mesh.position, 0xff4444, 30, 4);
+                game.player.addScore(100);
+                game.player.addSpecialCharge(25);
+                game.player.enemiesDefeated++;
+                game.enemies = game.enemies.filter(e => e !== this);
+            }
+        }
+
+        // ==================== COLLECTIBLE CLASS ====================
+        class Collectible {
+            constructor(position, type = 'health') {
+                this.type = type;
+                
+                switch (type) {
+                    case 'health':
+                        this.geometry = new THREE.SphereGeometry(0.5, 16, 16);
+                        this.material = new THREE.MeshStandardMaterial({
+                            color: 0x4caf50,
+                            emissive: 0x2e7d32,
+                            emissiveIntensity: 0.5,
+                            roughness: 0.2,
+                            metalness: 0.8
+                        });
+                        break;
+                    case 'score':
+                        this.geometry = new THREE.OctahedronGeometry(0.6);
+                        this.material = new THREE.MeshStandardMaterial({
+                            color: 0xffd700,
+                            emissive: 0xff9800,
+                            emissiveIntensity: 0.5,
+                            roughness: 0.1,
+                            metalness: 0.9
+                        });
+                        break;
+                    case 'special':
+                        this.geometry = new THREE.TetrahedronGeometry(0.5);
+                        this.material = new THREE.MeshStandardMaterial({
+                            color: 0xba68c8,
+                            emissive: 0x7b1fa2,
+                            emissiveIntensity: 0.6,
+                            roughness: 0.1,
+                            metalness: 0.8
+                        });
+                        break;
+                }
+                
+                this.mesh = new THREE.Mesh(this.geometry, this.material);
+                this.mesh.position.copy(position);
+                this.mesh.castShadow = true;
+                this.mesh.name = `Collectible_${type}`;
+                
+                this.floatOffset = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 3;
+                
+                scene.add(this.mesh);
+            }
+            
+            update(deltaTime) {
+                // Floating animation
+                const floatTime = gameTime * 2 + this.floatOffset;
+                this.mesh.position.y += Math.sin(floatTime) * 0.01;
+                
+                // Rotation
+                this.mesh.rotation.y += this.rotationSpeed * deltaTime;
+                this.mesh.rotation.x = Math.sin(floatTime * 0.5) * 0.2;
+                
+                // Pulsing emission
+                this.mesh.material.emissiveIntensity = 0.4 + Math.sin(floatTime * 3) * 0.2;
+                
+                // Check collision with player
+                const distance = this.mesh.position.distanceTo(game.player.mesh.position);
+                if (distance < 1.5) {
+                    this.collect();
+                }
+            }
+            
+            collect() {
+                switch (this.type) {
+                    case 'health':
+                        game.player.heal(GameConfig.collectibles.healthRestore);
+                        break;
+                    case 'score':
+                        game.player.addScore(GameConfig.collectibles.scoreValue);
+                        break;
+                    case 'special':
+                        game.player.addSpecialCharge(GameConfig.collectibles.specialCharge);
+                        break;
+                }
+                
+                // Visual effect
+                game.particleSystem.emit(this.mesh.position, this.mesh.material.color, 25, 3);
+                
+                // Remove from scene
+                scene.remove(this.mesh);
+                game.collectibles = game.collectibles.filter(c => c !== this);
+            }
+        }
+
+        // ==================== GAME CLASS ====================
+        class Game {
+            constructor() {
+                this.player = null;
+                this.enemies = [];
+                this.collectibles = [];
+                this.particleSystem = null;
+                this.clock = new THREE.Clock();
+                this.isPaused = false;
+                this.gameOver = false;
+                this.enemySpawnTimer = 0;
+                this.collectibleSpawnTimer = 0;
+                this.audioContext = null;
+                
+                this.init();
+            }
+            
+            async init() {
+                // Initialize Three.js
+                this.initThreeJS();
+                
+                // Initialize controllers
+                joystick = new JoystickController();
+                buttonController = new ButtonController();
+                
+                // Initialize particle system
+                this.particleSystem = new ParticleSystem();
+                
+                // Initialize player
+                this.player = new Player();
+                
+                // Initialize audio
+                this.initAudio();
+                
+                // Create initial environment
+                this.createEnvironment();
+                
+                // Start game loop
+                this.startGame();
+                
+                // Hide loading screen
+                this.hideLoadingScreen();
+            }
+            
+            initThreeJS() {
+                // Scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x87ceeb);
+                scene.fog = new THREE.Fog(0x87ceeb, 10, 200);
+                
+                // Camera
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 10, 15);
+                
+                // Renderer
+                const canvas = document.getElementById('gameCanvas');
+                renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.outputColorSpace = THREE.SRGBColorSpace;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.0;
+                
+                // Controls (for camera following)
+                controls = new OrbitControls(camera, canvas);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enableZoom = false;
+                controls.enablePan = false;
+                controls.maxPolarAngle = Math.PI / 2;
+                controls.minDistance = 8;
+                controls.maxDistance = 20;
+                controls.target.set(0, 3, 0);
+                
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 30, 10);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.camera.left = -30;
+                directionalLight.shadow.camera.right = 30;
+                directionalLight.shadow.camera.top = 30;
+                directionalLight.shadow.camera.bottom = -30;
+                directionalLight.shadow.mapSize.width = 1024;
+                directionalLight.shadow.mapSize.height = 1024;
+                scene.add(directionalLight);
+                
+                // Hemisphere light for sky/ground
+                const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x3a3a3a, 0.4);
+                scene.add(hemisphereLight);
+                
+                // Window resize handler
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create audio nodes for future sounds
+                    this.gainNode = this.audioContext.createGain();
+                    this.gainNode.connect(this.audioContext.destination);
+                    this.gainNode.gain.value = 0.5;
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+            
+            playLevelUpSound() {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.gainNode);
+                
+                oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(783.99, this.audioContext.currentTime + 0.2); // G5
+                
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(this.audioContext.currentTime + 0.5);
+            }
+            
+            createEnvironment() {
                 // Ground
-                const groundGeometry = new THREE.PlaneGeometry(100, 100, 20, 20);
+                const groundGeometry = new THREE.PlaneGeometry(GameConfig.world.boundarySize, GameConfig.world.boundarySize, 20, 20);
                 const groundMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x808080,
+                    color: 0x2e7d32,
                     roughness: 0.8,
-                    metalness: 0.2,
+                    metalness: 0.1,
                     side: THREE.DoubleSide
                 });
                 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -1014,15 +1719,15 @@
                 ground.name = 'Ground';
                 scene.add(ground);
                 
-                // Add texture variation
-                const groundColors = [0x808080, 0x707070, 0x909090];
+                // Add grass texture variation
+                const groundColors = [0x2e7d32, 0x388e3c, 0x43a047];
                 const groundVertices = groundGeometry.attributes.position;
                 const groundColorsAttr = new Float32Array(groundVertices.count * 3);
                 
                 for (let i = 0; i < groundVertices.count; i++) {
                     const x = groundVertices.getX(i);
                     const z = groundVertices.getY(i);
-                    const colorIndex = Math.floor((x + z) * 2) % groundColors.length;
+                    const colorIndex = Math.floor((x + z) * 0.5) % groundColors.length;
                     const color = new THREE.Color(groundColors[colorIndex]);
                     
                     groundColorsAttr[i * 3] = color.r;
@@ -1033,354 +1738,337 @@
                 groundGeometry.setAttribute('color', new THREE.BufferAttribute(groundColorsAttr, 3));
                 groundMaterial.vertexColors = true;
                 
-                // Platforms for gliding
-                const platformGeometry = new THREE.BoxGeometry(8, 0.5, 8);
+                // Platforms
+                const platformGeometry = new THREE.BoxGeometry(6, 1, 6);
                 const platformMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x4a90e2,
-                    roughness: 0.6,
-                    metalness: 0.3
+                    color: 0x795548,
+                    roughness: 0.7,
+                    metalness: 0.2
                 });
                 
-                // Create high platforms for gliding
-                const platformPositions = [
-                    { x: -20, y: 15, z: -10 },
-                    { x: 20, y: 20, z: 5 },
-                    { x: 0, y: 25, z: 20 },
-                    { x: -15, y: 18, z: 25 },
-                    { x: 15, y: 22, z: -15 },
-                    { x: -25, y: 12, z: 0 },
-                    { x: 25, y: 16, z: 15 },
-                    { x: -10, y: 28, z: -20 }
-                ];
-                
-                for (let i = 0; i < platformPositions.length; i++) {
-                    const pos = platformPositions[i];
+                // Create platforms at different heights
+                for (let i = 0; i < 8; i++) {
                     const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-                    platform.position.set(pos.x, pos.y, pos.z);
+                    platform.position.set(
+                        (Math.random() - 0.5) * 60,
+                        3 + i * 4,
+                        (Math.random() - 0.5) * 60
+                    );
                     platform.castShadow = true;
                     platform.receiveShadow = true;
-                    platform.name = `Platform_${i}`;
-                    
                     scene.add(platform);
-                    this.platforms.push({
-                        mesh: platform,
-                        boundingBox: new THREE.Box3().setFromObject(platform)
-                    });
                 }
                 
-                // Gliding rings (collectibles)
-                const ringGeometry = new THREE.TorusGeometry(2, 0.3, 8, 24);
-                const ringMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x00ffff,
-                    emissive: 0x0088ff,
-                    emissiveIntensity: 0.5,
-                    roughness: 0.3,
-                    metalness: 0.8
-                });
+                // Trees
+                const trunkGeometry = new THREE.CylinderGeometry(0.3, 0.5, 3, 8);
+                const leavesGeometry = new THREE.SphereGeometry(2, 8, 8);
+                const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 });
+                const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 });
                 
-                // Create rings in the air for gliding through
                 for (let i = 0; i < 20; i++) {
-                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
                     
-                    // Place rings between platforms
-                    const startPlatform = this.platforms[Math.floor(Math.random() * this.platforms.length)];
-                    const endPlatform = this.platforms[Math.floor(Math.random() * this.platforms.length)];
-                    
-                    const t = Math.random();
-                    const x = startPlatform.mesh.position.x * (1-t) + endPlatform.mesh.position.x * t;
-                    const y = (startPlatform.mesh.position.y + endPlatform.mesh.position.y) / 2 + Math.random() * 5;
-                    const z = startPlatform.mesh.position.z * (1-t) + endPlatform.mesh.position.z * t;
-                    
-                    ring.position.set(x, y, z);
-                    ring.castShadow = true;
-                    ring.name = `Ring_${i}`;
-                    
-                    // Animation properties
-                    ring.userData.rotationSpeed = 2;
-                    ring.userData.floatSpeed = 1;
-                    ring.userData.floatHeight = 0.5;
-                    ring.userData.floatOffset = Math.random() * Math.PI * 2;
-                    ring.userData.collected = false;
-                    
-                    scene.add(ring);
-                    this.collectibles.push(ring);
-                }
-                
-                // Skybox
-                const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
-                const skyMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x87ceeb,
-                    side: THREE.BackSide
-                });
-                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-                scene.add(sky);
-                
-                // Clouds for atmosphere
-                const cloudGeometry = new THREE.SphereGeometry(3, 8, 8);
-                const cloudMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                    transparent: true,
-                    opacity: 0.7,
-                    roughness: 1.0
-                });
-                
-                for (let i = 0; i < 15; i++) {
-                    const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                    cloud.position.set(
-                        (Math.random() - 0.5) * 200,
-                        30 + Math.random() * 20,
-                        (Math.random() - 0.5) * 200
+                    trunk.position.set(
+                        (Math.random() - 0.5) * 80,
+                        1.5,
+                        (Math.random() - 0.5) * 80
                     );
-                    cloud.scale.set(
-                        1 + Math.random() * 2,
-                        0.5 + Math.random() * 0.5,
-                        1 + Math.random() * 2
-                    );
-                    scene.add(cloud);
+                    leaves.position.copy(trunk.position);
+                    leaves.position.y += 2.5;
+                    
+                    trunk.castShadow = true;
+                    trunk.receiveShadow = true;
+                    leaves.castShadow = true;
+                    leaves.receiveShadow = true;
+                    
+                    scene.add(trunk);
+                    scene.add(leaves);
                 }
             }
             
             hideLoadingScreen() {
-                const loadingElement = document.getElementById('loading');
-                if (loadingElement) {
-                    loadingElement.style.display = 'none';
-                }
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.opacity = '0';
+                
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    this.showCenterMessage('TOUCH TO START', 0x4fc3f7, 2);
+                    
+                    // Start on touch
+                    document.addEventListener('touchstart', () => {
+                        if (!isGameStarted) {
+                            isGameStarted = true;
+                            this.showCenterMessage('GO!', 0x4caf50, 1);
+                        }
+                    }, { once: true });
+                    
+                    // Also start on click for testing
+                    document.addEventListener('click', () => {
+                        if (!isGameStarted) {
+                            isGameStarted = true;
+                            this.showCenterMessage('GO!', 0x4caf50, 1);
+                        }
+                    }, { once: true });
+                }, 500);
             }
             
-            setupEventListeners() {
-                // Keyboard input for desktop
-                window.addEventListener('keydown', (event) => {
-                    const key = event.key.toLowerCase();
-                    this.keys[key] = true;
-                    
-                    if (key === ' ') {
-                        event.preventDefault();
-                        this.player.jump();
-                    }
-                    
-                    if (key === 'shift') {
-                        this.player.startGlide();
-                    }
-                    
-                    if (key === 'escape') {
-                        this.isPaused = !this.isPaused;
-                        console.log('Game', this.isPaused ? 'paused' : 'resumed');
-                    }
-                    
-                    if (key === 'r') {
-                        this.resetGame();
-                    }
-                });
+            handleInput() {
+                if (!isGameStarted || this.isPaused || this.gameOver) return;
                 
-                window.addEventListener('keyup', (event) => {
-                    const key = event.key.toLowerCase();
-                    this.keys[key] = false;
-                    
-                    if (key === 'shift') {
-                        this.player.stopGlide();
-                    }
-                });
+                // Get joystick direction
+                const joystickDir = joystick.getDirection();
+                const forward = joystickDir.y;
+                const right = joystickDir.x;
                 
-                // Window resize
-                window.addEventListener('resize', () => {
-                    camera.aspect = window.innerWidth / window.innerHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-                
-                // Prevent right-click menu
-                renderer.domElement.addEventListener('contextmenu', (event) => {
-                    event.preventDefault();
-                });
-            }
-            
-            handleInput(deltaTime) {
-                if (this.isPaused || this.gameOver) return;
-                
-                let forward = 0;
-                let right = 0;
-                
-                // Check joystick input
-                const joystickDir = this.joystick.getDirection();
+                // Move player if joystick is active
                 if (joystickDir.magnitude > 0.1) {
-                    forward = joystickDir.y;
-                    right = joystickDir.x;
+                    this.player.move(forward, right);
                 } else {
-                    // Check keyboard input
-                    if (this.keys['w'] || this.keys['arrowup']) forward += 1;
-                    if (this.keys['s'] || this.keys['arrowdown']) forward -= 1;
-                    if (this.keys['a'] || this.keys['arrowleft']) right -= 1;
-                    if (this.keys['d'] || this.keys['arrowright']) right += 1;
+                    this.player.velocity.x *= 0.9;
+                    this.player.velocity.z *= 0.9;
                 }
                 
-                // Check button input for glide
-                if (this.buttons.isPressed('glide')) {
+                // Handle buttons
+                if (buttonController.isPressed('jump')) {
+                    if (this.player.jump()) {
+                        buttonController.setButtonCooldown('jump', 0.3);
+                    }
+                }
+                
+                if (buttonController.isPressed('glide')) {
                     this.player.startGlide();
-                } else if (this.player.isGliding && !this.keys['shift']) {
+                } else if (this.player.isGliding) {
                     this.player.stopGlide();
                 }
                 
-                // Check button input for jump
-                if (this.buttons.isPressed('jump')) {
-                    this.player.jump();
+                if (buttonController.isPressed('attack')) {
+                    if (this.player.attack()) {
+                        // Check for enemy hits
+                        this.checkAttackHit();
+                        buttonController.setButtonCooldown('attack', 0.5);
+                    }
                 }
                 
-                // Move player if any input
-                if (forward !== 0 || right !== 0) {
-                    this.player.move(forward, right);
-                } else {
-                    this.player.stop();
+                if (buttonController.isPressed('special')) {
+                    if (this.player.specialAttack()) {
+                        // Special attack hits all enemies
+                        this.enemies.forEach(enemy => {
+                            enemy.takeDamage(GameConfig.player.specialAttackDamage);
+                        });
+                        buttonController.setButtonCooldown('special', GameConfig.player.specialAttackCooldown);
+                    }
                 }
             }
             
-            checkCollisions() {
-                const playerPos = this.player.getPosition();
-                const playerSphere = this.player.boundingSphere;
+            checkAttackHit() {
+                const playerPos = this.player.mesh.position;
                 
-                // Platform collisions
-                for (const platform of this.platforms) {
-                    const platformBox = platform.boundingBox;
-                    
-                    if (playerPos.y >= platform.mesh.position.y - 1 && 
-                        playerPos.y <= platform.mesh.position.y + 2) {
-                        
-                        const platformCenter = new THREE.Vector3();
-                        platformBox.getCenter(platformCenter);
-                        
-                        const distanceX = Math.abs(playerPos.x - platformCenter.x);
-                        const distanceZ = Math.abs(playerPos.z - platformCenter.z);
-                        
-                        if (distanceX < 4 && distanceZ < 4) {
-                            if (playerPos.y < platform.mesh.position.y + 0.5) {
-                                playerPos.y = platform.mesh.position.y + 0.5;
-                                this.player.mesh.position.y = playerPos.y;
-                                this.player.velocity.y = 0;
-                                this.player.isOnGround = true;
-                                this.player.isDoubleJumpAvailable = true;
-                            }
-                        }
+                this.enemies.forEach(enemy => {
+                    const distance = playerPos.distanceTo(enemy.mesh.position);
+                    if (distance < 3) {
+                        enemy.takeDamage(GameConfig.player.attackDamage);
                     }
+                });
+            }
+            
+            updateEnemies(deltaTime) {
+                // Spawn new enemies
+                this.enemySpawnTimer += deltaTime;
+                if (this.enemySpawnTimer >= GameConfig.enemies.spawnRate && 
+                    this.enemies.length < GameConfig.enemies.maxEnemies) {
+                    this.enemySpawnTimer = 0;
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 15 + Math.random() * 10;
+                    const x = Math.cos(angle) * distance;
+                    const z = Math.sin(angle) * distance;
+                    
+                    const enemy = new Enemy(new THREE.Vector3(x, 2, z));
+                    this.enemies.push(enemy);
                 }
                 
-                // Ring collection
-                for (let i = this.collectibles.length - 1; i >= 0; i--) {
-                    const ring = this.collectibles[i];
-                    
-                    if (ring.userData.collected) continue;
-                    
-                    const distance = playerPos.distanceTo(ring.position);
-                    
-                    if (distance < 2.5) {
-                        ring.userData.collected = true;
-                        this.player.addScore(50);
-                        
-                        // Bonus for collecting while gliding
-                        if (this.player.isGliding) {
-                            this.player.addScore(25);
-                            this.player.glideStamina = Math.min(this.player.maxGlideStamina, this.player.glideStamina + 20);
-                            console.log("Bonus! Collected while gliding!");
-                        }
-                        
-                        // Visual effect
-                        ring.material.emissiveIntensity = 2.0;
-                        ring.material.opacity = 0.5;
-                        ring.material.transparent = true;
-                        
-                        // Remove after animation
-                        setTimeout(() => {
-                            scene.remove(ring);
-                            this.collectibles.splice(i, 1);
-                        }, 300);
-                        
-                        console.log('Collected ring! Score:', this.player.score);
-                    }
-                }
-                
-                // Boundary check
-                if (playerPos.y < -10) {
-                    this.player.takeDamage(10);
-                    this.player.reset();
-                    console.log('Player fell! Health:', this.player.health);
-                }
-                
-                // Game over check
-                if (this.player.health <= 0 && !this.gameOver) {
-                    this.gameOver = true;
-                    console.log('GAME OVER! Final Score:', this.player.score);
-                    alert(`Game Over! Your score: ${this.player.score}`);
-                }
+                // Update existing enemies
+                this.enemies.forEach(enemy => enemy.update(deltaTime));
             }
             
             updateCollectibles(deltaTime) {
-                for (const ring of this.collectibles) {
-                    if (ring.userData.collected) continue;
+                // Spawn new collectibles
+                this.collectibleSpawnTimer += deltaTime;
+                if (this.collectibleSpawnTimer >= 10 && this.collectibles.length < 10) {
+                    this.collectibleSpawnTimer = 0;
                     
-                    // Floating animation
-                    const floatTime = this.gameTime * ring.userData.floatSpeed + ring.userData.floatOffset;
-                    ring.position.y += Math.sin(floatTime) * 0.01;
+                    const types = ['health', 'score', 'special'];
+                    const type = types[Math.floor(Math.random() * types.length)];
                     
-                    // Rotation animation
-                    ring.rotation.y += ring.userData.rotationSpeed * deltaTime;
-                    ring.rotation.x = Math.sin(floatTime * 0.5) * 0.2;
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 10 + Math.random() * 20;
+                    const x = Math.cos(angle) * distance;
+                    const z = Math.sin(angle) * distance;
+                    const y = 2 + Math.random() * 5;
+                    
+                    const collectible = new Collectible(new THREE.Vector3(x, y, z), type);
+                    this.collectibles.push(collectible);
+                }
+                
+                // Update existing collectibles
+                this.collectibles.forEach(collectible => collectible.update(deltaTime));
+            }
+            
+            updateCamera() {
+                // Smooth camera follow
+                const targetPosition = this.player.mesh.position.clone();
+                targetPosition.y += 8;
+                targetPosition.z += 10;
+                
+                camera.position.lerp(targetPosition, 0.05);
+                controls.target.lerp(this.player.mesh.position, 0.05);
+                controls.update();
+            }
+            
+            showCenterMessage(text, color = 0xffffff, duration = 2) {
+                const message = document.getElementById('centerMessage');
+                message.textContent = text;
+                message.style.color = `#${color.toString(16).padStart(6, '0')}`;
+                message.style.opacity = '1';
+                
+                setTimeout(() => {
+                    message.style.opacity = '0';
+                }, duration * 1000);
+            }
+            
+            createCombatText(position, text, color) {
+                const combatText = document.createElement('div');
+                combatText.className = 'combat-text';
+                combatText.textContent = text;
+                combatText.style.color = `#${color.toString(16).padStart(6, '0')}`;
+                combatText.style.left = '50%';
+                combatText.style.top = '50%';
+                
+                document.getElementById('uiContainer').appendChild(combatText);
+                
+                // Position based on world position (simplified)
+                const screenPos = position.clone().project(camera);
+                combatText.style.left = `${(screenPos.x * 0.5 + 0.5) * 100}%`;
+                combatText.style.top = `${(-screenPos.y * 0.5 + 0.5) * 100}%`;
+                
+                // Remove after animation
+                setTimeout(() => {
+                    combatText.remove();
+                }, 1000);
+            }
+            
+            createLevelUpEffect() {
+                const levelUp = document.createElement('div');
+                levelUp.className = 'level-up-effect';
+                levelUp.textContent = 'LEVEL UP!';
+                
+                document.getElementById('uiContainer').appendChild(levelUp);
+                
+                setTimeout(() => {
+                    levelUp.remove();
+                }, 1000);
+            }
+            
+            checkGameOver() {
+                if (this.player.health <= 0 && !this.gameOver) {
+                    this.gameOver = true;
+                    this.showGameOverScreen();
                 }
             }
             
-            updateUI() {
-                const scoreElement = document.getElementById('score');
-                const positionElement = document.getElementById('position');
+            showGameOverScreen() {
+                document.getElementById('finalScore').textContent = this.player.score;
+                document.getElementById('finalLevel').textContent = this.player.level;
+                document.getElementById('finalEnemies').textContent = this.player.enemiesDefeated;
                 
-                if (scoreElement) {
-                    scoreElement.textContent = `Score: ${this.player.score} | Health: ${this.player.health}`;
-                }
+                document.getElementById('gameOverScreen').style.display = 'flex';
                 
-                if (positionElement) {
-                    const pos = this.player.getPosition();
-                    positionElement.textContent = `Position: (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)})`;
+                // Setup game over buttons
+                document.getElementById('playAgainBtn').onclick = () => {
+                    this.restartGame();
+                };
+                
+                document.getElementById('menuBtn').onclick = () => {
+                    location.reload();
+                };
+            }
+            
+            togglePause() {
+                if (this.gameOver) return;
+                
+                this.isPaused = !this.isPaused;
+                document.getElementById('pauseMenu').style.display = this.isPaused ? 'flex' : 'none';
+                
+                if (this.isPaused) {
+                    this.showCenterMessage('PAUSED', 0xff9800, 999);
                 }
             }
             
-            resetGame() {
-                this.player.reset();
-                this.player.score = 0;
-                this.player.health = 100;
-                
-                for (const ring of this.collectibles) {
-                    scene.remove(ring);
-                }
-                this.collectibles = [];
-                
+            restartGame() {
+                // Reset game state
                 this.gameOver = false;
                 this.isPaused = false;
-                this.gameTime = 0;
                 
-                console.log('Game reset!');
+                // Clear enemies and collectibles
+                this.enemies.forEach(enemy => scene.remove(enemy.mesh));
+                this.collectibles.forEach(collectible => scene.remove(collectible.mesh));
+                this.enemies = [];
+                this.collectibles = [];
+                
+                // Reset player
+                this.player.reset();
+                this.player.score = 0;
+                this.player.level = 1;
+                this.player.health = this.player.maxHealth;
+                this.player.experience = 0;
+                this.player.enemiesDefeated = 0;
+                
+                // Hide screens
+                document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('pauseMenu').style.display = 'none';
+                
+                // Show start message
+                this.showCenterMessage('GO!', 0x4caf50, 2);
             }
             
-            animate() {
-                requestAnimationFrame(() => this.animate());
+            startGame() {
+                // Setup pause menu buttons
+                document.getElementById('resumeBtn').onclick = () => this.togglePause();
+                document.getElementById('restartBtn').onclick = () => this.restartGame();
+                document.getElementById('quitBtn').onclick = () => location.reload();
                 
-                if (this.isPaused) return;
+                // Start game loop
+                this.gameLoop();
+            }
+            
+            gameLoop() {
+                requestAnimationFrame(() => this.gameLoop());
                 
-                const deltaTime = Math.min(this.clock.getDelta(), 0.1);
-                this.gameTime += deltaTime;
+                deltaTime = Math.min(this.clock.getDelta(), 0.1);
+                gameTime += deltaTime;
                 
-                // Handle input
-                this.handleInput(deltaTime);
+                if (!isGameStarted || this.gameOver) return;
                 
-                // Update player
-                this.player.update(deltaTime);
-                
-                // Update animations
-                this.updateCollectibles(deltaTime);
-                
-                // Check collisions
-                this.checkCollisions();
-                
-                // Update UI
-                this.updateUI();
-                
-                // Update controls
-                controls.update();
+                if (!this.isPaused) {
+                    // Handle input
+                    this.handleInput();
+                    
+                    // Update game objects
+                    this.player.update(deltaTime);
+                    this.updateEnemies(deltaTime);
+                    this.updateCollectibles(deltaTime);
+                    this.particleSystem.update(deltaTime);
+                    
+                    // Update camera
+                    this.updateCamera();
+                    
+                    // Update UI
+                    this.player.updateUI();
+                    
+                    // Check game over
+                    this.checkGameOver();
+                }
                 
                 // Render scene
                 renderer.render(scene, camera);
@@ -1390,43 +2078,38 @@
         // ==================== INITIALIZE GAME ====================
         window.addEventListener('load', () => {
             try {
-                console.log('Initializing game with joystick controls...');
+                console.log('Initializing Mobile 3D Adventure Game...');
+                console.log('Touch controls: Joystick + 4 Action Buttons');
+                console.log('Double-tap screen to pause');
                 
-                // Create and start the game
-                const game = new Game();
-                
-                // Make accessible for debugging
-                window.game = game;
-                
-                console.log('Game loaded successfully!');
-                console.log('Desktop: WASD to move, Space to jump, Shift to glide');
-                console.log('Mobile: Use joystick and buttons');
+                game = new Game();
+                window.game = game; // For debugging
                 
             } catch (error) {
                 console.error('Game initialization error:', error);
                 
-                const errorMessage = document.createElement('div');
-                errorMessage.style.position = 'absolute';
-                errorMessage.style.top = '50%';
-                errorMessage.style.left = '50%';
-                errorMessage.style.transform = 'translate(-50%, -50%)';
-                errorMessage.style.color = 'red';
-                errorMessage.style.fontSize = '20px';
-                errorMessage.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                errorMessage.style.padding = '20px';
-                errorMessage.style.borderRadius = '10px';
-                errorMessage.style.textAlign = 'center';
-                errorMessage.innerHTML = `
-                    <h2>Game Failed to Load</h2>
-                    <p>${error.message}</p>
-                    <p>Please check the browser console for details.</p>
-                `;
-                document.body.appendChild(errorMessage);
+                // Show error message
+                document.getElementById('loadingText').textContent = 'Loading Failed';
+                document.getElementById('loadingSubtext').textContent = 'Please refresh the page';
+                document.getElementById('loadingSubtext').style.color = '#ff4444';
                 
-                const loadingElement = document.getElementById('loading');
-                if (loadingElement) {
-                    loadingElement.style.display = 'none';
-                }
+                // Remove loader
+                document.querySelector('.loader').style.display = 'none';
+                
+                // Add retry button
+                const retryBtn = document.createElement('button');
+                retryBtn.textContent = 'RETRY';
+                retryBtn.style.background = '#2196f3';
+                retryBtn.style.color = 'white';
+                retryBtn.style.border = 'none';
+                retryBtn.style.padding = '15px 30px';
+                retryBtn.style.borderRadius = '25px';
+                retryBtn.style.fontSize = '18px';
+                retryBtn.style.marginTop = '20px';
+                retryBtn.style.cursor = 'pointer';
+                retryBtn.onclick = () => location.reload();
+                
+                document.getElementById('loadingScreen').appendChild(retryBtn);
             }
         });
 
@@ -1440,6 +2123,13 @@
             console.error('Unhandled promise rejection:', event.reason);
             event.preventDefault();
         });
+
+        // Prevent default touch behaviors
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.id === 'joystickBase' || e.target.classList.contains('action-btn')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
     </script>
 </body>
