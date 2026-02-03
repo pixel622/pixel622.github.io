@@ -1,1141 +1,344 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Pixel Adventure</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            font-family: 'Press Start 2P', cursive, sans-serif;
-            background-color: #2c3e50;
-            color: #fff;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 1000px;
-            max-height: 600px;
-            background-color: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-        }
-        
-        #game-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        
-        #hud {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        #joystick-container {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 120px;
-            height: 120px;
-            pointer-events: auto;
-        }
-        
-        #joystick-base {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        #joystick {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 3px solid rgba(50, 50, 50, 0.7);
-        }
-        
-        #controls-container {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 180px;
-            height: 180px;
-            pointer-events: auto;
-        }
-        
-        .control-button {
-            position: absolute;
-            width: 70px;
-            height: 70px;
-            background-color: rgba(70, 70, 70, 0.8);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 12px;
-            text-align: center;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.1s;
-            padding: 5px;
-        }
-        
-        .control-button:active {
-            background-color: rgba(100, 100, 100, 0.9);
-            transform: scale(0.95);
-        }
-        
-        #interact-btn {
-            top: 0;
-            right: 55px;
-            background-color: rgba(46, 204, 113, 0.8);
-        }
-        
-        #confirm-btn {
-            top: 55px;
-            right: 0;
-            background-color: rgba(52, 152, 219, 0.8);
-        }
-        
-        #cancel-btn {
-            bottom: 0;
-            right: 55px;
-            background-color: rgba(231, 76, 60, 0.8);
-        }
-        
-        #menu-btn {
-            top: 55px;
-            left: 0;
-            background-color: rgba(155, 89, 182, 0.8);
-        }
-        
-        #inventory-btn {
-            bottom: 55px;
-            right: 0;
-            background-color: rgba(241, 196, 15, 0.8);
-        }
-        
-        #action-buttons {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: auto;
-        }
-        
-        .action-btn {
-            background-color: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        
-        .action-btn:active {
-            background-color: rgba(50, 50, 50, 0.8);
-            transform: scale(0.95);
-        }
-        
-        #dialog-box {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.85);
-            border: 4px solid #306082;
-            border-radius: 8px;
-            padding: 15px;
-            z-index: 10;
-            display: none;
-        }
-        
-        #dialog-text {
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 10px;
-            min-height: 60px;
-        }
-        
-        #dialog-continue {
-            text-align: right;
-            font-size: 10px;
-            color: #ffcc00;
-        }
-        
-        #player-info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 3px solid #4a752c;
-            border-radius: 8px;
-            padding: 10px;
-            min-width: 200px;
-            pointer-events: auto;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 11px;
-        }
-        
-        .info-label {
-            color: #a0d8f1;
-        }
-        
-        .info-value {
-            color: #ffffff;
-        }
-        
-        #battle-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 20;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .battle-ui {
-            width: 90%;
-            max-width: 800px;
-            background-color: rgba(30, 30, 60, 0.9);
-            border: 5px solid #4a3060;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .battle-pokemon {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .battle-sprite {
-            width: 96px;
-            height: 96px;
-            image-rendering: pixelated;
-            margin-right: 20px;
-        }
-        
-        .battle-info {
-            flex-grow: 1;
-        }
-        
-        .health-bar {
-            height: 20px;
-            background-color: #333;
-            border-radius: 5px;
-            margin: 5px 0;
-            overflow: hidden;
-        }
-        
-        .health-fill {
-            height: 100%;
-            background-color: #4CAF50;
-            transition: width 0.5s;
-        }
-        
-        .battle-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .battle-btn {
-            background-color: #306082;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .battle-btn:active {
-            background-color: #4080a0;
-        }
-        
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 30;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #title {
-            font-size: 36px;
-            color: #ffcc00;
-            text-shadow: 0 0 10px #ff9900;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        #subtitle {
-            font-size: 14px;
-            color: #a0d8f1;
-            margin-bottom: 50px;
-            text-align: center;
-        }
-        
-        .menu-btn {
-            background-color: #306082;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            margin: 10px;
-            border-radius: 5px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            cursor: pointer;
-            width: 250px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        
-        .menu-btn:active {
-            background-color: #4080a0;
-        }
-        
-        #save-notification {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgba(46, 204, 113, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 12px;
-            z-index: 5;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            #joystick-container {
-                bottom: 20px;
-                left: 20px;
-                width: 100px;
-                height: 100px;
-            }
-            
-            #controls-container {
-                bottom: 20px;
-                right: 20px;
-                width: 150px;
-                height: 150px;
-            }
-            
-            .control-button {
-                width: 60px;
-                height: 60px;
-                font-size: 10px;
-            }
-            
-            #title {
-                font-size: 28px;
-            }
-            
-            .menu-btn {
-                width: 220px;
-                font-size: 12px;
-                padding: 12px 20px;
-            }
-        }
-        
-        @media (orientation: portrait) {
-            #game-container {
-                max-width: 100%;
-                max-height: 100%;
-            }
-            
-            #rotate-message {
-                display: flex;
-            }
-        }
-        
-        #rotate-message {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        #rotate-message p {
-            margin-bottom: 20px;
-            font-size: 18px;
-            color: #ffcc00;
-        }
-        
-        .pixel-art {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-    </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pixel Pokémon Mobile Fan Game</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+}
+
+canvas{
+    display:block;
+    image-rendering: pixelated;
+}
+
+/* JOYSTICK */
+#joystickBase{
+    position:fixed;
+    left:40px;
+    bottom:40px;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.2);
+}
+
+#joystickKnob{
+    position:absolute;
+    left:40px;
+    top:40px;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.6);
+}
+
+/* BUTTONS */
+.btn{
+    position:fixed;
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.3);
+    color:white;
+    font-size:14px;
+    text-align:center;
+    line-height:70px;
+    user-select:none;
+}
+
+#btnA{ right:40px; bottom:60px; }
+#btnB{ right:130px; bottom:140px; }
+#btnMenu{ right:40px; top:40px; }
+#btnBag{ right:130px; top:40px; }
+
+#battleUI{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:40%;
+    background:#222;
+    display:none;
+    color:white;
+    font-family:sans-serif;
+}
+.moveBtn{
+    width:45%;
+    height:40%;
+    margin:2%;
+    background:#444;
+    display:inline-block;
+    text-align:center;
+    line-height:70px;
+}
+</style>
 </head>
+
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        
-        <div id="hud">
-            <div id="player-info">
-                <div class="info-row">
-                    <span class="info-label">TRAINER:</span>
-                    <span id="player-name" class="info-value">ASH</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">BADGES:</span>
-                    <span id="badge-count" class="info-value">0/8</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">POKÉDEX:</span>
-                    <span id="pokedex-count" class="info-value">3/30</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">MONEY:</span>
-                    <span id="money-count" class="info-value">$500</span>
-                </div>
-            </div>
-            
-            <div id="action-buttons">
-                <div id="save-btn" class="action-btn">SAVE</div>
-                <div id="load-btn" class="action-btn">LOAD</div>
-                <div id="menu-toggle" class="action-btn">MENU</div>
-            </div>
-            
-            <div id="joystick-container">
-                <div id="joystick-base"></div>
-                <div id="joystick"></div>
-            </div>
-            
-            <div id="controls-container">
-                <div id="interact-btn" class="control-button">INTERACT</div>
-                <div id="confirm-btn" class="control-button">CONFIRM</div>
-                <div id="cancel-btn" class="control-button">CANCEL</div>
-                <div id="menu-btn" class="control-button">MENU</div>
-                <div id="inventory-btn" class="control-button">BAG</div>
-            </div>
-            
-            <div id="dialog-box">
-                <div id="dialog-text"></div>
-                <div id="dialog-continue">Tap to continue...</div>
-            </div>
-            
-            <div id="save-notification">
-                Game Saved!
-            </div>
-        </div>
-        
-        <div id="battle-container">
-            <div class="battle-ui">
-                <div class="battle-pokemon">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/25.png" alt="Pikachu Back" class="battle-sprite pixel-art">
-                    <div class="battle-info">
-                        <div>PIKACHU <span style="color:#ffcc00">Lv. 5</span></div>
-                        <div class="health-bar">
-                            <div id="player-health" class="health-fill" style="width: 85%"></div>
-                        </div>
-                        <div>HP: 17/20</div>
-                    </div>
-                </div>
-                
-                <div class="battle-pokemon" style="justify-content: flex-end;">
-                    <div class="battle-info" style="text-align: right; margin-right: 20px;">
-                        <div>PIDGEY <span style="color:#ffcc00">Lv. 3</span></div>
-                        <div class="health-bar">
-                            <div id="enemy-health" class="health-fill" style="width: 45%"></div>
-                        </div>
-                        <div>HP: 8/18</div>
-                    </div>
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/16.png" alt="Pidgey" class="battle-sprite pixel-art">
-                </div>
-            </div>
-            
-            <div class="battle-ui">
-                <div style="margin-bottom: 15px; font-size: 14px; color: #ffcc00; text-align: center;">
-                    What will PIKACHU do?
-                </div>
-                
-                <div class="battle-options">
-                    <button class="battle-btn" data-move="thundershock">THUNDERSHOCK</button>
-                    <button class="battle-btn" data-move="quickattack">QUICK ATTACK</button>
-                    <button class="battle-btn" data-move="tailwhip">TAIL WHIP</button>
-                    <button class="battle-btn" data-move="pokeball">POKÉ BALL</button>
-                </div>
-            </div>
-            
-            <button id="run-btn" class="battle-btn" style="margin-top: 10px; width: 200px;">RUN</button>
-        </div>
-        
-        <div id="start-screen">
-            <div id="title">POKÉMON PIXEL ADVENTURE</div>
-            <div id="subtitle">A Fan Game for Mobile - Educational Use Only</div>
-            <div id="start-game" class="menu-btn">START NEW GAME</div>
-            <div id="continue-game" class="menu-btn">CONTINUE GAME</div>
-            <div id="options-game" class="menu-btn">OPTIONS</div>
-            <div id="credits-game" class="menu-btn">CREDITS</div>
-            <div style="margin-top: 40px; font-size: 10px; color: #777; text-align: center;">
-                This is a fan-made game for educational purposes.<br>
-                Pokémon is © of Nintendo, Game Freak, and The Pokémon Company.
-            </div>
-        </div>
-        
-        <div id="rotate-message">
-            <p>Please rotate your device to landscape mode for the best gaming experience!</p>
-            <div style="font-size: 50px;">↻</div>
-        </div>
-    </div>
 
-    <script>
-        // Game State
-        const gameState = {
-            screen: 'start', // start, overworld, battle, menu
-            player: {
-                name: 'ASH',
-                x: 200,
-                y: 150,
-                speed: 0,
-                direction: 'down',
-                isRunning: false,
-                pokemon: [
-                    { id: 25, name: 'PIKACHU', level: 5, hp: 20, maxHp: 20, type: 'ELECTRIC' }
-                ],
-                badges: 0,
-                pokedex: 3,
-                money: 500,
-                items: [
-                    { id: 'pokeball', name: 'POKÉ BALL', count: 5 },
-                    { id: 'potion', name: 'POTION', count: 2 }
-                ]
-            },
-            map: {
-                current: 'starter_town',
-                tiles: []
-            },
-            dialog: {
-                active: false,
-                text: '',
-                index: 0,
-                speed: 30
-            },
-            battle: {
-                active: false,
-                enemyPokemon: { id: 16, name: 'PIDGEY', level: 3, hp: 18, maxHp: 18, type: 'NORMAL' }
-            }
-        };
+<canvas id="game"></canvas>
 
-        // DOM Elements
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        const startScreen = document.getElementById('start-screen');
-        const battleContainer = document.getElementById('battle-container');
-        const dialogBox = document.getElementById('dialog-box');
-        const dialogText = document.getElementById('dialog-text');
-        const joystick = document.getElementById('joystick');
-        const joystickContainer = document.getElementById('joystick-container');
-        const saveNotification = document.getElementById('save-notification');
-        
-        // UI Update Elements
-        const playerNameEl = document.getElementById('player-name');
-        const badgeCountEl = document.getElementById('badge-count');
-        const pokedexCountEl = document.getElementById('pokedex-count');
-        const moneyCountEl = document.getElementById('money-count');
-        
-        // Initialize Canvas
-        function initCanvas() {
-            const container = document.getElementById('game-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            
-            // Draw initial game state
-            draw();
-        }
-        
-        // Draw Game
-        function draw() {
-            // Clear canvas
-            ctx.fillStyle = '#87CEEB'; // Sky blue for overworld
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw grass area
-            ctx.fillStyle = '#78C850'; // Pokémon grass green
-            ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
-            
-            // Draw path
-            ctx.fillStyle = '#A8A878'; // Path color
-            ctx.fillRect(canvas.width/2 - 30, 50, 60, canvas.height - 100);
-            
-            // Draw player
-            drawPlayer();
-            
-            // Draw NPCs or objects
-            drawNPCs();
-            
-            // Draw buildings
-            drawBuildings();
-            
-            // Request next frame
-            requestAnimationFrame(draw);
-        }
-        
-        // Draw Player
-        function drawPlayer() {
-            const size = 20;
-            const x = gameState.player.x;
-            const y = gameState.player.y;
-            
-            // Player body
-            ctx.fillStyle = '#3B7BBF'; // Blue for player
-            ctx.fillRect(x - size/2, y - size/2, size, size);
-            
-            // Player face direction indicator
-            ctx.fillStyle = '#FFCC00';
-            switch(gameState.player.direction) {
-                case 'up':
-                    ctx.fillRect(x - size/2, y - size/2, size, 5);
-                    break;
-                case 'down':
-                    ctx.fillRect(x - size/2, y + size/2 - 5, size, 5);
-                    break;
-                case 'left':
-                    ctx.fillRect(x - size/2, y - size/2, 5, size);
-                    break;
-                case 'right':
-                    ctx.fillRect(x + size/2 - 5, y - size/2, 5, size);
-                    break;
+<!-- JOYSTICK -->
+<div id="joystickBase">
+    <div id="joystickKnob"></div>
+</div>
+
+<!-- BUTTONS -->
+<div id="btnA" class="btn">A</div>
+<div id="btnB" class="btn">B</div>
+<div id="btnMenu" class="btn">Menu</div>
+<div id="btnBag" class="btn">Bag</div>
+
+<!-- BATTLE UI -->
+<div id="battleUI">
+    <div class="moveBtn" onclick="playerAttack(0)">Move 1</div>
+    <div class="moveBtn" onclick="playerAttack(1)">Move 2</div>
+    <div class="moveBtn" onclick="playerAttack(2)">Move 3</div>
+    <div class="moveBtn" onclick="playerAttack(3)">Move 4</div>
+</div>
+
+<script>
+
+/* CANVAS SETUP */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+/* GAME STATE */
+
+let gameState = "world";
+
+/* TILE MAP */
+
+const tileSize = 32;
+const mapWidth = 30;
+const mapHeight = 20;
+
+let map = [];
+
+for(let y=0;y<mapHeight;y++){
+    let row=[];
+    for(let x=0;x<mapWidth;x++){
+
+        if(Math.random()<0.2) row.push("grass");
+        else row.push("ground");
+
+    }
+    map.push(row);
+}
+
+/* PLAYER */
+
+let player = {
+    x:200,
+    y:200,
+    speed:2,
+    runSpeed:4,
+    dirX:0,
+    dirY:0,
+    pokemon:{
+        name:"Pikachu",
+        hp:35,
+        maxHp:35,
+        moves:["Thunder Shock","Quick Attack","Tail Whip","Growl"]
+    }
+};
+
+/* JOYSTICK */
+
+const base = document.getElementById("joystickBase");
+const knob = document.getElementById("joystickKnob");
+
+let joy = {x:0,y:0};
+let dragging=false;
+
+base.addEventListener("touchstart",()=>dragging=true);
+document.addEventListener("touchend",()=>{
+    dragging=false;
+    joy.x=0; joy.y=0;
+    knob.style.left="40px";
+    knob.style.top="40px";
+});
+
+document.addEventListener("touchmove",e=>{
+    if(!dragging) return;
+
+    let rect = base.getBoundingClientRect();
+    let touch = e.touches[0];
+
+    let dx = touch.clientX - (rect.left+70);
+    let dy = touch.clientY - (rect.top+70);
+
+    let dist = Math.sqrt(dx*dx+dy*dy);
+    let max = 50;
+
+    if(dist>max){
+        dx*=max/dist;
+        dy*=max/dist;
+    }
+
+    knob.style.left = (dx+40)+"px";
+    knob.style.top = (dy+40)+"px";
+
+    joy.x = dx/max;
+    joy.y = dy/max;
+});
+
+/* BUTTON EVENTS */
+
+document.getElementById("btnA").onclick = ()=>interact();
+document.getElementById("btnB").onclick = ()=>back();
+
+/* WORLD DRAW */
+
+function drawMap(){
+
+    for(let y=0;y<mapHeight;y++){
+        for(let x=0;x<mapWidth;x++){
+
+            if(map[y][x]=="grass"){
+                ctx.fillStyle="green";
+            } else{
+                ctx.fillStyle="#8BC34A";
             }
+
+            ctx.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
         }
-        
-        // Draw NPCs
-        function drawNPCs() {
-            // Example NPC
-            ctx.fillStyle = '#E06666'; // Red for NPC
-            ctx.fillRect(canvas.width/2 - 10, 100, 20, 20);
+    }
+}
+
+/* PLAYER DRAW */
+
+function drawPlayer(){
+    ctx.fillStyle="yellow";
+    ctx.fillRect(player.x,player.y,24,24);
+}
+
+/* MOVEMENT */
+
+function updatePlayer(){
+
+    let speed = Math.abs(joy.x)+Math.abs(joy.y)>1 ? player.runSpeed : player.speed;
+
+    player.x += joy.x*speed;
+    player.y += joy.y*speed;
+
+    checkWildEncounter();
+}
+
+/* WILD ENCOUNTER */
+
+function checkWildEncounter(){
+
+    let tileX = Math.floor(player.x/tileSize);
+    let tileY = Math.floor(player.y/tileSize);
+
+    if(map[tileY] && map[tileY][tileX]=="grass"){
+
+        if(Math.random()<0.01){
+            startBattle();
         }
-        
-        // Draw Buildings
-        function drawBuildings() {
-            // Player's house
-            ctx.fillStyle = '#8B4513'; // Brown
-            ctx.fillRect(100, 100, 80, 60);
-            ctx.fillStyle = '#ADD8E6'; // Light blue for roof
-            ctx.beginPath();
-            ctx.moveTo(90, 100);
-            ctx.lineTo(190, 100);
-            ctx.lineTo(140, 70);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Professor's lab
-            ctx.fillStyle = '#708090'; // Slate gray
-            ctx.fillRect(canvas.width - 180, 100, 80, 60);
-            ctx.fillStyle = '#B0C4DE'; // Light steel blue for roof
-            ctx.beginPath();
-            ctx.moveTo(canvas.width - 190, 100);
-            ctx.lineTo(canvas.width - 90, 100);
-            ctx.lineTo(canvas.width - 140, 70);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Pokémon Center (red roof)
-            ctx.fillStyle = '#F08080'; // Light coral
-            ctx.fillRect(canvas.width/2 - 40, canvas.height - 160, 80, 60);
-            ctx.fillStyle = '#FF6B6B'; // Red for roof
-            ctx.beginPath();
-            ctx.moveTo(canvas.width/2 - 50, canvas.height - 160);
-            ctx.lineTo(canvas.width/2 + 30, canvas.height - 160);
-            ctx.lineTo(canvas.width/2 - 10, canvas.height - 190);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Add signs
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = '10px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText("HOME", 140, 135);
-            ctx.fillText("LAB", canvas.width - 140, 135);
-            ctx.fillText("POKéMON", canvas.width/2, canvas.height - 125);
-            ctx.fillText("CENTER", canvas.width/2, canvas.height - 110);
-        }
-        
-        // Show Dialog
-        function showDialog(text) {
-            gameState.dialog.active = true;
-            gameState.dialog.text = text;
-            gameState.dialog.index = 0;
-            dialogBox.style.display = 'block';
-            typeDialog();
-        }
-        
-        // Typewriter effect for dialog
-        function typeDialog() {
-            if (gameState.dialog.index < gameState.dialog.text.length) {
-                dialogText.textContent = gameState.dialog.text.substring(0, gameState.dialog.index + 1);
-                gameState.dialog.index++;
-                setTimeout(typeDialog, gameState.dialog.speed);
-            }
-        }
-        
-        // Close Dialog
-        function closeDialog() {
-            gameState.dialog.active = false;
-            dialogBox.style.display = 'none';
-        }
-        
-        // Start Battle
-        function startBattle() {
-            gameState.screen = 'battle';
-            battleContainer.style.display = 'flex';
-            updateBattleUI();
-        }
-        
-        // End Battle
-        function endBattle() {
-            gameState.screen = 'overworld';
-            battleContainer.style.display = 'none';
-        }
-        
-        // Update Battle UI
-        function updateBattleUI() {
-            // Update player Pokémon health
-            const playerHP = gameState.player.pokemon[0];
-            const playerHealthPercent = (playerHP.hp / playerHP.maxHp) * 100;
-            document.getElementById('player-health').style.width = `${playerHealthPercent}%`;
-            
-            // Update enemy Pokémon health
-            const enemyHP = gameState.battle.enemyPokemon;
-            const enemyHealthPercent = (enemyHP.hp / enemyHP.maxHp) * 100;
-            document.getElementById('enemy-health').style.width = `${enemyHealthPercent}%`;
-        }
-        
-        // Use Move in Battle
-        function useMove(move) {
-            const playerPokemon = gameState.player.pokemon[0];
-            const enemyPokemon = gameState.battle.enemyPokemon;
-            
-            // Calculate damage (simplified)
-            let damage = 0;
-            switch(move) {
-                case 'thundershock':
-                    damage = 10;
-                    showDialog(`PIKACHU used THUNDERSHOCK!`);
-                    break;
-                case 'quickattack':
-                    damage = 8;
-                    showDialog(`PIKACHU used QUICK ATTACK!`);
-                    break;
-                case 'tailwhip':
-                    damage = 0;
-                    showDialog(`PIKACHU used TAIL WHIP!`);
-                    showDialog(`PIDGEY's defense fell!`);
-                    break;
-                case 'pokeball':
-                    // Try to catch
-                    const catchChance = Math.random();
-                    if (catchChance > 0.5) {
-                        showDialog(`Gotcha! PIDGEY was caught!`);
-                        // Add to party or PC
-                        setTimeout(() => {
-                            endBattle();
-                            showDialog(`You caught PIDGEY! It was added to your PC.`);
-                        }, 1500);
-                    } else {
-                        showDialog(`Oh no! The Pokémon broke free!`);
-                    }
-                    return;
-            }
-            
-            // Apply damage
-            enemyPokemon.hp = Math.max(0, enemyPokemon.hp - damage);
-            
-            // Check if enemy fainted
-            if (enemyPokemon.hp <= 0) {
-                showDialog(`PIDGEY fainted!`);
-                setTimeout(() => {
-                    showDialog(`PIKACHU gained 50 EXP. Points!`);
-                    setTimeout(() => {
-                        endBattle();
-                        showDialog(`You won the battle! Received $50 for winning!`);
-                        gameState.player.money += 50;
-                        updatePlayerUI();
-                    }, 1500);
-                }, 1500);
-            } else {
-                // Enemy attacks back
-                setTimeout(() => {
-                    const enemyDamage = Math.floor(Math.random() * 6) + 3;
-                    playerPokemon.hp = Math.max(0, playerPokemon.hp - enemyDamage);
-                    showDialog(`PIDGEY used TACKLE!`);
-                    
-                    // Check if player fainted
-                    if (playerPokemon.hp <= 0) {
-                        setTimeout(() => {
-                            showDialog(`PIKACHU fainted!`);
-                            setTimeout(() => {
-                                endBattle();
-                                showDialog(`You blacked out!`);
-                            }, 1500);
-                        }, 1500);
-                    }
-                    
-                    updateBattleUI();
-                }, 1500);
-            }
-            
-            updateBattleUI();
-        }
-        
-        // Update Player UI
-        function updatePlayerUI() {
-            playerNameEl.textContent = gameState.player.name;
-            badgeCountEl.textContent = `${gameState.player.badges}/8`;
-            pokedexCountEl.textContent = `${gameState.player.pokedex}/30`;
-            moneyCountEl.textContent = `$${gameState.player.money}`;
-        }
-        
-        // Save Game
-        function saveGame() {
-            localStorage.setItem('pokemonPixelAdventureSave', JSON.stringify(gameState.player));
-            saveNotification.style.display = 'block';
-            setTimeout(() => {
-                saveNotification.style.display = 'none';
-            }, 2000);
-        }
-        
-        // Load Game
-        function loadGame() {
-            const saved = localStorage.getItem('pokemonPixelAdventureSave');
-            if (saved) {
-                gameState.player = JSON.parse(saved);
-                updatePlayerUI();
-                showDialog(`Game loaded successfully!`);
-            } else {
-                showDialog(`No save file found.`);
-            }
-        }
-        
-        // Start Game
-        function startGame() {
-            gameState.screen = 'overworld';
-            startScreen.style.display = 'none';
-            showDialog(`Welcome to the world of POKéMON! I'm PROF. OAK. This world is inhabited by creatures called POKéMON! For some people, POKéMON are pets. Others use them for fights. Myself... I study POKéMON as a profession.`);
-            
-            // Center player on screen
-            gameState.player.x = canvas.width / 2;
-            gameState.player.y = canvas.height / 2;
-        }
-        
-        // Continue Game
-        function continueGame() {
-            loadGame();
-            gameState.screen = 'overworld';
-            startScreen.style.display = 'none';
-            showDialog(`Welcome back, ${gameState.player.name}!`);
-            
-            // Center player on screen
-            gameState.player.x = canvas.width / 2;
-            gameState.player.y = canvas.height / 2;
-        }
-        
-        // Handle Joystick Movement
-        function initJoystick() {
-            let joystickActive = false;
-            let joystickX = 0;
-            let joystickY = 0;
-            const joystickBase = document.getElementById('joystick-base');
-            const joystickRect = joystickContainer.getBoundingClientRect();
-            const joystickCenterX = joystickRect.width / 2;
-            const joystickCenterY = joystickRect.height / 2;
-            const maxDistance = joystickRect.width / 3;
-            
-            // Touch/Mouse down
-            joystickContainer.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                joystickActive = true;
-                updateJoystick(e.touches[0]);
-            });
-            
-            joystickContainer.addEventListener('mousedown', function(e) {
-                e.preventDefault();
-                joystickActive = true;
-                updateJoystick(e);
-            });
-            
-            // Touch/Mouse move
-            document.addEventListener('touchmove', function(e) {
-                if (joystickActive) {
-                    e.preventDefault();
-                    updateJoystick(e.touches[0]);
-                }
-            });
-            
-            document.addEventListener('mousemove', function(e) {
-                if (joystickActive) {
-                    e.preventDefault();
-                    updateJoystick(e);
-                }
-            });
-            
-            // Touch/Mouse up
-            document.addEventListener('touchend', function(e) {
-                if (joystickActive) {
-                    e.preventDefault();
-                    resetJoystick();
-                }
-            });
-            
-            document.addEventListener('mouseup', function(e) {
-                if (joystickActive) {
-                    e.preventDefault();
-                    resetJoystick();
-                }
-            });
-            
-            // Update joystick position and player movement
-            function updateJoystick(input) {
-                const rect = joystickContainer.getBoundingClientRect();
-                const x = input.clientX - rect.left;
-                const y = input.clientY - rect.top;
-                
-                // Calculate distance from center
-                const deltaX = x - joystickCenterX;
-                const deltaY = y - joystickCenterY;
-                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                
-                // Limit joystick to maximum distance
-                let limitedDistance = Math.min(distance, maxDistance);
-                const angle = Math.atan2(deltaY, deltaX);
-                
-                // Update joystick position
-                joystickX = Math.cos(angle) * limitedDistance;
-                joystickY = Math.sin(angle) * limitedDistance;
-                
-                joystick.style.transform = `translate(${joystickX}px, ${joystickY}px)`;
-                
-                // Update player movement based on joystick
-                const moveX = joystickX / maxDistance;
-                const moveY = joystickY / maxDistance;
-                
-                // Determine if running (joystick pushed far)
-                gameState.player.isRunning = limitedDistance > maxDistance * 0.7;
-                
-                // Set player speed
-                gameState.player.speed = gameState.player.isRunning ? 4 : 2;
-                
-                // Update player position
-                gameState.player.x += moveX * gameState.player.speed;
-                gameState.player.y += moveY * gameState.player.speed;
-                
-                // Keep player within bounds
-                gameState.player.x = Math.max(20, Math.min(canvas.width - 20, gameState.player.x));
-                gameState.player.y = Math.max(20, Math.min(canvas.height - 20, gameState.player.y));
-                
-                // Update player direction
-                if (Math.abs(moveX) > Math.abs(moveY)) {
-                    gameState.player.direction = moveX > 0 ? 'right' : 'left';
-                } else if (Math.abs(moveY) > 0) {
-                    gameState.player.direction = moveY > 0 ? 'down' : 'up';
-                }
-                
-                // Check for encounters while moving in grass
-                if ((moveX !== 0 || moveY !== 0) && 
-                    gameState.player.x > 50 && gameState.player.x < canvas.width - 50 &&
-                    gameState.player.y > 50 && gameState.player.y < 100) {
-                    // In tall grass area
-                    if (Math.random() < 0.01) { // 1% chance per frame
-                        startBattle();
-                    }
-                }
-            }
-            
-            // Reset joystick to center
-            function resetJoystick() {
-                joystickActive = false;
-                joystickX = 0;
-                joystickY = 0;
-                joystick.style.transform = 'translate(0, 0)';
-                gameState.player.speed = 0;
-            }
-        }
-        
-        // Initialize Button Events
-        function initButtons() {
-            // Control buttons
-            document.getElementById('interact-btn').addEventListener('click', function() {
-                if (gameState.screen === 'overworld') {
-                    showDialog(`You search the area...`);
-                }
-            });
-            
-            document.getElementById('confirm-btn').addEventListener('click', function() {
-                if (gameState.dialog.active) {
-                    closeDialog();
-                } else if (gameState.screen === 'overworld') {
-                    showDialog(`Confirm action!`);
-                }
-            });
-            
-            document.getElementById('cancel-btn').addEventListener('click', function() {
-                if (gameState.dialog.active) {
-                    closeDialog();
-                } else if (gameState.screen === 'battle') {
-                    endBattle();
-                }
-            });
-            
-            document.getElementById('menu-btn').addEventListener('click', function() {
-                showDialog(`Pokédex: ${gameState.player.pokedex} seen\nBadges: ${gameState.player.badges}\nMoney: $${gameState.player.money}\nTime: 10:45`);
-            });
-            
-            document.getElementById('inventory-btn').addEventListener('click', function() {
-                let itemsText = "BAG:\n";
-                gameState.player.items.forEach(item => {
-                    itemsText += `${item.name} x${item.count}\n`;
-                });
-                showDialog(itemsText);
-            });
-            
-            // Action buttons
-            document.getElementById('save-btn').addEventListener('click', saveGame);
-            document.getElementById('load-btn').addEventListener('click', loadGame);
-            document.getElementById('menu-toggle').addEventListener('click', function() {
-                showDialog(`Options:\n1. Save Game\n2. Load Game\n3. Settings\n4. Return to Title`);
-            });
-            
-            // Start screen buttons
-            document.getElementById('start-game').addEventListener('click', startGame);
-            document.getElementById('continue-game').addEventListener('click', continueGame);
-            document.getElementById('options-game').addEventListener('click', function() {
-                showDialog(`Options:\n- Sound: ON\n- Music: ON\n- Vibration: OFF\n- Auto-save: ON`);
-            });
-            document.getElementById('credits-game').addEventListener('click', function() {
-                showDialog(`POKéMON PIXEL ADVENTURE\nA fan game by Pokémon fans\nFor educational purposes only\n\nPokémon © Nintendo/Game Freak`);
-            });
-            
-            // Battle buttons
-            document.querySelectorAll('.battle-btn[data-move]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const move = this.getAttribute('data-move');
-                    useMove(move);
-                });
-            });
-            
-            document.getElementById('run-btn').addEventListener('click', function() {
-                showDialog(`Got away safely!`);
-                setTimeout(endBattle, 1500);
-            });
-            
-            // Dialog box click to continue
-            dialogBox.addEventListener('click', function() {
-                if (gameState.dialog.active && gameState.dialog.index >= gameState.dialog.text.length) {
-                    closeDialog();
-                }
-            });
-        }
-        
-        // Check Orientation
-        function checkOrientation() {
-            const rotateMessage = document.getElementById('rotate-message');
-            if (window.innerHeight > window.innerWidth) {
-                rotateMessage.style.display = 'flex';
-            } else {
-                rotateMessage.style.display = 'none';
-            }
-        }
-        
-        // Initialize Game
-        function initGame() {
-            initCanvas();
-            initJoystick();
-            initButtons();
-            updatePlayerUI();
-            checkOrientation();
-            
-            // Handle window resize
-            window.addEventListener('resize', function() {
-                initCanvas();
-                checkOrientation();
-            });
-            
-            // Handle orientation change
-            window.addEventListener('orientationchange', checkOrientation);
-            
-            // Auto-save every 2 minutes
-            setInterval(saveGame, 120000);
-        }
-        
-        // Start the game when page loads
-        window.addEventListener('load', initGame);
-    </script>
+
+    }
+}
+
+/* BATTLE SYSTEM */
+
+let enemyPokemon=null;
+
+function startBattle(){
+
+    gameState="battle";
+
+    enemyPokemon={
+        name:"Bulbasaur",
+        hp:40,
+        maxHp:40
+    };
+
+    document.getElementById("battleUI").style.display="block";
+}
+
+function playerAttack(index){
+
+    if(gameState!=="battle") return;
+
+    enemyPokemon.hp -= 10;
+
+    if(enemyPokemon.hp<=0){
+        endBattle();
+    }else{
+        player.pokemon.hp -= 5;
+    }
+}
+
+function endBattle(){
+    document.getElementById("battleUI").style.display="none";
+    gameState="world";
+}
+
+/* INTERACT */
+
+function interact(){
+    alert("Interacting with world!");
+}
+
+function back(){
+    alert("Back pressed");
+}
+
+/* SAVE SYSTEM */
+
+function saveGame(){
+    localStorage.setItem("pokeSave",JSON.stringify(player));
+}
+
+function loadGame(){
+    let save = localStorage.getItem("pokeSave");
+    if(save) player = JSON.parse(save);
+}
+loadGame();
+
+setInterval(saveGame,5000);
+
+/* MAIN LOOP */
+
+function gameLoop(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    if(gameState=="world"){
+        drawMap();
+        updatePlayer();
+        drawPlayer();
+    }
+
+    if(gameState=="battle"){
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        ctx.fillStyle="white";
+        ctx.fillText(player.pokemon.name+" HP: "+player.pokemon.hp,50,50);
+        ctx.fillText(enemyPokemon.name+" HP: "+enemyPokemon.hp,50,100);
+    }
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+</script>
 </body>
 </html>
