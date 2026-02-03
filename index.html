@@ -3,2282 +3,924 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Mountain Skiing</title>
+    <title>Pokémon Adventure 2D</title>
     <style>
-        /* RESET & BASE STYLES */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            touch-action: manipulation;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
         
-        html, body {
-            width: 100%;
-            height: 100%;
+        body {
+            background: #202030;
+            font-family: 'Courier New', monospace;
+            color: #fff;
             overflow: hidden;
-            touch-action: none;
-            background: #000;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 85vh;
+            margin: 0 auto;
         }
         
         #gameCanvas {
-            display: block;
+            background: #88c070;
+            border: 4px solid #405850;
+            border-radius: 8px;
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
         
-        /* LOADING SCREEN */
-        #loadingScreen {
+        #uiPanel {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-top: 3px solid #506080;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            width: 120px;
+            height: 120px;
+        }
+        
+        .d-btn {
+            background: #506080;
+            border: 2px solid #405060;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .d-btn:active {
+            background: #607090;
+            transform: scale(0.95);
+        }
+        
+        .center-cell {
+            grid-column: 2;
+            grid-row: 2;
+            background: transparent;
+            border: none;
+        }
+        
+        .action-buttons {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
+            gap: 10px;
+            width: 120px;
         }
         
-        .loader {
-            width: 80px;
-            height: 80px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: #4fc3f7;
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 30px;
-        }
-        
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        
-        #loadingText {
+        .action-btn {
+            background: #c05050;
+            border: 2px solid #903030;
+            border-radius: 5px;
+            padding: 10px;
             color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 10px;
-        }
-        
-        #loadingSubtext {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
-            padding: 0 20px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        /* MAIN UI CONTAINER */
-        #uiContainer {
+        .action-btn:active {
+            background: #d06060;
+            transform: scale(0.95);
+        }
+        
+        #dialogBox {
+            position: absolute;
+            bottom: 180px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #506080;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            line-height: 1.4;
+            display: none;
+        }
+        
+        #battleScreen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 100;
+            background: #202020;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
         }
         
-        /* TOP UI - SKIING STATS */
-        #topUI {
+        .battle-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .pokemon-display {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .hp-bar {
+            height: 10px;
+            background: #30a030;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        
+        .battle-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .battle-btn {
+            background: #506080;
+            border: 2px solid #405060;
+            border-radius: 5px;
+            padding: 15px;
+            color: white;
+            text-align: center;
+        }
+        
+        #hud {
             position: absolute;
             top: 10px;
             left: 10px;
-            right: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 15px;
             background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .ui-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .ui-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .ui-icon {
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 10px;
+            border-radius: 8px;
             font-size: 14px;
         }
         
-        #speedDisplay { color: #4fc3f7; }
-        #altitudeDisplay { color: #81c784; }
-        #distanceDisplay { color: #ffb74d; }
-        #scoreDisplay { color: #ffd700; }
-        
-        /* SPEED INDICATOR */
-        #speedIndicator {
-            position: absolute;
-            bottom: 180px;
-            right: 20px;
-            width: 100px;
-            height: 100px;
-            z-index: 100;
-        }
-        
-        .speed-circle {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 3px solid rgba(255, 255, 255, 0.1);
+        .pokeball-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: red;
             border-radius: 50%;
+            border: 2px solid black;
+            position: relative;
+            margin: 0 5px;
         }
         
-        .speed-fill {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 3px solid transparent;
-            border-top-color: #4fc3f7;
-            border-radius: 50%;
-            clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 100%, 0 100%, 0 0, 50% 0);
-            transform: rotate(45deg);
-        }
-        
-        .speed-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .speed-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-        }
-        
-        /* TILT INDICATOR */
-        #tiltIndicator {
-            position: absolute;
-            bottom: 180px;
-            left: 20px;
-            width: 100px;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-        
-        .tilt-line {
+        .pokeball-icon:after {
+            content: '';
             position: absolute;
             width: 100%;
             height: 2px;
-            background: rgba(255, 255, 255, 0.3);
+            background: black;
             top: 50%;
             left: 0;
-            transform: translateY(-50%);
         }
         
-        .tilt-marker {
-            position: absolute;
-            width: 4px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.5);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        .tilt-pointer {
-            position: absolute;
-            width: 30px;
-            height: 4px;
-            background: #4fc3f7;
-            top: 50%;
-            left: 50%;
-            transform-origin: left center;
-            transform: translateY(-50%);
-            transition: transform 0.1s;
-        }
-        
-        .tilt-label {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-            white-space: nowrap;
-        }
-        
-        /* JOYSTICK CONTROLS - NEW */
-        #joystickContainer {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 150px;
-            height: 150px;
-            z-index: 100;
-            pointer-events: none;
-            display: none; /* Hidden by default, shown on mobile */
-        }
-        
-        @media (max-width: 768px) {
-            #joystickContainer {
-                display: block;
-            }
-        }
-        
-        #joystickBase {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            bottom: 0;
-            left: 0;
-            pointer-events: auto;
-            touch-action: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        #joystickHandle {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle at 30% 30%, #4fc3f7, #1976d2);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* BOOST BUTTON - NEW */
-        #boostControl {
-            position: absolute;
-            bottom: 30px;
-            right: 120px;
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 193, 7, 0.9), rgba(245, 124, 0, 0.9));
-            border: 2px solid rgba(255, 235, 59, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-            cursor: pointer;
-            pointer-events: auto;
-            touch-action: none;
-            transition: all 0.1s ease;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            z-index: 100;
-        }
-        
-        #boostControl:active {
-            transform: scale(0.9);
-            background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.9), rgba(255, 193, 7, 0.9));
-        }
-        
-        .boost-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
-        
-        /* BOOST INDICATOR - NEW */
-        #boostIndicator {
-            position: absolute;
-            top: 120px;
-            right: 20px;
-            width: 100px;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 193, 7, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        #boostBar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ffc107, #ff9800);
-            transform: scaleX(1);
-            transform-origin: left;
-            transition: transform 0.1s;
-        }
-        
-        .boost-text {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            color: #ffc107;
-            font-size: 14px;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-        }
-        
-        /* SKI CONTROLS */
-        #skiControls {
-            position: absolute;
-            bottom: 30px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 30px;
-            z-index: 100;
-            pointer-events: none;
-        }
-        
-        .ski-control {
-            width: 70px;
-            height: 70px;
-            background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9));
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            pointer-events: auto;
-            touch-action: none;
-            transition: all 0.1s ease;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-        
-        .ski-control:active {
-            transform: scale(0.9);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        #leftControl {
-            border-color: rgba(76, 175, 80, 0.8);
-        }
-        
-        #rightControl {
-            border-color: rgba(244, 67, 54, 0.8);
-        }
-        
-        #jumpControl {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle at 30% 30%, rgba(33, 150, 243, 0.8), rgba(21, 101, 192, 0.9));
-            border-color: rgba(33, 150, 243, 0.9);
-            font-size: 28px;
-        }
-        
-        .control-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
-        
-        /* CENTER MESSAGES */
-        #centerMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 150;
-        }
-        
-        /* SNOW EFFECT OVERLAY */
-        #snowOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-            opacity: 0.3;
-        }
-        
-        .snowflake {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            animation: fall linear infinite;
-        }
-        
-        @keyframes fall {
-            to {
-                transform: translateY(100vh);
-            }
-        }
-        
-        /* PAUSE MENU */
-        #pauseMenu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            backdrop-filter: blur(10px);
-        }
-        
-        .pause-title {
-            color: white;
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 40px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-        
-        .menu-btn {
-            background: linear-gradient(135deg, #2196f3, #1976d2);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            margin: 10px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 200px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
-        }
-        
-        .menu-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
-        }
-        
-        .menu-btn:active {
-            transform: translateY(0);
-        }
-        
-        #resumeBtn { background: linear-gradient(135deg, #4caf50, #388e3c); }
-        #restartBtn { background: linear-gradient(135deg, #ff9800, #f57c00); }
-        #quitBtn { background: linear-gradient(135deg, #f44336, #d32f2f); }
-        
-        /* INSTRUCTIONS */
-        #instructions {
-            position: absolute;
-            bottom: 300px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 14px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            animation: fadeOut 5s 10s forwards;
-        }
-        
-        @keyframes fadeOut {
-            to { opacity: 0; visibility: hidden; }
-        }
-        
-        /* GAME OVER SCREEN */
-        #gameOverScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-            backdrop-filter: blur(20px);
-        }
-        
-        .game-over-title {
-            color: #4fc3f7;
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
-        }
-        
-        .final-stats {
-            color: white;
-            font-size: 24px;
-            margin: 10px 0;
-            text-align: center;
-        }
-        
-        .stat-value {
-            color: #ffd700;
-            font-weight: bold;
-        }
-        
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .ski-control {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
+        @media (max-width: 600px) {
+            .d-pad, .action-buttons {
+                width: 100px;
+                height: 100px;
             }
             
-            #jumpControl {
-                width: 70px;
-                height: 70px;
-                font-size: 24px;
-            }
-            
-            #speedIndicator, #tiltIndicator {
-                bottom: 160px;
-            }
-            
-            #boostControl {
-                width: 70px;
-                height: 70px;
-                font-size: 28px;
-                right: 100px;
-            }
-            
-            .pause-title {
-                font-size: 28px;
-            }
-            
-            .menu-btn {
-                width: 180px;
-                padding: 12px 30px;
+            .d-btn {
                 font-size: 16px;
             }
-        }
-        
-        @media (max-width: 480px) {
-            .ski-control {
-                width: 50px;
-                height: 50px;
-                font-size: 18px;
-            }
             
-            #jumpControl {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-            }
-            
-            #speedIndicator, #tiltIndicator {
-                bottom: 140px;
-                width: 80px;
-                height: 80px;
-            }
-            
-            #tiltIndicator {
-                height: 50px;
-                width: 80px;
-            }
-            
-            #boostControl {
-                width: 60px;
-                height: 60px;
-                font-size: 24px;
-                right: 80px;
-            }
-            
-            #topUI {
-                padding: 10px;
-            }
-            
-            .ui-item {
-                font-size: 14px;
+            .action-btn {
+                font-size: 12px;
+                padding: 8px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- LOADING SCREEN -->
-    <div id="loadingScreen">
-        <div class="loader"></div>
-        <div id="loadingText">Loading Mountain Skiing...</div>
-        <div id="loadingSubtext">Touch screen to begin your descent</div>
-    </div>
-    
-    <!-- CANVAS -->
-    <canvas id="gameCanvas"></canvas>
-    
-    <!-- SNOW OVERLAY -->
-    <div id="snowOverlay"></div>
-    
-    <!-- UI CONTAINER -->
-    <div id="uiContainer">
-        <!-- TOP UI -->
-        <div id="topUI">
-            <div class="ui-section">
-                <div class="ui-item">
-                    <div class="ui-icon">⚡</div>
-                    <div id="speedDisplay">Speed: 0 km/h</div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="hud">
+            <div>Poké Balls: <span id="pokeballCount">5</span> <div class="pokeball-icon"></div></div>
+            <div>Pokémon: <span id="pokemonCount">1</span>/151</div>
+            <div>Location: <span id="location">Route 1</span></div>
+        </div>
+        
+        <div id="dialogBox"></div>
+        
+        <div id="battleScreen">
+            <div class="battle-info">
+                <div>
+                    <h3>Wild Pikachu</h3>
+                    <div>Lv. 5</div>
+                    <div class="hp-bar" style="width: 100%"></div>
                 </div>
-                <div class="ui-item">
-                    <div class="ui-icon">⛰️</div>
-                    <div id="altitudeDisplay">Altitude: 1000m</div>
+                <div>
+                    <h3>Charmander</h3>
+                    <div>Lv. 5</div>
+                    <div class="hp-bar" style="width: 80%"></div>
                 </div>
             </div>
             
-            <div class="ui-section">
-                <div class="ui-item">
-                    <div class="ui-icon">📏</div>
-                    <div id="distanceDisplay">Distance: 0m</div>
+            <div class="pokemon-display">
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 40px;">🐭</div>
+                    <div>Wild Pikachu</div>
                 </div>
-                <div class="ui-item">
-                    <div class="ui-icon">⭐</div>
-                    <div id="scoreDisplay">Score: 0</div>
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 40px;">🔥</div>
+                    <div>Charmander</div>
+                </div>
+            </div>
+            
+            <div id="battleText" style="margin: 20px 0; min-height: 60px;">
+                A wild Pikachu appeared!
+            </div>
+            
+            <div class="battle-menu">
+                <button class="battle-btn" onclick="useMove('Tackle')">Tackle</button>
+                <button class="battle-btn" onclick="useMove('Ember')">Ember</button>
+                <button class="battle-btn" onclick="useMove('Growl')">Growl</button>
+                <button class="battle-btn" onclick="throwPokeball()">Poké Ball</button>
+                <button class="battle-btn" onclick="runAway()">Run</button>
+                <button class="battle-btn" onclick="switchPokemon()">Switch</button>
+            </div>
+        </div>
+        
+        <div id="uiPanel">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span id="gameText">Use D-Pad to move, A/B for actions</span>
+            </div>
+            <div class="controls">
+                <div class="d-pad">
+                    <div class="d-btn center-cell"></div>
+                    <div class="d-btn" id="upBtn" ontouchstart="keyDown('ArrowUp')" ontouchend="keyUp('ArrowUp')">↑</div>
+                    <div class="d-btn center-cell"></div>
+                    <div class="d-btn" id="leftBtn" ontouchstart="keyDown('ArrowLeft')" ontouchend="keyUp('ArrowLeft')">←</div>
+                    <div class="d-btn center-cell"></div>
+                    <div class="d-btn" id="rightBtn" ontouchstart="keyDown('ArrowRight')" ontouchend="keyUp('ArrowRight')">→</div>
+                    <div class="d-btn center-cell"></div>
+                    <div class="d-btn" id="downBtn" ontouchstart="keyDown('ArrowDown')" ontouchend="keyUp('ArrowDown')">↓</div>
+                    <div class="d-btn center-cell"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <div class="action-btn" id="aBtn" ontouchstart="pressA()" ontouchend="releaseA()">A / Action</div>
+                    <div class="action-btn" id="bBtn" ontouchstart="pressB()" ontouchend="releaseB()">B / Cancel</div>
+                    <div class="action-btn" onclick="openMenu()">Menu</div>
+                    <div class="action-btn" onclick="startBattle()">Battle Test</div>
                 </div>
             </div>
         </div>
-        
-        <!-- BOOST INDICATOR - NEW -->
-        <div class="boost-text">BOOST</div>
-        <div id="boostIndicator">
-            <div id="boostBar"></div>
-        </div>
-        
-        <!-- SPEED INDICATOR -->
-        <div id="speedIndicator">
-            <div class="speed-circle"></div>
-            <div class="speed-fill" id="speedFill"></div>
-            <div class="speed-text">
-                <span id="speedValue">0</span>
-                <div class="speed-label">KM/H</div>
-            </div>
-        </div>
-        
-        <!-- TILT INDICATOR -->
-        <div id="tiltIndicator">
-            <div class="tilt-line"></div>
-            <div class="tilt-marker"></div>
-            <div class="tilt-pointer" id="tiltPointer"></div>
-            <div class="tilt-label">TILT</div>
-        </div>
-        
-        <!-- JOYSTICK - NEW -->
-        <div id="joystickContainer">
-            <div id="joystickBase">
-                <div id="joystickHandle"></div>
-            </div>
-        </div>
-        
-        <!-- BOOST BUTTON - NEW -->
-        <div id="boostControl">
-            🔥
-            <div class="boost-label">BOOST</div>
-        </div>
-        
-        <!-- SKI CONTROLS -->
-        <div id="skiControls">
-            <div class="ski-control" id="leftControl">
-                ←
-                <div class="control-label">LEFT</div>
-            </div>
-            <div class="ski-control" id="rightControl">
-                →
-                <div class="control-label">RIGHT</div>
-            </div>
-        </div>
-        
-        <!-- JUMP CONTROL -->
-        <div class="ski-control" id="jumpControl">
-            🦘
-            <div class="control-label">JUMP</div>
-        </div>
-        
-        <!-- CENTER MESSAGE -->
-        <div id="centerMessage"></div>
-        
-        <!-- INSTRUCTIONS -->
-        <div id="instructions">
-            <div>Use LEFT/RIGHT buttons or JOYSTICK to steer</div>
-            <div>Press JUMP for tricks | Press BOOST for speed</div>
-            <div>Ski down the mountain as far as you can!</div>
-        </div>
-    </div>
-    
-    <!-- PAUSE MENU -->
-    <div id="pauseMenu">
-        <div class="pause-title">SKIING PAUSED</div>
-        <button class="menu-btn" id="resumeBtn">RESUME</button>
-        <button class="menu-btn" id="restartBtn">RESTART RUN</button>
-        <button class="menu-btn" id="quitBtn">QUIT</button>
-    </div>
-    
-    <!-- GAME OVER SCREEN -->
-    <div id="gameOverScreen">
-        <div class="game-over-title">RUN COMPLETE</div>
-        <div class="final-stats">Distance: <span class="stat-value" id="finalDistance">0m</span></div>
-        <div class="final-stats">Top Speed: <span class="stat-value" id="finalSpeed">0 km/h</span></div>
-        <div class="final-stats">Score: <span class="stat-value" id="finalScore">0</span></div>
-        <div class="final-stats">Jumps: <span class="stat-value" id="finalJumps">0</span></div>
-        <button class="menu-btn" id="playAgainBtn">SKI AGAIN</button>
-        <button class="menu-btn" id="menuBtn">MAIN MENU</button>
     </div>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
-        }
-    }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        // ==================== GAME CONFIGURATION ====================
-        const GameConfig = {
-            skiing: {
-                baseSpeed: 5,
-                maxSpeed: 150, // Increased from 120
-                acceleration: 8,
-                deceleration: 3,
-                turnSpeed: 2.5,
-                jumpForce: 8,
-                gravity: 15,
-                airControl: 0.5,
-                slopeAcceleration: 10,
-                friction: 0.95,
-                boostMultiplier: 2.0, // NEW: Boost multiplier
-                boostDuration: 3.0, // NEW: Boost duration in seconds
-                boostCooldown: 10.0, // NEW: Boost cooldown in seconds
-                boostChargeRate: 20.0 // NEW: Boost charge per second
-            },
-            mountain: {
-                width: 200,
-                length: 1000,
-                height: 300,
-                peakHeight: 350,
-                snowLevel: 0.7,
-                treeDensity: 0.01,
-                rockDensity: 0.005
-            },
-            scoring: {
-                distanceMultiplier: 1,
-                speedMultiplier: 2,
-                jumpMultiplier: 10,
-                trickMultiplier: 50,
-                comboMultiplier: 1.5,
-                boostMultiplier: 3 // NEW: Extra points while boosting
-            },
-            visuals: {
-                fogDensity: 0.002,
-                snowflakeCount: 100,
-                particleCount: 20
-            }
+    <script>
+        // Game State
+        const gameState = {
+            player: { x: 200, y: 200, speed: 3, direction: 'down' },
+            keys: {},
+            map: [],
+            tilesize: 32,
+            buildings: [],
+            npcs: [],
+            wildPokemon: [],
+            playerPokemon: [{ name: 'Charmander', level: 5, hp: 20, maxHp: 20, moves: ['Tackle', 'Ember', 'Growl'] }],
+            pokeballs: 5,
+            inBattle: false,
+            currentWildPokemon: null,
+            currentLocation: 'Route 1'
         };
 
-        // ==================== GLOBAL VARIABLES ====================
-        let scene, camera, renderer, controls;
-        let game, buttonController, joystick; // NEW: Added joystick
-        let deltaTime = 0;
-        let gameTime = 0;
-        let isGameStarted = false;
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        let snowflakes = [];
-
-        // ==================== JOYSTICK CONTROLLER - NEW ====================
-        class JoystickController {
-            constructor() {
-                this.base = document.getElementById('joystickBase');
-                this.handle = document.getElementById('joystickHandle');
-                this.active = false;
-                this.maxDistance = 40;
-                this.position = { x: 0, y: 0 };
-                this.normalized = { x: 0, y: 0 };
-                this.baseRect = null;
-                this.centerX = 0;
-                this.centerY = 0;
-                
-                this.init();
-            }
-            
-            init() {
-                this.updateBaseRect();
-                
-                // Touch events
-                this.base.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    this.onStart(touch.clientX, touch.clientY);
-                }, { passive: false });
-                
-                document.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    if (this.active) {
-                        const touch = e.touches[0];
-                        this.onMove(touch.clientX, touch.clientY);
-                    }
-                }, { passive: false });
-                
-                document.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.onEnd();
-                }, { passive: false });
-                
-                // Mouse events for testing
-                if (!isMobile) {
-                    this.base.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        this.onStart(e.clientX, e.clientY);
-                    });
-                    
-                    document.addEventListener('mousemove', (e) => {
-                        e.preventDefault();
-                        if (this.active) {
-                            this.onMove(e.clientX, e.clientY);
-                        }
-                    });
-                    
-                    document.addEventListener('mouseup', (e) => {
-                        e.preventDefault();
-                        this.onEnd();
-                    });
-                }
-                
-                // Update rect on resize
-                window.addEventListener('resize', () => this.updateBaseRect());
-            }
-            
-            updateBaseRect() {
-                this.baseRect = this.base.getBoundingClientRect();
-                this.centerX = this.baseRect.left + this.baseRect.width / 2;
-                this.centerY = this.baseRect.top + this.baseRect.height / 2;
-            }
-            
-            onStart(clientX, clientY) {
-                this.active = true;
-                this.updateBaseRect();
-                this.onMove(clientX, clientY);
-            }
-            
-            onMove(clientX, clientY) {
-                if (!this.active) return;
-                
-                let dx = clientX - this.centerX;
-                let dy = clientY - this.centerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > this.maxDistance) {
-                    dx = (dx / distance) * this.maxDistance;
-                    dy = (dy / distance) * this.maxDistance;
-                }
-                
-                this.handle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                this.normalized.x = dx / this.maxDistance;
-                this.normalized.y = -dy / this.maxDistance;
-                this.position.x = dx;
-                this.position.y = dy;
-            }
-            
-            onEnd() {
-                this.active = false;
-                this.normalized.x = 0;
-                this.normalized.y = 0;
-                this.position.x = 0;
-                this.position.y = 0;
-                this.handle.style.transform = 'translate(-50%, -50%)';
-            }
-            
-            getDirection() {
-                const magnitude = Math.sqrt(this.normalized.x * this.normalized.x + this.normalized.y * this.normalized.y);
-                return {
-                    x: this.normalized.x,
-                    y: this.normalized.y,
-                    magnitude: magnitude > 1 ? 1 : magnitude
-                };
-            }
-            
-            isActive() {
-                return this.active;
-            }
+        // Canvas setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const dialogBox = document.getElementById('dialogBox');
+        const battleScreen = document.getElementById('battleScreen');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            drawGame();
         }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-        // ==================== BUTTON CONTROLLER - MODIFIED ====================
-        class ButtonController {
-            constructor() {
-                this.buttons = {
-                    left: false,
-                    right: false,
-                    jump: false,
-                    boost: false // NEW: Boost button
-                };
-                
-                this.buttonElements = {};
-                this.init();
-            }
+        // Generate map
+        function generateMap() {
+            const width = 40;
+            const height = 30;
+            gameState.map = [];
             
-            init() {
-                const buttons = ['leftControl', 'rightControl', 'jumpControl', 'boostControl']; // NEW: Added boostControl
-                
-                buttons.forEach(btnId => {
-                    const element = document.getElementById(btnId);
-                    const buttonName = btnId.replace('Control', '');
-                    this.buttonElements[buttonName] = element;
-                    
-                    // Touch events
-                    element.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        this.buttons[buttonName] = true;
-                        element.style.transform = 'scale(0.85)';
-                        element.style.opacity = '0.8';
-                    }, { passive: false });
-                    
-                    element.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        this.buttons[buttonName] = false;
-                        element.style.transform = 'scale(1)';
-                        element.style.opacity = '1';
-                    }, { passive: false });
-                    
-                    element.addEventListener('touchcancel', (e) => {
-                        e.preventDefault();
-                        this.buttons[buttonName] = false;
-                        element.style.transform = 'scale(1)';
-                        element.style.opacity = '1';
-                    }, { passive: false });
-                    
-                    // Mouse events for testing
-                    if (!isMobile) {
-                        element.addEventListener('mousedown', (e) => {
-                            e.preventDefault();
-                            this.buttons[buttonName] = true;
-                            element.style.transform = 'scale(0.85)';
-                            element.style.opacity = '0.8';
-                        });
-                        
-                        element.addEventListener('mouseup', (e) => {
-                            e.preventDefault();
-                            this.buttons[buttonName] = false;
-                            element.style.transform = 'scale(1)';
-                            element.style.opacity = '1';
-                        });
-                        
-                        element.addEventListener('mouseleave', (e) => {
-                            e.preventDefault();
-                            this.buttons[buttonName] = false;
-                            element.style.transform = 'scale(1)';
-                            element.style.opacity = '1';
-                        });
-                    }
-                });
-                
-                // Pause button (double tap on screen)
-                let lastTap = 0;
-                document.addEventListener('touchstart', (e) => {
-                    const currentTime = new Date().getTime();
-                    const tapLength = currentTime - lastTap;
-                    
-                    if (tapLength < 300 && tapLength > 0) {
-                        e.preventDefault();
-                        game.togglePause();
-                    }
-                    lastTap = currentTime;
-                });
-            }
-            
-            isPressed(buttonName) {
-                return this.buttons[buttonName];
-            }
-            
-            getAllButtons() {
-                return { ...this.buttons };
-            }
-            
-            setButtonCooldown(buttonName, cooldownTime) {
-                const element = this.buttonElements[buttonName];
-                if (element) {
-                    element.style.opacity = '0.5';
-                    setTimeout(() => {
-                        element.style.opacity = '1';
-                    }, cooldownTime * 1000);
-                }
-            }
-        }
-
-        // ==================== SNOW EFFECT ====================
-        class SnowEffect {
-            constructor() {
-                this.container = document.getElementById('snowOverlay');
-                this.snowflakes = [];
-                this.createSnowflakes();
-            }
-            
-            createSnowflakes() {
-                for (let i = 0; i < GameConfig.visuals.snowflakeCount; i++) {
-                    const snowflake = document.createElement('div');
-                    snowflake.className = 'snowflake';
-                    
-                    const size = Math.random() * 5 + 2;
-                    const startX = Math.random() * 100;
-                    const duration = Math.random() * 10 + 5;
-                    const delay = Math.random() * 5;
-                    const opacity = Math.random() * 0.5 + 0.3;
-                    
-                    snowflake.style.width = `${size}px`;
-                    snowflake.style.height = `${size}px`;
-                    snowflake.style.left = `${startX}%`;
-                    snowflake.style.opacity = opacity;
-                    snowflake.style.animationDuration = `${duration}s`;
-                    snowflake.style.animationDelay = `${delay}s`;
-                    
-                    this.container.appendChild(snowflake);
-                    this.snowflakes.push({
-                        element: snowflake,
-                        x: startX,
-                        speed: duration,
-                        size: size
-                    });
-                }
-            }
-            
-            update(intensity = 1) {
-                this.snowflakes.forEach(snowflake => {
-                    // Reset snowflake if it's off screen
-                    const rect = snowflake.element.getBoundingClientRect();
-                    if (rect.top > window.innerHeight) {
-                        snowflake.element.style.top = '-10px';
-                        snowflake.element.style.left = `${Math.random() * 100}%`;
-                    }
-                    
-                    // Adjust speed based on intensity
-                    snowflake.element.style.animationDuration = `${snowflake.speed / intensity}s`;
-                });
-            }
-        }
-
-        // ==================== SKIER CLASS - MODIFIED ====================
-        class Skier {
-            constructor() {
-                // First-person view - no visible player model
-                this.mesh = new THREE.Object3D();
-                this.mesh.position.set(0, GameConfig.mountain.peakHeight - 10, -GameConfig.mountain.length / 4);
-                
-                // Ski physics
-                this.velocity = new THREE.Vector3(0, 0, 0);
-                this.direction = new THREE.Vector3(0, 0, 1); // Start facing downhill
-                this.speed = 0;
-                this.turnAngle = 0;
-                this.turnSpeed = GameConfig.skiing.turnSpeed;
-                this.isOnGround = true;
-                this.isJumping = false;
-                this.jumpCooldown = 0;
-                
-                // NEW: Boost system
-                this.isBoosting = false;
-                this.boostCharge = 100; // Start with full boost
-                this.maxBoostCharge = 100;
-                this.boostTimer = 0;
-                this.boostCooldown = 0;
-                this.boostEffect = null;
-                
-                // Ski poles (visual only, not rendered)
-                this.leftPole = new THREE.Vector3(-0.5, 0, 1);
-                this.rightPole = new THREE.Vector3(0.5, 0, 1);
-                
-                // Stats
-                this.distance = 0;
-                this.maxSpeed = 0;
-                this.jumpCount = 0;
-                this.trickCount = 0;
-                this.combo = 0;
-                this.score = 0;
-                this.boostUsed = 0; // NEW: Track boost usage
-                
-                // Ski tracks
-                this.trackPositions = [];
-                this.trackMesh = this.createTrackMesh();
-                scene.add(this.trackMesh);
-                
-                // Particle system for snow spray
-                this.particleSystem = this.createParticleSystem();
-                scene.add(this.particleSystem);
-                
-                // NEW: Boost effect particle system
-                this.boostParticleSystem = this.createBoostParticleSystem();
-                scene.add(this.boostParticleSystem);
-                
-                // Add to scene
-                scene.add(this.mesh);
-            }
-            
-            createTrackMesh() {
-                const geometry = new THREE.BufferGeometry();
-                const material = new THREE.LineBasicMaterial({
-                    color: 0xffffff,
-                    transparent: true,
-                    opacity: 0.3,
-                    linewidth: 2
-                });
-                return new THREE.Line(geometry, material);
-            }
-            
-            createParticleSystem() {
-                const geometry = new THREE.BufferGeometry();
-                const material = new THREE.PointsMaterial({
-                    color: 0xffffff,
-                    size: 0.2,
-                    transparent: true,
-                    opacity: 0.6,
-                    blending: THREE.AdditiveBlending
-                });
-                return new THREE.Points(geometry, material);
-            }
-            
-            // NEW: Create boost particle system
-            createBoostParticleSystem() {
-                const geometry = new THREE.BufferGeometry();
-                const material = new THREE.PointsMaterial({
-                    color: 0xff9800,
-                    size: 0.3,
-                    transparent: true,
-                    opacity: 0.8,
-                    blending: THREE.AdditiveBlending
-                });
-                return new THREE.Points(geometry, material);
-            }
-            
-            update(deltaTime) {
-                // Update cooldowns
-                if (this.jumpCooldown > 0) this.jumpCooldown -= deltaTime;
-                if (this.boostCooldown > 0) this.boostCooldown -= deltaTime;
-                
-                // NEW: Update boost system
-                this.updateBoost(deltaTime);
-                
-                // Handle input
-                this.handleSteering(deltaTime);
-                
-                // Apply physics
-                this.applyPhysics(deltaTime);
-                
-                // Update position
-                this.mesh.position.add(this.velocity.clone().multiplyScalar(deltaTime));
-                
-                // Get terrain height at current position
-                const terrainHeight = game.getTerrainHeight(this.mesh.position.x, this.mesh.position.z);
-                
-                // Ground collision
-                if (this.mesh.position.y <= terrainHeight + 0.5) {
-                    this.mesh.position.y = terrainHeight + 0.5;
-                    this.velocity.y = 0;
-                    this.isOnGround = true;
-                    this.isJumping = false;
-                    
-                    // Add snow spray particles when moving fast
-                    if (this.speed > 20) {
-                        this.createSnowSpray();
-                    }
-                } else {
-                    // In air - apply gravity
-                    this.velocity.y -= GameConfig.skiing.gravity * deltaTime;
-                    this.isOnGround = false;
-                }
-                
-                // Calculate slope angle for acceleration
-                const slopeVector = game.getSlopeVector(this.mesh.position.x, this.mesh.position.z);
-                const slopeAngle = Math.acos(Math.abs(slopeVector.y));
-                
-                // Accelerate based on slope
-                if (this.isOnGround && slopeAngle > 0.1) {
-                    const slopeAcceleration = GameConfig.skiing.slopeAcceleration * Math.sin(slopeAngle);
-                    this.speed += slopeAcceleration * deltaTime;
-                }
-                
-                // NEW: Apply boost multiplier if boosting
-                const currentMaxSpeed = this.isBoosting ? 
-                    GameConfig.skiing.maxSpeed * GameConfig.skiing.boostMultiplier : 
-                    GameConfig.skiing.maxSpeed;
-                
-                // Apply friction
-                if (this.isOnGround) {
-                    this.speed *= GameConfig.skiing.friction;
-                }
-                
-                // Limit speed
-                this.speed = Math.min(this.speed, currentMaxSpeed);
-                
-                // Update velocity based on speed and direction
-                this.velocity.x = Math.sin(this.turnAngle) * this.speed;
-                this.velocity.z = Math.cos(this.turnAngle) * this.speed;
-                
-                // Update distance
-                const distanceTraveled = this.velocity.length() * deltaTime;
-                this.distance += distanceTraveled;
-                
-                // Update max speed
-                if (this.speed > this.maxSpeed) {
-                    this.maxSpeed = this.speed;
-                }
-                
-                // Update score
-                this.updateScore(deltaTime);
-                
-                // Update tracks
-                this.updateTracks();
-                
-                // Update particles
-                this.updateParticles(deltaTime);
-                
-                // NEW: Update boost particles
-                this.updateBoostParticles(deltaTime);
-                
-                // Update tilt indicator
-                this.updateTiltIndicator();
-                
-                // NEW: Update boost UI
-                this.updateBoostUI();
-                
-                // Check if fallen off mountain
-                if (this.mesh.position.y < -100) {
-                    game.endRun();
-                }
-            }
-            
-            // NEW: Update boost system
-            updateBoost(deltaTime) {
-                if (this.isBoosting) {
-                    this.boostTimer -= deltaTime;
-                    
-                    if (this.boostTimer <= 0) {
-                        this.stopBoost();
-                    }
-                } else {
-                    // Recharge boost when not using it
-                    if (this.boostCharge < this.maxBoostCharge) {
-                        this.boostCharge += GameConfig.skiing.boostChargeRate * deltaTime;
-                        if (this.boostCharge > this.maxBoostCharge) {
-                            this.boostCharge = this.maxBoostCharge;
-                        }
-                    }
-                }
-            }
-            
-            // NEW: Start boost
-            startBoost() {
-                if (this.boostCharge >= 25 && this.boostCooldown <= 0 && !this.isBoosting) {
-                    this.isBoosting = true;
-                    this.boostTimer = GameConfig.skiing.boostDuration;
-                    this.boostCharge -= 25; // Use 25% of boost charge
-                    this.boostUsed++;
-                    
-                    // Visual feedback
-                    game.createFloatingText(this.mesh.position, 'BOOST!', 0xff9800);
-                    
-                    // Sound effect if available
-                    if (game.audioContext) {
-                        game.playBoostSound();
-                    }
-                    
-                    return true;
-                }
-                return false;
-            }
-            
-            // NEW: Stop boost
-            stopBoost() {
-                if (this.isBoosting) {
-                    this.isBoosting = false;
-                    this.boostCooldown = GameConfig.skiing.boostCooldown;
-                    
-                    // Create boost end effect
-                    game.createFloatingText(this.mesh.position, 'Boost Ended', 0xff9800);
-                }
-            }
-            
-            // NEW: Update boost particles
-            updateBoostParticles(deltaTime) {
-                if (!this.isBoosting || this.boostTimer <= 0) {
-                    this.boostParticleSystem.visible = false;
-                    return;
-                }
-                
-                this.boostParticleSystem.visible = true;
-                
-                // Create particles behind the skier
-                const particleCount = 30;
-                const positions = new Float32Array(particleCount * 3);
-                const velocities = new Float32Array(particleCount * 3);
-                const lifetimes = new Float32Array(particleCount);
-                
-                for (let i = 0; i < particleCount; i++) {
-                    // Position behind skier
-                    const angle = Math.random() * Math.PI * 2;
-                    const radius = Math.random() * 1.5;
-                    const distance = -2 - Math.random() * 3;
-                    
-                    positions[i * 3] = Math.cos(angle) * radius;
-                    positions[i * 3 + 1] = Math.random() * 0.5;
-                    positions[i * 3 + 2] = distance;
-                    
-                    // Velocity going backward and spreading
-                    velocities[i * 3] = (Math.random() - 0.5) * 3;
-                    velocities[i * 3 + 1] = Math.random() * 2;
-                    velocities[i * 3 + 2] = -5 - Math.random() * 3;
-                    
-                    lifetimes[i] = 0.5 + Math.random() * 0.5;
-                }
-                
-                // Update particle positions
-                for (let i = 0; i < positions.length / 3; i++) {
-                    positions[i * 3] += velocities[i * 3] * deltaTime;
-                    positions[i * 3 + 1] += velocities[i * 3 + 1] * deltaTime;
-                    positions[i * 3 + 2] += velocities[i * 3 + 2] * deltaTime;
-                    
-                    velocities[i * 3 + 1] -= 5 * deltaTime; // Gravity
-                }
-                
-                this.boostParticleSystem.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                this.boostParticleSystem.geometry.attributes.position.needsUpdate = true;
-            }
-            
-            handleSteering(deltaTime) {
-                // NEW: Check joystick input first
-                let turnInput = 0;
-                
-                if (joystick && joystick.isActive()) {
-                    const joystickDir = joystick.getDirection();
-                    turnInput = joystickDir.x;
-                } else {
-                    // Fall back to button input
-                    const buttons = buttonController.getAllButtons();
-                    if (buttons.left) turnInput += 1;
-                    if (buttons.right) turnInput -= 1;
-                }
-                
-                // Apply turning
-                if (Math.abs(turnInput) > 0.1) {
-                    this.turnAngle += turnInput * this.turnSpeed * deltaTime;
-                }
-                
-                // NEW: Check boost button
-                if (buttonController.isPressed('boost')) {
-                    this.startBoost();
-                }
-                
-                // Jumping
-                if (buttonController.isPressed('jump') && this.jumpCooldown <= 0) {
-                    this.jump();
-                }
-                
-                // Normalize turn angle
-                this.turnAngle = (this.turnAngle + Math.PI * 2) % (Math.PI * 2);
-                
-                // Apply turning to direction
-                this.direction.x = Math.sin(this.turnAngle);
-                this.direction.z = Math.cos(this.turnAngle);
-                this.direction.normalize();
-            }
-            
-            applyPhysics(deltaTime) {
-                // If in air, allow some air control
-                if (!this.isOnGround) {
-                    const airControl = GameConfig.skiing.airControl;
-                    
-                    // NEW: Check joystick for air control
-                    let turnInput = 0;
-                    if (joystick && joystick.isActive()) {
-                        const joystickDir = joystick.getDirection();
-                        turnInput = joystickDir.x;
-                    } else {
-                        const buttons = buttonController.getAllButtons();
-                        if (buttons.left) turnInput += 1;
-                        if (buttons.right) turnInput -= 1;
-                    }
-                    
-                    if (Math.abs(turnInput) > 0.1) {
-                        this.turnAngle += turnInput * this.turnSpeed * airControl * deltaTime;
-                    }
-                }
-                
-                // Update combo based on air time
-                if (!this.isOnGround) {
-                    this.combo += deltaTime * 10;
-                } else if (this.combo > 0) {
-                    // Add score for completed combo
-                    const comboScore = Math.floor(this.combo * GameConfig.scoring.comboMultiplier);
-                    this.score += comboScore;
-                    this.combo = 0;
-                }
-            }
-            
-            jump() {
-                if (this.isOnGround && this.jumpCooldown <= 0) {
-                    this.velocity.y = GameConfig.skiing.jumpForce;
-                    this.isOnGround = false;
-                    this.isJumping = true;
-                    this.jumpCooldown = 1;
-                    this.jumpCount++;
-                    
-                    // Add jump score
-                    const jumpScore = GameConfig.scoring.jumpMultiplier * (1 + this.speed / 50);
-                    this.score += Math.floor(jumpScore);
-                    
-                    // Show jump text
-                    game.createFloatingText(this.mesh.position, 'JUMP!', 0x4fc3f7);
-                    
-                    return true;
-                }
-                return false;
-            }
-            
-            createSnowSpray() {
-                // Create snow spray particles
-                const particleCount = Math.floor(this.speed / 10);
-                const positions = new Float32Array(particleCount * 3);
-                const velocities = new Float32Array(particleCount * 3);
-                
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const radius = Math.random() * 0.5;
-                    const height = Math.random() * 0.3;
-                    
-                    positions[i * 3] = Math.cos(angle) * radius;
-                    positions[i * 3 + 1] = height;
-                    positions[i * 3 + 2] = Math.sin(angle) * radius;
-                    
-                    velocities[i * 3] = (Math.random() - 0.5) * 2;
-                    velocities[i * 3 + 1] = Math.random() * 3;
-                    velocities[i * 3 + 2] = (Math.random() - 0.5) * 2;
-                }
-                
-                // Store particle data
-                this.particleSystem.userData.positions = positions;
-                this.particleSystem.userData.velocities = velocities;
-                this.particleSystem.userData.lifetimes = new Float32Array(particleCount).fill(1);
-                
-                // Update geometry
-                this.particleSystem.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            }
-            
-            updateParticles(deltaTime) {
-                if (!this.particleSystem.userData.positions) return;
-                
-                const positions = this.particleSystem.userData.positions;
-                const velocities = this.particleSystem.userData.velocities;
-                const lifetimes = this.particleSystem.userData.lifetimes;
-                
-                for (let i = 0; i < positions.length / 3; i++) {
-                    lifetimes[i] -= deltaTime;
-                    
-                    if (lifetimes[i] <= 0) continue;
-                    
-                    positions[i * 3] += velocities[i * 3] * deltaTime;
-                    positions[i * 3 + 1] += velocities[i * 3 + 1] * deltaTime;
-                    positions[i * 3 + 2] += velocities[i * 3 + 2] * deltaTime;
-                    
-                    velocities[i * 3 + 1] -= 5 * deltaTime; // Gravity
-                }
-                
-                this.particleSystem.geometry.attributes.position.needsUpdate = true;
-            }
-            
-            updateTracks() {
-                // Add current position to track
-                this.trackPositions.push(this.mesh.position.clone());
-                
-                // Limit track length
-                if (this.trackPositions.length > 100) {
-                    this.trackPositions.shift();
-                }
-                
-                // Update track mesh
-                if (this.trackPositions.length > 1) {
-                    const positions = new Float32Array(this.trackPositions.length * 3);
-                    this.trackPositions.forEach((pos, i) => {
-                        positions[i * 3] = pos.x;
-                        positions[i * 3 + 1] = pos.y + 0.1; // Slightly above ground
-                        positions[i * 3 + 2] = pos.z;
-                    });
-                    
-                    this.trackMesh.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                    this.trackMesh.geometry.attributes.position.needsUpdate = true;
-                }
-            }
-            
-            updateScore(deltaTime) {
-                // Score for distance
-                const distanceScore = this.speed * GameConfig.scoring.distanceMultiplier * deltaTime;
-                
-                // Score for speed
-                const speedScore = this.speed * GameConfig.scoring.speedMultiplier * deltaTime;
-                
-                // NEW: Extra score while boosting
-                let boostBonus = 0;
-                if (this.isBoosting) {
-                    boostBonus = this.speed * GameConfig.scoring.boostMultiplier * deltaTime;
-                }
-                
-                // Total score
-                this.score += Math.floor(distanceScore + speedScore + boostBonus);
-            }
-            
-            updateTiltIndicator() {
-                const tiltPointer = document.getElementById('tiltPointer');
-                if (tiltPointer) {
-                    // Calculate tilt based on turn angle and slope
-                    const slopeVector = game.getSlopeVector(this.mesh.position.x, this.mesh.position.z);
-                    const tiltAngle = this.turnAngle * 0.5 + (slopeVector.x * 30);
-                    const tiltDegrees = THREE.MathUtils.radToDeg(tiltAngle) % 360;
-                    
-                    // Update pointer rotation
-                    tiltPointer.style.transform = `translateY(-50%) rotate(${tiltDegrees}deg)`;
-                }
-            }
-            
-            // NEW: Update boost UI
-            updateBoostUI() {
-                const boostBar = document.getElementById('boostBar');
-                const boostControl = document.getElementById('boostControl');
-                
-                if (boostBar) {
-                    const boostPercent = this.boostCharge / this.maxBoostCharge;
-                    boostBar.style.transform = `scaleX(${boostPercent})`;
-                    
-                    // Change color based on boost status
-                    if (this.isBoosting) {
-                        boostBar.style.background = 'linear-gradient(90deg, #ff5722, #ff9800)';
-                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(255, 87, 34, 0.9), rgba(245, 124, 0, 0.9))';
-                        boostControl.style.borderColor = 'rgba(255, 87, 34, 0.9)';
-                        boostControl.innerHTML = '⚡';
-                    } else if (this.boostCharge >= 25) {
-                        boostBar.style.background = 'linear-gradient(90deg, #ffc107, #ff9800)';
-                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(255, 193, 7, 0.9), rgba(245, 124, 0, 0.9))';
-                        boostControl.style.borderColor = 'rgba(255, 235, 59, 0.9)';
-                        boostControl.innerHTML = '🔥';
-                    } else {
-                        boostBar.style.background = 'linear-gradient(90deg, #757575, #9e9e9e)';
-                        boostControl.style.background = 'radial-gradient(circle at 30% 30%, rgba(117, 117, 117, 0.9), rgba(158, 158, 158, 0.9))';
-                        boostControl.style.borderColor = 'rgba(189, 189, 189, 0.9)';
-                        boostControl.innerHTML = '⌛';
-                    }
-                }
-            }
-            
-            getAltitude() {
-                return this.mesh.position.y;
-            }
-            
-            getSpeedKmh() {
-                return Math.floor(this.speed * 3.6); // Convert m/s to km/h
-            }
-            
-            updateUI() {
-                // Update speed display
-                document.getElementById('speedDisplay').textContent = `Speed: ${this.getSpeedKmh()} km/h`;
-                document.getElementById('altitudeDisplay').textContent = `Altitude: ${Math.floor(this.getAltitude())}m`;
-                document.getElementById('distanceDisplay').textContent = `Distance: ${Math.floor(this.distance)}m`;
-                document.getElementById('scoreDisplay').textContent = `Score: ${this.score}`;
-                
-                // Update speed indicator
-                const speedFill = document.getElementById('speedFill');
-                const speedValue = document.getElementById('speedValue');
-                
-                const currentMaxSpeed = this.isBoosting ? 
-                    GameConfig.skiing.maxSpeed * GameConfig.skiing.boostMultiplier : 
-                    GameConfig.skiing.maxSpeed;
-                    
-                const speedPercent = this.getSpeedKmh() / currentMaxSpeed;
-                const rotation = 45 + (speedPercent * 270); // 45 to 315 degrees
-                
-                speedFill.style.transform = `rotate(${rotation}deg)`;
-                speedValue.textContent = this.getSpeedKmh();
-                
-                // Update speed fill color based on speed
-                if (this.getSpeedKmh() < 30) {
-                    speedFill.style.borderTopColor = '#4fc3f7'; // Blue
-                } else if (this.getSpeedKmh() < 60) {
-                    speedFill.style.borderTopColor = '#4caf50'; // Green
-                } else if (this.getSpeedKmh() < 90) {
-                    speedFill.style.borderTopColor = '#ff9800'; // Orange
-                } else if (this.getSpeedKmh() < 120) {
-                    speedFill.style.borderTopColor = '#f44336'; // Red
-                } else {
-                    speedFill.style.borderTopColor = '#9c27b0'; // Purple for extreme speeds
-                }
-            }
-            
-            reset() {
-                this.mesh.position.set(0, GameConfig.mountain.peakHeight - 10, -GameConfig.mountain.length / 4);
-                this.velocity.set(0, 0, 0);
-                this.speed = GameConfig.skiing.baseSpeed;
-                this.turnAngle = 0;
-                this.distance = 0;
-                this.jumpCount = 0;
-                this.trickCount = 0;
-                this.combo = 0;
-                this.score = 0;
-                this.boostUsed = 0;
-                this.trackPositions = [];
-                this.isOnGround = true;
-                this.isJumping = false;
-                this.isBoosting = false;
-                this.boostCharge = 100;
-                this.boostTimer = 0;
-                this.boostCooldown = 0;
-            }
-        }
-
-        // ==================== MOUNTAIN TERRAIN ====================
-        class MountainTerrain {
-            constructor() {
-                this.geometry = null;
-                this.mesh = null;
-                this.heightData = null;
-                this.createTerrain();
-            }
-            
-            createTerrain() {
-                const width = GameConfig.mountain.width;
-                const length = GameConfig.mountain.length;
-                const height = GameConfig.mountain.height;
-                const peakHeight = GameConfig.mountain.peakHeight;
-                
-                // Create plane geometry
-                const geometry = new THREE.PlaneGeometry(width, length, 100, 200);
-                
-                // Generate height data
-                this.heightData = new Float32Array(geometry.attributes.position.count);
-                const positions = geometry.attributes.position;
-                
-                for (let i = 0; i < positions.count; i++) {
-                    const x = positions.getX(i);
-                    const z = positions.getZ(i);
-                    
-                    // Base mountain shape (cone)
-                    let y = peakHeight - Math.sqrt(x * x + z * z) * 0.5;
-                    
-                    // Add some randomness for realism
-                    y += Math.sin(x * 0.1) * 10;
-                    y += Math.cos(z * 0.08) * 8;
-                    
-                    // Add ridges
-                    y += Math.sin(Math.atan2(z, x) * 10) * 5;
-                    
-                    // Ensure minimum height
-                    y = Math.max(0, y);
-                    
-                    this.heightData[i] = y;
-                    positions.setY(i, y);
-                }
-                
-                geometry.computeVertexNormals();
-                
-                // Create material - WHITE SNOW MATERIAL
-                const material = new THREE.MeshStandardMaterial({
-                    color: 0xffffff, // WHITE SNOW
-                    roughness: 0.8,
-                    metalness: 0.1,
-                    side: THREE.DoubleSide
-                });
-                
-                // Create mesh
-                this.mesh = new THREE.Mesh(geometry, material);
-                this.mesh.rotation.x = -Math.PI / 2;
-                this.mesh.receiveShadow = true;
-                this.mesh.castShadow = true;
-                this.mesh.name = 'Mountain';
-                
-                scene.add(this.mesh);
-                
-                // Add trees
-                this.addTrees();
-                
-                // Add rocks
-                this.addRocks();
-            }
-            
-            addTrees() {
-                const treeTrunkGeometry = new THREE.CylinderGeometry(0.3, 0.4, 3, 8);
-                const treeLeavesGeometry = new THREE.ConeGeometry(1.5, 3, 8);
-                
-                const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 });
-                const leavesMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 });
-                
-                const treeCount = Math.floor(GameConfig.mountain.width * GameConfig.mountain.length * GameConfig.mountain.treeDensity);
-                
-                for (let i = 0; i < treeCount; i++) {
-                    const x = (Math.random() - 0.5) * GameConfig.mountain.width * 0.8;
-                    const z = (Math.random() - 0.5) * GameConfig.mountain.length * 0.8;
-                    const y = this.getHeight(x, z);
-                    
-                    // Only add trees below snow line
-                    if (y < GameConfig.mountain.snowLevel * GameConfig.mountain.peakHeight * 0.9) {
-                        const trunk = new THREE.Mesh(treeTrunkGeometry, trunkMaterial);
-                        const leaves = new THREE.Mesh(treeLeavesGeometry, leavesMaterial);
-                        
-                        trunk.position.set(x, y + 1.5, z);
-                        leaves.position.set(x, y + 3.5, z);
-                        
-                        // Random rotation
-                        const rotation = Math.random() * Math.PI * 2;
-                        trunk.rotation.y = rotation;
-                        leaves.rotation.y = rotation;
-                        
-                        // Random scale variation
-                        const scale = 0.8 + Math.random() * 0.4;
-                        trunk.scale.setScalar(scale);
-                        leaves.scale.setScalar(scale);
-                        
-                        trunk.castShadow = true;
-                        leaves.castShadow = true;
-                        
-                        scene.add(trunk);
-                        scene.add(leaves);
-                    }
-                }
-            }
-            
-            addRocks() {
-                const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
-                const rockMaterial = new THREE.MeshStandardMaterial({ 
-                    color: 0x795548,
-                    roughness: 0.9,
-                    metalness: 0.1
-                });
-                
-                const rockCount = Math.floor(GameConfig.mountain.width * GameConfig.mountain.length * GameConfig.mountain.rockDensity);
-                
-                for (let i = 0; i < rockCount; i++) {
-                    const x = (Math.random() - 0.5) * GameConfig.mountain.width * 0.9;
-                    const z = (Math.random() - 0.5) * GameConfig.mountain.length * 0.9;
-                    const y = this.getHeight(x, z);
-                    
-                    // Rocks can be anywhere
-                    const rock = new THREE.Mesh(rockGeometry, rockMaterial);
-                    rock.position.set(x, y + 0.5, z);
-                    
-                    // Random rotation and scale
-                    rock.rotation.set(
-                        Math.random() * Math.PI * 2,
-                        Math.random() * Math.PI * 2,
-                        Math.random() * Math.PI * 2
+            // Grass, paths, water
+            for (let y = 0; y < height; y++) {
+                gameState.map[y] = [];
+                for (let x = 0; x < width; x++) {
+                    // Create paths
+                    const isPath = (
+                        (x > 15 && x < 25 && y > 10 && y < 20) || // Central square
+                        (x > 5 && x < 35 && y === 15) || // Horizontal path
+                        (x === 20 && y > 5 && y < 25) // Vertical path
                     );
                     
-                    const scale = 0.5 + Math.random() * 2;
-                    rock.scale.setScalar(scale);
+                    const isWater = (x < 5 || x > 35 || y < 5 || y > 25) && !isPath;
                     
-                    rock.castShadow = true;
-                    scene.add(rock);
-                }
-            }
-            
-            getHeight(x, z) {
-                // Simple interpolation for height
-                const width = GameConfig.mountain.width;
-                const length = GameConfig.mountain.length;
-                
-                // Convert to normalized coordinates
-                const nx = (x / width) + 0.5;
-                const nz = (z / length) + 0.5;
-                
-                // Clamp to valid range
-                if (nx < 0 || nx > 1 || nz < 0 || nz > 1) {
-                    return 0;
-                }
-                
-                // Simple approximation - in a real game, you'd use proper interpolation
-                // with the height data
-                const distanceFromPeak = Math.sqrt(x * x + z * z);
-                let height = GameConfig.mountain.peakHeight - distanceFromPeak * 0.5;
-                
-                // Add some terrain variation
-                height += Math.sin(x * 0.1) * 10;
-                height += Math.cos(z * 0.08) * 8;
-                
-                return Math.max(0, height);
-            }
-            
-            getSlopeVector(x, z) {
-                // Calculate approximate slope at position
-                const delta = 0.1;
-                const height = this.getHeight(x, z);
-                const heightX = this.getHeight(x + delta, z);
-                const heightZ = this.getHeight(x, z + delta);
-                
-                const slopeX = (heightX - height) / delta;
-                const slopeZ = (heightZ - height) / delta;
-                
-                return new THREE.Vector3(-slopeX, 1, -slopeZ).normalize();
-            }
-        }
-
-        // ==================== GAME CLASS - MODIFIED ====================
-        class Game {
-            constructor() {
-                this.skier = null;
-                this.terrain = null;
-                this.snowEffect = null;
-                this.clock = new THREE.Clock();
-                this.isPaused = false;
-                this.isGameOver = false;
-                this.floatingTexts = [];
-                this.audioContext = null;
-                
-                this.init();
-            }
-            
-            async init() {
-                // Initialize Three.js
-                this.initThreeJS();
-                
-                // NEW: Initialize joystick
-                joystick = new JoystickController();
-                
-                // Initialize controllers
-                buttonController = new ButtonController();
-                
-                // Initialize terrain
-                this.terrain = new MountainTerrain();
-                
-                // Initialize skier
-                this.skier = new Skier();
-                
-                // Initialize snow effect
-                this.snowEffect = new SnowEffect();
-                
-                // Initialize audio
-                this.initAudio();
-                
-                // Start game loop
-                this.startGame();
-                
-                // Hide loading screen
-                this.hideLoadingScreen();
-            }
-            
-            initThreeJS() {
-                // Scene
-                scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x87ceeb);
-                scene.fog = new THREE.Fog(0x87ceeb, 50, 500);
-                
-                // Camera (FIRST PERSON - attached to skier)
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-                camera.position.set(0, 1.7, 0); // Eye height
-                
-                // Renderer
-                const canvas = document.getElementById('gameCanvas');
-                renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                renderer.shadowMap.enabled = true;
-                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                renderer.outputColorSpace = THREE.SRGBColorSpace;
-                renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.0;
-                
-                // Lighting
-                // Sun light
-                const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                sunLight.position.set(100, 200, 100);
-                sunLight.castShadow = true;
-                sunLight.shadow.camera.left = -100;
-                sunLight.shadow.camera.right = 100;
-                sunLight.shadow.camera.top = 100;
-                sunLight.shadow.camera.bottom = -100;
-                sunLight.shadow.mapSize.width = 2048;
-                sunLight.shadow.mapSize.height = 2048;
-                scene.add(sunLight);
-                
-                // Ambient light
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-                scene.add(ambientLight);
-                
-                // Sky light (blue-ish for snow)
-                const skyLight = new THREE.HemisphereLight(0x87ceeb, 0x3a3a3a, 0.3);
-                scene.add(skyLight);
-                
-                // Window resize handler
-                window.addEventListener('resize', () => {
-                    camera.aspect = window.innerWidth / window.innerHeight;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-            }
-            
-            initAudio() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Create audio nodes for future sounds
-                    this.gainNode = this.audioContext.createGain();
-                    this.gainNode.connect(this.audioContext.destination);
-                    this.gainNode.gain.value = 0.5;
-                } catch (e) {
-                    console.log('Web Audio API not supported');
-                }
-            }
-            
-            // NEW: Play boost sound
-            playBoostSound() {
-                if (!this.audioContext) return;
-                
-                const oscillator = this.audioContext.createOscillator();
-                const gainNode = this.audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(this.gainNode);
-                
-                oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // C5
-                oscillator.frequency.setValueAtTime(659.25, this.audioContext.currentTime + 0.1); // E5
-                
-                gainNode.gain.setValueAtTime(0.4, this.audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-                
-                oscillator.start();
-                oscillator.stop(this.audioContext.currentTime + 0.3);
-            }
-            
-            hideLoadingScreen() {
-                const loadingScreen = document.getElementById('loadingScreen');
-                loadingScreen.style.opacity = '0';
-                
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    this.showCenterMessage('READY TO SKI', 0x4fc3f7, 2);
-                    
-                    // Start on touch
-                    document.addEventListener('touchstart', () => {
-                        if (!isGameStarted) {
-                            isGameStarted = true;
-                            this.showCenterMessage('GO!', 0x4caf50, 1);
-                        }
-                    }, { once: true });
-                    
-                    // Also start on click for testing
-                    document.addEventListener('click', () => {
-                        if (!isGameStarted) {
-                            isGameStarted = true;
-                            this.showCenterMessage('GO!', 0x4caf50, 1);
-                        }
-                    }, { once: true });
-                }, 500);
-            }
-            
-            getTerrainHeight(x, z) {
-                return this.terrain.getHeight(x, z);
-            }
-            
-            getSlopeVector(x, z) {
-                return this.terrain.getSlopeVector(x, z);
-            }
-            
-            updateCamera() {
-                // First-person camera follows skier
-                camera.position.copy(this.skier.mesh.position);
-                camera.position.y += 1.7; // Eye height
-                
-                // Look in direction of movement with some smoothing
-                const lookTarget = this.skier.mesh.position.clone().add(this.skier.direction.clone().multiplyScalar(10));
-                lookTarget.y = camera.position.y - 1; // Look slightly downhill
-                
-                camera.lookAt(lookTarget);
-                
-                // Add slight camera bob when skiing
-                if (this.skier.isOnGround && this.skier.speed > 10) {
-                    const bob = Math.sin(gameTime * 10) * 0.05;
-                    camera.position.y += bob;
-                }
-                
-                // Add head tilt when turning
-                const tilt = this.skier.turnAngle * 0.1;
-                camera.rotation.z = tilt;
-            }
-            
-            createFloatingText(position, text, color) {
-                const floatingText = {
-                    element: document.createElement('div'),
-                    position: position.clone(),
-                    life: 2,
-                    velocity: new THREE.Vector3(0, 2, 0)
-                };
-                
-                floatingText.element.style.position = 'absolute';
-                floatingText.element.style.color = `#${color.toString(16).padStart(6, '0')}`;
-                floatingText.element.style.fontSize = '20px';
-                floatingText.element.style.fontWeight = 'bold';
-                floatingText.element.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
-                floatingText.element.style.whiteSpace = 'nowrap';
-                floatingText.element.textContent = text;
-                
-                document.getElementById('uiContainer').appendChild(floatingText.element);
-                this.floatingTexts.push(floatingText);
-            }
-            
-            updateFloatingTexts(deltaTime) {
-                for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
-                    const text = this.floatingTexts[i];
-                    text.life -= deltaTime;
-                    
-                    if (text.life <= 0) {
-                        text.element.remove();
-                        this.floatingTexts.splice(i, 1);
-                        continue;
+                    if (isWater) {
+                        gameState.map[y][x] = 2; // Water
+                    } else if (isPath) {
+                        gameState.map[y][x] = 1; // Path
+                    } else {
+                        gameState.map[y][x] = 0; // Grass
                     }
-                    
-                    // Update position
-                    text.position.add(text.velocity.clone().multiplyScalar(deltaTime));
-                    
-                    // Convert world position to screen position
-                    const screenPos = text.position.clone().project(camera);
-                    
-                    const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
-                    const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
-                    
-                    text.element.style.left = `${x}px`;
-                    text.element.style.top = `${y}px`;
-                    text.element.style.opacity = text.life;
                 }
             }
             
-            showCenterMessage(text, color = 0xffffff, duration = 2) {
-                const message = document.getElementById('centerMessage');
-                message.textContent = text;
-                message.style.color = `#${color.toString(16).padStart(6, '0')}`;
-                message.style.opacity = '1';
-                
-                setTimeout(() => {
-                    message.style.opacity = '0';
-                }, duration * 1000);
-            }
+            // Add buildings
+            gameState.buildings = [
+                { x: 16, y: 10, width: 8, height: 4, type: 'pokecenter', name: 'Pokémon Center' },
+                { x: 16, y: 17, width: 8, height: 4, type: 'pokemart', name: 'Poké Mart' },
+                { x: 5, y: 12, width: 6, height: 5, type: 'house', name: "Player's House" },
+                { x: 29, y: 12, width: 6, height: 5, type: 'house', name: "Rival's House" },
+                { x: 18, y: 22, width: 4, height: 3, type: 'gym', name: 'Pokémon Gym' }
+            ];
             
-            endRun() {
-                if (this.isGameOver) return;
-                
-                this.isGameOver = true;
-                this.showGameOverScreen();
-            }
+            // Add NPCs
+            gameState.npcs = [
+                { x: 22, y: 14, type: 'nurse', direction: 'down' },
+                { x: 18, y: 18, type: 'shopkeeper', direction: 'left' },
+                { x: 8, y: 14, type: 'trainer', direction: 'right' },
+                { x: 30, y: 14, type: 'rival', direction: 'down' }
+            ];
             
-            showGameOverScreen() {
-                document.getElementById('finalDistance').textContent = `${Math.floor(this.skier.distance)}m`;
-                document.getElementById('finalSpeed').textContent = `${this.skier.getSpeedKmh()} km/h`;
-                document.getElementById('finalScore').textContent = this.skier.score;
-                document.getElementById('finalJumps').textContent = this.skier.jumpCount;
-                
-                document.getElementById('gameOverScreen').style.display = 'flex';
-                
-                // Setup game over buttons
-                document.getElementById('playAgainBtn').onclick = () => {
-                    this.restartGame();
-                };
-                
-                document.getElementById('menuBtn').onclick = () => {
-                    location.reload();
-                };
-            }
+            // Add wild Pokémon areas
+            gameState.wildPokemon = [
+                { x: 10, y: 8, type: 'pikachu', chance: 0.3 },
+                { x: 25, y: 8, type: 'bulbasaur', chance: 0.2 },
+                { x: 10, y: 22, type: 'squirtle', chance: 0.2 },
+                { x: 25, y: 22, type: 'pidgey', chance: 0.4 }
+            ];
+        }
+
+        // Draw game
+        function drawGame() {
+            if (gameState.inBattle) return;
             
-            togglePause() {
-                if (this.isGameOver) return;
-                
-                this.isPaused = !this.isPaused;
-                document.getElementById('pauseMenu').style.display = this.isPaused ? 'flex' : 'none';
-                
-                if (this.isPaused) {
-                    this.showCenterMessage('PAUSED', 0xff9800, 999);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate visible area
+            const viewX = Math.max(0, Math.min(gameState.player.x - canvas.width/2, 
+                gameState.map[0].length * gameState.tilesize - canvas.width));
+            const viewY = Math.max(0, Math.min(gameState.player.y - canvas.height/2, 
+                gameState.map.length * gameState.tilesize - canvas.height));
+            
+            // Draw tiles
+            for (let y = 0; y < gameState.map.length; y++) {
+                for (let x = 0; x < gameState.map[y].length; x++) {
+                    const tileX = x * gameState.tilesize - viewX;
+                    const tileY = y * gameState.tilesize - viewY;
+                    
+                    // Skip if outside view
+                    if (tileX < -gameState.tilesize || tileX > canvas.width || 
+                        tileY < -gameState.tilesize || tileY > canvas.height) continue;
+                    
+                    switch(gameState.map[y][x]) {
+                        case 0: // Grass
+                            ctx.fillStyle = '#78c850';
+                            ctx.fillRect(tileX, tileY, gameState.tilesize, gameState.tilesize);
+                            // Grass pattern
+                            ctx.fillStyle = '#68b040';
+                            for (let i = 0; i < 4; i++) {
+                                const px = tileX + Math.random() * gameState.tilesize;
+                                const py = tileY + Math.random() * gameState.tilesize;
+                                ctx.fillRect(px, py, 2, 2);
+                            }
+                            break;
+                        case 1: // Path
+                            ctx.fillStyle = '#a8a878';
+                            ctx.fillRect(tileX, tileY, gameState.tilesize, gameState.tilesize);
+                            // Path pattern
+                            ctx.fillStyle = '#989868';
+                            ctx.fillRect(tileX + 8, tileY + 8, 16, 16);
+                            break;
+                        case 2: // Water
+                            ctx.fillStyle = '#6890f0';
+                            ctx.fillRect(tileX, tileY, gameState.tilesize, gameState.tilesize);
+                            // Water waves
+                            ctx.fillStyle = '#5880e0';
+                            ctx.beginPath();
+                            ctx.moveTo(tileX, tileY + 16);
+                            ctx.bezierCurveTo(tileX + 8, tileY + 8, tileX + 24, tileY + 24, tileX + 32, tileY + 16);
+                            ctx.fill();
+                            break;
+                    }
                 }
             }
             
-            restartGame() {
-                // Reset game state
-                this.isGameOver = false;
-                this.isPaused = false;
+            // Draw buildings
+            gameState.buildings.forEach(building => {
+                const screenX = building.x * gameState.tilesize - viewX;
+                const screenY = building.y * gameState.tilesize - viewY;
                 
-                // Reset skier
-                this.skier.reset();
+                ctx.fillStyle = building.type === 'gym' ? '#d83030' : 
+                               building.type === 'pokecenter' ? '#f8a8a8' : '#c0a878';
+                ctx.fillRect(screenX, screenY, 
+                    building.width * gameState.tilesize, 
+                    building.height * gameState.tilesize);
                 
-                // Clear floating texts
-                this.floatingTexts.forEach(text => text.element.remove());
-                this.floatingTexts = [];
+                // Roof
+                ctx.fillStyle = building.type === 'gym' ? '#a82020' : 
+                               building.type === 'pokecenter' ? '#d88888' : '#a89058';
+                ctx.fillRect(screenX, screenY, 
+                    building.width * gameState.tilesize, 
+                    gameState.tilesize);
                 
-                // Hide screens
-                document.getElementById('gameOverScreen').style.display = 'none';
-                document.getElementById('pauseMenu').style.display = 'none';
+                // Door
+                ctx.fillStyle = '#705848';
+                ctx.fillRect(
+                    screenX + building.width * gameState.tilesize/2 - 8,
+                    screenY + building.height * gameState.tilesize - 16,
+                    16, 16
+                );
                 
-                // Show start message
-                this.showCenterMessage('GO!', 0x4caf50, 2);
-            }
+                // Sign
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    building.name,
+                    screenX + building.width * gameState.tilesize/2,
+                    screenY + 12
+                );
+            });
             
-            startGame() {
-                // Setup pause menu buttons
-                document.getElementById('resumeBtn').onclick = () => this.togglePause();
-                document.getElementById('restartBtn').onclick = () => this.restartGame();
-                document.getElementById('quitBtn').onclick = () => location.reload();
+            // Draw NPCs
+            gameState.npcs.forEach(npc => {
+                const screenX = npc.x * gameState.tilesize - viewX;
+                const screenY = npc.y * gameState.tilesize - viewY;
                 
-                // Start game loop
-                this.gameLoop();
-            }
+                ctx.fillStyle = {
+                    nurse: '#ff88ff',
+                    shopkeeper: '#88ff88',
+                    trainer: '#8888ff',
+                    rival: '#ff8888'
+                }[npc.type] || '#cccccc';
+                
+                // NPC body
+                ctx.fillRect(screenX + 8, screenY + 4, 16, 24);
+                
+                // NPC head
+                ctx.fillStyle = '#ffccaa';
+                ctx.fillRect(screenX + 10, screenY, 12, 12);
+                
+                // NPC direction indicator
+                ctx.fillStyle = '#000000';
+                const dirX = npc.direction === 'left' ? -4 : npc.direction === 'right' ? 4 : 0;
+                const dirY = npc.direction === 'up' ? -4 : npc.direction === 'down' ? 4 : 0;
+                ctx.fillRect(screenX + 15 + dirX, screenY + 15 + dirY, 2, 2);
+            });
             
-            gameLoop() {
-                requestAnimationFrame(() => this.gameLoop());
+            // Draw player
+            const playerScreenX = gameState.player.x - viewX;
+            const playerScreenY = gameState.player.y - viewY;
+            
+            // Player body
+            ctx.fillStyle = '#4068a0';
+            ctx.fillRect(playerScreenX - 10, playerScreenY - 20, 20, 30);
+            
+            // Player head
+            ctx.fillStyle = '#ffccaa';
+            ctx.fillRect(playerScreenX - 8, playerScreenY - 28, 16, 16);
+            
+            // Player direction indicator
+            ctx.fillStyle = '#000000';
+            const dirX = gameState.player.direction === 'left' ? -6 : gameState.player.direction === 'right' ? 6 : 0;
+            const dirY = gameState.player.direction === 'up' ? -6 : gameState.player.direction === 'down' ? 6 : 0;
+            ctx.fillRect(playerScreenX + dirX, playerScreenY - 5 + dirY, 3, 3);
+            
+            // Draw Pokémon in grass
+            gameState.wildPokemon.forEach(pokemon => {
+                const screenX = pokemon.x * gameState.tilesize - viewX;
+                const screenY = pokemon.y * gameState.tilesize - viewY;
                 
-                deltaTime = Math.min(this.clock.getDelta(), 0.1);
-                gameTime += deltaTime;
-                
-                if (!isGameStarted || this.isGameOver) return;
-                
-                if (!this.isPaused) {
-                    // Update skier
-                    this.skier.update(deltaTime);
+                // Only draw if in tall grass
+                if (gameState.map[pokemon.y][pokemon.x] === 0) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.beginPath();
+                    ctx.arc(screenX + 16, screenY + 16, 8, 0, Math.PI * 2);
+                    ctx.fill();
                     
-                    // Update camera (first-person follows skier)
-                    this.updateCamera();
-                    
-                    // Update UI
-                    this.skier.updateUI();
-                    
-                    // Update snow effect based on speed
-                    const snowIntensity = 0.5 + (this.skier.speed / GameConfig.skiing.maxSpeed) * 0.5;
-                    this.snowEffect.update(snowIntensity);
-                    
-                    // Update floating texts
-                    this.updateFloatingTexts(deltaTime);
+                    // Sparkle
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(screenX + 12, screenY + 12, 2, 2);
+                    ctx.fillRect(screenX + 18, screenY + 18, 2, 2);
                 }
-                
-                // Render scene
-                renderer.render(scene, camera);
+            });
+        }
+
+        // Check collisions
+        function checkCollision(x, y) {
+            // Map boundaries
+            if (x < 0 || y < 0 || 
+                x >= gameState.map[0].length * gameState.tilesize || 
+                y >= gameState.map.length * gameState.tilesize) {
+                return true;
+            }
+            
+            // Building collisions
+            const tileX = Math.floor(x / gameState.tilesize);
+            const tileY = Math.floor(y / gameState.tilesize);
+            
+            // Water tiles
+            if (gameState.map[tileY][tileX] === 2) {
+                showDialog("You can't swim without a Water Pokémon!");
+                return true;
+            }
+            
+            // Building collisions
+            for (const building of gameState.buildings) {
+                if (tileX >= building.x && tileX < building.x + building.width &&
+                    tileY >= building.y && tileY < building.y + building.height) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Update game
+        function updateGame() {
+            if (gameState.inBattle) return;
+            
+            let moved = false;
+            
+            // Movement
+            if (gameState.keys['ArrowUp']) {
+                gameState.player.direction = 'up';
+                const newY = gameState.player.y - gameState.player.speed;
+                if (!checkCollision(gameState.player.x, newY)) {
+                    gameState.player.y = newY;
+                    moved = true;
+                }
+            }
+            if (gameState.keys['ArrowDown']) {
+                gameState.player.direction = 'down';
+                const newY = gameState.player.y + gameState.player.speed;
+                if (!checkCollision(gameState.player.x, newY)) {
+                    gameState.player.y = newY;
+                    moved = true;
+                }
+            }
+            if (gameState.keys['ArrowLeft']) {
+                gameState.player.direction = 'left';
+                const newX = gameState.player.x - gameState.player.speed;
+                if (!checkCollision(newX, gameState.player.y)) {
+                    gameState.player.x = newX;
+                    moved = true;
+                }
+            }
+            if (gameState.keys['ArrowRight']) {
+                gameState.player.direction = 'right';
+                const newX = gameState.player.x + gameState.player.speed;
+                if (!checkCollision(newX, gameState.player.y)) {
+                    gameState.player.x = newX;
+                    moved = true;
+                }
+            }
+            
+            // Update location text
+            const tileX = Math.floor(gameState.player.x / gameState.tilesize);
+            const tileY = Math.floor(gameState.player.y / gameState.tilesize);
+            
+            if (tileX >= 15 && tileX <= 25 && tileY >= 10 && tileY <= 20) {
+                gameState.currentLocation = 'Central Town';
+            } else if (gameState.map[tileY][tileX] === 0) {
+                gameState.currentLocation = 'Tall Grass';
+            } else if (gameState.map[tileY][tileX] === 1) {
+                gameState.currentLocation = 'Route 1';
+            }
+            
+            document.getElementById('location').textContent = gameState.currentLocation;
+            
+            // Check for encounters in tall grass
+            if (moved && gameState.map[tileY][tileX] === 0 && Math.random() < 0.01) {
+                startWildBattle();
+            }
+            
+            // Check for NPC interactions
+            if (moved) {
+                checkNPCInteraction(tileX, tileY);
+            }
+            
+            // Check for building entry
+            if (gameState.keys['aPressed']) {
+                tryEnterBuilding(tileX, tileY);
+                gameState.keys['aPressed'] = false;
+            }
+            
+            drawGame();
+        }
+
+        // Show dialog
+        function showDialog(text) {
+            dialogBox.style.display = 'block';
+            dialogBox.textContent = text;
+            
+            setTimeout(() => {
+                dialogBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // Check NPC interaction
+        function checkNPCInteraction(x, y) {
+            for (const npc of gameState.npcs) {
+                if (Math.abs(npc.x - x) <= 1 && Math.abs(npc.y - y) <= 1) {
+                    const messages = {
+                        nurse: "Welcome to the Pokémon Center! We heal your Pokémon back to perfect health!",
+                        shopkeeper: "We sell Poké Balls and Potions! Come back when you have some money!",
+                        trainer: "Want to battle? I'm still training my Pokémon!",
+                        rival: "I'm going to be the very best! Like no one ever was!"
+                    };
+                    showDialog(messages[npc.type]);
+                    break;
+                }
             }
         }
 
-        // ==================== INITIALIZE GAME ====================
-        window.addEventListener('load', () => {
-            try {
-                console.log('Initializing Mountain Skiing Game...');
-                console.log('First-person skiing on snowy mountain');
-                console.log('Controls: LEFT/RIGHT buttons or JOYSTICK to steer');
-                console.log('JUMP for tricks | BOOST for extra speed');
-                console.log('Double-tap screen to pause');
-                
-                game = new Game();
-                window.game = game; // For debugging
-                
-            } catch (error) {
-                console.error('Game initialization error:', error);
-                
-                // Show error message
-                document.getElementById('loadingText').textContent = 'Loading Failed';
-                document.getElementById('loadingSubtext').textContent = 'Please refresh the page';
-                document.getElementById('loadingSubtext').style.color = '#ff4444';
-                
-                // Remove loader
-                document.querySelector('.loader').style.display = 'none';
-                
-                // Add retry button
-                const retryBtn = document.createElement('button');
-                retryBtn.textContent = 'RETRY';
-                retryBtn.style.background = '#2196f3';
-                retryBtn.style.color = 'white';
-                retryBtn.style.border = 'none';
-                retryBtn.style.padding = '15px 30px';
-                retryBtn.style.borderRadius = '25px';
-                retryBtn.style.fontSize = '18px';
-                retryBtn.style.marginTop = '20px';
-                retryBtn.style.cursor = 'pointer';
-                retryBtn.onclick = () => location.reload();
-                
-                document.getElementById('loadingScreen').appendChild(retryBtn);
+        // Try to enter building
+        function tryEnterBuilding(x, y) {
+            for (const building of gameState.buildings) {
+                if (x >= building.x && x < building.x + building.width &&
+                    y >= building.y && y < building.y + building.height) {
+                    
+                    if (building.type === 'pokecenter') {
+                        showDialog("Welcome to the Pokémon Center! Your Pokémon have been healed!");
+                        gameState.playerPokemon.forEach(p => p.hp = p.maxHp);
+                    } else if (building.type === 'gym') {
+                        showDialog("This is the Pokémon Gym! Come back when you're stronger!");
+                    } else {
+                        showDialog(`You entered ${building.name}.`);
+                    }
+                    break;
+                }
             }
-        });
+        }
 
-        // ==================== ERROR HANDLING ====================
-        window.addEventListener('error', (event) => {
-            console.error('Global error:', event.error);
-            event.preventDefault();
-        });
+        // Start wild battle
+        function startWildBattle() {
+            const wildPokemonTypes = [
+                { name: 'Pikachu', emoji: '🐭', maxHp: 18, moves: ['Thundershock', 'Quick Attack'] },
+                { name: 'Bulbasaur', emoji: '🌱', maxHp: 22, moves: ['Vine Whip', 'Tackle'] },
+                { name: 'Squirtle', emoji: '💧', maxHp: 20, moves: ['Water Gun', 'Tail Whip'] },
+                { name: 'Pidgey', emoji: '🐦', maxHp: 16, moves: ['Gust', 'Sand Attack'] },
+                { name: 'Caterpie', emoji: '🐛', maxHp: 14, moves: ['Tackle', 'String Shot'] },
+                { name: 'Rattata', emoji: '🐀', maxHp: 15, moves: ['Tackle', 'Tail Whip'] }
+            ];
+            
+            const wild = wildPokemonTypes[Math.floor(Math.random() * wildPokemonTypes.length)];
+            gameState.currentWildPokemon = {
+                ...wild,
+                level: Math.floor(Math.random() * 5) + 3,
+                hp: wild.maxHp
+            };
+            
+            gameState.inBattle = true;
+            battleScreen.style.display = 'flex';
+            
+            // Update battle screen
+            document.querySelector('#battleScreen .battle-info h3').textContent = 
+                `Wild ${gameState.currentWildPokemon.name}`;
+            document.querySelector('#battleScreen .battle-info div:nth-child(1) div').textContent = 
+                `Lv. ${gameState.currentWildPokemon.level}`;
+            document.querySelector('#battleScreen .pokemon-display div:nth-child(1) div:first-child').textContent = 
+                gameState.currentWildPokemon.emoji;
+            document.querySelector('#battleScreen .pokemon-display div:nth-child(1) div:nth-child(2)').textContent = 
+                `Wild ${gameState.currentWildPokemon.name}`;
+            
+            document.getElementById('battleText').textContent = 
+                `A wild ${gameState.currentWildPokemon.name} appeared!`;
+        }
 
-        window.addEventListener('unhandledrejection', (event) => {
-            console.error('Unhandled promise rejection:', event.reason);
-            event.preventDefault();
-        });
+        // Battle functions
+        function useMove(move) {
+            if (!gameState.inBattle || !gameState.currentWildPokemon) return;
+            
+            const playerPokemon = gameState.playerPokemon[0];
+            const wildPokemon = gameState.currentWildPokemon;
+            
+            // Player attack
+            const damage = Math.floor(Math.random() * 8) + 3;
+            wildPokemon.hp = Math.max(0, wildPokemon.hp - damage);
+            
+            document.getElementById('battleText').textContent = 
+                `${playerPokemon.name} used ${move}! It dealt ${damage} damage!`;
+            
+            // Update HP bar
+            const hpPercent = (wildPokemon.hp / gameState.currentWildPokemon.maxHp) * 100;
+            document.querySelector('#battleScreen .battle-info div:nth-child(1) .hp-bar').style.width = 
+                `${hpPercent}%`;
+            
+            if (wildPokemon.hp <= 0) {
+                setTimeout(() => {
+                    document.getElementById('battleText').textContent = 
+                        `Wild ${wildPokemon.name} fainted! You won the battle!`;
+                    setTimeout(endBattle, 2000);
+                }, 1000);
+                return;
+            }
+            
+            // Wild Pokémon attack
+            setTimeout(() => {
+                const wildMove = wildPokemon.moves[Math.floor(Math.random() * wildPokemon.moves.length)];
+                const wildDamage = Math.floor(Math.random() * 6) + 2;
+                playerPokemon.hp = Math.max(0, playerPokemon.hp - wildDamage);
+                
+                document.getElementById('battleText').textContent = 
+                    `Wild ${wildPokemon.name} used ${wildMove}! It dealt ${wildDamage} damage!`;
+                
+                // Update player HP bar
+                const playerHpPercent = (playerPokemon.hp / playerPokemon.maxHp) * 100;
+                document.querySelector('#battleScreen .battle-info div:nth-child(2) .hp-bar').style.width = 
+                    `${playerHpPercent}%`;
+                
+                if (playerPokemon.hp <= 0) {
+                    setTimeout(() => {
+                        document.getElementById('battleText').textContent = 
+                            `${playerPokemon.name} fainted! You blacked out!`;
+                        setTimeout(() => {
+                            endBattle();
+                            showDialog("You rushed to the Pokémon Center!");
+                            gameState.playerPokemon.forEach(p => p.hp = p.maxHp);
+                        }, 2000);
+                    }, 1000);
+                }
+            }, 1500);
+        }
 
-        // Prevent default touch behaviors
-        document.addEventListener('touchmove', (e) => {
-            if (e.target.classList.contains('ski-control') || 
-                e.target.id === 'joystickBase' ||
-                e.target.id === 'boostControl') {
+        function throwPokeball() {
+            if (!gameState.inBattle || gameState.pokeballs <= 0) {
+                document.getElementById('battleText').textContent = "No Poké Balls left!";
+                return;
+            }
+            
+            gameState.pokeballs--;
+            document.getElementById('pokeballCount').textContent = gameState.pokeballs;
+            
+            const catchRate = 0.3 + (gameState.currentWildPokemon.hp / gameState.currentWildPokemon.maxHp) * 0.2;
+            
+            document.getElementById('battleText').textContent = "You threw a Poké Ball!";
+            
+            setTimeout(() => {
+                if (Math.random() < catchRate) {
+                    document.getElementById('battleText').textContent = 
+                        `Gotcha! ${gameState.currentWildPokemon.name} was caught!`;
+                    gameState.playerPokemon.push({
+                        name: gameState.currentWildPokemon.name,
+                        level: gameState.currentWildPokemon.level,
+                        hp: gameState.currentWildPokemon.hp,
+                        maxHp: gameState.currentWildPokemon.maxHp,
+                        moves: gameState.currentWildPokemon.moves
+                    });
+                    document.getElementById('pokemonCount').textContent = gameState.playerPokemon.length;
+                    setTimeout(endBattle, 2000);
+                } else {
+                    document.getElementById('battleText').textContent = 
+                        `Oh no! The wild ${gameState.currentWildPokemon.name} broke free!`;
+                }
+            }, 1500);
+        }
+
+        function runAway() {
+            if (gameState.inBattle && Math.random() > 0.2) {
+                document.getElementById('battleText').textContent = "Got away safely!";
+                setTimeout(endBattle, 1500);
+            } else {
+                document.getElementById('battleText').textContent = "Can't escape!";
+            }
+        }
+
+        function switchPokemon() {
+            if (gameState.playerPokemon.length > 1) {
+                document.getElementById('battleText').textContent = 
+                    `You have ${gameState.playerPokemon.length} Pokémon. Switch feature coming soon!`;
+            } else {
+                document.getElementById('battleText').textContent = "You only have one Pokémon!";
+            }
+        }
+
+        function endBattle() {
+            gameState.inBattle = false;
+            battleScreen.style.display = 'none';
+        }
+
+        // Control functions
+        function keyDown(key) {
+            gameState.keys[key] = true;
+            updateGame();
+        }
+
+        function keyUp(key) {
+            gameState.keys[key] = false;
+        }
+
+        function pressA() {
+            gameState.keys['aPressed'] = true;
+            updateGame();
+        }
+
+        function releaseA() {
+            gameState.keys['aPressed'] = false;
+        }
+
+        function pressB() {
+            if (gameState.inBattle) {
+                endBattle();
+            } else {
+                showDialog("Canceled.");
+            }
+        }
+
+        function releaseB() {
+            // Nothing needed
+        }
+
+        function openMenu() {
+            showDialog(`Pokédex: ${gameState.playerPokemon.length}/151 caught\nPoké Balls: ${gameState.pokeballs}`);
+        }
+
+        function startBattle() {
+            if (!gameState.inBattle) {
+                startWildBattle();
+            }
+        }
+
+        // Keyboard controls for desktop
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'a', 'A', 'b', 'B'].includes(e.key)) {
                 e.preventDefault();
+                if (e.key === 'a' || e.key === 'A') pressA();
+                else if (e.key === 'b' || e.key === 'B') pressB();
+                else keyDown(e.key);
             }
-        }, { passive: false });
+        });
 
+        document.addEventListener('keyup', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'a', 'A', 'b', 'B'].includes(e.key)) {
+                e.preventDefault();
+                if (e.key === 'a' || e.key === 'A') releaseA();
+                else if (e.key === 'b' || e.key === 'B') releaseB();
+                else keyUp(e.key);
+            }
+        });
+
+        // Prevent context menu on mobile
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Initialize game
+        generateMap();
+        drawGame();
+        
+        // Game loop
+        setInterval(updateGame, 1000/60);
+        
+        // Prevent pull-to-refresh on mobile
+        document.body.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
