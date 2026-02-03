@@ -5,175 +5,1139 @@
 <title>Pokemon Style Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body{margin:0;overflow:hidden;background:#000}
-canvas{display:block}
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Arial', sans-serif;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+canvas {
+    display: block;
+}
 
 /* Joystick */
-#joyBase{position:fixed;bottom:20px;left:20px;width:120px;height:120px;
-background:rgba(255,255,255,.2);border-radius:50%}
-#joy{position:absolute;width:40px;height:40px;left:40px;top:40px;
-background:rgba(255,255,255,.6);border-radius:50%}
+#joyBase {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 100px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    z-index: 100;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
 
-/* Battle */
-#battle{position:fixed;inset:0;background:#000;color:#fff;
-font-family:monospace;display:none;text-align:center;padding-top:40px}
-button{font-size:18px;padding:10px 20px}
+#joy {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    left: 30px;
+    top: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    border: 2px solid rgba(100, 100, 255, 0.8);
+    box-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
+    transition: all 0.1s;
+}
+
+/* Battle UI */
+#battle {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(to bottom, #1a5f7a, #0a3d62);
+    color: white;
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.battle-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.enemy-area {
+    height: 40%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.player-area {
+    height: 40%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.hp-bar {
+    width: 200px;
+    height: 20px;
+    background: #333;
+    border: 2px solid #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(to right, #ff4444, #ffaa44);
+    transition: width 0.3s;
+}
+
+.battle-menu {
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    max-width: 300px;
+}
+
+.battle-menu button {
+    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.battle-menu button:hover {
+    background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
+    transform: translateY(-2px);
+}
+
+.battle-menu button:active {
+    transform: translateY(0);
+}
+
+#battleLog {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    min-height: 60px;
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Animation for attacks */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.shake { animation: shake 0.3s; }
+.flash { animation: flash 0.3s; }
+.float { animation: float 2s infinite; }
+
+/* Minimap */
+#minimap {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 120px;
+    height: 120px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    z-index: 50;
+}
+
+/* HUD */
+#hud {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    font-size: 14px;
+    z-index: 50;
+}
 </style>
 </head>
 
 <body>
 <canvas id="game"></canvas>
 <div id="joyBase"><div id="joy"></div></div>
+<div id="minimap"></div>
+<div id="hud">HP: 100/100</div>
 
 <div id="battle">
-<h2>Wild Creature Appeared!</h2>
-<p id="enemyHP"></p>
-<p id="playerHP"></p>
-<button onclick="attack()">ATTACK</button>
+    <div class="battle-container">
+        <div class="enemy-area">
+            <div id="enemySprite" class="float"></div>
+            <div id="enemyInfo">
+                <h2 id="enemyName">Wild Pikachu</h2>
+                <div class="hp-bar">
+                    <div id="enemyHPFill" class="hp-fill" style="width: 100%"></div>
+                </div>
+                <div id="enemyHPText">HP: 20/20</div>
+            </div>
+        </div>
+        
+        <div id="battleLog">A wild Pokémon appeared!</div>
+        
+        <div class="player-area">
+            <div id="playerInfo">
+                <h2 id="playerName">Trainer</h2>
+                <div class="hp-bar">
+                    <div id="playerHPFill" class="hp-fill" style="width: 100%"></div>
+                </div>
+                <div id="playerHPText">HP: 30/30</div>
+            </div>
+            <div id="playerSprite"></div>
+        </div>
+        
+        <div class="battle-menu" id="battleMenu" style="display: none;">
+            <button onclick="attack()">FIGHT</button>
+            <button onclick="usePotion()">POTION</button>
+            <button onclick="usePokeball()">POKéBALL</button>
+            <button onclick="run()">RUN</button>
+        </div>
+    </div>
 </div>
 
 <script>
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-canvas.width=innerWidth;
-canvas.height=innerHeight;
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const minimapCtx = document.getElementById("minimap").getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-const TILE=32;
+const TILE = 64;
+const GRASS_COLORS = ['#5dbb63', '#6fcf97', '#57a773'];
+const FLOWER_COLORS = ['#ff6b9d', '#ffd166', '#06d6a0', '#118ab2'];
 
 // GAME STATE
-let world="outside"; // outside | house | center
-let inBattle=false;
+let world = "outside";
+let inBattle = false;
+let gameTime = 0;
 
 // PLAYER
-const player={x:0,y:0,size:28,speed:2};
-
-// CAMERA
-const cam={x:0,y:0};
-
-// JOYSTICK
-let joyX=0,joyY=0,drag=false;
-const base=document.getElementById("joyBase");
-const stick=document.getElementById("joy");
-
-base.onmousedown=base.ontouchstart=()=>drag=true;
-window.onmouseup=window.ontouchend=()=>{drag=false;joyX=joyY=0;
-stick.style.left="40px";stick.style.top="40px"};
-window.onmousemove=window.ontouchmove=e=>{
- if(!drag)return;
- const r=base.getBoundingClientRect();
- const t=e.touches?e.touches[0]:e;
- let x=t.clientX-r.left-60,y=t.clientY-r.top-60;
- const d=Math.hypot(x,y);
- if(d>60){x*=60/d;y*=60/d;}
- joyX=x/60;joyY=y/60;
- stick.style.left=x+60-20+"px";
- stick.style.top=y+60-20+"px";
+const player = {
+    x: 0,
+    y: 0,
+    size: 28,
+    speed: 2,
+    direction: 0, // 0: down, 1: left, 2: right, 3: up
+    animationFrame: 0
 };
 
-// BATTLE
-let enemyHP=20,playerHP=30;
-const battleUI=document.getElementById("battle");
-function startBattle(){
- inBattle=true;enemyHP=20;playerHP=30;
- battleUI.style.display="block";
- updateBattleText();
-}
-function updateBattleText(){
- enemyHP.innerText="Enemy HP: "+enemyHP;
- playerHP.innerText="Your HP: "+playerHP;
-}
-function attack(){
- enemyHP-=5;
- if(enemyHP<=0){endBattle();return;}
- playerHP-=3;
- if(playerHP<=0){endBattle();}
- updateBattleText();
-}
-function endBattle(){
- inBattle=false;
- battleUI.style.display="none";
+// CAMERA
+const cam = { x: 0, y: 0 };
+
+// ASSETS (Base64 encoded sprites)
+const assets = {
+    player: {
+        down: [0, 0],
+        left: [1, 0],
+        right: [2, 0],
+        up: [3, 0]
+    },
+    pokemon: {
+        pikachu: [0, 1],
+        bulbasaur: [1, 1],
+        charmander: [2, 1],
+        squirtle: [3, 1]
+    }
+};
+
+// TERRAIN DETAILS
+const terrainDetails = [];
+for(let i = 0; i < 100; i++) {
+    terrainDetails.push({
+        x: Math.random() * 2000 - 1000,
+        y: Math.random() * 2000 - 1000,
+        type: Math.random() > 0.5 ? 'flower' : 'bush',
+        color: FLOWER_COLORS[Math.floor(Math.random() * FLOWER_COLORS.length)],
+        size: Math.random() * 10 + 5
+    });
 }
 
-// BUILDINGS (outside world)
-const buildings=[
- {x:100,y:0,type:"house"},
- {x:-120,y:0,type:"center"}
+// BUILDINGS WITH DETAILED INTERIORS
+const buildings = [
+    {
+        x: 200,
+        y: 0,
+        type: "house",
+        interior: {
+            walls: '#d2b48c',
+            floor: '#8b7355',
+            furniture: [
+                {x: 80, y: 60, type: 'table', width: 40, height: 20, color: '#8b4513'},
+                {x: 40, y: 60, type: 'chair', width: 20, height: 20, color: '#654321'},
+                {x: 120, y: 60, type: 'bookshelf', width: 30, height: 50, color: '#8b4513'},
+                {x: 80, y: 100, type: 'bed', width: 60, height: 30, color: '#4a8bca'},
+                {x: 40, y: 120, type: 'plant', width: 15, height: 30, color: '#2d5a27'},
+                {x: 120, y: 120, type: 'lamp', width: 10, height: 25, color: '#d4af37'}
+            ]
+        }
+    },
+    {
+        x: -200,
+        y: 0,
+        type: "center",
+        interior: {
+            walls: '#f8f8f8',
+            floor: '#d0d0d0',
+            furniture: [
+                {x: 80, y: 60, type: 'counter', width: 80, height: 20, color: '#8b4513'},
+                {x: 100, y: 90, type: 'healing_machine', width: 40, height: 40, color: '#4a8bca'},
+                {x: 40, y: 60, type: 'chair', width: 20, height: 20, color: '#654321'},
+                {x: 120, y: 120, type: 'plant', width: 15, height: 30, color: '#2d5a27'},
+                {x: 40, y: 120, type: 'table', width: 30, height: 20, color: '#8b4513'},
+                {x: 160, y: 60, type: 'poster', width: 40, height: 30, color: '#ff6b6b'}
+            ]
+        }
+    }
 ];
 
+// JOYSTICK
+let joyX = 0, joyY = 0, drag = false;
+const base = document.getElementById("joyBase");
+const stick = document.getElementById("joy");
+
+base.onmousedown = base.ontouchstart = (e) => {
+    e.preventDefault();
+    drag = true;
+};
+
+window.onmouseup = window.ontouchend = () => {
+    drag = false;
+    joyX = joyY = 0;
+    stick.style.left = "30px";
+    stick.style.top = "30px";
+    player.animationFrame = 0;
+};
+
+window.onmousemove = window.ontouchmove = (e) => {
+    if(!drag) return;
+    const r = base.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    let x = t.clientX - r.left - 50;
+    let y = t.clientY - r.top - 50;
+    const d = Math.hypot(x, y);
+    if(d > 50){ x *= 50/d; y *= 50/d; }
+    joyX = x/50;
+    joyY = y/50;
+    stick.style.left = x + 50 - 20 + "px";
+    stick.style.top = y + 50 - 20 + "px";
+    
+    // Update player direction
+    if(Math.abs(joyX) > Math.abs(joyY)) {
+        player.direction = joyX > 0 ? 2 : 1;
+    } else {
+        player.direction = joyY > 0 ? 0 : 3;
+    }
+};
+
+// BATTLE SYSTEM
+let enemyHP = 20, playerHP = 30, maxPlayerHP = 30;
+let enemyType = 'pikachu';
+let potions = 3, pokeballs = 5;
+const battleUI = document.getElementById("battle");
+
+const pokemonTypes = [
+    {name: "Pikachu", color: "#ffd700", hp: 20},
+    {name: "Bulbasaur", color: "#78c850", hp: 25},
+    {name: "Charmander", color: "#f08030", hp: 22},
+    {name: "Squirtle", color: "#6890f0", hp: 23}
+];
+
+function startBattle() {
+    inBattle = true;
+    enemyType = pokemonTypes[Math.floor(Math.random() * pokemonTypes.length)];
+    enemyHP = enemyType.hp;
+    playerHP = Math.min(playerHP, maxPlayerHP);
+    battleUI.style.display = "block";
+    
+    document.getElementById("enemyName").textContent = "Wild " + enemyType.name;
+    document.getElementById("enemyName").style.color = enemyType.color;
+    
+    updateBattleText();
+    updateHUD();
+    
+    setTimeout(() => {
+        document.getElementById("battleMenu").style.display = "grid";
+        addBattleLog("What will you do?");
+    }, 1000);
+}
+
+function updateBattleText() {
+    const enemyPercent = (enemyHP / enemyType.hp) * 100;
+    const playerPercent = (playerHP / maxPlayerHP) * 100;
+    
+    document.getElementById("enemyHPFill").style.width = enemyPercent + "%";
+    document.getElementById("playerHPFill").style.width = playerPercent + "%";
+    
+    document.getElementById("enemyHPText").textContent = `HP: ${enemyHP}/${enemyType.hp}`;
+    document.getElementById("playerHPText").textContent = `HP: ${playerHP}/${maxPlayerHP}`;
+    
+    // Update HUD
+    document.getElementById("hud").innerHTML = `
+        HP: ${playerHP}/${maxPlayerHP}<br>
+        Potions: ${potions}<br>
+        Pokéballs: ${pokeballs}
+    `;
+}
+
+function addBattleLog(message) {
+    const log = document.getElementById("battleLog");
+    log.textContent = message;
+}
+
+function attack() {
+    const damage = 5 + Math.floor(Math.random() * 3);
+    enemyHP -= damage;
+    
+    // Visual effects
+    document.getElementById("enemySprite").classList.add('shake');
+    document.getElementById("enemyHPFill").classList.add('flash');
+    
+    addBattleLog(`You attacked for ${damage} damage!`);
+    updateBattleText();
+    
+    setTimeout(() => {
+        document.getElementById("enemySprite").classList.remove('shake');
+        document.getElementById("enemyHPFill").classList.remove('flash');
+        
+        if(enemyHP <= 0) {
+            addBattleLog(`Wild ${enemyType.name} fainted!`);
+            setTimeout(() => {
+                endBattle(true);
+            }, 1500);
+            return;
+        }
+        
+        // Enemy attack
+        setTimeout(() => enemyAttack(), 800);
+    }, 500);
+}
+
+function enemyAttack() {
+    const damage = 3 + Math.floor(Math.random() * 2);
+    playerHP -= damage;
+    
+    // Visual effects
+    document.getElementById("playerSprite").classList.add('shake');
+    document.getElementById("playerHPFill").classList.add('flash');
+    
+    addBattleLog(`Wild ${enemyType.name} attacked for ${damage} damage!`);
+    updateBattleText();
+    
+    setTimeout(() => {
+        document.getElementById("playerSprite").classList.remove('shake');
+        document.getElementById("playerHPFill").classList.remove('flash');
+        
+        if(playerHP <= 0) {
+            addBattleLog("You blacked out!");
+            setTimeout(() => {
+                endBattle(false);
+            }, 1500);
+        }
+    }, 500);
+}
+
+function usePotion() {
+    if(potions > 0) {
+        potions--;
+        const heal = 15;
+        playerHP = Math.min(playerHP + heal, maxPlayerHP);
+        addBattleLog(`You used a Potion and restored ${heal} HP!`);
+        updateBattleText();
+        
+        setTimeout(() => enemyAttack(), 1000);
+    } else {
+        addBattleLog("No potions left!");
+    }
+}
+
+function usePokeball() {
+    if(pokeballs > 0) {
+        pokeballs--;
+        addBattleLog(`You threw a Pokéball!`);
+        updateBattleText();
+        
+        const catchChance = (enemyHP / enemyType.hp) * 0.5 + 0.3;
+        if(Math.random() < catchChance) {
+            addBattleLog(`Gotcha! ${enemyType.name} was caught!`);
+            setTimeout(() => {
+                endBattle(true);
+            }, 2000);
+        } else {
+            addBattleLog(`Oh no! ${enemyType.name} broke free!`);
+            setTimeout(() => enemyAttack(), 1000);
+        }
+    } else {
+        addBattleLog("No Pokéballs left!");
+    }
+}
+
+function run() {
+    const runChance = 0.7;
+    if(Math.random() < runChance) {
+        addBattleLog("Got away safely!");
+        setTimeout(() => endBattle(false), 1000);
+    } else {
+        addBattleLog("Couldn't escape!");
+        setTimeout(() => enemyAttack(), 800);
+    }
+}
+
+function endBattle(victory) {
+    inBattle = false;
+    battleUI.style.display = "none";
+    document.getElementById("battleMenu").style.display = "none";
+    
+    if(!victory && playerHP <= 0) {
+        // Player fainted - reset to center
+        player.x = buildings[1].x;
+        player.y = buildings[1].y + 50;
+        playerHP = maxPlayerHP;
+        updateHUD();
+    }
+}
+
+function updateHUD() {
+    document.getElementById("hud").innerHTML = `
+        HP: ${playerHP}/${maxPlayerHP}<br>
+        Potions: ${potions}<br>
+        Pokéballs: ${pokeballs}
+    `;
+}
+
+// GRAPHICS FUNCTIONS
+function drawPlayerSprite() {
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    
+    // Body
+    ctx.fillStyle = '#2c8bff';
+    ctx.fillRect(-14, -14, 28, 28);
+    
+    // Head
+    ctx.fillStyle = '#ffcc00';
+    ctx.beginPath();
+    ctx.arc(0, -25, 12, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Eyes
+    ctx.fillStyle = '#000';
+    ctx.fillRect(-4, -28, 3, 6);
+    ctx.fillRect(1, -28, 3, 6);
+    
+    // Walking animation
+    if((joyX !== 0 || joyY !== 0) && !inBattle) {
+        player.animationFrame = (player.animationFrame + 0.2) % 4;
+        const legOffset = Math.sin(player.animationFrame) * 3;
+        ctx.fillRect(-8, 5, 5, 10 + legOffset);
+        ctx.fillRect(3, 5, 5, 10 - legOffset);
+    } else {
+        ctx.fillRect(-8, 5, 5, 10);
+        ctx.fillRect(3, 5, 5, 10);
+    }
+    
+    ctx.restore();
+}
+
+function drawPokemonSprite(x, y, type, size = 1) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size, size);
+    
+    switch(type) {
+        case 'pikachu':
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ears
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-15, -30, 5, 15);
+            ctx.fillRect(10, -30, 5, 15);
+            
+            // Cheeks
+            ctx.fillStyle = '#ff6b9d';
+            ctx.beginPath();
+            ctx.arc(-15, 0, 8, 0, Math.PI * 2);
+            ctx.arc(15, 0, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Face
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-8, -5, 4, 8);
+            ctx.fillRect(4, -5, 4, 8);
+            ctx.fillRect(-4, 8, 8, 4);
+            break;
+            
+        case 'bulbasaur':
+            ctx.fillStyle = '#78c850';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bulb
+            ctx.fillStyle = '#a8e6a8';
+            ctx.beginPath();
+            ctx.arc(0, -15, 10, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+            
+        case 'charmander':
+            ctx.fillStyle = '#f08030';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Flame
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath();
+            ctx.arc(25, -5, 8, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+            
+        case 'squirtle':
+            ctx.fillStyle = '#6890f0';
+            ctx.beginPath();
+            ctx.arc(0, 0, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Shell
+            ctx.fillStyle = '#a0522d';
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+    }
+    
+    ctx.restore();
+}
+
+function drawTerrainDetail(x, y, type, color, size) {
+    ctx.save();
+    ctx.translate(x - cam.x, y - cam.y);
+    
+    if(type === 'flower') {
+        // Stem
+        ctx.fillStyle = '#2d5a27';
+        ctx.fillRect(-1, 0, 2, size);
+        
+        // Flower
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        for(let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2 + gameTime * 0.01;
+            const px = Math.cos(angle) * 3;
+            const py = Math.sin(angle) * 3 - 5;
+            ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        
+        // Center
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.arc(0, -5, 2, 0, Math.PI * 2);
+        ctx.fill();
+    } else if(type === 'bush') {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(0, -size/2, size/2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(-size/3, -size/4, size/3, 0, Math.PI * 2);
+        ctx.arc(size/3, -size/4, size/3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    ctx.restore();
+}
+
+function drawBuilding(x, y, type) {
+    ctx.save();
+    ctx.translate(x - cam.x, y - cam.y);
+    
+    if(type === 'house') {
+        // Main house
+        ctx.fillStyle = '#a0522d';
+        ctx.fillRect(-40, -60, 80, 60);
+        
+        // Roof
+        ctx.fillStyle = '#8b4513';
+        ctx.beginPath();
+        ctx.moveTo(-50, -60);
+        ctx.lineTo(0, -90);
+        ctx.lineTo(50, -60);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Windows
+        ctx.fillStyle = '#4a8bca';
+        ctx.fillRect(-30, -45, 20, 20);
+        ctx.fillRect(10, -45, 20, 20);
+        
+        // Door
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(-10, -20, 20, 30);
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath();
+        ctx.arc(5, -5, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Path
+        ctx.fillStyle = '#8b7355';
+        ctx.fillRect(-15, 0, 30, 20);
+        
+    } else if(type === 'center') {
+        // Main building
+        ctx.fillStyle = '#ff9999';
+        ctx.fillRect(-50, -60, 100, 60);
+        
+        // Roof
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fillRect(-55, -70, 110, 10);
+        
+        // Windows
+        ctx.fillStyle = '#4a8bca';
+        for(let i = 0; i < 3; i++) {
+            ctx.fillRect(-40 + i * 30, -45, 20, 20);
+        }
+        
+        // Door
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(-15, -20, 30, 30);
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath();
+        ctx.arc(0, -5, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Sign
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-60, -80, 120, 15);
+        ctx.fillStyle = '#ff4444';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('POKéMON CENTER', 0, -68);
+        
+        // Path
+        ctx.fillStyle = '#d0d0d0';
+        ctx.fillRect(-20, 0, 40, 20);
+    }
+    
+    ctx.restore();
+}
+
+function drawInterior(interior) {
+    // Floor
+    ctx.fillStyle = interior.floor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Walls
+    ctx.fillStyle = interior.walls;
+    ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+    
+    // Furniture
+    interior.furniture.forEach(item => {
+        ctx.fillStyle = item.color;
+        
+        switch(item.type) {
+            case 'table':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Table legs
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(item.x + 5, item.y + item.height, 5, 10);
+                ctx.fillRect(item.x + item.width - 10, item.y + item.height, 5, 10);
+                break;
+                
+            case 'chair':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Chair back
+                ctx.fillRect(item.x, item.y - 10, item.width, 5);
+                break;
+                
+            case 'bed':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Pillow
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(item.x + 5, item.y + 5, 20, 15);
+                break;
+                
+            case 'plant':
+                // Pot
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(item.x, item.y, item.width, 10);
+                // Plant
+                ctx.fillStyle = item.color;
+                ctx.beginPath();
+                for(let i = 0; i < 3; i++) {
+                    ctx.arc(item.x + item.width/2, item.y - i * 8, item.width/3 + i * 2, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                break;
+                
+            case 'bookshelf':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Shelves
+                ctx.fillStyle = '#654321';
+                for(let i = 1; i < 4; i++) {
+                    ctx.fillRect(item.x, item.y + i * 15, item.width, 3);
+                }
+                // Books
+                const bookColors = ['#ff6b6b', '#4a8bca', '#ffd166', '#06d6a0'];
+                for(let i = 0; i < 3; i++) {
+                    for(let j = 0; j < 4; j++) {
+                        ctx.fillStyle = bookColors[j];
+                        ctx.fillRect(item.x + 5 + j * 6, item.y + 5 + i * 15, 5, 10);
+                    }
+                }
+                break;
+                
+            case 'healing_machine':
+                // Base
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Screen
+                ctx.fillStyle = '#00ff00';
+                ctx.fillRect(item.x + 10, item.y + 10, 20, 20);
+                // Buttons
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(item.x + item.width - 10, item.y + 15, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.arc(item.x + item.width - 10, item.y + 30, 5, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'counter':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Counter top
+                ctx.fillStyle = '#d2b48c';
+                ctx.fillRect(item.x, item.y - 5, item.width, 5);
+                break;
+                
+            case 'lamp':
+                // Base
+                ctx.fillRect(item.x, item.y, item.width, 5);
+                // Pole
+                ctx.fillRect(item.x + item.width/2 - 2, item.y - 15, 4, 15);
+                // Lamp
+                ctx.fillStyle = '#ffff00';
+                ctx.beginPath();
+                ctx.arc(item.x + item.width/2, item.y - 20, 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Glow
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+                ctx.beginPath();
+                ctx.arc(item.x + item.width/2, item.y - 20, 15, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'poster':
+                ctx.fillRect(item.x, item.y, item.width, item.height);
+                // Poster image
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('POKé', item.x + item.width/2, item.y + item.height/2 + 8);
+                // Frame
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(item.x, item.y, item.width, item.height);
+                break;
+        }
+    });
+    
+    // Exit
+    ctx.fillStyle = '#333';
+    ctx.fillRect(canvas.width/2 - 30, canvas.height - 50, 60, 30);
+    ctx.fillStyle = '#fff';
+    ctx.font = '14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('EXIT', canvas.width/2, canvas.height - 30);
+}
+
+function drawOutside() {
+    // Sky gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#87CEEB');
+    gradient.addColorStop(1, '#E0F6FF');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    for(let i = 0; i < 5; i++) {
+        const cloudX = (cam.x * 0.1 + i * 200) % 1000 - 500;
+        const cloudY = Math.sin(gameTime * 0.001 + i) * 50 - 100;
+        ctx.beginPath();
+        ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
+        ctx.arc(cloudX + 25, cloudY, 25, 0, Math.PI * 2);
+        ctx.arc(cloudX + 55, cloudY, 20, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    // Ground
+    const visibleStartX = Math.floor(cam.x / TILE) - 2;
+    const visibleEndX = Math.ceil((cam.x + canvas.width) / TILE) + 2;
+    const visibleStartY = Math.floor(cam.y / TILE) - 2;
+    const visibleEndY = Math.ceil((cam.y + canvas.height) / TILE) + 2;
+    
+    for(let x = visibleStartX; x < visibleEndX; x++) {
+        for(let y = visibleStartY; y < visibleEndY; y++) {
+            const colorIndex = (x + y) % GRASS_COLORS.length;
+            ctx.fillStyle = GRASS_COLORS[colorIndex];
+            ctx.fillRect(x * TILE - cam.x, y * TILE - cam.y, TILE, TILE);
+            
+            // Grass pattern
+            if((x + y) % 3 === 0) {
+                ctx.fillStyle = 'rgba(45, 90, 39, 0.2)';
+                ctx.fillRect(x * TILE - cam.x + 10, y * TILE - cam.y + 10, 12, 2);
+                ctx.fillRect(x * TILE - cam.x + 20, y * TILE - cam.y + 20, 8, 2);
+            }
+        }
+    }
+    
+    // Terrain details
+    terrainDetails.forEach(detail => {
+        if(Math.abs(detail.x - player.x) < 500 && Math.abs(detail.y - player.y) < 500) {
+            drawTerrainDetail(detail.x, detail.y, detail.type, detail.color, detail.size);
+        }
+    });
+    
+    // Buildings
+    buildings.forEach(building => {
+        drawBuilding(building.x, building.y, building.type);
+    });
+    
+    // Trees along boundaries
+    ctx.fillStyle = '#2d5a27';
+    for(let i = -600; i <= 600; i += 100) {
+        // Top and bottom rows
+        ctx.beginPath();
+        ctx.arc(i - cam.x, -500 - cam.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(i - cam.x, 500 - cam.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Left and right columns
+        ctx.beginPath();
+        ctx.arc(-600 - cam.x, i - cam.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(600 - cam.x, i - cam.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawMinimap() {
+    minimapCtx.clearRect(0, 0, 120, 120);
+    
+    // Background
+    minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    minimapCtx.fillRect(0, 0, 120, 120);
+    
+    // Border
+    minimapCtx.strokeStyle = '#fff';
+    minimapCtx.lineWidth = 2;
+    minimapCtx.strokeRect(0, 0, 120, 120);
+    
+    // World boundaries
+    const scale = 0.1;
+    
+    // Player
+    minimapCtx.fillStyle = '#ff4444';
+    minimapCtx.beginPath();
+    minimapCtx.arc(60 + player.x * scale, 60 + player.y * scale, 4, 0, Math.PI * 2);
+    minimapCtx.fill();
+    
+    // Buildings
+    minimapCtx.fillStyle = '#a0522d';
+    buildings.forEach(b => {
+        minimapCtx.fillRect(60 + b.x * scale - 3, 60 + b.y * scale - 3, 6, 6);
+    });
+}
+
 // UPDATE
-function update(){
- if(inBattle)return;
-
- player.x+=joyX*player.speed;
- player.y+=joyY*player.speed;
-
- // ENTER BUILDINGS
- if(world==="outside"){
-  buildings.forEach(b=>{
-   if(Math.abs(player.x-b.x)<20 && Math.abs(player.y-b.y+30)<10){
-    if(b.type==="house"){world="house";player.x=0;player.y=40;}
-    if(b.type==="center"){world="center";player.x=0;player.y=40;}
-   }
-  });
- }
-
- // EXIT BUILDINGS
- if((world==="house"||world==="center") && player.y>80){
-   world="outside";
-   player.x=0;player.y=0;
- }
-
- // RANDOM BATTLE
- if(world==="outside" && Math.random()<0.004){
-   startBattle();
- }
-
- cam.x=player.x-canvas.width/2;
- cam.y=player.y-canvas.height/2;
+function update() {
+    if(inBattle) return;
+    
+    gameTime++;
+    
+    // Update player position with joystick
+    const moveX = joyX * player.speed;
+    const moveY = joyY * player.speed;
+    
+    if(moveX !== 0 || moveY !== 0) {
+        player.x += moveX;
+        player.y += moveY;
+        
+        // Walking animation
+        player.animationFrame += 0.2;
+    }
+    
+    // Boundary check
+    const BOUNDARY = 500;
+    player.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.x));
+    player.y = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.y));
+    
+    // Enter buildings
+    if(world === "outside") {
+        buildings.forEach(b => {
+            if(Math.abs(player.x - b.x) < 40 && Math.abs(player.y - b.y) < 40) {
+                if(b.type === "house") {
+                    world = "house";
+                    player.x = 0;
+                    player.y = 40;
+                }
+                if(b.type === "center") {
+                    world = "center";
+                    player.x = 0;
+                    player.y = 40;
+                    
+                    // Heal at Pokémon Center
+                    playerHP = maxPlayerHP;
+                    updateHUD();
+                }
+            }
+        });
+    }
+    
+    // Exit buildings
+    if((world === "house" || world === "center") && player.y > canvas.height - 80) {
+        world = "outside";
+        player.x = buildings[world === "house" ? 0 : 1].x;
+        player.y = buildings[world === "house" ? 0 : 1].y + 60;
+    }
+    
+    // Random battle
+    if(world === "outside" && Math.random() < 0.003) {
+        startBattle();
+    }
+    
+    // Smooth camera
+    cam.x += (player.x - canvas.width/2 - cam.x) * 0.1;
+    cam.y += (player.y - canvas.height/2 - cam.y) * 0.1;
 }
 
-// DRAW
-function drawOutside(){
- for(let x=-1000;x<1000;x+=TILE){
-  for(let y=-1000;y<1000;y+=TILE){
-   ctx.fillStyle=((x+y)/TILE)%2?"#5dbb63":"#6fcf97";
-   ctx.fillRect(x-cam.x,y-cam.y,TILE,TILE);
-  }
- }
- // BUILDINGS
- buildings.forEach(b=>{
-  ctx.fillStyle=b.type==="house"?"#a0522d":"#ff9999";
-  ctx.fillRect(b.x-cam.x-20,b.y-cam.y-40,40,40);
-  ctx.fillStyle="#000";
-  ctx.fillRect(b.x-cam.x-6,b.y-cam.y-10,12,10); // door
- });
+// DRAW BATTLE
+function drawBattle() {
+    // Background
+    ctx.fillStyle = '#1a5f7a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Battle platform
+    ctx.fillStyle = '#8b4513';
+    ctx.fillRect(0, canvas.height * 0.6, canvas.width, canvas.height * 0.4);
+    
+    // Enemy platform
+    ctx.fillStyle = '#a0522d';
+    ctx.beginPath();
+    ctx.ellipse(canvas.width * 0.7, canvas.height * 0.3, 100, 80, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Player platform
+    ctx.fillStyle = '#a0522d';
+    ctx.beginPath();
+    ctx.ellipse(canvas.width * 0.3, canvas.height * 0.7, 100, 80, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw Pokémon
+    drawPokemonSprite(canvas.width * 0.7, canvas.height * 0.3, enemyType.name.toLowerCase(), 1.5);
+    drawPlayerSprite();
 }
 
-function drawInterior(color){
- ctx.fillStyle=color;
- ctx.fillRect(0,0,canvas.width,canvas.height);
- ctx.fillStyle="#333";
- ctx.fillRect(canvas.width/2-20,canvas.height/2+40,40,20); // exit
+// MAIN DRAW LOOP
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    update();
+    
+    if(inBattle) {
+        drawBattle();
+    } else {
+        if(world === "outside") {
+            drawOutside();
+        } else if(world === "house") {
+            drawInterior(buildings[0].interior);
+        } else if(world === "center") {
+            drawInterior(buildings[1].interior);
+        }
+        
+        drawPlayerSprite();
+    }
+    
+    drawMinimap();
+    
+    requestAnimationFrame(draw);
 }
 
-function drawPlayer(){
- ctx.fillStyle="#ff4444";
- ctx.fillRect(canvas.width/2-player.size/2,
- canvas.height/2-player.size/2,
- player.size,player.size);
+// Initialize
+function init() {
+    updateHUD();
+    
+    // Set up battle sprites
+    document.getElementById("playerSprite").innerHTML = "";
+    document.getElementById("enemySprite").innerHTML = "";
+    
+    // Create canvas for player sprite in battle
+    const playerCanvas = document.createElement("canvas");
+    playerCanvas.width = 100;
+    playerCanvas.height = 100;
+    const playerCtx = playerCanvas.getContext("2d");
+    playerCtx.fillStyle = '#2c8bff';
+    playerCtx.fillRect(30, 30, 40, 40);
+    document.getElementById("playerSprite").appendChild(playerCanvas);
+    
+    draw();
 }
 
-// LOOP
-function loop(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
- update();
- if(world==="outside")drawOutside();
- if(world==="house")drawInterior("#d2b48c");
- if(world==="center")drawInterior("#f8f8f8");
- drawPlayer();
- requestAnimationFrame(loop);
-}
-loop();
+// Handle window resize
+window.addEventListener('resize', () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+});
+
+// Start the game
+init();
 </script>
 </body>
 </html>
