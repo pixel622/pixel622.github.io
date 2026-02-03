@@ -2,240 +2,1866 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Untitled 2D Pixel Pokémon Adventure</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pokémon Adventure</title>
     <style>
-        body { margin: 0; background: #000; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; touch-action: none; }
-        #game-container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-        canvas { background: #222; image-rendering: pixelated; border: 4px solid #444; }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
-        /* UI Elements */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-        #dialogue-box { 
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 600px; height: 120px; background: rgba(0, 0, 0, 0.85);
-            border: 3px solid white; padding: 15px; box-sizing: border-box;
-            display: none; pointer-events: auto; cursor: pointer;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        #name-input-container {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #000; padding: 20px; border: 2px solid white; display: none; pointer-events: auto;
+        
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #000;
+            overflow: hidden;
+            touch-action: none;
         }
-        #joystick {
-            position: absolute; bottom: 40px; left: 40px; width: 100px; height: 100px;
-            background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: none; pointer-events: auto;
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a2e;
         }
-        .btn { background: white; color: black; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; font-weight: bold; }
+        
+        #gameCanvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 4px solid #f1c40f;
+            box-shadow: 0 0 40px rgba(241, 196, 15, 0.5);
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        /* Title Screen */
+        #titleScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        #pokemonLogo {
+            font-size: clamp(24px, 8vw, 48px);
+            color: #ffcb05;
+            text-shadow: 
+                3px 3px 0 #2a75bb,
+                6px 6px 0 #000,
+                0 0 20px rgba(255, 203, 5, 0.5);
+            margin-bottom: 40px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .clickToContinue {
+            font-size: clamp(12px, 3vw, 16px);
+            color: #fff;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Dialogue Box */
+        #dialogueBox {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: #fff;
+            border: 6px solid #000;
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        
+        #dialogueBox.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        #dialogueText {
+            font-size: clamp(10px, 2.5vw, 14px);
+            line-height: 1.6;
+            color: #000;
+            min-height: 80px;
+        }
+        
+        #continueIndicator {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 12px;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        /* Professor Screen */
+        #professorScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 999;
+        }
+        
+        #professorScreen.active {
+            display: flex;
+        }
+        
+        #professorImage {
+            margin-top: 100px;
+            width: 200px;
+            height: 200px;
+            background: #444;
+            border: 4px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+        
+        /* Name Input */
+        #nameInputContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 6px solid #000;
+            padding: 30px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1001;
+            text-align: center;
+        }
+        
+        #nameInputContainer.active {
+            display: block;
+        }
+        
+        #nameInput {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            padding: 10px;
+            border: 3px solid #000;
+            margin: 20px 0;
+            width: 200px;
+        }
+        
+        #confirmNameBtn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            padding: 10px 20px;
+            background: #ffcb05;
+            border: 3px solid #000;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #confirmNameBtn:hover {
+            background: #2a75bb;
+            color: #fff;
+        }
+        
+        /* Start Button */
+        #startButton {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(14px, 3vw, 18px);
+            padding: 15px 30px;
+            background: #ffcb05;
+            border: 4px solid #000;
+            cursor: pointer;
+            margin-bottom: 40px;
+            box-shadow: 4px 4px 0 #000;
+            transition: all 0.2s;
+        }
+        
+        #startButton:hover {
+            background: #2a75bb;
+            color: #fff;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        
+        /* Starter Selection */
+        #starterSelection {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 8px solid #000;
+            padding: 30px;
+            border-radius: 12px;
+            display: none;
+            z-index: 1001;
+            max-width: 90%;
+        }
+        
+        #starterSelection.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        #starterTitle {
+            font-size: clamp(12px, 3vw, 16px);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        #starterOptions {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .starterOption {
+            text-align: center;
+            cursor: pointer;
+            padding: 15px;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .starterOption:hover {
+            border-color: #ffcb05;
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+        
+        .starterSprite {
+            width: 80px;
+            height: 80px;
+            background: #e0e0e0;
+            margin: 0 auto 10px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .starterName {
+            font-size: clamp(10px, 2vw, 12px);
+        }
+        
+        /* Battle Screen */
+        #battleScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #87ceeb 0%, #98d98e 50%, #6b8e23 100%);
+            display: none;
+            flex-direction: column;
+            z-index: 900;
+        }
+        
+        #battleScreen.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        #battleArea {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        
+        .pokemon-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .enemy-pokemon {
+            justify-content: flex-end;
+        }
+        
+        .pokemon-sprite {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 4px solid #000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+        
+        .pokemon-info {
+            background: rgba(255, 255, 255, 0.9);
+            border: 4px solid #000;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+        }
+        
+        .pokemon-name {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .pokemon-level {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .hp-bar-container {
+            background: #ddd;
+            height: 20px;
+            border: 2px solid #000;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .hp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .hp-bar.low {
+            background: linear-gradient(90deg, #ff9800 0%, #ffc107 100%);
+        }
+        
+        .hp-bar.critical {
+            background: linear-gradient(90deg, #f44336 0%, #e91e63 100%);
+        }
+        
+        .hp-text {
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        
+        #battleMenu {
+            background: #fff;
+            border: 6px solid #000;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0 20px 20px;
+        }
+        
+        #battleOptions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .battle-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(10px, 2.5vw, 14px);
+            padding: 15px;
+            background: #ffcb05;
+            border: 4px solid #000;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+        
+        .battle-btn:hover:not(:disabled) {
+            background: #2a75bb;
+            color: #fff;
+        }
+        
+        .battle-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #battleMessage {
+            font-size: clamp(10px, 2.5vw, 12px);
+            margin-bottom: 15px;
+            min-height: 40px;
+            line-height: 1.5;
+        }
+        
+        /* Catch Animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+        
+        .catching {
+            animation: shake 0.5s ease-in-out 3;
+        }
+        
+        /* Mobile Joystick */
+        #joystickContainer {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            display: none;
+            z-index: 50;
+        }
+        
+        #joystickContainer.active {
+            display: block;
+        }
+        
+        #joystickBase {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: relative;
+        }
+        
+        #joystickStick {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* Game UI */
+        #gameUI {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #fff;
+            padding: 15px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: clamp(8px, 2vw, 12px);
+            display: none;
+            z-index: 50;
+        }
+        
+        #gameUI.active {
+            display: block;
+        }
+        
+        .ui-item {
+            margin-bottom: 8px;
+        }
+        
+        /* Menu Button */
+        #menuBtn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 10px 15px;
+            background: rgba(255, 203, 5, 0.9);
+            border: 3px solid #000;
+            cursor: pointer;
+            border-radius: 4px;
+            display: none;
+            z-index: 50;
+        }
+        
+        #menuBtn.active {
+            display: block;
+        }
+        
+        /* Inventory Menu */
+        #inventoryMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border: 6px solid #000;
+            border-radius: 8px;
+            padding: 30px;
+            display: none;
+            z-index: 1000;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        
+        #inventoryMenu.active {
+            display: block;
+        }
+        
+        .menu-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .menu-section-title {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #2a75bb;
+        }
+        
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .inventory-item {
+            background: #f0f0f0;
+            border: 3px solid #000;
+            padding: 10px;
+            text-align: center;
+            font-size: 10px;
+            border-radius: 4px;
+        }
+        
+        .pokemon-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .pokemon-card {
+            background: #f0f0f0;
+            border: 3px solid #000;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .pokemon-card-sprite {
+            width: 60px;
+            height: 60px;
+            background: #e0e0e0;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        
+        .pokemon-card-info {
+            flex: 1;
+            font-size: 10px;
+        }
+        
+        .close-menu-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 10px 20px;
+            background: #f44336;
+            color: #fff;
+            border: 3px solid #000;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            border-radius: 4px;
+        }
+        
+        /* Victory Screen */
+        #victoryScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+        }
+        
+        #victoryScreen.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .victory-title {
+            font-size: clamp(24px, 6vw, 48px);
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .victory-text {
+            font-size: clamp(12px, 3vw, 18px);
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        @media (max-width: 768px) {
+            #pokemonLogo {
+                font-size: 32px;
+            }
+            
+            #dialogueText {
+                font-size: 12px;
+            }
+            
+            #joystickContainer {
+                width: 100px;
+                height: 100px;
+                bottom: 30px;
+                left: 30px;
+            }
+            
+            .pokemon-sprite {
+                width: 80px;
+                height: 80px;
+                font-size: 40px;
+            }
+            
+            .pokemon-info {
+                min-width: 150px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div id="game-container">
-    <canvas id="gameCanvas"></canvas>
-    
-    <div id="ui-layer">
-        <!-- Dialogue System -->
-        <div id="dialogue-box" onclick="advanceDialogue()">
-            <div id="dialogue-text"></div>
-            <div style="text-align: right; margin-top: 10px;">...</div>
+    <div id="gameContainer">
+        <!-- Title Screen -->
+        <div id="titleScreen">
+            <div id="pokemonLogo">POKÉMON</div>
+            <div class="clickToContinue">Click anywhere to start</div>
         </div>
-
-        <!-- Name Entry -->
-        <div id="name-input-container" id="name-ui">
-            <p>Enter your name, Trainer:</p>
-            <input type="text" id="name-field" maxlength="10">
-            <button class="btn" onclick="submitName()">CONFIRM</button>
-        </div>
-
-        <!-- Starter Selection -->
-        <div id="starter-ui" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; pointer-events: auto; text-align: center;">
-            <h3>Choose your partner:</h3>
-            <button class="btn" onclick="chooseStarter('Treecko')">TREECKO</button>
-            <button class="btn" onclick="chooseStarter('Froakie')">FROAKIE</button>
-            <button class="btn" onclick="chooseStarter('Charmander')">CHARMANDER</button>
-        </div>
-
-        <!-- Mobile Joystick -->
-        <div id="joystick"></div>
-    </div>
-</div>
-
-<script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const diagBox = document.getElementById('dialogue-box');
-    const diagText = document.getElementById('dialogue-text');
-
-    // Game State
-    let gameState = 'INTRO';
-    let playerName = '';
-    let playerStarter = '';
-    let currentMap = 'HOUSE'; // HOUSE or WORLD
-    
-    // Player Object
-    const player = {
-        x: 150, y: 150, size: 32, speed: 3,
-        color: 'red' // Representing the red hat trainer
-    };
-
-    // Dialogue Queue
-    let dialogueLines = [];
-    let currentLineIndex = 0;
-
-    // Initialize Canvas
-    function init() {
-        canvas.width = 400;
-        canvas.height = 400;
-        startIntro();
-    }
-
-    function startIntro() {
-        gameState = 'INTRO';
-        showDialogue([
-            "Welcome! It is a pleasure to meet you. I am Professor Kyan.",
-            "I am a researcher. My life’s work is dedicated to studying Pokémon...",
-            "Some keep them as pets. Others use them for combat. But for all, they are partners.",
-            "But enough about me. Tell me... what is your name?"
-        ], () => {
-            document.getElementById('name-input-container').style.display = 'block';
-        });
-    }
-
-    function submitName() {
-        playerName = document.getElementById('name-field').value || "Trainer";
-        document.getElementById('name-input-container').style.display = 'none';
-        showDialogue([
-            `${playerName}! What a legendary name.`,
-            "Your journey of dreams and adventures is about to begin!",
-            "Click START to enter your home."
-        ], () => {
-            spawnInHouse();
-        });
-    }
-
-    function spawnInHouse() {
-        gameState = 'PLAYING';
-        currentMap = 'HOUSE';
-        diagBox.style.display = 'none';
-        document.getElementById('joystick').style.display = 'block';
         
-        // Secondary encounter with Kyan inside house
-        setTimeout(() => {
-            showDialogue([
-                `There you are, ${playerName}!`,
-                "Today is the day you become a Trainer.",
-                "Choose your first partner..."
-            ], () => {
-                document.getElementById('starter-ui').style.display = 'block';
-            });
-        }, 500);
-    }
+        <!-- Professor Screen -->
+        <div id="professorScreen">
+            <div id="professorImage">👨‍🔬</div>
+        </div>
+        
+        <!-- Name Input -->
+        <div id="nameInputContainer">
+            <div style="font-size: 14px; margin-bottom: 15px;">Enter your name:</div>
+            <input type="text" id="nameInput" maxlength="12" placeholder="Your name">
+            <br>
+            <button id="confirmNameBtn">Confirm</button>
+        </div>
+        
+        <!-- Starter Selection -->
+        <div id="starterSelection">
+            <div id="starterTitle">Choose your starter Pokémon!</div>
+            <div id="starterOptions">
+                <div class="starterOption" data-pokemon="treecko">
+                    <div class="starterSprite">🦎</div>
+                    <div class="starterName">Treecko</div>
+                </div>
+                <div class="starterOption" data-pokemon="froakie">
+                    <div class="starterSprite">🐸</div>
+                    <div class="starterName">Froakie</div>
+                </div>
+                <div class="starterOption" data-pokemon="charmander">
+                    <div class="starterSprite">🔥</div>
+                    <div class="starterName">Charmander</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Battle Screen -->
+        <div id="battleScreen">
+            <div id="battleArea">
+                <div class="pokemon-display enemy-pokemon">
+                    <div class="pokemon-info">
+                        <div class="pokemon-name" id="enemyName">Wild Pidgey</div>
+                        <div class="pokemon-level" id="enemyLevel">Lv. 5</div>
+                        <div class="hp-bar-container">
+                            <div class="hp-bar" id="enemyHPBar" style="width: 100%;"></div>
+                        </div>
+                        <div class="hp-text" id="enemyHP">HP: 20/20</div>
+                    </div>
+                    <div class="pokemon-sprite" id="enemySprite">🐦</div>
+                </div>
+                
+                <div class="pokemon-display">
+                    <div class="pokemon-sprite" id="playerBattleSprite">🦎</div>
+                    <div class="pokemon-info">
+                        <div class="pokemon-name" id="playerPokemonName">Treecko</div>
+                        <div class="pokemon-level" id="playerPokemonLevel">Lv. 5</div>
+                        <div class="hp-bar-container">
+                            <div class="hp-bar" id="playerHPBar" style="width: 100%;"></div>
+                        </div>
+                        <div class="hp-text" id="playerHP">HP: 25/25</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="battleMenu">
+                <div id="battleMessage">What will you do?</div>
+                <div id="battleOptions">
+                    <button class="battle-btn" id="attackBtn">Fight</button>
+                    <button class="battle-btn" id="catchBtn">Catch</button>
+                    <button class="battle-btn" id="itemBtn">Items</button>
+                    <button class="battle-btn" id="runBtn">Run</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Victory Screen -->
+        <div id="victoryScreen">
+            <div class="victory-title">CHAMPION!</div>
+            <div class="victory-text">Congratulations!<br>You caught all 25 Pokémon<br>and defeated all 8 Gyms!</div>
+        </div>
+        
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Dialogue Box -->
+        <div id="dialogueBox">
+            <div id="dialogueText"></div>
+            <div id="continueIndicator">▼</div>
+        </div>
+        
+        <!-- Mobile Joystick -->
+        <div id="joystickContainer">
+            <div id="joystickBase">
+                <div id="joystickStick"></div>
+            </div>
+        </div>
+        
+        <!-- Menu Button -->
+        <button id="menuBtn">Menu</button>
+        
+        <!-- Game UI -->
+        <div id="gameUI">
+            <div class="ui-item" id="playerName">Trainer: Red</div>
+            <div class="ui-item" id="pokemonCount">Pokémon: 0/25</div>
+            <div class="ui-item" id="badges">Badges: 0/8</div>
+            <div class="ui-item" id="pokeballs">Pokéballs: 10</div>
+        </div>
+        
+        <!-- Inventory Menu -->
+        <div id="inventoryMenu">
+            <div class="menu-title">Your Team</div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Pokémon Party</div>
+                <div id="pokemonParty" class="pokemon-list"></div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-section-title">Items</div>
+                <div id="itemsList" class="inventory-grid"></div>
+            </div>
+            
+            <button class="close-menu-btn" id="closeMenuBtn">Close</button>
+        </div>
+        
+        <!-- Start Button -->
+        <button id="startButton" style="display: none;">Start Adventure</button>
+    </div>
 
-    function chooseStarter(choice) {
-        playerStarter = choice;
-        document.getElementById('starter-ui').style.display = 'none';
-        showDialogue([
-            `${choice}! A fine choice!`,
-            "Go now! Head to the door to start your adventure."
-        ]);
-    }
-
-    // Dialogue Logic
-    function showDialogue(lines, callback) {
-        dialogueLines = lines;
-        currentLineIndex = 0;
-        diagBox.style.display = 'block';
-        diagText.innerText = dialogueLines[currentLineIndex];
-        onDialogueEnd = callback;
-    }
-
-    function advanceDialogue() {
-        currentLineIndex++;
-        if (currentLineIndex < dialogueLines.length) {
-            diagText.innerText = dialogueLines[currentLineIndex];
-        } else {
-            diagBox.style.display = 'none';
-            if (onDialogueEnd) onDialogueEnd();
-        }
-    }
-
-    // Controls
-    const keys = {};
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
-
-    // Game Loop
-    function update() {
-        if (gameState === 'PLAYING' && diagBox.style.display === 'none') {
-            let nextX = player.x;
-            let nextY = player.y;
-
-            if (keys['ArrowUp'] || keys['KeyW']) nextY -= player.speed;
-            if (keys['ArrowDown'] || keys['KeyS']) nextY += player.speed;
-            if (keys['ArrowLeft'] || keys['KeyA']) nextX -= player.speed;
-            if (keys['ArrowRight'] || keys['KeyD']) nextX += player.speed;
-
-            // Simple Collision (Stay inside 400x400)
-            if (nextX > 20 && nextX < 350) player.x = nextX;
-            if (nextY > 20 && nextY < 350) player.y = nextY;
-
-            // Teleport Logic (Door at bottom)
-            if (currentMap === 'HOUSE' && player.y > 340) {
-                currentMap = 'WORLD';
-                player.y = 50; // Spawn at top of outside map
+    <script>
+        // Game Configuration
+        const TILE_SIZE = 16;
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 600;
+        const PLAYER_SPEED = 2;
+        const ENCOUNTER_RATE = 0.05;
+        
+        // Pokemon Database
+        const POKEMON_DATA = {
+            pidgey: { name: 'Pidgey', sprite: '🐦', hp: 20, attack: 8, level: 3 },
+            rattata: { name: 'Rattata', sprite: '🐀', hp: 18, attack: 7, level: 2 },
+            caterpie: { name: 'Caterpie', sprite: '🐛', hp: 15, attack: 5, level: 2 },
+            weedle: { name: 'Weedle', sprite: '🐝', hp: 16, attack: 6, level: 3 },
+            pikachu: { name: 'Pikachu', sprite: '⚡', hp: 22, attack: 10, level: 5 },
+            bulbasaur: { name: 'Bulbasaur', sprite: '🌱', hp: 25, attack: 9, level: 5 },
+            squirtle: { name: 'Squirtle', sprite: '🐢', hp: 24, attack: 9, level: 5 },
+            charmander: { name: 'Charmander', sprite: '🔥', hp: 23, attack: 10, level: 5 },
+            treecko: { name: 'Treecko', sprite: '🦎', hp: 25, attack: 10, level: 5 },
+            froakie: { name: 'Froakie', sprite: '🐸', hp: 24, attack: 9, level: 5 },
+            eevee: { name: 'Eevee', sprite: '🦊', hp: 27, attack: 11, level: 8 },
+            jigglypuff: { name: 'Jigglypuff', sprite: '🎀', hp: 30, attack: 8, level: 7 },
+            meowth: { name: 'Meowth', sprite: '🐱', hp: 21, attack: 9, level: 6 },
+            psyduck: { name: 'Psyduck', sprite: '🦆', hp: 26, attack: 10, level: 7 },
+            growlithe: { name: 'Growlithe', sprite: '🐕', hp: 28, attack: 12, level: 9 },
+            machop: { name: 'Machop', sprite: '💪', hp: 30, attack: 13, level: 10 },
+            geodude: { name: 'Geodude', sprite: '🪨', hp: 32, attack: 11, level: 8 },
+            magnemite: { name: 'Magnemite', sprite: '🧲', hp: 20, attack: 12, level: 8 },
+            gastly: { name: 'Gastly', sprite: '👻', hp: 22, attack: 14, level: 10 },
+            onix: { name: 'Onix', sprite: '🐍', hp: 40, attack: 10, level: 12 },
+            voltorb: { name: 'Voltorb', sprite: '⚫', hp: 23, attack: 11, level: 9 },
+            cubone: { name: 'Cubone', sprite: '🦴', hp: 26, attack: 12, level: 10 },
+            koffing: { name: 'Koffing', sprite: '☁️', hp: 28, attack: 13, level: 11 },
+            dratini: { name: 'Dratini', sprite: '🐉', hp: 30, attack: 15, level: 15 },
+            snorlax: { name: 'Snorlax', sprite: '😴', hp: 80, attack: 20, level: 20 }
+        };
+        
+        // Game State
+        const gameState = {
+            currentMap: 'outside',
+            playerName: '',
+            starterPokemon: '',
+            pokemonCaught: [],
+            caughtSpecies: new Set(),
+            badges: 0,
+            pokeballs: 10,
+            potions: 5,
+            dialogueActive: false,
+            currentDialogue: [],
+            dialogueIndex: 0,
+            gameStarted: false,
+            introComplete: false,
+            starterChosen: false,
+            inBattle: false,
+            steps: 0,
+            defeatedGyms: new Set()
+        };
+        
+        // Player Object
+        const player = {
+            x: 400,
+            y: 300,
+            width: 32,
+            height: 32,
+            speed: PLAYER_SPEED,
+            direction: 'down',
+            moving: false,
+            sprite: '🧑',
+            currentPokemon: null
+        };
+        
+        // Battle State
+        const battleState = {
+            wildPokemon: null,
+            playerPokemon: null,
+            turn: 'player',
+            catching: false
+        };
+        
+        // Movement State
+        const keys = {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        };
+        
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        
+        // Map Definitions
+        const maps = {
+            outside: {
+                width: 30,
+                height: 25,
+                tiles: [],
+                objects: [
+                    { type: 'house', x: 8, y: 5, width: 5, height: 4 },
+                    { type: 'door', x: 10, y: 8, width: 1, height: 1, destination: 'inside' },
+                    { type: 'gym', x: 20, y: 10, width: 4, height: 4, id: 1, name: 'Rock Gym' },
+                    { type: 'gym', x: 5, y: 15, width: 4, height: 4, id: 2, name: 'Water Gym' },
+                    { type: 'tree', x: 3, y: 3 },
+                    { type: 'tree', x: 5, y: 3 },
+                    { type: 'tree', x: 15, y: 4 },
+                    { type: 'tree', x: 17, y: 6 },
+                    { type: 'tree', x: 25, y: 8 },
+                    { type: 'grass', x: 12, y: 15, width: 6, height: 4 },
+                    { type: 'grass', x: 22, y: 18, width: 5, height: 3 }
+                ],
+                spawn: { x: 10, y: 10 }
+            },
+            inside: {
+                width: 15,
+                height: 12,
+                tiles: [],
+                objects: [
+                    { type: 'door', x: 7, y: 10, width: 1, height: 1, destination: 'outside' },
+                    { type: 'bed', x: 2, y: 2 },
+                    { type: 'table', x: 7, y: 5 }
+                ],
+                spawn: { x: 7, y: 9 }
+            },
+            town: {
+                width: 35,
+                height: 30,
+                tiles: [],
+                objects: [
+                    { type: 'gym', x: 15, y: 10, width: 5, height: 5, id: 3, name: 'Electric Gym' },
+                    { type: 'gym', x: 25, y: 15, width: 5, height: 5, id: 4, name: 'Fire Gym' },
+                    { type: 'pokecenter', x: 10, y: 20, width: 4, height: 3 },
+                    { type: 'grass', x: 5, y: 5, width: 8, height: 5 },
+                    { type: 'grass', x: 20, y: 22, width: 7, height: 5 },
+                    { type: 'tree', x: 2, y: 2 },
+                    { type: 'tree', x: 30, y: 5 },
+                    { type: 'tree', x: 8, y: 28 }
+                ],
+                spawn: { x: 17, y: 20 }
+            },
+            cave: {
+                width: 25,
+                height: 20,
+                tiles: [],
+                objects: [
+                    { type: 'gym', x: 11, y: 8, width: 5, height: 5, id: 5, name: 'Ghost Gym' },
+                    { type: 'rock', x: 5, y: 5 },
+                    { type: 'rock', x: 18, y: 7 },
+                    { type: 'rock', x: 8, y: 15 },
+                    { type: 'rock', x: 20, y: 16 }
+                ],
+                spawn: { x: 12, y: 18 }
+            },
+            mountain: {
+                width: 30,
+                height: 25,
+                tiles: [],
+                objects: [
+                    { type: 'gym', x: 13, y: 10, width: 5, height: 5, id: 6, name: 'Dragon Gym' },
+                    { type: 'gym', x: 20, y: 15, width: 5, height: 5, id: 7, name: 'Psychic Gym' },
+                    { type: 'gym', x: 8, y: 18, width: 5, height: 5, id: 8, name: 'Champion Arena' },
+                    { type: 'rock', x: 5, y: 8 },
+                    { type: 'rock', x: 25, y: 10 },
+                    { type: 'rock', x: 15, y: 20 }
+                ],
+                spawn: { x: 15, y: 22 }
+            }
+        };
+        
+        // Initialize map tiles
+        for (let map in maps) {
+            const mapData = maps[map];
+            mapData.tiles = [];
+            for (let y = 0; y < mapData.height; y++) {
+                mapData.tiles[y] = [];
+                for (let x = 0; x < mapData.width; x++) {
+                    if (map === 'cave') {
+                        mapData.tiles[y][x] = 'cave';
+                    } else if (map === 'mountain') {
+                        mapData.tiles[y][x] = 'mountain';
+                    } else {
+                        mapData.tiles[y][x] = 'floor';
+                    }
+                }
             }
         }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (gameState === 'PLAYING') {
-            // Draw Environment
-            if (currentMap === 'HOUSE') {
-                ctx.fillStyle = '#5d4037'; // Brown floor
-                ctx.fillRect(0,0,400,400);
-                ctx.fillStyle = '#333'; // Walls
-                ctx.fillRect(0,0,400,20);
-                ctx.fillStyle = 'blue'; // Rug/Table placeholder
-                ctx.fillRect(150, 150, 100, 60);
-            } else {
-                ctx.fillStyle = '#2e7d32'; // Green grass
-                ctx.fillRect(0,0,400,400);
-            }
-
-            // Draw Player (Red Hat Trainer)
-            ctx.fillStyle = 'white';
-            ctx.fillRect(player.x, player.y, player.size, player.size);
-            ctx.fillStyle = 'red'; // The Hat
-            ctx.fillRect(player.x, player.y, player.size, 10);
-
-            // Restricted POV (Vignette Effect)
-            const gradient = ctx.createRadialGradient(
-                player.x + 16, player.y + 16, 50, 
-                player.x + 16, player.y + 16, 150
-            );
-            gradient.addColorStop(0, 'rgba(0,0,0,0)');
-            gradient.addColorStop(1, 'rgba(0,0,0,0.95)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        } else {
-            // Intro Background
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0,0,canvas.width, canvas.height);
-        }
-
-        requestAnimationFrame(() => {
-            update();
-            draw();
+        
+        // Camera
+        const camera = {
+            x: 0,
+            y: 0
+        };
+        
+        // Dialogue System
+        const dialogues = {
+            intro: [
+                "Hello there! Welcome to the world of Pokémon!",
+                "My name is Kyan!",
+                "People call me the Pokémon Prof!",
+                "This world is inhabited by creatures called Pokémon!",
+                "For some people, Pokémon are pets. Others use them for fights.",
+                "Myself… I study Pokémon as a profession.",
+                "First, what is your name?"
+            ],
+            postName: [
+                "So your name is {name}...",
+                "Your very own Pokémon legend is about to unfold!",
+                "A world of dreams and adventures with Pokémon awaits!",
+                "Let's go!"
+            ],
+            houseEnter: [
+                "Hello {name}! This is the beginning of your legendary adventure in the Pokémon World.",
+                "Before you start as a trainer you will need to choose one of these following Pokémon:",
+                "Treecko, Froakie, or Charmander."
+            ],
+            starterChosen: [
+                "Excellent choice! {pokemon} will be a great partner!",
+                "Now go out and explore the world!",
+                "Walk through tall grass to find wild Pokémon!",
+                "Catch all 25 Pokémon and defeat the 8 Gym Leaders!",
+                "Your adventure begins now!"
+            ],
+            gym: [
+                "Welcome to the {gymName}!",
+                "Defeat me in battle to earn a badge!",
+                "Let's battle!"
+            ],
+            gymVictory: [
+                "Congratulations! You defeated the {gymName}!",
+                "You earned the {gymName} Badge!",
+                "Keep going and challenge the other Gyms!"
+            ]
+        };
+        
+        // UI Elements
+        const titleScreen = document.getElementById('titleScreen');
+        const professorScreen = document.getElementById('professorScreen');
+        const dialogueBox = document.getElementById('dialogueBox');
+        const dialogueText = document.getElementById('dialogueText');
+        const nameInputContainer = document.getElementById('nameInputContainer');
+        const nameInput = document.getElementById('nameInput');
+        const confirmNameBtn = document.getElementById('confirmNameBtn');
+        const startButton = document.getElementById('startButton');
+        const starterSelection = document.getElementById('starterSelection');
+        const joystickContainer = document.getElementById('joystickContainer');
+        const gameUI = document.getElementById('gameUI');
+        const menuBtn = document.getElementById('menuBtn');
+        const inventoryMenu = document.getElementById('inventoryMenu');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+        
+        // Battle UI
+        const battleScreen = document.getElementById('battleScreen');
+        const attackBtn = document.getElementById('attackBtn');
+        const catchBtn = document.getElementById('catchBtn');
+        const itemBtn = document.getElementById('itemBtn');
+        const runBtn = document.getElementById('runBtn');
+        const battleMessage = document.getElementById('battleMessage');
+        
+        // Victory Screen
+        const victoryScreen = document.getElementById('victoryScreen');
+        
+        // Title Screen Click
+        titleScreen.addEventListener('click', () => {
+            titleScreen.style.display = 'none';
+            professorScreen.classList.add('active');
+            dialogueBox.classList.add('active');
+            showDialogue(dialogues.intro);
         });
-    }
-
-    init();
-    draw();
-
-</script>
+        
+        // Dialogue System Functions
+        function showDialogue(dialogue) {
+            gameState.dialogueActive = true;
+            gameState.currentDialogue = dialogue;
+            gameState.dialogueIndex = 0;
+            displayCurrentDialogue();
+        }
+        
+        function displayCurrentDialogue() {
+            if (gameState.dialogueIndex < gameState.currentDialogue.length) {
+                let text = gameState.currentDialogue[gameState.dialogueIndex];
+                text = text.replace('{name}', gameState.playerName);
+                text = text.replace('{pokemon}', gameState.starterPokemon);
+                text = text.replace('{gymName}', battleState.gymName || '');
+                dialogueText.textContent = text;
+            }
+        }
+        
+        function advanceDialogue() {
+            if (!gameState.dialogueActive) return;
+            
+            gameState.dialogueIndex++;
+            
+            if (gameState.dialogueIndex < gameState.currentDialogue.length) {
+                displayCurrentDialogue();
+            } else {
+                dialogueBox.classList.remove('active');
+                gameState.dialogueActive = false;
+                handleDialogueEnd();
+            }
+        }
+        
+        function handleDialogueEnd() {
+            if (!gameState.introComplete && gameState.currentDialogue === dialogues.intro) {
+                nameInputContainer.classList.add('active');
+            } else if (gameState.currentDialogue === dialogues.postName) {
+                startButton.style.display = 'block';
+            } else if (gameState.currentDialogue === dialogues.houseEnter) {
+                starterSelection.classList.add('active');
+            } else if (gameState.currentDialogue === dialogues.starterChosen) {
+                gameState.starterChosen = true;
+                updateGameUI();
+            } else if (gameState.currentDialogue === dialogues.gym) {
+                startGymBattle();
+            } else if (gameState.currentDialogue === dialogues.gymVictory) {
+                // Continue exploring
+            }
+        }
+        
+        // Click to advance dialogue
+        document.addEventListener('click', (e) => {
+            if (gameState.dialogueActive && 
+                !nameInputContainer.classList.contains('active') &&
+                !starterSelection.classList.contains('active') &&
+                !battleScreen.classList.contains('active')) {
+                advanceDialogue();
+            }
+        });
+        
+        // Name Input
+        confirmNameBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                gameState.playerName = name;
+                nameInputContainer.classList.remove('active');
+                dialogueBox.classList.add('active');
+                showDialogue(dialogues.postName);
+            }
+        });
+        
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmNameBtn.click();
+            }
+        });
+        
+        // Start Button
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            professorScreen.classList.remove('active');
+            gameState.introComplete = true;
+            gameState.gameStarted = true;
+            
+            player.x = maps.outside.spawn.x * TILE_SIZE;
+            player.y = maps.outside.spawn.y * TILE_SIZE;
+            gameState.currentMap = 'outside';
+            
+            joystickContainer.classList.add('active');
+            gameUI.classList.add('active');
+            menuBtn.classList.add('active');
+            updateGameUI();
+            
+            gameLoop();
+        });
+        
+        // Starter Selection
+        document.querySelectorAll('.starterOption').forEach(option => {
+            option.addEventListener('click', () => {
+                const pokemon = option.dataset.pokemon;
+                gameState.starterPokemon = pokemon.charAt(0).toUpperCase() + pokemon.slice(1);
+                
+                const starterData = POKEMON_DATA[pokemon];
+                const starterPokemon = {
+                    ...starterData,
+                    maxHP: starterData.hp,
+                    currentHP: starterData.hp,
+                    id: Date.now()
+                };
+                
+                gameState.pokemonCaught.push(starterPokemon);
+                gameState.caughtSpecies.add(pokemon);
+                player.currentPokemon = starterPokemon;
+                
+                starterSelection.classList.remove('active');
+                dialogueBox.classList.add('active');
+                showDialogue(dialogues.starterChosen);
+            });
+        });
+        
+        // Menu System
+        menuBtn.addEventListener('click', () => {
+            if (!gameState.inBattle && !gameState.dialogueActive) {
+                inventoryMenu.classList.add('active');
+                updateInventoryDisplay();
+            }
+        });
+        
+        closeMenuBtn.addEventListener('click', () => {
+            inventoryMenu.classList.remove('active');
+        });
+        
+        function updateInventoryDisplay() {
+            const pokemonParty = document.getElementById('pokemonParty');
+            const itemsList = document.getElementById('itemsList');
+            
+            pokemonParty.innerHTML = '';
+            gameState.pokemonCaught.forEach(pokemon => {
+                const card = document.createElement('div');
+                card.className = 'pokemon-card';
+                card.innerHTML = `
+                    <div class="pokemon-card-sprite">${pokemon.sprite}</div>
+                    <div class="pokemon-card-info">
+                        <div>${pokemon.name} - Lv.${pokemon.level}</div>
+                        <div>HP: ${pokemon.currentHP}/${pokemon.maxHP}</div>
+                        <div>Attack: ${pokemon.attack}</div>
+                    </div>
+                `;
+                pokemonParty.appendChild(card);
+            });
+            
+            itemsList.innerHTML = `
+                <div class="inventory-item">
+                    <div>🔴 Pokéballs</div>
+                    <div>x${gameState.pokeballs}</div>
+                </div>
+                <div class="inventory-item">
+                    <div>🧪 Potions</div>
+                    <div>x${gameState.potions}</div>
+                </div>
+            `;
+        }
+        
+        // Update Game UI
+        function updateGameUI() {
+            document.getElementById('playerName').textContent = `Trainer: ${gameState.playerName}`;
+            document.getElementById('pokemonCount').textContent = `Pokémon: ${gameState.caughtSpecies.size}/25`;
+            document.getElementById('badges').textContent = `Badges: ${gameState.badges}/8`;
+            document.getElementById('pokeballs').textContent = `Pokéballs: ${gameState.pokeballs}`;
+        }
+        
+        // Wild Encounter System
+        function checkWildEncounter() {
+            if (gameState.inBattle || !gameState.starterChosen) return;
+            
+            const map = maps[gameState.currentMap];
+            const playerTileX = Math.floor(player.x / TILE_SIZE);
+            const playerTileY = Math.floor(player.y / TILE_SIZE);
+            
+            let inGrass = false;
+            for (let obj of map.objects) {
+                if (obj.type === 'grass') {
+                    const grassLeft = obj.x;
+                    const grassRight = obj.x + obj.width;
+                    const grassTop = obj.y;
+                    const grassBottom = obj.y + obj.height;
+                    
+                    if (playerTileX >= grassLeft && playerTileX < grassRight &&
+                        playerTileY >= grassTop && playerTileY < grassBottom) {
+                        inGrass = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (inGrass && Math.random() < ENCOUNTER_RATE) {
+                startWildBattle();
+            }
+        }
+        
+        function startWildBattle() {
+            gameState.inBattle = true;
+            
+            const availablePokemon = Object.keys(POKEMON_DATA).filter(
+                key => !['treecko', 'froakie', 'charmander'].includes(key)
+            );
+            const randomPokemon = availablePokemon[Math.floor(Math.random() * availablePokemon.length)];
+            const pokemonData = POKEMON_DATA[randomPokemon];
+            
+            battleState.wildPokemon = {
+                ...pokemonData,
+                maxHP: pokemonData.hp,
+                currentHP: pokemonData.hp,
+                species: randomPokemon
+            };
+            
+            battleState.playerPokemon = player.currentPokemon || gameState.pokemonCaught[0];
+            battleState.turn = 'player';
+            battleState.catching = false;
+            
+            updateBattleDisplay();
+            battleScreen.classList.add('active');
+            setBattleMessage(`A wild ${battleState.wildPokemon.name} appeared!`);
+        }
+        
+        function startGymBattle() {
+            gameState.inBattle = true;
+            
+            const gymPokemon = ['onix', 'psyduck', 'pikachu', 'growlithe', 'gastly', 'dratini', 'meowth', 'snorlax'];
+            const gymIndex = battleState.currentGymId - 1;
+            const pokemonKey = gymPokemon[gymIndex] || 'snorlax';
+            const pokemonData = POKEMON_DATA[pokemonKey];
+            
+            battleState.wildPokemon = {
+                ...pokemonData,
+                maxHP: pokemonData.hp * 2,
+                currentHP: pokemonData.hp * 2,
+                hp: pokemonData.hp * 2,
+                attack: pokemonData.attack * 1.5,
+                species: pokemonKey,
+                isGym: true
+            };
+            
+            battleState.playerPokemon = player.currentPokemon || gameState.pokemonCaught[0];
+            battleState.turn = 'player';
+            
+            updateBattleDisplay();
+            battleScreen.classList.add('active');
+            setBattleMessage(`Gym Leader challenges you!`);
+        }
+        
+        function updateBattleDisplay() {
+            const enemy = battleState.wildPokemon;
+            const playerPoke = battleState.playerPokemon;
+            
+            document.getElementById('enemyName').textContent = enemy.isGym ? `Gym ${enemy.name}` : `Wild ${enemy.name}`;
+            document.getElementById('enemyLevel').textContent = `Lv. ${enemy.level}`;
+            document.getElementById('enemySprite').textContent = enemy.sprite;
+            document.getElementById('enemyHP').textContent = `HP: ${enemy.currentHP}/${enemy.maxHP}`;
+            
+            const enemyHPPercent = (enemy.currentHP / enemy.maxHP) * 100;
+            const enemyHPBar = document.getElementById('enemyHPBar');
+            enemyHPBar.style.width = `${enemyHPPercent}%`;
+            enemyHPBar.className = 'hp-bar';
+            if (enemyHPPercent < 25) enemyHPBar.classList.add('critical');
+            else if (enemyHPPercent < 50) enemyHPBar.classList.add('low');
+            
+            document.getElementById('playerPokemonName').textContent = playerPoke.name;
+            document.getElementById('playerPokemonLevel').textContent = `Lv. ${playerPoke.level}`;
+            document.getElementById('playerBattleSprite').textContent = playerPoke.sprite;
+            document.getElementById('playerHP').textContent = `HP: ${playerPoke.currentHP}/${playerPoke.maxHP}`;
+            
+            const playerHPPercent = (playerPoke.currentHP / playerPoke.maxHP) * 100;
+            const playerHPBar = document.getElementById('playerHPBar');
+            playerHPBar.style.width = `${playerHPPercent}%`;
+            playerHPBar.className = 'hp-bar';
+            if (playerHPPercent < 25) playerHPBar.classList.add('critical');
+            else if (playerHPPercent < 50) playerHPBar.classList.add('low');
+        }
+        
+        function setBattleMessage(msg) {
+            battleMessage.textContent = msg;
+        }
+        
+        // Battle Actions
+        attackBtn.addEventListener('click', () => {
+            if (battleState.turn !== 'player') return;
+            
+            const damage = Math.floor(Math.random() * 5) + battleState.playerPokemon.attack;
+            battleState.wildPokemon.currentHP = Math.max(0, battleState.wildPokemon.currentHP - damage);
+            
+            setBattleMessage(`${battleState.playerPokemon.name} dealt ${damage} damage!`);
+            updateBattleDisplay();
+            
+            if (battleState.wildPokemon.currentHP <= 0) {
+                setTimeout(() => {
+                    if (battleState.wildPokemon.isGym) {
+                        winGymBattle();
+                    } else {
+                        setBattleMessage(`${battleState.wildPokemon.name} fainted!`);
+                        setTimeout(endBattle, 2000);
+                    }
+                }, 1000);
+            } else {
+                setTimeout(enemyTurn, 1500);
+            }
+        });
+        
+        catchBtn.addEventListener('click', () => {
+            if (battleState.turn !== 'player' || battleState.wildPokemon.isGym) return;
+            if (gameState.pokeballs <= 0) {
+                setBattleMessage("You don't have any Pokéballs!");
+                return;
+            }
+            
+            gameState.pokeballs--;
+            updateGameUI();
+            
+            const catchRate = 0.5 - (battleState.wildPokemon.currentHP / battleState.wildPokemon.maxHP) * 0.3;
+            const caught = Math.random() < catchRate;
+            
+            setBattleMessage(`You threw a Pokéball!`);
+            document.getElementById('enemySprite').classList.add('catching');
+            
+            setTimeout(() => {
+                document.getElementById('enemySprite').classList.remove('catching');
+                
+                if (caught) {
+                    const caughtPokemon = {
+                        ...battleState.wildPokemon,
+                        id: Date.now()
+                    };
+                    gameState.pokemonCaught.push(caughtPokemon);
+                    gameState.caughtSpecies.add(battleState.wildPokemon.species);
+                    
+                    setBattleMessage(`You caught ${battleState.wildPokemon.name}!`);
+                    updateGameUI();
+                    
+                    if (gameState.caughtSpecies.size >= 25 && gameState.badges >= 8) {
+                        setTimeout(() => {
+                            showVictoryScreen();
+                        }, 2000);
+                    } else {
+                        setTimeout(endBattle, 2000);
+                    }
+                } else {
+                    setBattleMessage(`${battleState.wildPokemon.name} broke free!`);
+                    setTimeout(enemyTurn, 1500);
+                }
+            }, 2000);
+        });
+        
+        itemBtn.addEventListener('click', () => {
+            if (battleState.turn !== 'player') return;
+            if (gameState.potions <= 0) {
+                setBattleMessage("You don't have any Potions!");
+                return;
+            }
+            
+            gameState.potions--;
+            const healAmount = 20;
+            battleState.playerPokemon.currentHP = Math.min(
+                battleState.playerPokemon.maxHP,
+                battleState.playerPokemon.currentHP + healAmount
+            );
+            
+            setBattleMessage(`You used a Potion! Restored ${healAmount} HP!`);
+            updateBattleDisplay();
+            updateGameUI();
+            
+            setTimeout(enemyTurn, 1500);
+        });
+        
+        runBtn.addEventListener('click', () => {
+            if (battleState.turn !== 'player' || battleState.wildPokemon.isGym) return;
+            
+            setBattleMessage("Got away safely!");
+            setTimeout(endBattle, 1000);
+        });
+        
+        function enemyTurn() {
+            battleState.turn = 'enemy';
+            
+            const damage = Math.floor(Math.random() * 4) + battleState.wildPokemon.attack;
+            battleState.playerPokemon.currentHP = Math.max(0, battleState.playerPokemon.currentHP - damage);
+            
+            setBattleMessage(`${battleState.wildPokemon.name} dealt ${damage} damage!`);
+            updateBattleDisplay();
+            
+            if (battleState.playerPokemon.currentHP <= 0) {
+                setTimeout(() => {
+                    setBattleMessage("Your Pokémon fainted! You blacked out!");
+                    setTimeout(() => {
+                        healAllPokemon();
+                        endBattle();
+                    }, 2000);
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    battleState.turn = 'player';
+                    setBattleMessage("What will you do?");
+                }, 1500);
+            }
+        }
+        
+        function winGymBattle() {
+            gameState.badges++;
+            gameState.defeatedGyms.add(battleState.currentGymId);
+            updateGameUI();
+            
+            setBattleMessage(`You defeated the Gym Leader!`);
+            
+            setTimeout(() => {
+                endBattle();
+                setTimeout(() => {
+                    dialogueBox.classList.add('active');
+                    showDialogue(dialogues.gymVictory);
+                }, 500);
+                
+                if (gameState.caughtSpecies.size >= 25 && gameState.badges >= 8) {
+                    setTimeout(() => {
+                        showVictoryScreen();
+                    }, 3000);
+                }
+            }, 2000);
+        }
+        
+        function healAllPokemon() {
+            gameState.pokemonCaught.forEach(pokemon => {
+                pokemon.currentHP = pokemon.maxHP;
+            });
+        }
+        
+        function endBattle() {
+            battleScreen.classList.remove('active');
+            gameState.inBattle = false;
+            battleState.wildPokemon = null;
+            battleState.turn = 'player';
+        }
+        
+        function showVictoryScreen() {
+            victoryScreen.classList.add('active');
+        }
+        
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            if (gameState.dialogueActive || gameState.inBattle) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    keys.up = true;
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    keys.down = true;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    keys.left = true;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    keys.right = true;
+                    break;
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    keys.up = false;
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    keys.down = false;
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    keys.left = false;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    keys.right = false;
+                    break;
+            }
+        });
+        
+        // Mobile Joystick
+        let joystickActive = false;
+        let joystickStartX = 0;
+        let joystickStartY = 0;
+        
+        const joystickBase = document.getElementById('joystickBase');
+        const joystickStick = document.getElementById('joystickStick');
+        
+        function handleJoystickStart(e) {
+            if (gameState.dialogueActive || gameState.inBattle) return;
+            joystickActive = true;
+            const rect = joystickBase.getBoundingClientRect();
+            joystickStartX = rect.left + rect.width / 2;
+            joystickStartY = rect.top + rect.height / 2;
+        }
+        
+        function handleJoystickMove(e) {
+            if (!joystickActive) return;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const deltaX = touch.clientX - joystickStartX;
+            const deltaY = touch.clientY - joystickStartY;
+            
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = 35;
+            
+            if (distance > maxDistance) {
+                const angle = Math.atan2(deltaY, deltaX);
+                joystickStick.style.left = `calc(50% + ${Math.cos(angle) * maxDistance}px)`;
+                joystickStick.style.top = `calc(50% + ${Math.sin(angle) * maxDistance}px)`;
+            } else {
+                joystickStick.style.left = `calc(50% + ${deltaX}px)`;
+                joystickStick.style.top = `calc(50% + ${deltaY}px)`;
+            }
+            
+            const threshold = 10;
+            keys.up = deltaY < -threshold;
+            keys.down = deltaY > threshold;
+            keys.left = deltaX < -threshold;
+            keys.right = deltaX > threshold;
+        }
+        
+        function handleJoystickEnd() {
+            joystickActive = false;
+            joystickStick.style.left = '50%';
+            joystickStick.style.top = '50%';
+            keys.up = keys.down = keys.left = keys.right = false;
+        }
+        
+        joystickBase.addEventListener('touchstart', handleJoystickStart);
+        joystickBase.addEventListener('touchmove', handleJoystickMove);
+        joystickBase.addEventListener('touchend', handleJoystickEnd);
+        joystickBase.addEventListener('mousedown', handleJoystickStart);
+        document.addEventListener('mousemove', handleJoystickMove);
+        document.addEventListener('mouseup', handleJoystickEnd);
+        
+        // Collision Detection
+        function checkCollision(x, y) {
+            const map = maps[gameState.currentMap];
+            const tileX = Math.floor(x / TILE_SIZE);
+            const tileY = Math.floor(y / TILE_SIZE);
+            
+            if (tileX < 0 || tileX >= map.width || tileY < 0 || tileY >= map.height) {
+                return true;
+            }
+            
+            for (let obj of map.objects) {
+                if (obj.type === 'door' || obj.type === 'grass') continue;
+                
+                const objLeft = obj.x * TILE_SIZE;
+                const objRight = (obj.x + (obj.width || 1)) * TILE_SIZE;
+                const objTop = obj.y * TILE_SIZE;
+                const objBottom = (obj.y + (obj.height || 1)) * TILE_SIZE;
+                
+                if (x + player.width > objLeft && x < objRight &&
+                    y + player.height > objTop && y < objBottom) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Check Door and Gym Interaction
+        function checkInteractions() {
+            const map = maps[gameState.currentMap];
+            const playerCenterX = player.x + player.width / 2;
+            const playerCenterY = player.y + player.height / 2;
+            
+            for (let obj of map.objects) {
+                const objCenterX = (obj.x + (obj.width || 1) / 2) * TILE_SIZE;
+                const objCenterY = (obj.y + (obj.height || 1) / 2) * TILE_SIZE;
+                
+                const distance = Math.sqrt(
+                    Math.pow(playerCenterX - objCenterX, 2) +
+                    Math.pow(playerCenterY - objCenterY, 2)
+                );
+                
+                if (obj.type === 'door' && distance < TILE_SIZE * 1.5) {
+                    changeMap(obj.destination);
+                    
+                    if (obj.destination === 'inside' && !gameState.starterChosen) {
+                        setTimeout(() => {
+                            dialogueBox.classList.add('active');
+                            showDialogue(dialogues.houseEnter);
+                        }, 500);
+                    }
+                    return;
+                }
+                
+                if (obj.type === 'gym' && distance < TILE_SIZE * 2) {
+                    if (!gameState.defeatedGyms.has(obj.id)) {
+                        battleState.currentGymId = obj.id;
+                        battleState.gymName = obj.name;
+                        dialogueBox.classList.add('active');
+                        showDialogue(dialogues.gym);
+                    }
+                    return;
+                }
+            }
+        }
+        
+        function changeMap(mapName) {
+            gameState.currentMap = mapName;
+            const spawn = maps[mapName].spawn;
+            player.x = spawn.x * TILE_SIZE;
+            player.y = spawn.y * TILE_SIZE;
+        }
+        
+        // Update Player
+        function updatePlayer() {
+            if (gameState.dialogueActive || gameState.inBattle) return;
+            
+            let newX = player.x;
+            let newY = player.y;
+            let moved = false;
+            
+            if (keys.up) {
+                newY -= player.speed;
+                player.direction = 'up';
+                moved = true;
+            }
+            if (keys.down) {
+                newY += player.speed;
+                player.direction = 'down';
+                moved = true;
+            }
+            if (keys.left) {
+                newX -= player.speed;
+                player.direction = 'left';
+                moved = true;
+            }
+            if (keys.right) {
+                newX += player.speed;
+                player.direction = 'right';
+                moved = true;
+            }
+            
+            if (!checkCollision(newX, player.y)) {
+                player.x = newX;
+            }
+            if (!checkCollision(player.x, newY)) {
+                player.y = newY;
+            }
+            
+            if (moved) {
+                gameState.steps++;
+                if (gameState.steps % 10 === 0) {
+                    checkWildEncounter();
+                }
+            }
+            
+            checkInteractions();
+            
+            camera.x = player.x - CANVAS_WIDTH / 2 + player.width / 2;
+            camera.y = player.y - CANVAS_HEIGHT / 2 + player.height / 2;
+            
+            const map = maps[gameState.currentMap];
+            camera.x = Math.max(0, Math.min(camera.x, map.width * TILE_SIZE - CANVAS_WIDTH));
+            camera.y = Math.max(0, Math.min(camera.y, map.height * TILE_SIZE - CANVAS_HEIGHT));
+        }
+        
+        // Render Game
+        function render() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            const map = maps[gameState.currentMap];
+            
+            // Draw floor
+            if (gameState.currentMap === 'inside') {
+                ctx.fillStyle = '#d4a574';
+            } else if (gameState.currentMap === 'cave') {
+                ctx.fillStyle = '#4a4a4a';
+            } else if (gameState.currentMap === 'mountain') {
+                ctx.fillStyle = '#8b7355';
+            } else {
+                ctx.fillStyle = '#90c674';
+            }
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // Draw grid
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            for (let y = 0; y < map.height; y++) {
+                for (let x = 0; x < map.width; x++) {
+                    const screenX = x * TILE_SIZE - camera.x;
+                    const screenY = y * TILE_SIZE - camera.y;
+                    ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                }
+            }
+            
+            // Draw objects
+            for (let obj of map.objects) {
+                const screenX = obj.x * TILE_SIZE - camera.x;
+                const screenY = obj.y * TILE_SIZE - camera.y;
+                const width = (obj.width || 1) * TILE_SIZE;
+                const height = (obj.height || 1) * TILE_SIZE;
+                
+                switch(obj.type) {
+                    case 'house':
+                        ctx.fillStyle = '#8b4513';
+                        ctx.fillRect(screenX, screenY, width, height);
+                        ctx.fillStyle = '#a0522d';
+                        ctx.fillRect(screenX, screenY, width, height * 0.3);
+                        break;
+                    case 'gym':
+                        const defeated = gameState.defeatedGyms.has(obj.id);
+                        ctx.fillStyle = defeated ? '#4caf50' : '#e74c3c';
+                        ctx.fillRect(screenX, screenY, width, height);
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '12px "Press Start 2P"';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('GYM', screenX + width/2, screenY + height/2);
+                        break;
+                    case 'pokecenter':
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.fillRect(screenX, screenY, width, height);
+                        break;
+                    case 'door':
+                        ctx.fillStyle = '#654321';
+                        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                        break;
+                    case 'tree':
+                        ctx.fillStyle = '#228b22';
+                        ctx.beginPath();
+                        ctx.arc(screenX + TILE_SIZE/2, screenY + TILE_SIZE/2, TILE_SIZE, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'grass':
+                        ctx.fillStyle = 'rgba(34, 139, 34, 0.5)';
+                        ctx.fillRect(screenX, screenY, width, height);
+                        break;
+                    case 'rock':
+                        ctx.fillStyle = '#696969';
+                        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                        break;
+                    case 'bed':
+                        ctx.fillStyle = '#ff69b4';
+                        ctx.fillRect(screenX, screenY, TILE_SIZE * 2, TILE_SIZE);
+                        break;
+                    case 'table':
+                        ctx.fillStyle = '#8b4513';
+                        ctx.fillRect(screenX, screenY, TILE_SIZE * 2, TILE_SIZE);
+                        break;
+                }
+            }
+            
+            // Draw player
+            const playerScreenX = player.x - camera.x;
+            const playerScreenY = player.y - camera.y;
+            
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(playerScreenX, playerScreenY, player.width, player.height);
+            
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(player.sprite, playerScreenX + player.width/2, playerScreenY + player.height/2);
+        }
+        
+        // Game Loop
+        function gameLoop() {
+            if (!gameState.gameStarted) return;
+            
+            updatePlayer();
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
 </body>
 </html>
-
-
