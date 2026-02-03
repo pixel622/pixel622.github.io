@@ -2,179 +2,178 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>2D Pokemon Style Game</title>
+<title>Pokemon Style Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
 <style>
-body { margin:0; overflow:hidden; background:#000; }
-canvas { display:block; background:#5dbb63; }
+body{margin:0;overflow:hidden;background:#000}
+canvas{display:block}
 
 /* Joystick */
-#joyBase {
-  position:fixed; bottom:20px; left:20px;
-  width:120px; height:120px;
-  background:rgba(255,255,255,0.2);
-  border-radius:50%;
-}
-#joy {
-  position:absolute; width:40px; height:40px;
-  left:40px; top:40px;
-  background:rgba(255,255,255,0.6);
-  border-radius:50%;
-}
+#joyBase{position:fixed;bottom:20px;left:20px;width:120px;height:120px;
+background:rgba(255,255,255,.2);border-radius:50%}
+#joy{position:absolute;width:40px;height:40px;left:40px;top:40px;
+background:rgba(255,255,255,.6);border-radius:50%}
 
-/* Battle UI */
-#battle {
-  position:fixed;
-  inset:0;
-  background:#000;
-  color:#fff;
-  font-family:monospace;
-  display:none;
-  text-align:center;
-  padding-top:40px;
-}
-button {
-  font-size:18px;
-  padding:10px 20px;
-}
+/* Battle */
+#battle{position:fixed;inset:0;background:#000;color:#fff;
+font-family:monospace;display:none;text-align:center;padding-top:40px}
+button{font-size:18px;padding:10px 20px}
 </style>
 </head>
 
 <body>
-
 <canvas id="game"></canvas>
-
 <div id="joyBase"><div id="joy"></div></div>
 
 <div id="battle">
-  <h2>Wild Creature Appeared!</h2>
-  <p id="enemyHP"></p>
-  <p id="playerHP"></p>
-  <button onclick="attack()">ATTACK</button>
+<h2>Wild Creature Appeared!</h2>
+<p id="enemyHP"></p>
+<p id="playerHP"></p>
+<button onclick="attack()">ATTACK</button>
 </div>
 
 <script>
-// Canvas
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
 
-// Player
-const player = {
-  x:0, y:0, size:32, speed:2,
-  vx:0, vy:0, frame:0
-};
+const TILE=32;
 
-// Camera
-const cam = { x:0, y:0 };
+// GAME STATE
+let world="outside"; // outside | house | center
+let inBattle=false;
 
-// Map
-const TILE = 32;
-function isGrass(x,y){
-  return ((Math.floor(x/TILE)+Math.floor(y/TILE))%4===0);
-}
+// PLAYER
+const player={x:0,y:0,size:28,speed:2};
 
-// Joystick
-let joyX=0, joyY=0, drag=false;
+// CAMERA
+const cam={x:0,y:0};
+
+// JOYSTICK
+let joyX=0,joyY=0,drag=false;
 const base=document.getElementById("joyBase");
 const stick=document.getElementById("joy");
 
 base.onmousedown=base.ontouchstart=()=>drag=true;
-window.onmouseup=window.ontouchend=()=>{drag=false; joyX=joyY=0; stick.style.left="40px"; stick.style.top="40px";}
+window.onmouseup=window.ontouchend=()=>{drag=false;joyX=joyY=0;
+stick.style.left="40px";stick.style.top="40px"};
 window.onmousemove=window.ontouchmove=e=>{
  if(!drag)return;
  const r=base.getBoundingClientRect();
  const t=e.touches?e.touches[0]:e;
- let x=t.clientX-r.left-60, y=t.clientY-r.top-60;
+ let x=t.clientX-r.left-60,y=t.clientY-r.top-60;
  const d=Math.hypot(x,y);
- if(d>60){ x*=60/d; y*=60/d; }
- joyX=x/60; joyY=y/60;
+ if(d>60){x*=60/d;y*=60/d;}
+ joyX=x/60;joyY=y/60;
  stick.style.left=x+60-20+"px";
  stick.style.top=y+60-20+"px";
 };
 
-// Battle
-let inBattle=false;
-let enemyHP=20, playerHP=30;
+// BATTLE
+let enemyHP=20,playerHP=30;
 const battleUI=document.getElementById("battle");
-
 function startBattle(){
- inBattle=true;
- enemyHP=20;
- playerHP=30;
+ inBattle=true;enemyHP=20;playerHP=30;
  battleUI.style.display="block";
  updateBattleText();
 }
-
 function updateBattleText(){
- enemyHPText.innerText="Enemy HP: "+enemyHP;
- playerHPText.innerText="Your HP: "+playerHP;
+ enemyHP.innerText="Enemy HP: "+enemyHP;
+ playerHP.innerText="Your HP: "+playerHP;
 }
-
 function attack(){
  enemyHP-=5;
- if(enemyHP<=0){
-   alert("You won!");
-   endBattle();
-   return;
- }
+ if(enemyHP<=0){endBattle();return;}
  playerHP-=3;
- if(playerHP<=0){
-   alert("You lost!");
-   endBattle();
- }
+ if(playerHP<=0){endBattle();}
  updateBattleText();
 }
-
 function endBattle(){
  inBattle=false;
  battleUI.style.display="none";
 }
 
-// Game Loop
+// BUILDINGS (outside world)
+const buildings=[
+ {x:100,y:0,type:"house"},
+ {x:-120,y:0,type:"center"}
+];
+
+// UPDATE
 function update(){
  if(inBattle)return;
 
- player.vx=joyX*player.speed;
- player.vy=joyY*player.speed;
+ player.x+=joyX*player.speed;
+ player.y+=joyY*player.speed;
 
- player.x+=player.vx;
- player.y+=player.vy;
+ // ENTER BUILDINGS
+ if(world==="outside"){
+  buildings.forEach(b=>{
+   if(Math.abs(player.x-b.x)<20 && Math.abs(player.y-b.y+30)<10){
+    if(b.type==="house"){world="house";player.x=0;player.y=40;}
+    if(b.type==="center"){world="center";player.x=0;player.y=40;}
+   }
+  });
+ }
+
+ // EXIT BUILDINGS
+ if((world==="house"||world==="center") && player.y>80){
+   world="outside";
+   player.x=0;player.y=0;
+ }
+
+ // RANDOM BATTLE
+ if(world==="outside" && Math.random()<0.004){
+   startBattle();
+ }
 
  cam.x=player.x-canvas.width/2;
  cam.y=player.y-canvas.height/2;
-
- if(isGrass(player.x,player.y) && Math.random()<0.005){
-   startBattle();
- }
 }
 
-function drawMap(){
- for(let x=-2000;x<2000;x+=TILE){
-  for(let y=-2000;y<2000;y+=TILE){
-   ctx.fillStyle=isGrass(x,y)?"#4caf50":"#5dbb63";
+// DRAW
+function drawOutside(){
+ for(let x=-1000;x<1000;x+=TILE){
+  for(let y=-1000;y<1000;y+=TILE){
+   ctx.fillStyle=((x+y)/TILE)%2?"#5dbb63":"#6fcf97";
    ctx.fillRect(x-cam.x,y-cam.y,TILE,TILE);
   }
  }
+ // BUILDINGS
+ buildings.forEach(b=>{
+  ctx.fillStyle=b.type==="house"?"#a0522d":"#ff9999";
+  ctx.fillRect(b.x-cam.x-20,b.y-cam.y-40,40,40);
+  ctx.fillStyle="#000";
+  ctx.fillRect(b.x-cam.x-6,b.y-cam.y-10,12,10); // door
+ });
+}
+
+function drawInterior(color){
+ ctx.fillStyle=color;
+ ctx.fillRect(0,0,canvas.width,canvas.height);
+ ctx.fillStyle="#333";
+ ctx.fillRect(canvas.width/2-20,canvas.height/2+40,40,20); // exit
 }
 
 function drawPlayer(){
  ctx.fillStyle="#ff4444";
- ctx.fillRect(canvas.width/2-16,canvas.height/2-16,32,32);
+ ctx.fillRect(canvas.width/2-player.size/2,
+ canvas.height/2-player.size/2,
+ player.size,player.size);
 }
 
+// LOOP
 function loop(){
  ctx.clearRect(0,0,canvas.width,canvas.height);
  update();
- drawMap();
+ if(world==="outside")drawOutside();
+ if(world==="house")drawInterior("#d2b48c");
+ if(world==="center")drawInterior("#f8f8f8");
  drawPlayer();
  requestAnimationFrame(loop);
 }
-
 loop();
 </script>
-
 </body>
 </html>
