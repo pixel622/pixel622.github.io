@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Gamma Village</title>
+    <title>Pokémon Island Village</title>
     <style>
         * {
             margin: 0;
@@ -41,9 +41,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)),
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%23005287"/><circle cx="200" cy="200" r="150" fill="%23006bb3"/><circle cx="200" cy="200" r="100" fill="%230084d1"/></svg>');
-            background-size: cover;
+            background: linear-gradient(rgba(0, 50, 100, 0.9), rgba(0, 80, 160, 0.9));
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -56,8 +54,7 @@
             color: #ffd700;
             text-shadow: 0 0 10px #ffd700,
                          0 0 20px #ffd700,
-                         2px 2px 0 #000,
-                         -2px -2px 0 #000;
+                         2px 2px 0 #000;
             margin-bottom: 50px;
             animation: logoGlow 2s infinite;
             letter-spacing: 5px;
@@ -148,22 +145,21 @@
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
-            max-width: 800px;
+            max-width: 600px;
             background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
             border: 4px solid #ffd700;
             border-radius: 20px;
-            padding: 25px;
+            padding: 20px;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             z-index: 800;
             display: none;
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
-            backdrop-filter: blur(5px);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
         }
 
         .dialog-text {
-            margin-bottom: 20px;
-            min-height: 80px;
+            margin-bottom: 15px;
+            min-height: 60px;
             line-height: 1.6;
             text-shadow: 1px 1px 2px #000;
         }
@@ -176,15 +172,20 @@
         }
 
         .dialog-btn {
-            background: linear-gradient(to bottom, #ff4444, #cc0000);
+            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
             color: white;
             border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.2s;
-            min-width: 150px;
+            min-width: 120px;
+        }
+
+        .dialog-btn:hover {
+            background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
+            transform: translateY(-2px);
         }
 
         /* Controls */
@@ -215,50 +216,34 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* Village Sign */
-        .village-sign {
-            position: absolute;
-            background: linear-gradient(to bottom, #8b4513, #654321);
-            color: #ffd700;
-            padding: 10px 20px;
-            border: 3px solid #ffd700;
-            border-radius: 10px;
-            font-size: 20px;
-            text-align: center;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        /* Minimap */
-        #minimap {
+        /* Location Indicator */
+        #locationIndicator {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: 150px;
-            height: 150px;
             background: rgba(0, 0, 0, 0.7);
-            border: 3px solid #4a90e2;
-            border-radius: 10px;
-            z-index: 50;
-            display: none;
-            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
-        }
-
-        /* NPC Dialog */
-        .npc-dialog {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.9);
             color: white;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 10px;
             border: 2px solid #4a90e2;
             font-size: 14px;
-            max-width: 200px;
-            text-align: center;
-            z-index: 20;
+            z-index: 50;
             display: none;
             box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+        }
+
+        /* Screen Fade */
+        .screen-fade {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            opacity: 0;
+            z-index: 700;
+            pointer-events: none;
+            transition: opacity 0.5s;
         }
 
         /* Mobile Responsive */
@@ -267,23 +252,25 @@
             .title-btn { padding: 12px 30px; font-size: 18px; min-width: 180px; }
             #joyBase { width: 100px; height: 100px; }
             #joy { width: 40px; height: 40px; left: 30px; top: 30px; }
-            #minimap { width: 120px; height: 120px; }
         }
     </style>
 </head>
 <body>
     <!-- Title Screen -->
     <div id="titleScreen">
-        <div class="title-logo">POKÉMON VILLAGE</div>
+        <div class="title-logo">ISLAND VILLAGE</div>
         <div class="title-menu">
-            <button class="title-btn" onclick="startGame()">START GAME</button>
-            <button class="title-btn" onclick="showCredits()">CREDITS</button>
+            <button class="title-btn" onclick="startGame()">EXPLORE VILLAGE</button>
+            <button class="title-btn" onclick="showInstructions()">HOW TO PLAY</button>
         </div>
     </div>
 
     <!-- Game Container -->
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
+        
+        <!-- Screen Fade -->
+        <div class="screen-fade" id="screenFade"></div>
         
         <!-- Dialog Box -->
         <div id="dialogBox">
@@ -294,23 +281,21 @@
         <!-- Controls -->
         <div id="joyBase"><div id="joy"></div></div>
         <div id="hud">
-            <div id="hudContent">Welcome to the Village!</div>
+            <div id="hudContent">Island Village</div>
         </div>
         <div id="controls">
             <div class="control-btn" onclick="interact()">💬</div>
             <div class="control-btn" onclick="toggleMap()">🗺️</div>
         </div>
         
-        <!-- Minimap -->
-        <canvas id="minimap"></canvas>
+        <!-- Location Indicator -->
+        <div id="locationIndicator">Village Square</div>
     </div>
 
     <script>
         // Game initialization
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const minimapCanvas = document.getElementById('minimap');
-        const minimapCtx = minimapCanvas.getContext('2d');
         
         // Game state
         let gameState = {
@@ -318,137 +303,253 @@
                 x: 400,
                 y: 300,
                 direction: 0, // 0: down, 1: left, 2: right, 3: up
-                speed: 3,
+                speed: 4,
                 spriteFrame: 0,
-                inHouse: false,
-                currentHouse: null
+                currentArea: 'village_square',
+                inBuilding: false,
+                currentBuilding: null
             },
-            camera: { x: 0, y: 0 },
-            village: {
-                name: "Sunflower Village",
-                time: "Morning",
-                weather: "Sunny"
-            },
+            areas: {},
             inDialog: false,
-            showMinimap: false
+            currentTime: 'day'
         };
 
-        // Village Data - Houses and Buildings
-        const village = {
-            // Main village area
-            bounds: { x: 0, y: 0, width: 1600, height: 1200 },
-            
-            // Houses (20 houses in total)
-            houses: [
-                // Row 1 - Upper village (5 houses)
-                { id: 1, x: 200, y: 100, width: 80, height: 60, color: '#a0522d', roof: '#8b4513', name: "Pokémon Lab", type: "lab" },
-                { id: 2, x: 320, y: 100, width: 70, height: 55, color: '#d2691e', roof: '#8b4513', name: "Trainer House", type: "house" },
-                { id: 3, x: 420, y: 100, width: 75, height: 58, color: '#cd853f', roof: '#8b4513', name: "Berry Shop", type: "shop" },
-                { id: 4, x: 520, y: 100, width: 65, height: 52, color: '#8b4513', roof: '#654321', name: "Family Home", type: "house" },
-                { id: 5, x: 620, y: 100, width: 80, height: 60, color: '#a0522d', roof: '#8b4513', name: "Day Care", type: "special" },
-                
-                // Row 2 - Middle village (5 houses)
-                { id: 6, x: 180, y: 220, width: 72, height: 56, color: '#d2691e', roof: '#8b4513', name: "Item Shop", type: "shop" },
-                { id: 7, x: 280, y: 220, width: 68, height: 54, color: '#cd853f', roof: '#8b4513', name: "Home", type: "house" },
-                { id: 8, x: 380, y: 220, width: 76, height: 59, color: '#8b4513', roof: '#654321', name: "Gym", type: "gym" },
-                { id: 9, x: 500, y: 220, width: 70, height: 55, color: '#a0522d', roof: '#8b4513', name: "Poké Mart", type: "shop" },
-                { id: 10, x: 600, y: 220, width: 65, height: 52, color: '#d2691e', roof: '#8b4513', name: "Home", type: "house" },
-                
-                // Row 3 - Lower village (5 houses)
-                { id: 11, x: 150, y: 350, width: 78, height: 60, color: '#cd853f', roof: '#8b4513', name: "Poké Center", type: "center", color: '#ff9999', roof: '#ff6b6b' },
-                { id: 12, x: 260, y: 350, width: 72, height: 56, color: '#8b4513', roof: '#654321', name: "Home", type: "house" },
-                { id: 13, x: 370, y: 350, width: 70, height: 55, color: '#a0522d', roof: '#8b4513', name: "School", type: "special" },
-                { id: 14, x: 480, y: 350, width: 68, height: 54, color: '#d2691e', roof: '#8b4513', name: "Home", type: "house" },
-                { id: 15, x: 590, y: 350, width: 75, height: 58, color: '#cd853f', roof: '#8b4513', name: "Trainer's House", type: "house" },
-                
-                // Row 4 - Bottom village (5 houses)
-                { id: 16, x: 220, y: 480, width: 70, height: 55, color: '#8b4513', roof: '#654321', name: "Home", type: "house" },
-                { id: 17, x: 320, y: 480, width: 65, height: 52, color: '#a0522d', roof: '#8b4513', name: "Move Tutor", type: "special" },
-                { id: 18, x: 420, y: 480, width: 80, height: 60, color: '#d2691e', roof: '#8b4513', name: "Battle House", type: "special" },
-                { id: 19, x: 530, y: 480, width: 72, height: 56, color: '#cd853f', roof: '#8b4513', name: "Home", type: "house" },
-                { id: 20, x: 640, y: 480, width: 68, height: 54, color: '#8b4513', roof: '#654321', name: "Elder's House", type: "house" }
+        // Island Village Areas - Each area is its own screen
+        const islandVillage = {
+            // The village is on a green island with different connected areas
+            areas: [
+                {
+                    id: 'village_square',
+                    name: 'Village Square',
+                    type: 'square',
+                    connections: {
+                        north: 'north_path',
+                        east: 'east_path',
+                        south: 'south_beach',
+                        west: 'west_path'
+                    },
+                    buildings: [
+                        { id: 'pokemon_center', x: 300, y: 200, width: 80, height: 60, type: 'center', name: 'Pokémon Center', color: '#ff9999', roof: '#ff6b6b' },
+                        { id: 'pokemart', x: 500, y: 200, width: 70, height: 55, type: 'shop', name: 'Poké Mart', color: '#78c850', roof: '#57a773' }
+                    ],
+                    npcs: [
+                        { x: 400, y: 350, type: 'mayor', dialog: "Welcome to our island village! It's peaceful here." },
+                        { x: 350, y: 400, type: 'child', dialog: "My Pokémon is playing in the flowers!" }
+                    ],
+                    decorations: [
+                        { x: 200, y: 250, type: 'fountain', size: 30 },
+                        { x: 600, y: 250, type: 'bench', size: 25 }
+                    ]
+                },
+                {
+                    id: 'north_path',
+                    name: 'Northern Path',
+                    type: 'path',
+                    connections: {
+                        south: 'village_square',
+                        north: 'northern_houses'
+                    },
+                    buildings: [],
+                    npcs: [
+                        { x: 400, y: 300, type: 'hiker', dialog: "The path north leads to some houses. Beautiful view up there!" }
+                    ],
+                    decorations: [
+                        { x: 300, y: 200, type: 'tree', size: 35 },
+                        { x: 500, y: 200, type: 'tree', size: 30 },
+                        { x: 400, y: 400, type: 'sign', text: 'North: Residential Area' }
+                    ]
+                },
+                {
+                    id: 'northern_houses',
+                    name: 'Residential Area',
+                    type: 'residential',
+                    connections: {
+                        south: 'north_path',
+                        east: 'east_houses',
+                        west: 'west_houses'
+                    },
+                    buildings: [
+                        { id: 'house1', x: 250, y: 250, width: 65, height: 50, type: 'house', name: 'Red House', color: '#ff6b6b', roof: '#cc4444' },
+                        { id: 'house2', x: 550, y: 250, width: 70, height: 52, type: 'house', name: 'Blue House', color: '#4a90e2', roof: '#2c6cb0' },
+                        { id: 'house3', x: 400, y: 150, width: 75, height: 55, type: 'house', name: 'Green House', color: '#78c850', roof: '#57a773' }
+                    ],
+                    npcs: [
+                        { x: 250, y: 320, type: 'lady', dialog: "I live in the red house. It's cozy!" },
+                        { x: 550, y: 320, type: 'man', dialog: "The blue house is mine. Best view on the island!" },
+                        { x: 400, y: 220, type: 'old_woman', dialog: "My garden is full of beautiful flowers." }
+                    ],
+                    decorations: [
+                        { x: 150, y: 200, type: 'tree', size: 40 },
+                        { x: 650, y: 200, type: 'tree', size: 40 },
+                        { x: 400, y: 400, type: 'flower_bed', size: 50 }
+                    ]
+                },
+                {
+                    id: 'east_path',
+                    name: 'Eastern Path',
+                    type: 'path',
+                    connections: {
+                        west: 'village_square',
+                        east: 'east_houses'
+                    },
+                    buildings: [],
+                    npcs: [
+                        { x: 400, y: 300, type: 'fisherman', dialog: "The eastern houses have a great view of the ocean!" }
+                    ],
+                    decorations: [
+                        { x: 300, y: 200, type: 'rock', size: 25 },
+                        { x: 500, y: 200, type: 'rock', size: 30 },
+                        { x: 400, y: 400, type: 'sign', text: 'East: Cliff Houses' }
+                    ]
+                },
+                {
+                    id: 'east_houses',
+                    name: 'Cliffside Area',
+                    type: 'cliff',
+                    connections: {
+                        west: 'east_path',
+                        north: 'northern_houses'
+                    },
+                    buildings: [
+                        { id: 'house4', x: 300, y: 200, width: 80, height: 60, type: 'house', name: 'Yellow House', color: '#ffd700', roof: '#ccaa00' },
+                        { id: 'lab', x: 500, y: 200, width: 90, height: 65, type: 'lab', name: 'Research Lab', color: '#a8a8a8', roof: '#888888' }
+                    ],
+                    npcs: [
+                        { x: 300, y: 270, type: 'scientist', dialog: "The research lab studies island Pokémon." },
+                        { x: 500, y: 270, type: 'researcher', dialog: "We discovered new Pokémon species here!" }
+                    ],
+                    decorations: [
+                        { x: 200, y: 150, type: 'cliff_edge', size: 40 },
+                        { x: 600, y: 150, type: 'cliff_edge', size: 40 },
+                        { x: 400, y: 450, type: 'telescope', size: 30 }
+                    ]
+                },
+                {
+                    id: 'west_path',
+                    name: 'Western Path',
+                    type: 'path',
+                    connections: {
+                        east: 'village_square',
+                        west: 'west_houses'
+                    },
+                    buildings: [],
+                    npcs: [
+                        { x: 400, y: 300, type: 'gardener', dialog: "The west has the best gardens on the island!" }
+                    ],
+                    decorations: [
+                        { x: 300, y: 200, type: 'bush', size: 35 },
+                        { x: 500, y: 200, type: 'bush', size: 40 },
+                        { x: 400, y: 400, type: 'sign', text: 'West: Garden Houses' }
+                    ]
+                },
+                {
+                    id: 'west_houses',
+                    name: 'Garden Area',
+                    type: 'garden',
+                    connections: {
+                        east: 'west_path',
+                        north: 'northern_houses'
+                    },
+                    buildings: [
+                        { id: 'house5', x: 300, y: 200, width: 70, height: 55, type: 'house', name: 'Purple House', color: '#a855f7', roof: '#7c3aed' },
+                        { id: 'gym', x: 500, y: 200, width: 85, height: 60, type: 'gym', name: 'Island Gym', color: '#f08030', roof: '#cc5500' }
+                    ],
+                    npcs: [
+                        { x: 300, y: 270, type: 'gardener', dialog: "My garden has rare berries!" },
+                        { x: 500, y: 270, type: 'gym_leader', dialog: "Challenge me at the gym when you're ready!" }
+                    ],
+                    decorations: [
+                        { x: 200, y: 300, type: 'flower_garden', size: 60 },
+                        { x: 600, y: 300, type: 'flower_garden', size: 60 },
+                        { x: 400, y: 150, type: 'fountain', size: 35 }
+                    ]
+                },
+                {
+                    id: 'south_beach',
+                    name: 'Southern Beach',
+                    type: 'beach',
+                    connections: {
+                        north: 'village_square'
+                    },
+                    buildings: [
+                        { id: 'beach_house', x: 400, y: 200, width: 75, height: 50, type: 'house', name: 'Beach House', color: '#87CEEB', roof: '#4682B4' }
+                    ],
+                    npcs: [
+                        { x: 300, y: 350, type: 'swimmer', dialog: "The water is perfect for swimming!" },
+                        { x: 500, y: 350, type: 'fisherman', dialog: "I catch the best Pokémon here!" }
+                    ],
+                    decorations: [
+                        { x: 200, y: 450, type: 'palm_tree', size: 40 },
+                        { x: 600, y: 450, type: 'palm_tree', size: 40 },
+                        { x: 400, y: 500, type: 'beach_umbrella', size: 30 }
+                    ]
+                }
             ],
             
-            // NPCs with dialog
-            npcs: [
-                { x: 240, y: 180, type: 'scientist', dialog: "Welcome to our Pokémon Lab! We research Pokémon evolution here." },
-                { x: 350, y: 180, type: 'trainer', dialog: "I'm training my Pokémon for the upcoming tournament!" },
-                { x: 550, y: 180, type: 'child', dialog: "Look at my cute Pokémon! Want to see?" },
-                { x: 200, y: 280, type: 'shopkeeper', dialog: "Fresh berries for sale! Good for your Pokémon's health." },
-                { x: 410, y: 280, type: 'gymleader', dialog: "The gym is open! Challenge me if you dare!" },
-                { x: 620, y: 280, type: 'oldman', dialog: "I've lived here for 50 years. This village has grown so much!" },
-                { x: 180, y: 410, type: 'nurse', dialog: "Welcome to the Pokémon Center! We heal your Pokémon for free." },
-                { x: 400, y: 410, type: 'teacher', dialog: "I teach young trainers about Pokémon types and weaknesses." },
-                { x: 610, y: 410, type: 'fisherman', dialog: "Caught any good Pokémon lately? The lake has Magikarp." },
-                { x: 320, y: 530, type: 'move_tutor', dialog: "I can teach special moves to your Pokémon. Come see me!" }
-            ],
-            
-            // Special locations
-            special: [
-                { x: 700, y: 200, type: 'fountain', name: "Village Fountain" },
-                { x: 100, y: 300, type: 'statue', name: "Founder's Statue" },
-                { x: 750, y: 400, type: 'bench', name: "Resting Bench" },
-                { x: 100, y: 550, type: 'tree', name: "Ancient Tree" }
-            ],
-            
-            // Paths connecting houses
-            paths: [
-                // Main horizontal paths
-                { x: 150, y: 180, width: 550, height: 20, color: '#8b7355' },
-                { x: 150, y: 300, width: 550, height: 20, color: '#8b7355' },
-                { x: 150, y: 420, width: 550, height: 20, color: '#8b7355' },
-                { x: 150, y: 540, width: 550, height: 20, color: '#8b7355' },
-                
-                // Vertical paths
-                { x: 250, y: 80, width: 20, height: 520, color: '#8b7355' },
-                { x: 450, y: 80, width: 20, height: 520, color: '#8b7355' },
-                { x: 650, y: 80, width: 20, height: 520, color: '#8b7355' },
-                
-                // Cross paths
-                { x: 350, y: 240, width: 20, height: 120, color: '#8b7355' },
-                { x: 550, y: 240, width: 20, height: 120, color: '#8b7355' }
-            ],
-            
-            // Trees and decorations
-            trees: [
-                { x: 100, y: 150, size: 25, color: '#2d5a27' },
-                { x: 100, y: 450, size: 30, color: '#2d5a27' },
-                { x: 750, y: 150, size: 28, color: '#2d5a27' },
-                { x: 750, y: 450, size: 26, color: '#2d5a27' },
-                { x: 50, y: 300, size: 32, color: '#2d5a27' },
-                { x: 800, y: 300, size: 30, color: '#2d5a27' },
-                // Row of trees
-                { x: 50, y: 100, size: 20, color: '#2d5a27' },
-                { x: 50, y: 200, size: 22, color: '#2d5a27' },
-                { x: 50, y: 400, size: 24, color: '#2d5a27' },
-                { x: 50, y: 500, size: 21, color: '#2d5a27' },
-                { x: 800, y: 100, size: 23, color: '#2d5a27' },
-                { x: 800, y: 200, size: 25, color: '#2d5a27' },
-                { x: 800, y: 400, size: 22, color: '#2d5a27' },
-                { x: 800, y: 500, size: 24, color: '#2d5a27' }
-            ],
-            
-            // Flowers and bushes
-            decorations: []
+            // Building interiors
+            buildingInteriors: {
+                'pokemon_center': {
+                    name: 'Pokémon Center',
+                    color: '#ff9999',
+                    furniture: [
+                        { type: 'counter', x: 300, y: 300, width: 200, height: 30 },
+                        { type: 'healing_machine', x: 350, y: 250, width: 100, height: 80 },
+                        { type: 'chairs', x: 250, y: 400, width: 40, height: 30 },
+                        { type: 'chairs', x: 510, y: 400, width: 40, height: 30 }
+                    ],
+                    npc: { x: 400, y: 320, type: 'nurse', dialog: "Welcome! I can heal your Pokémon." }
+                },
+                'pokemart': {
+                    name: 'Poké Mart',
+                    color: '#78c850',
+                    furniture: [
+                        { type: 'counter', x: 300, y: 300, width: 200, height: 30 },
+                        { type: 'shelves', x: 200, y: 200, width: 400, height: 60 },
+                        { type: 'cash_register', x: 350, y: 290, width: 30, height: 20 }
+                    ],
+                    npc: { x: 400, y: 320, type: 'shopkeeper', dialog: "Welcome to the Poké Mart! What can I get you?" }
+                },
+                'lab': {
+                    name: 'Research Lab',
+                    color: '#a8a8a8',
+                    furniture: [
+                        { type: 'lab_table', x: 250, y: 250, width: 300, height: 40 },
+                        { type: 'computers', x: 300, y: 200, width: 200, height: 40 },
+                        { type: 'bookshelf', x: 200, y: 350, width: 150, height: 100 },
+                        { type: 'specimen', x: 450, y: 350, width: 150, height: 100 }
+                    ],
+                    npc: { x: 400, y: 300, type: 'professor', dialog: "Welcome to our lab! We study island Pokémon." }
+                },
+                'gym': {
+                    name: 'Island Gym',
+                    color: '#f08030',
+                    furniture: [
+                        { type: 'battle_platform', x: 350, y: 200, width: 100, height: 80 },
+                        { type: 'stands', x: 200, y: 300, width: 400, height: 30 },
+                        { type: 'trophy_case', x: 300, y: 350, width: 200, height: 80 }
+                    ],
+                    npc: { x: 400, y: 250, type: 'gym_leader', dialog: "Welcome to the Island Gym! Ready for a challenge?" }
+                },
+                // Generic house interior
+                'house': {
+                    name: 'House',
+                    color: '#d2b48c',
+                    furniture: [
+                        { type: 'table', x: 350, y: 300, width: 100, height: 30 },
+                        { type: 'chairs', x: 330, y: 330, width: 40, height: 30 },
+                        { type: 'chairs', x: 430, y: 330, width: 40, height: 30 },
+                        { type: 'bed', x: 250, y: 200, width: 120, height: 60 },
+                        { type: 'bookshelf', x: 550, y: 200, width: 50, height: 80 }
+                    ],
+                    npc: { x: 400, y: 350, type: 'resident', dialog: "Welcome to my home! Make yourself comfortable." }
+                }
+            }
         };
-
-        // Generate random decorations
-        for (let i = 0; i < 100; i++) {
-            village.decorations.push({
-                x: Math.random() * 800,
-                y: Math.random() * 600,
-                type: Math.random() > 0.5 ? 'flower' : 'bush',
-                color: ['#ff6b9d', '#ffd166', '#06d6a0', '#118ab2'][Math.floor(Math.random() * 4)],
-                size: Math.random() * 8 + 4
-            });
-        }
 
         // Initialize game
         function initGame() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            minimapCanvas.width = 150;
-            minimapCanvas.height = 150;
             
             window.addEventListener('resize', () => {
                 canvas.width = window.innerWidth;
@@ -457,6 +558,11 @@
             
             // Setup joystick
             setupJoystick();
+            
+            // Initialize areas
+            islandVillage.areas.forEach(area => {
+                gameState.areas[area.id] = area;
+            });
             
             // Start game loop
             gameLoop();
@@ -554,399 +660,532 @@
             document.getElementById('dialogBox').style.display = 'block';
         }
 
+        // Fade screen for transitions
+        function fadeScreen(fadeIn, callback) {
+            const fade = document.getElementById('screenFade');
+            if (fadeIn) {
+                fade.style.opacity = '1';
+                setTimeout(() => {
+                    if (callback) callback();
+                    setTimeout(() => {
+                        fade.style.opacity = '0';
+                    }, 500);
+                }, 500);
+            } else {
+                fade.style.opacity = '0';
+                if (callback) callback();
+            }
+        }
+
+        // Change area
+        function changeArea(areaId) {
+            fadeScreen(true, () => {
+                gameState.player.currentArea = areaId;
+                gameState.player.x = 400;
+                gameState.player.y = 300;
+                updateLocationIndicator();
+                fadeScreen(false);
+            });
+        }
+
+        // Enter building
+        function enterBuilding(buildingId, buildingData) {
+            fadeScreen(true, () => {
+                gameState.player.inBuilding = true;
+                gameState.player.currentBuilding = {
+                    id: buildingId,
+                    data: buildingData
+                };
+                gameState.player.x = 400;
+                gameState.player.y = 450;
+                updateLocationIndicator();
+                fadeScreen(false);
+                
+                // Show building entry dialog
+                const interior = islandVillage.buildingInteriors[buildingData.type] || islandVillage.buildingInteriors.house;
+                showDialog(`You entered ${buildingData.name}.`);
+            });
+        }
+
+        // Exit building
+        function exitBuilding() {
+            fadeScreen(true, () => {
+                gameState.player.inBuilding = false;
+                gameState.player.currentBuilding = null;
+                gameState.player.x = 400;
+                gameState.player.y = 400;
+                updateLocationIndicator();
+                fadeScreen(false);
+                showDialog("You left the building.");
+            });
+        }
+
+        // Update location indicator
+        function updateLocationIndicator() {
+            const indicator = document.getElementById('locationIndicator');
+            if (gameState.player.inBuilding) {
+                indicator.textContent = gameState.player.currentBuilding.data.name;
+            } else {
+                const area = gameState.areas[gameState.player.currentArea];
+                indicator.textContent = area.name;
+            }
+            indicator.style.display = 'block';
+        }
+
         // Interaction system
         function interact() {
             if (gameState.inDialog) return;
             
-            // Check for nearby NPCs
-            for (const npc of village.npcs) {
+            if (gameState.player.inBuilding) {
+                // Inside building - talk to NPC or exit
+                const building = gameState.player.currentBuilding;
+                const interior = islandVillage.buildingInteriors[building.data.type] || islandVillage.buildingInteriors.house;
+                
+                // Check if near NPC
+                const npc = interior.npc;
                 const distance = Math.sqrt(
                     Math.pow(gameState.player.x - npc.x, 2) + 
                     Math.pow(gameState.player.y - npc.y, 2)
                 );
                 
-                if (distance < 50) {
+                if (distance < 80) {
                     showDialog(`${getNPCTypeName(npc.type)}: "${npc.dialog}"`);
-                    return;
+                } else {
+                    // Show exit option
+                    showDialog("What would you like to do?", [
+                        { text: "Exit Building", action: exitBuilding },
+                        { text: "Look Around", action: () => showDialog("You're in a cozy building.") }
+                    ]);
                 }
-            }
-            
-            // Check for nearby houses
-            for (const house of village.houses) {
-                const distance = Math.sqrt(
-                    Math.pow(gameState.player.x - house.x, 2) + 
-                    Math.pow(gameState.player.y - house.y, 2)
-                );
+            } else {
+                // Outside - check for nearby interactions
+                const area = gameState.areas[gameState.player.currentArea];
                 
-                if (distance < 60) {
-                    if (gameState.player.inHouse && gameState.player.currentHouse === house.id) {
-                        // Exit house
-                        gameState.player.inHouse = false;
-                        gameState.player.currentHouse = null;
-                        showDialog(`You left ${house.name}.`);
-                    } else if (!gameState.player.inHouse) {
-                        // Enter house
-                        gameState.player.inHouse = true;
-                        gameState.player.currentHouse = house.id;
-                        const houseDialog = getHouseDialog(house);
-                        showDialog(houseDialog);
+                // Check buildings
+                for (const building of area.buildings) {
+                    const distance = Math.sqrt(
+                        Math.pow(gameState.player.x - building.x, 2) + 
+                        Math.pow(gameState.player.y - building.y, 2)
+                    );
+                    
+                    if (distance < 60) {
+                        showDialog(`Do you want to enter ${building.name}?`, [
+                            { text: "Enter", action: () => enterBuilding(building.id, building) },
+                            { text: "Cancel", action: () => {} }
+                        ]);
+                        return;
                     }
-                    return;
                 }
-            }
-            
-            // Check for special locations
-            for (const special of village.special) {
-                const distance = Math.sqrt(
-                    Math.pow(gameState.player.x - special.x, 2) + 
-                    Math.pow(gameState.player.y - special.y, 2)
-                );
                 
-                if (distance < 40) {
-                    showDialog(`You're at the ${special.name}. ${getSpecialDialog(special.type)}`);
-                    return;
+                // Check NPCs
+                for (const npc of area.npcs) {
+                    const distance = Math.sqrt(
+                        Math.pow(gameState.player.x - npc.x, 2) + 
+                        Math.pow(gameState.player.y - npc.y, 2)
+                    );
+                    
+                    if (distance < 50) {
+                        showDialog(`${getNPCTypeName(npc.type)}: "${npc.dialog}"`);
+                        return;
+                    }
                 }
+                
+                // Check area transitions
+                const playerNearEdge = 
+                    gameState.player.x < 50 || 
+                    gameState.player.x > 750 || 
+                    gameState.player.y < 50 || 
+                    gameState.player.y > 550;
+                
+                if (playerNearEdge) {
+                    const direction = getDirectionFromPosition();
+                    const area = gameState.areas[gameState.player.currentArea];
+                    
+                    if (area.connections[direction]) {
+                        const newAreaId = area.connections[direction];
+                        const newArea = gameState.areas[newAreaId];
+                        showDialog(`This path leads to ${newArea.name}. Go there?`, [
+                            { text: "Go", action: () => changeArea(newAreaId) },
+                            { text: "Stay", action: () => {} }
+                        ]);
+                        return;
+                    }
+                }
+                
+                // Default dialog
+                showDialog("There's nothing special here.");
             }
-            
-            // Default dialog
-            showDialog("There's nothing special here. Try talking to someone or entering a building.");
         }
 
         function getNPCTypeName(type) {
             const names = {
-                'scientist': 'Scientist',
-                'trainer': 'Pokémon Trainer',
-                'child': 'Youngster',
-                'shopkeeper': 'Shopkeeper',
-                'gymleader': 'Gym Leader',
-                'oldman': 'Elder',
-                'nurse': 'Nurse Joy',
-                'teacher': 'Teacher',
+                'mayor': 'Mayor',
+                'child': 'Child',
+                'hiker': 'Hiker',
+                'lady': 'Lady',
+                'man': 'Man',
+                'old_woman': 'Grandma',
                 'fisherman': 'Fisherman',
-                'move_tutor': 'Move Tutor'
+                'scientist': 'Scientist',
+                'researcher': 'Researcher',
+                'gardener': 'Gardener',
+                'gym_leader': 'Gym Leader',
+                'swimmer': 'Swimmer',
+                'nurse': 'Nurse Joy',
+                'shopkeeper': 'Shopkeeper',
+                'professor': 'Professor',
+                'resident': 'Resident'
             };
             return names[type] || 'Villager';
         }
 
-        function getHouseDialog(house) {
-            const dialogs = {
-                'lab': `Welcome to ${house.name}! This is where Pokémon research happens.`,
-                'shop': `Welcome to ${house.name}! We have items for sale.`,
-                'gym': `Welcome to ${house.name}! Trainers battle here.`,
-                'center': `Welcome to ${house.name}! We heal your Pokémon.`,
-                'special': `You entered ${house.name}.`,
-                'house': `You're in ${house.name}. It's cozy inside.`
-            };
-            return dialogs[house.type] || `You entered ${house.name}.`;
+        function getDirectionFromPosition() {
+            if (gameState.player.x < 50) return 'west';
+            if (gameState.player.x > 750) return 'east';
+            if (gameState.player.y < 50) return 'north';
+            if (gameState.player.y > 550) return 'south';
+            return null;
         }
 
-        function getSpecialDialog(type) {
-            const dialogs = {
-                'fountain': "The water looks refreshing!",
-                'statue': "This statue commemorates the village founder.",
-                'bench': "A good place to rest and watch the village.",
-                'tree': "This ancient tree has stood here for centuries."
-            };
-            return dialogs[type] || "This is a special place in the village.";
-        }
-
-        // Minimap
         function toggleMap() {
-            gameState.showMinimap = !gameState.showMinimap;
-            document.getElementById('minimap').style.display = gameState.showMinimap ? 'block' : 'none';
-        }
-
-        function renderMinimap() {
-            if (!gameState.showMinimap) return;
-            
-            minimapCtx.clearRect(0, 0, 150, 150);
-            
-            // Draw minimap background
-            minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            minimapCtx.fillRect(0, 0, 150, 150);
-            
-            // Draw village bounds
-            const scale = 0.1;
-            const offsetX = 10;
-            const offsetY = 10;
-            
-            // Draw paths
-            minimapCtx.fillStyle = '#8b7355';
-            village.paths.forEach(path => {
-                minimapCtx.fillRect(
-                    path.x * scale + offsetX,
-                    path.y * scale + offsetY,
-                    path.width * scale,
-                    path.height * scale
-                );
-            });
-            
-            // Draw houses
-            village.houses.forEach(house => {
-                minimapCtx.fillStyle = house.type === 'center' ? '#ff9999' : '#a0522d';
-                minimapCtx.fillRect(
-                    house.x * scale + offsetX,
-                    house.y * scale + offsetY,
-                    house.width * scale,
-                    house.height * scale
-                );
-            });
-            
-            // Draw player
-            minimapCtx.fillStyle = '#ff4444';
-            minimapCtx.beginPath();
-            minimapCtx.arc(
-                gameState.player.x * scale + offsetX,
-                gameState.player.y * scale + offsetY,
-                3, 0, Math.PI * 2
-            );
-            minimapCtx.fill();
-            
-            // Draw border
-            minimapCtx.strokeStyle = '#4a90e2';
-            minimapCtx.lineWidth = 2;
-            minimapCtx.strokeRect(0, 0, 150, 150);
-            
-            // Draw label
-            minimapCtx.fillStyle = '#fff';
-            minimapCtx.font = '10px Arial';
-            minimapCtx.fillText('SUNFLOWER VILLAGE', 5, 145);
+            showDialog("Island Village Map\n\n" +
+                      "North: Residential Area\n" +
+                      "East: Cliffside Area\n" +
+                      "West: Garden Area\n" +
+                      "South: Beach\n" +
+                      "Center: Village Square");
         }
 
         // Rendering
         function render() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            if (gameState.player.inHouse) {
-                renderHouseInterior();
+            if (gameState.player.inBuilding) {
+                renderBuildingInterior();
             } else {
-                renderVillage();
+                renderCurrentArea();
             }
             
-            renderMinimap();
+            drawPlayer();
         }
 
-        function renderVillage() {
-            // Sky
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(1, '#E0F6FF');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function renderCurrentArea() {
+            const area = gameState.areas[gameState.player.currentArea];
             
-            // Clouds
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            for (let i = 0; i < 5; i++) {
-                const cloudX = (gameState.camera.x * 0.1 + i * 150) % (canvas.width + 300) - 150;
-                const cloudY = 50 + Math.sin(Date.now() * 0.0003 + i) * 25;
-                drawCloud(cloudX, cloudY);
-            }
+            // Draw ground based on area type
+            drawGround(area.type);
             
-            // Apply camera transform
-            ctx.save();
-            ctx.translate(canvas.width/2 - gameState.player.x, canvas.height/2 - gameState.player.y);
-            
-            // Draw paths
-            village.paths.forEach(path => {
-                ctx.fillStyle = path.color;
-                ctx.fillRect(path.x, path.y, path.width, path.height);
-            });
-            
-            // Draw decorations
-            village.decorations.forEach(deco => {
-                ctx.fillStyle = deco.color;
-                if (deco.type === 'flower') {
-                    ctx.beginPath();
-                    ctx.arc(deco.x, deco.y, deco.size/2, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            });
-            
-            // Draw trees
-            village.trees.forEach(tree => {
-                ctx.fillStyle = tree.color;
-                ctx.beginPath();
-                ctx.arc(tree.x, tree.y, tree.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Tree trunk
-                ctx.fillStyle = '#8b4513';
-                ctx.fillRect(tree.x - 5, tree.y + tree.size/2, 10, 20);
-            });
-            
-            // Draw houses
-            village.houses.forEach(house => {
-                drawHouse(house);
-                
-                // House label
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(house.name, house.x + house.width/2, house.y - 10);
+            // Draw buildings
+            area.buildings.forEach(building => {
+                drawBuilding(building);
             });
             
             // Draw NPCs
-            village.npcs.forEach(npc => {
+            area.npcs.forEach(npc => {
                 drawNPC(npc);
             });
             
-            // Draw special locations
-            village.special.forEach(special => {
-                drawSpecial(special);
+            // Draw decorations
+            area.decorations.forEach(deco => {
+                drawDecoration(deco, area.type);
             });
             
-            // Draw village boundaries
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(50, 50, 700, 550);
-            
-            // Draw village sign
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(350, 30, 100, 40);
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('SUNFLOWER VILLAGE', 400, 55);
-            
-            // Draw player
-            drawPlayer();
-            
-            ctx.restore();
+            // Draw area border/edge indicators
+            drawAreaEdges(area);
         }
 
-        function drawCloud(x, y) {
-            ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2);
-            ctx.arc(x + 25, y - 10, 25, 0, Math.PI * 2);
-            ctx.arc(x + 55, y, 20, 0, Math.PI * 2);
-            ctx.fill();
+        function drawGround(areaType) {
+            let groundColor, patternColor;
+            
+            switch(areaType) {
+                case 'square':
+                    groundColor = '#8b7355'; // Stone path
+                    patternColor = '#a0522d';
+                    break;
+                case 'path':
+                    groundColor = '#a8a878'; // Dirt path
+                    patternColor = '#8b7355';
+                    break;
+                case 'residential':
+                    groundColor = '#5dbb63'; // Green grass
+                    patternColor = '#57a773';
+                    break;
+                case 'cliff':
+                    groundColor = '#b8a038'; // Rocky ground
+                    patternColor = '#a89030';
+                    break;
+                case 'garden':
+                    groundColor = '#78c850'; // Garden grass
+                    patternColor = '#5dbb63';
+                    break;
+                case 'beach':
+                    groundColor = '#f5deb3'; // Sand
+                    patternColor = '#d2b48c';
+                    break;
+                default:
+                    groundColor = '#5dbb63';
+                    patternColor = '#57a773';
+            }
+            
+            // Fill entire screen with ground
+            ctx.fillStyle = groundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add pattern
+            ctx.fillStyle = patternColor;
+            const tileSize = 40;
+            for(let x = 0; x < canvas.width; x += tileSize) {
+                for(let y = 0; y < canvas.height; y += tileSize) {
+                    if ((x + y) % (tileSize * 2) === 0) {
+                        ctx.fillRect(x, y, tileSize, tileSize);
+                    }
+                }
+            }
+            
+            // Add sky
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(0.3, '#E0F6FF');
+            skyGradient.addColorStop(0.7, 'transparent');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.3);
         }
 
-        function drawHouse(house) {
+        function drawBuilding(building) {
             // Main building
-            ctx.fillStyle = house.color || '#a0522d';
-            ctx.fillRect(house.x, house.y, house.width, house.height);
+            ctx.fillStyle = building.color;
+            ctx.fillRect(building.x - building.width/2, building.y - building.height/2, building.width, building.height);
             
             // Roof
-            ctx.fillStyle = house.roof || '#8b4513';
+            ctx.fillStyle = building.roof;
             ctx.beginPath();
-            ctx.moveTo(house.x - 10, house.y);
-            ctx.lineTo(house.x + house.width/2, house.y - 20);
-            ctx.lineTo(house.x + house.width + 10, house.y);
+            ctx.moveTo(building.x - building.width/2 - 10, building.y - building.height/2);
+            ctx.lineTo(building.x, building.y - building.height/2 - 20);
+            ctx.lineTo(building.x + building.width/2 + 10, building.y - building.height/2);
             ctx.closePath();
             ctx.fill();
             
             // Door
             ctx.fillStyle = '#654321';
-            ctx.fillRect(house.x + house.width/2 - 8, house.y + house.height - 20, 16, 20);
+            ctx.fillRect(building.x - 8, building.y + building.height/2 - 20, 16, 20);
             
             // Windows
             ctx.fillStyle = '#4a8bca';
-            ctx.fillRect(house.x + 15, house.y + 15, 12, 12);
-            ctx.fillRect(house.x + house.width - 27, house.y + 15, 12, 12);
+            ctx.fillRect(building.x - building.width/2 + 15, building.y - 10, 12, 12);
+            ctx.fillRect(building.x + building.width/2 - 27, building.y - 10, 12, 12);
             
-            // Special features based on type
-            if (house.type === 'center') {
-                // Red cross
-                ctx.fillStyle = '#ff4444';
-                ctx.fillRect(house.x + house.width/2 - 15, house.y - 25, 30, 5);
-                ctx.fillRect(house.x + house.width/2 - 2, house.y - 35, 4, 25);
-            } else if (house.type === 'shop') {
-                // Shop sign
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(house.x + house.width/2, house.y - 25, 10, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Building name
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(building.name, building.x, building.y - building.height/2 - 25);
         }
 
         function drawNPC(npc) {
-            // NPC body
+            // NPC body color based on type
             const npcColors = {
-                'scientist': '#4a90e2',
-                'trainer': '#ff4444',
+                'mayor': '#4a90e2',
                 'child': '#ff6b9d',
-                'shopkeeper': '#8b4513',
-                'gymleader': '#ffd700',
-                'oldman': '#888',
-                'nurse': '#ff9999',
-                'teacher': '#78c850',
+                'hiker': '#8b4513',
+                'lady': '#f08030',
+                'man': '#2c8bff',
+                'old_woman': '#888',
                 'fisherman': '#6890f0',
-                'move_tutor': '#f08030'
+                'scientist': '#a8a8a8',
+                'researcher': '#78c850',
+                'gardener': '#57a773',
+                'gym_leader': '#ffd700',
+                'swimmer': '#87CEEB'
             };
             
             ctx.fillStyle = npcColors[npc.type] || '#fff';
             ctx.beginPath();
-            ctx.arc(npc.x, npc.y, 10, 0, Math.PI * 2);
+            ctx.arc(npc.x, npc.y, 12, 0, Math.PI * 2);
             ctx.fill();
             
-            // NPC face
+            // Face
             ctx.fillStyle = '#ffcc99';
             ctx.beginPath();
-            ctx.arc(npc.x, npc.y - 3, 6, 0, Math.PI * 2);
+            ctx.arc(npc.x, npc.y - 2, 8, 0, Math.PI * 2);
             ctx.fill();
             
             // Interaction indicator
             ctx.fillStyle = '#4a90e2';
             ctx.beginPath();
-            ctx.arc(npc.x, npc.y - 20, 4, 0, Math.PI * 2);
+            ctx.arc(npc.x, npc.y - 20, 5, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        function drawSpecial(special) {
-            switch(special.type) {
+        function drawDecoration(deco, areaType) {
+            switch(deco.type) {
+                case 'tree':
+                    ctx.fillStyle = areaType === 'beach' ? '#2d5a27' : '#3a7d34';
+                    ctx.beginPath();
+                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Trunk
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(deco.x - 5, deco.y + deco.size/2, 10, 25);
+                    break;
+                    
+                case 'palm_tree':
+                    // Trunk
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(deco.x - 5, deco.y, 10, 40);
+                    // Leaves
+                    ctx.fillStyle = '#2d5a27';
+                    ctx.beginPath();
+                    ctx.arc(deco.x, deco.y - 10, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
                 case 'fountain':
                     ctx.fillStyle = '#4a8bca';
                     ctx.beginPath();
-                    ctx.arc(special.x, special.y, 15, 0, Math.PI * 2);
+                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
                     ctx.fill();
-                    
-                    // Water effect
+                    // Water animation
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                     for(let i = 0; i < 3; i++) {
                         const offset = Math.sin(Date.now() * 0.002 + i) * 3;
                         ctx.beginPath();
-                        ctx.arc(special.x, special.y - 5 + offset, 8, 0, Math.PI * 2);
+                        ctx.arc(deco.x, deco.y - 5 + offset, deco.size/2, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    break;
-                    
-                case 'statue':
-                    ctx.fillStyle = '#888';
-                    // Base
-                    ctx.fillRect(special.x - 10, special.y, 20, 5);
-                    // Body
-                    ctx.fillRect(special.x - 5, special.y - 20, 10, 20);
-                    // Head
-                    ctx.beginPath();
-                    ctx.arc(special.x, special.y - 25, 5, 0, Math.PI * 2);
-                    ctx.fill();
                     break;
                     
                 case 'bench':
                     ctx.fillStyle = '#8b4513';
                     // Seat
-                    ctx.fillRect(special.x - 20, special.y, 40, 5);
+                    ctx.fillRect(deco.x - deco.size, deco.y, deco.size * 2, 8);
                     // Back
-                    ctx.fillRect(special.x - 20, special.y - 10, 40, 3);
+                    ctx.fillRect(deco.x - deco.size, deco.y - 8, deco.size * 2, 4);
                     // Legs
-                    ctx.fillRect(special.x - 18, special.y + 5, 4, 10);
-                    ctx.fillRect(special.x + 14, special.y + 5, 4, 10);
+                    ctx.fillRect(deco.x - deco.size + 5, deco.y + 8, 6, 15);
+                    ctx.fillRect(deco.x + deco.size - 11, deco.y + 8, 6, 15);
                     break;
                     
-                case 'tree':
+                case 'sign':
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(deco.x - 30, deco.y - 20, 60, 40);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(deco.text, deco.x, deco.y);
+                    break;
+                    
+                case 'flower_bed':
+                    ctx.fillStyle = '#78c850';
+                    ctx.fillRect(deco.x - deco.size/2, deco.y - deco.size/2, deco.size, deco.size);
+                    // Flowers
+                    const flowerColors = ['#ff6b9d', '#ffd700', '#87CEEB', '#ff4444'];
+                    for(let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const fx = deco.x + Math.cos(angle) * (deco.size/3);
+                        const fy = deco.y + Math.sin(angle) * (deco.size/3);
+                        ctx.fillStyle = flowerColors[i % flowerColors.length];
+                        ctx.beginPath();
+                        ctx.arc(fx, fy, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                    
+                case 'rock':
+                    ctx.fillStyle = '#888';
+                    ctx.beginPath();
+                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
+                case 'bush':
                     ctx.fillStyle = '#2d5a27';
                     ctx.beginPath();
-                    ctx.arc(special.x, special.y, 20, 0, Math.PI * 2);
+                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.fillStyle = '#8b4513';
-                    ctx.fillRect(special.x - 8, special.y + 15, 16, 25);
                     break;
             }
+        }
+
+        function drawAreaEdges(area) {
+            // Draw exit indicators
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 5]);
+            
+            for (const [direction, targetArea] of Object.entries(area.connections)) {
+                switch(direction) {
+                    case 'north':
+                        ctx.beginPath();
+                        ctx.moveTo(300, 30);
+                        ctx.lineTo(500, 30);
+                        ctx.stroke();
+                        break;
+                    case 'south':
+                        ctx.beginPath();
+                        ctx.moveTo(300, canvas.height - 30);
+                        ctx.lineTo(500, canvas.height - 30);
+                        ctx.stroke();
+                        break;
+                    case 'east':
+                        ctx.beginPath();
+                        ctx.moveTo(canvas.width - 30, 250);
+                        ctx.lineTo(canvas.width - 30, 350);
+                        ctx.stroke();
+                        break;
+                    case 'west':
+                        ctx.beginPath();
+                        ctx.moveTo(30, 250);
+                        ctx.lineTo(30, 350);
+                        ctx.stroke();
+                        break;
+                }
+            }
+            ctx.setLineDash([]);
+        }
+
+        function renderBuildingInterior() {
+            const building = gameState.player.currentBuilding;
+            const interior = islandVillage.buildingInteriors[building.data.type] || islandVillage.buildingInteriors.house;
+            
+            // Draw walls and floor
+            ctx.fillStyle = interior.color;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw floor pattern
+            ctx.fillStyle = '#8b7355';
+            const tileSize = 40;
+            for(let x = 0; x < canvas.width; x += tileSize) {
+                for(let y = 0; y < canvas.height; y += tileSize) {
+                    if ((x + y) % (tileSize * 2) === 0) {
+                        ctx.fillRect(x, y, tileSize, tileSize);
+                    }
+                }
+            }
+            
+            // Draw furniture
+            interior.furniture.forEach(item => {
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(item.x - item.width/2, item.y - item.height/2, item.width, item.height);
+            });
+            
+            // Draw NPC if present
+            if (interior.npc) {
+                drawNPC(interior.npc);
+            }
+            
+            // Draw exit door
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(canvas.width/2 - 40, canvas.height - 80, 80, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('EXIT', canvas.width/2, canvas.height - 60);
+            
+            // Building name
+            ctx.fillStyle = '#000';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(building.data.name, canvas.width/2, 50);
         }
 
         function drawPlayer() {
@@ -957,7 +1196,6 @@
                 player.spriteFrame = (player.spriteFrame + 0.2) % 8;
             }
             
-            // Draw player (trainer)
             ctx.save();
             ctx.translate(player.x, player.y);
             
@@ -991,7 +1229,7 @@
             ctx.fillRect(-6, 12, 4, 8 + legOffset);
             ctx.fillRect(2, 12, 4, 8 - legOffset);
             
-            // Interaction indicator
+            // Interaction indicator if near something
             if (checkNearbyInteraction()) {
                 ctx.fillStyle = '#4a90e2';
                 ctx.beginPath();
@@ -1002,65 +1240,22 @@
             ctx.restore();
         }
 
-        function renderHouseInterior() {
-            // House interior background
-            ctx.fillStyle = '#d2b48c';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Wood floor pattern
-            for(let x = 0; x < canvas.width; x += 40) {
-                for(let y = 0; y < canvas.height; y += 40) {
-                    ctx.fillStyle = (x + y) % 80 === 0 ? '#8b7355' : '#a0522d';
-                    ctx.fillRect(x, y, 40, 40);
-                }
-            }
-            
-            // Furniture
-            const house = village.houses.find(h => h.id === gameState.player.currentHouse);
-            if (house) {
-                ctx.fillStyle = '#fff';
-                ctx.font = '24px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(house.name, canvas.width/2, 50);
-                
-                // Draw some furniture based on house type
-                ctx.fillStyle = '#8b4513';
-                
-                if (house.type === 'house') {
-                    // Bed
-                    ctx.fillRect(canvas.width/2 - 60, canvas.height/2 - 30, 120, 60);
-                    // Table
-                    ctx.fillRect(canvas.width/2 - 40, canvas.height/2 + 50, 80, 20);
-                    // Chairs
-                    ctx.fillRect(canvas.width/2 - 60, canvas.height/2 + 40, 20, 30);
-                    ctx.fillRect(canvas.width/2 + 40, canvas.height/2 + 40, 20, 30);
-                } else if (house.type === 'shop') {
-                    // Counter
-                    ctx.fillRect(canvas.width/2 - 100, canvas.height/2 - 20, 200, 40);
-                    // Shelves
-                    for(let i = 0; i < 3; i++) {
-                        ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 80 + i * 30, 240, 5);
-                    }
-                }
-            }
-            
-            // Exit sign
-            ctx.fillStyle = '#333';
-            ctx.fillRect(canvas.width/2 - 40, canvas.height - 80, 80, 30);
-            ctx.fillStyle = '#fff';
-            ctx.font = '16px Arial';
-            ctx.fillText('EXIT', canvas.width/2, canvas.height - 60);
-            
-            // Draw player in house
-            ctx.save();
-            ctx.translate(canvas.width/2, canvas.height/2);
-            drawPlayer();
-            ctx.restore();
-        }
-
         function checkNearbyInteraction() {
+            if (gameState.player.inBuilding) return true;
+            
+            const area = gameState.areas[gameState.player.currentArea];
+            
+            // Check buildings
+            for (const building of area.buildings) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - building.x, 2) + 
+                    Math.pow(gameState.player.y - building.y, 2)
+                );
+                if (distance < 60) return true;
+            }
+            
             // Check NPCs
-            for (const npc of village.npcs) {
+            for (const npc of area.npcs) {
                 const distance = Math.sqrt(
                     Math.pow(gameState.player.x - npc.x, 2) + 
                     Math.pow(gameState.player.y - npc.y, 2)
@@ -1068,44 +1263,30 @@
                 if (distance < 50) return true;
             }
             
-            // Check houses
-            for (const house of village.houses) {
-                const distance = Math.sqrt(
-                    Math.pow(gameState.player.x - house.x, 2) + 
-                    Math.pow(gameState.player.y - house.y, 2)
-                );
-                if (distance < 60) return true;
-            }
-            
-            // Check special locations
-            for (const special of village.special) {
-                const distance = Math.sqrt(
-                    Math.pow(gameState.player.x - special.x, 2) + 
-                    Math.pow(gameState.player.y - special.y, 2)
-                );
-                if (distance < 40) return true;
-            }
-            
-            return false;
+            // Check area edges
+            return gameState.player.x < 70 || 
+                   gameState.player.x > 730 || 
+                   gameState.player.y < 70 || 
+                   gameState.player.y > 530;
         }
 
         // Game loop
         function gameLoop() {
             // Update player position
-            if (!gameState.inDialog && !gameState.player.inHouse) {
+            if (!gameState.inDialog && !gameState.player.inBuilding) {
                 gameState.player.x += joystick.x * gameState.player.speed;
                 gameState.player.y += joystick.y * gameState.player.speed;
                 
-                // Keep player in village bounds
-                gameState.player.x = Math.max(50, Math.min(750, gameState.player.x));
-                gameState.player.y = Math.max(50, Math.min(550, gameState.player.y));
+                // Keep player on screen
+                gameState.player.x = Math.max(30, Math.min(770, gameState.player.x));
+                gameState.player.y = Math.max(30, Math.min(570, gameState.player.y));
             }
             
             // Update HUD
+            const area = gameState.areas[gameState.player.currentArea];
             document.getElementById('hudContent').innerHTML = `
-                Sunflower Village<br>
-                Position: ${Math.floor(gameState.player.x)}, ${Math.floor(gameState.player.y)}<br>
-                ${gameState.player.inHouse ? 'Inside Building' : 'Exploring Village'}
+                ${area.name}<br>
+                ${gameState.player.inBuilding ? 'Inside Building' : 'Exploring'}
             `;
             
             // Render
@@ -1121,14 +1302,22 @@
             document.getElementById('joyBase').style.display = 'block';
             document.getElementById('hud').style.display = 'block';
             document.getElementById('controls').style.display = 'flex';
+            document.getElementById('locationIndicator').style.display = 'block';
             
-            showDialog("Welcome to Sunflower Village! A peaceful village with many houses and friendly people. Use the joystick to move and the 💬 button to interact with villagers and buildings.");
+            showDialog("Welcome to Island Village! Explore different areas, enter buildings, and talk to villagers. Use the joystick to move and the 💬 button to interact.");
             
+            updateLocationIndicator();
             initGame();
         }
 
-        function showCredits() {
-            showDialog("Pokémon Village Adventure\n\nCreated with HTML5 Canvas\nInspired by Pokémon games\n\nUse the joystick to explore!");
+        function showInstructions() {
+            showDialog("HOW TO PLAY:\n\n" +
+                      "• Use the JOYSTICK to move\n" +
+                      "• Press 💬 to interact with people and buildings\n" +
+                      "• Walk to screen edges to change areas\n" +
+                      "• Enter buildings to explore interiors\n" +
+                      "• Talk to villagers for information\n\n" +
+                      "Explore the entire island village!");
         }
     </script>
 </body>
