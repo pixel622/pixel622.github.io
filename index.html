@@ -1,1100 +1,1630 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pokémon: Pixel Adventure</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐉</text></svg>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f380f">
     <style>
+        /* Reset and Base Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: none;
+            -moz-text-size-adjust: none;
+            -ms-text-size-adjust: none;
+            text-size-adjust: none;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Pokemon GB', monospace;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
-        
-        body {
-            font-family: 'Pokemon GB', monospace;
-            background-color: #000;
-            color: #000;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
+
         @font-face {
             font-family: 'Pokemon GB';
             src: url('https://fonts.cdnfonts.com/s/14507/PokemonGB.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
         }
-        
-        #game-container {
+
+        /* Fullscreen Game Container */
+        #game-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        /* GBA Screen with Authentic Styling */
+        #gba-screen {
             position: relative;
-            width: 480px;
-            height: 320px;
-            background-color: #8bac0f;
-            border: 16px solid #306230;
-            border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="%230f380f"/><rect x="4" y="4" width="24" height="24" fill="%238bac0f"/></svg>') 16 stretch;
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            max-height: 320px;
+            background: linear-gradient(135deg, #0f380f 0%, #306230 100%);
+            border: 20px solid #1a1a1a;
+            border-radius: 20px;
             box-shadow: 
-                0 0 0 8px #0f380f,
-                0 0 30px rgba(0, 0, 0, 0.8),
-                inset 0 0 20px rgba(0, 0, 0, 0.3);
+                inset 0 0 40px rgba(0, 0, 0, 0.8),
+                0 0 60px rgba(139, 172, 15, 0.3),
+                0 20px 80px rgba(0, 0, 0, 0.9);
             overflow: hidden;
-            image-rendering: pixelated;
+            transform: translateZ(0);
+            will-change: transform;
         }
-        
-        #game-screen {
+
+        /* Game Screen Canvas */
+        #game-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #8bac0f;
+            background: #8bac0f;
             z-index: 1;
         }
-        
-        #hud {
+
+        /* GBA Screen Effects */
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .gba-grid {
+            background-image: 
+                linear-gradient(rgba(15, 56, 15, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 56, 15, 0.1) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        .screen-refresh {
+            animation: refresh 8s infinite linear;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(255, 255, 255, 0.02) 50%
+            );
+            background-size: 100% 6px;
+        }
+
+        @keyframes refresh {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(6px); }
+        }
+
+        .crt-overlay {
+            background: 
+                radial-gradient(
+                    ellipse at center,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(15, 56, 15, 0.3) 100%
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.15) 0px,
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+        }
+
+        /* GBA Power LED */
+        .power-led {
+            position: absolute;
+            top: -10px;
+            right: 30px;
+            width: 8px;
+            height: 8px;
+            background: #ff4444;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Game Screens */
+        .game-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 10;
-            pointer-events: none;
         }
-        
-        /* GBA-Style Dialog Box */
+
+        #intro-screen {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        #title-screen {
+            background: linear-gradient(to bottom, #306230, #8bac0f);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        #gameplay-screen {
+            display: none;
+        }
+
+        /* Nintendo Logo Animation */
+        .nintendo-logo {
+            font-size: 32px;
+            text-align: center;
+            animation: logoFade 4s ease-in-out forwards;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .nintendo-logo .copyright {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .nintendo-logo .gba-text {
+            font-size: 14px;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            color: #8bac0f;
+        }
+
+        @keyframes logoFade {
+            0% { opacity: 0; transform: scale(0.8); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
+        /* Pokémon Title Logo */
+        .pokemon-logo {
+            font-size: 48px;
+            color: #ffcc00;
+            text-shadow: 
+                4px 4px 0 #306230,
+                6px 6px 0 rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: logoPulse 3s infinite ease-in-out;
+            transform-origin: center;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .title-subtext {
+            font-size: 20px;
+            color: #e8f8e0;
+            margin-bottom: 60px;
+            text-shadow: 2px 2px 0 #306230;
+        }
+
+        /* GBA Menu System */
+        .gba-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            background: #306230;
+            border: 4px solid #0f380f;
+            color: #e8f8e0;
+            font-size: 20px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s;
+            text-shadow: 2px 2px 0 #0f380f;
+        }
+
+        .menu-item:hover, .menu-item:active, .menu-item.selected {
+            background: #ffcc00;
+            color: #306230;
+            transform: translateY(-2px);
+        }
+
+        .menu-item:active {
+            transform: translateY(0);
+        }
+
+        /* Dialog System */
         .dialog-box {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             height: 96px;
-            background-color: #e8f8e0;
+            background: #e8f8e0;
             border: 4px solid #0f380f;
             border-left: 0;
             border-right: 0;
             border-bottom: 0;
-            padding: 12px 16px;
-            z-index: 20;
+            padding: 16px;
+            z-index: 50;
             display: none;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
         }
-        
+
         .dialog-text {
-            font-size: 16px;
-            line-height: 20px;
-            letter-spacing: 0.5px;
+            font-size: 18px;
+            line-height: 24px;
             color: #0f380f;
+            height: 48px;
+            overflow: hidden;
             font-family: 'Pokemon GB', monospace;
         }
-        
+
         .dialog-continue {
             position: absolute;
-            bottom: 12px;
-            right: 16px;
-            font-size: 14px;
+            bottom: 16px;
+            right: 24px;
             color: #306230;
+            font-size: 14px;
             animation: blink 1s infinite;
         }
-        
+
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
-        
-        /* GBA Menu Box */
-        .menu-box {
+
+        /* Name Input Screen */
+        .name-input-screen {
             position: absolute;
-            background-color: #e8f8e0;
-            border: 4px solid #0f380f;
-            padding: 8px;
-            z-index: 30;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #e8f8e0;
+            border: 12px solid #0f380f;
+            padding: 40px;
+            z-index: 100;
             display: none;
+            min-width: 300px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
         }
-        
-        .menu-option {
-            padding: 6px 12px;
-            font-size: 16px;
+
+        .name-prompt {
+            font-size: 20px;
             color: #0f380f;
-            cursor: pointer;
-            pointer-events: auto;
-            margin: 2px 0;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.4;
         }
-        
-        .menu-option.selected {
-            background-color: #306230;
+
+        .name-display {
+            font-size: 32px;
+            color: #306230;
+            text-align: center;
+            margin: 24px 0;
+            min-height: 40px;
+            letter-spacing: 6px;
+            font-weight: bold;
+            border-bottom: 4px solid #0f380f;
+            padding-bottom: 12px;
+        }
+
+        .name-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .name-btn {
+            padding: 12px;
+            background: #306230;
             color: #e8f8e0;
+            border: 4px solid #0f380f;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.1s;
         }
-        
-        /* GBA Battle Interface */
+
+        .name-btn:active {
+            background: #ffcc00;
+            color: #306230;
+            transform: scale(0.95);
+        }
+
+        /* Battle Screen */
         .battle-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #8bac0f;
+            background: linear-gradient(to bottom, #3060a8, #8bac0f);
             z-index: 40;
             display: none;
         }
-        
-        .battle-hud {
+
+        .battle-ui {
             position: absolute;
             bottom: 0;
             width: 100%;
             height: 112px;
-            background-color: #306230;
-            border-top: 4px solid #0f380f;
+            background: #306230;
+            border-top: 8px solid #0f380f;
+            padding: 16px;
         }
-        
+
         .battle-options {
-            position: absolute;
-            bottom: 16px;
-            right: 16px;
-            width: 200px;
-            height: 80px;
-            background-color: #e8f8e0;
-            border: 4px solid #0f380f;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2px;
-            padding: 4px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            height: 100%;
         }
-        
+
         .battle-option {
-            font-size: 14px;
+            background: #e8f8e0;
+            border: 4px solid #0f380f;
             color: #0f380f;
-            padding: 8px;
-            text-align: center;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            pointer-events: auto;
+            transition: all 0.1s;
+            font-family: 'Pokemon GB', monospace;
         }
-        
-        .battle-option.selected {
-            background-color: #306230;
-            color: #e8f8e0;
+
+        .battle-option:active {
+            background: #ffcc00;
+            transform: scale(0.95);
         }
-        
+
         .battle-info {
             position: absolute;
-            top: 16px;
-            left: 16px;
-            background-color: #e8f8e0;
-            border: 4px solid #0f380f;
-            padding: 8px;
-            width: 180px;
+            top: 20px;
+            left: 20px;
+            background: #e8f8e0;
+            border: 8px solid #0f380f;
+            padding: 16px;
+            min-width: 200px;
         }
-        
-        .battle-health {
-            height: 12px;
-            background-color: #0f380f;
-            margin: 4px 0;
-            border: 2px solid #000;
+
+        .health-bar {
+            height: 16px;
+            background: #0f380f;
+            margin: 8px 0;
+            border: 3px solid #000;
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .health-fill {
             height: 100%;
-            background-color: #00ff00;
-            width: 100%;
+            background: #00ff00;
+            transition: width 0.3s ease;
         }
-        
-        /* GBA Controls */
-        #controls {
-            position: absolute;
-            bottom: -120px;
-            width: 100%;
-            height: 120px;
-            background-color: rgba(15, 56, 15, 0.9);
+
+        /* Mobile Controls Overlay */
+        #mobile-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 30vh;
+            z-index: 200;
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 16px;
-            z-index: 50;
-            transition: bottom 0.3s;
+            justify-content: space-between;
+            padding: 20px;
+            pointer-events: none;
         }
-        
+
         .d-pad {
-            width: 96px;
-            height: 96px;
+            width: 150px;
+            height: 150px;
             position: relative;
+            pointer-events: auto;
         }
-        
-        .d-button {
+
+        .d-btn {
             position: absolute;
-            width: 32px;
-            height: 32px;
-            background-color: #444;
-            border: 2px solid #222;
+            width: 50px;
+            height: 50px;
+            background: rgba(48, 98, 48, 0.9);
+            border: 4px solid #0f380f;
+            color: #e8f8e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: all 0.1s;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        
-        .d-up { top: 0; left: 32px; }
-        .d-down { bottom: 0; left: 32px; }
-        .d-left { top: 32px; left: 0; }
-        .d-right { top: 32px; right: 0; }
-        
-        .d-button:active {
-            background-color: #666;
+
+        .d-btn:active {
+            background: #ffcc00;
+            color: #306230;
+            transform: scale(0.9);
         }
-        
+
+        .d-up { top: 0; left: 50px; }
+        .d-down { bottom: 0; left: 50px; }
+        .d-left { top: 50px; left: 0; }
+        .d-right { top: 50px; right: 0; }
+
         .action-buttons {
             display: flex;
-            gap: 16px;
+            flex-direction: column;
+            gap: 20px;
+            pointer-events: auto;
+            align-items: center;
         }
-        
-        .action-button {
-            width: 48px;
-            height: 48px;
-            background-color: #306230;
-            border: 4px solid #0f380f;
+
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(139, 172, 15, 0.9);
+            border: 6px solid #306230;
             border-radius: 50%;
             color: #e8f8e0;
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 12px;
-            text-align: center;
-            cursor: pointer;
-            pointer-events: auto;
-        }
-        
-        .action-button:active {
-            background-color: #408050;
-        }
-        
-        /* GBA Intro Screen */
-        .intro-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 60;
-            display: flex;
             justify-content: center;
-            align-items: center;
-        }
-        
-        .nintendo-logo {
-            color: #fff;
-            font-size: 24px;
-            text-align: center;
-            animation: fadeInOut 4s forwards;
-        }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        
-        .title-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #306230, #8bac0f);
-            z-index: 59;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .title-logo {
-            font-size: 32px;
-            color: #ffcc00;
-            text-shadow: 
-                3px 3px 0 #306230,
-                -1px -1px 0 #306230,
-                1px -1px 0 #306230,
-                -1px 1px 0 #306230;
-            margin-bottom: 40px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        .title-options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .title-option {
             font-size: 20px;
-            color: #e8f8e0;
-            text-align: center;
-            padding: 8px 24px;
-            background-color: #306230;
-            border: 3px solid #0f380f;
+            font-weight: bold;
             cursor: pointer;
-            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: all 0.1s;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-        
-        .title-option.selected {
-            background-color: #ffcc00;
+
+        .action-btn:active {
+            background: #ffcc00;
             color: #306230;
+            transform: scale(0.9);
         }
-        
-        /* GBA Character Sprites */
-        .sprite {
-            position: absolute;
-            image-rendering: pixelated;
-            z-index: 5;
-        }
-        
-        .player-sprite {
-            width: 32px;
-            height: 32px;
-        }
-        
-        .npc-sprite {
-            width: 32px;
-            height: 32px;
-        }
-        
-        .pokemon-sprite {
-            width: 64px;
-            height: 64px;
-        }
-        
-        /* GBA Map Tiles */
-        .map-tile {
-            position: absolute;
-            width: 32px;
-            height: 32px;
-            background-color: #8bac0f;
-            border: 1px solid #0f380f;
-            z-index: 2;
-        }
-        
-        .grass-tile {
-            background-color: #4a752c;
-        }
-        
-        .path-tile {
-            background-color: #a8a878;
-        }
-        
-        .water-tile {
-            background-color: #3060a8;
-        }
-        
-        .building-tile {
-            background-color: #d87070;
-        }
-        
-        /* GBA Text Input */
-        .name-input {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #e8f8e0;
-            border: 8px solid #0f380f;
-            padding: 32px;
-            z-index: 70;
+
+        /* Fullscreen Instructions */
+        #fullscreen-instructions {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
             display: none;
-        }
-        
-        .name-prompt {
-            font-size: 18px;
-            color: #0f380f;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        
-        .name-display {
-            font-size: 24px;
-            color: #306230;
-            text-align: center;
-            margin: 16px 0;
-            min-height: 32px;
-            letter-spacing: 4px;
-        }
-        
-        .name-options {
-            display: flex;
+            flex-direction: column;
             justify-content: center;
-            gap: 16px;
-            margin-top: 16px;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
         }
-        
-        .name-button {
-            padding: 8px 16px;
-            background-color: #306230;
-            color: #e8f8e0;
-            border: 3px solid #0f380f;
-            cursor: pointer;
-            pointer-events: auto;
+
+        .fullscreen-icon {
+            font-size: 60px;
+            margin-bottom: 30px;
+            color: #ffcc00;
+            animation: bounce 2s infinite;
         }
-        
-        /* GBA Text Animation */
-        .text-typing {
-            display: inline-block;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 3px solid #0f380f;
-            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
-        
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
+
+        /* Landscape Warning */
+        #landscape-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffcc00;
+            text-align: center;
+            padding: 20px;
         }
-        
-        @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: #0f380f }
+
+        .rotate-icon {
+            font-size: 80px;
+            margin-bottom: 30px;
+            animation: rotate 2s infinite linear;
         }
-        
-        /* Game Boy Screen Effect */
-        .scanlines {
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 0, 0, 0.1) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 100;
+            background: #000;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #8bac0f;
         }
-        
-        .crt-effect {
+
+        .loading-text {
+            font-size: 20px;
+            margin-top: 20px;
+            animation: loadingPulse 1.5s infinite;
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Game Boy Styling */
+        .gb-speaker {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(
-                ellipse at center,
-                rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0.6) 100%
-            );
-            pointer-events: none;
-            z-index: 101;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
         }
-        
-        /* Mobile Responsive */
-        @media (max-width: 600px) {
-            #game-container {
-                transform: scale(0.8);
+
+        .gb-speaker-dot {
+            width: 8px;
+            height: 8px;
+            background: #555;
+            border-radius: 50%;
+        }
+
+        .gb-label {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #666;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* Media Queries for Different Devices */
+        @media (max-width: 768px) {
+            #gba-screen {
+                max-width: 100vw;
+                max-height: 100vh;
+                border-width: 10px;
+                border-radius: 10px;
             }
             
-            #controls {
-                bottom: 0;
+            .pokemon-logo {
+                font-size: 36px;
+            }
+            
+            .title-subtext {
+                font-size: 16px;
+                margin-bottom: 40px;
+            }
+            
+            .menu-item {
+                font-size: 18px;
+                padding: 10px 20px;
+            }
+            
+            .d-pad {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .d-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .action-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
             }
         }
-        
-        @media (max-height: 500px) {
-            #game-container {
-                transform: scale(0.7);
+
+        @media (orientation: portrait) and (max-width: 768px) {
+            #gba-screen {
+                transform: rotate(90deg) scale(0.8);
+                transform-origin: center center;
             }
+            
+            #landscape-warning {
+                display: flex;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 400px) {
+            #gba-screen {
+                transform: scale(0.9);
+            }
+            
+            #mobile-controls {
+                height: 40vh;
+            }
+        }
+
+        /* Prevent text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
-<body>
-    <div id="game-container">
-        <!-- Game Screen -->
-        <div id="game-screen"></div>
-        
-        <!-- GBA Intro Sequence -->
-        <div class="intro-screen" id="intro-screen">
-            <div class="nintendo-logo">
-                <div style="font-size: 32px; margin-bottom: 20px;">©</div>
-                <div>NINTENDO</div>
-                <div style="font-size: 14px; margin-top: 10px;">GAME BOY ADVANCE</div>
-            </div>
-        </div>
-        
-        <!-- Title Screen -->
-        <div class="title-screen" id="title-screen">
-            <div class="title-logo">POKéMON</div>
-            <div style="font-size: 20px; color: #e8f8e0; margin-bottom: 60px;">PIXEL ADVENTURE</div>
-            <div class="title-options">
-                <div class="title-option selected" id="new-game">NEW GAME</div>
-                <div class="title-option" id="continue-game">CONTINUE</div>
-                <div class="title-option" id="options-game">OPTIONS</div>
-            </div>
-        </div>
-        
-        <!-- Name Input Screen -->
-        <div class="name-input" id="name-input">
-            <div class="name-prompt">What is your name?</div>
-            <div class="name-display" id="name-display"></div>
-            <div style="font-size: 12px; color: #306230; text-align: center; margin: 8px 0;">
-                Use A/Z to change letters, B to delete
-            </div>
-            <div class="name-options">
-                <div class="name-button" id="confirm-name">OK</div>
-                <div class="name-button" id="cancel-name">CANCEL</div>
-            </div>
-        </div>
-        
-        <!-- Dialog Box -->
-        <div class="dialog-box" id="dialog-box">
-            <div class="dialog-text" id="dialog-text"></div>
-            <div class="dialog-continue" id="dialog-continue">▼</div>
-        </div>
-        
-        <!-- Battle Screen -->
-        <div class="battle-screen" id="battle-screen">
-            <div class="battle-info">
-                <div>PIKACHU</div>
-                <div>Lv5</div>
-                <div class="battle-health">
-                    <div class="health-fill" id="player-health" style="width: 85%"></div>
+<body class="no-select">
+    <div id="game-wrapper">
+        <!-- GBA Device -->
+        <div id="gba-screen">
+            <!-- Power LED -->
+            <div class="power-led"></div>
+            
+            <!-- Game Screens -->
+            <div id="intro-screen" class="game-screen">
+                <div class="nintendo-logo">
+                    <span class="copyright">©</span>
+                    NINTENDO<br>
+                    <span class="gba-text">GAME BOY ADVANCE</span>
                 </div>
-                <div>HP: 17/20</div>
             </div>
             
-            <div class="battle-hud">
-                <div class="battle-options">
-                    <div class="battle-option selected">FIGHT</div>
-                    <div class="battle-option">POKéMON</div>
-                    <div class="battle-option">BAG</div>
-                    <div class="battle-option">RUN</div>
+            <div id="title-screen" class="game-screen">
+                <div class="pokemon-logo">POKéMON</div>
+                <div class="title-subtext">PIXEL ADVENTURE</div>
+                <div class="gba-menu">
+                    <div class="menu-item selected" id="new-game-btn">NEW GAME</div>
+                    <div class="menu-item" id="continue-btn">CONTINUE</div>
+                    <div class="menu-item" id="options-btn">OPTIONS</div>
                 </div>
             </div>
+            
+            <div id="gameplay-screen" class="game-screen">
+                <canvas id="game-canvas"></canvas>
+                
+                <!-- Dialog Box -->
+                <div id="dialog-box" class="dialog-box">
+                    <div id="dialog-text" class="dialog-text"></div>
+                    <div id="dialog-continue" class="dialog-continue">▼</div>
+                </div>
+                
+                <!-- Battle Screen -->
+                <div id="battle-screen" class="battle-screen">
+                    <div class="battle-info">
+                        <div>PIKACHU Lv5</div>
+                        <div class="health-bar">
+                            <div id="player-health" class="health-fill" style="width: 85%"></div>
+                        </div>
+                        <div>HP: <span id="player-hp">17</span>/20</div>
+                    </div>
+                    <div class="battle-ui">
+                        <div class="battle-options">
+                            <div class="battle-option" data-action="fight">FIGHT</div>
+                            <div class="battle-option" data-action="pokemon">POKéMON</div>
+                            <div class="battle-option" data-action="bag">BAG</div>
+                            <div class="battle-option" data-action="run">RUN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Name Input Screen -->
+            <div id="name-input-screen" class="name-input-screen">
+                <div class="name-prompt">What is your name?</div>
+                <div id="name-display" class="name-display"></div>
+                <div style="text-align: center; color: #306230; margin: 16px 0; font-size: 14px;">
+                    Use UP/DOWN to change letters, LEFT/RIGHT to move
+                </div>
+                <div class="name-controls">
+                    <div class="name-btn" data-action="prev">PREV</div>
+                    <div class="name-btn" data-action="next">NEXT</div>
+                    <div class="name-btn" data-action="back">BACK</div>
+                    <div class="name-btn" data-action="space">SPACE</div>
+                    <div class="name-btn" data-action="delete">DEL</div>
+                    <div class="name-btn" data-action="confirm">OK</div>
+                </div>
+            </div>
+            
+            <!-- Screen Effects -->
+            <div class="screen-overlay gba-grid"></div>
+            <div class="screen-overlay screen-refresh"></div>
+            <div class="screen-overlay crt-overlay"></div>
+            
+            <!-- Game Boy Speaker -->
+            <div class="gb-speaker">
+                <div class="gb-speaker-dot"></div>
+                <div class="gb-speaker-dot"></div>
+                <div class="gb-speaker-dot"></div>
+                <div class="gb-speaker-dot"></div>
+                <div class="gb-speaker-dot"></div>
+            </div>
+            
+            <div class="gb-label">GAME BOY ADVANCE</div>
         </div>
         
-        <!-- Game Boy Controls -->
-        <div id="controls">
+        <!-- Mobile Touch Controls -->
+        <div id="mobile-controls">
             <div class="d-pad">
-                <div class="d-button d-up" id="btn-up">↑</div>
-                <div class="d-button d-down" id="btn-down">↓</div>
-                <div class="d-button d-left" id="btn-left">←</div>
-                <div class="d-button d-right" id="btn-right">→</div>
+                <div class="d-btn d-up" data-direction="up">↑</div>
+                <div class="d-btn d-down" data-direction="down">↓</div>
+                <div class="d-btn d-left" data-direction="left">←</div>
+                <div class="d-btn d-right" data-direction="right">→</div>
             </div>
             
             <div class="action-buttons">
-                <div class="action-button" id="btn-a">A</div>
-                <div class="action-button" id="btn-b">B</div>
-                <div class="action-button" id="btn-start">START</div>
-                <div class="action-button" id="btn-select">SELECT</div>
+                <div class="action-btn" id="btn-a">A</div>
+                <div class="action-btn" id="btn-b">B</div>
+                <div class="action-btn" id="btn-start">START</div>
             </div>
         </div>
         
-        <!-- GBA Visual Effects -->
-        <div class="scanlines"></div>
-        <div class="crt-effect"></div>
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div style="width: 60px; height: 60px; border: 6px solid #306230; border-top-color: #ffcc00; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <div class="loading-text">LOADING...</div>
+        </div>
+    </div>
+    
+    <!-- Landscape Warning -->
+    <div id="landscape-warning">
+        <div class="rotate-icon">↻</div>
+        <h2 style="margin-bottom: 20px; color: #ffcc00;">PLEASE ROTATE YOUR DEVICE</h2>
+        <p style="color: #8bac0f; max-width: 400px; line-height: 1.5;">
+            This game is designed for landscape mode.<br>
+            Please rotate your device sideways for the best experience.
+        </p>
+    </div>
+    
+    <!-- Fullscreen Instructions -->
+    <div id="fullscreen-instructions">
+        <div class="fullscreen-icon">⬜</div>
+        <h2 style="margin-bottom: 20px; color: #ffcc00;">FULLSCREEN MODE</h2>
+        <p style="color: #8bac0f; max-width: 400px; line-height: 1.5; margin-bottom: 30px;">
+            For the best GBA experience, we recommend using fullscreen mode.<br><br>
+            Look for the fullscreen button in your browser, or add this to your home screen as a web app.
+        </p>
+        <div style="display: flex; gap: 20px;">
+            <button id="enable-fullscreen" style="padding: 12px 24px; background: #ffcc00; color: #306230; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-family: 'Pokemon GB';">ENABLE</button>
+            <button id="skip-fullscreen" style="padding: 12px 24px; background: #306230; color: #e8f8e0; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-family: 'Pokemon GB';">SKIP</button>
+        </div>
     </div>
 
     <script>
-        // GAME STATE
-        const gameState = {
-            screen: 'intro', // intro, title, overworld, battle, menu
+        // Game State
+        const GameState = {
+            current: 'intro', // intro, title, name_input, gameplay, battle, menu
             player: {
                 name: '',
                 x: 240,
                 y: 160,
                 direction: 'down',
-                sprite: 'player_down',
+                moving: false,
+                sprite: null,
                 pokemon: [
-                    { id: 25, name: 'PIKACHU', level: 5, hp: 20, maxHp: 20 }
+                    { id: 25, name: 'PIKACHU', level: 5, hp: 20, maxHp: 20, moves: ['THUNDERSHOCK', 'QUICK ATTACK', 'TAIL WHIP', 'GROWL'] }
+                ],
+                badges: 0,
+                pokedex: 1,
+                money: 3000,
+                items: [
+                    { id: 'pokeball', name: 'POKÉ BALL', count: 10 },
+                    { id: 'potion', name: 'POTION', count: 3 }
                 ]
+            },
+            map: {
+                current: 'pallet_town',
+                tiles: [],
+                npcs: [],
+                objects: []
             },
             dialog: {
                 active: false,
                 lines: [],
                 currentLine: 0,
-                typing: false
+                typing: false,
+                speed: 30,
+                callback: null
             },
-            map: {
-                tiles: [],
-                npcs: []
+            battle: {
+                active: false,
+                enemy: { id: 16, name: 'PIDGEY', level: 3, hp: 18, maxHp: 18 },
+                turn: 'player'
             },
-            input: {
-                name: '',
+            nameInput: {
+                letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ  -',
                 cursor: 0,
-                letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ -.'
+                name: ''
             }
         };
 
-        // DOM ELEMENTS
-        const gameScreen = document.getElementById('game-screen');
+        // DOM Elements
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
         const introScreen = document.getElementById('intro-screen');
         const titleScreen = document.getElementById('title-screen');
-        const nameInput = document.getElementById('name-input');
+        const gameplayScreen = document.getElementById('gameplay-screen');
         const dialogBox = document.getElementById('dialog-box');
         const dialogText = document.getElementById('dialog-text');
+        const nameInputScreen = document.getElementById('name-input-screen');
         const nameDisplay = document.getElementById('name-display');
         const battleScreen = document.getElementById('battle-screen');
-
-        // GBA COLOR PALETTE
-        const colors = {
-            green1: '#0f380f',
-            green2: '#306230',
-            green3: '#8bac0f',
-            green4: '#9bbc0f',
-            light: '#e8f8e0',
-            dark: '#0f380f'
+        const loadingScreen = document.getElementById('loading-screen');
+        const landscapeWarning = document.getElementById('landscape-warning');
+        const fullscreenInstructions = document.getElementById('fullscreen-instructions');
+        
+        // Game Assets
+        const assets = {
+            tiles: {},
+            sprites: {},
+            characters: {},
+            pokemon: {}
         };
 
-        // INITIALIZE GAME
-        function initGame() {
-            // Start with intro sequence
-            startIntro();
+        // Initialize Game
+        async function initGame() {
+            // Set canvas size
+            resizeCanvas();
             
-            // Setup controls
-            setupControls();
+            // Hide loading screen after a moment
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                startIntro();
+            }, 2000);
             
-            // Setup keyboard for name input
-            setupKeyboard();
+            // Setup event listeners
+            setupEventListeners();
             
-            // Create initial map
-            createMap();
+            // Check orientation
+            checkOrientation();
+            
+            // Show fullscreen instructions on first visit
+            if (!localStorage.getItem('pokemon_fullscreen_shown')) {
+                setTimeout(() => {
+                    fullscreenInstructions.style.display = 'flex';
+                }, 500);
+            }
+            
+            // Initialize audio
+            initAudio();
         }
 
-        // GBA INTRO SEQUENCE
+        // Resize canvas to fit screen
+        function resizeCanvas() {
+            const gbaScreen = document.getElementById('gba-screen');
+            canvas.width = gbaScreen.clientWidth;
+            canvas.height = gbaScreen.clientHeight;
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Window resize
+            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    resizeCanvas();
+                    checkOrientation();
+                }, 100);
+            });
+            
+            // Fullscreen buttons
+            document.getElementById('enable-fullscreen').addEventListener('click', requestFullscreen);
+            document.getElementById('skip-fullscreen').addEventListener('click', () => {
+                fullscreenInstructions.style.display = 'none';
+                localStorage.setItem('pokemon_fullscreen_shown', 'true');
+            });
+            
+            // Title screen buttons
+            document.getElementById('new-game-btn').addEventListener('click', startNewGame);
+            document.getElementById('continue-btn').addEventListener('click', continueGame);
+            document.getElementById('options-btn').addEventListener('click', showOptions);
+            
+            // Name input buttons
+            document.querySelectorAll('.name-btn').forEach(btn => {
+                btn.addEventListener('click', handleNameInput);
+            });
+            
+            // Battle buttons
+            document.querySelectorAll('.battle-option').forEach(btn => {
+                btn.addEventListener('click', handleBattleAction);
+            });
+            
+            // Mobile controls
+            setupMobileControls();
+            
+            // Dialog continue
+            dialogBox.addEventListener('click', advanceDialog);
+            
+            // Keyboard support
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        // Setup Mobile Controls
+        function setupMobileControls() {
+            // D-pad buttons
+            document.querySelectorAll('.d-btn').forEach(btn => {
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const direction = btn.getAttribute('data-direction');
+                    handleMovement(direction, true);
+                });
+                
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    const direction = btn.getAttribute('data-direction');
+                    handleMovement(direction, false);
+                });
+            });
+            
+            // Action buttons
+            document.getElementById('btn-a').addEventListener('click', handleAButton);
+            document.getElementById('btn-b').addEventListener('click', handleBButton);
+            document.getElementById('btn-start').addEventListener('click', handleStartButton);
+        }
+
+        // Handle Keyboard Input
+        function handleKeyboard(e) {
+            if (GameState.current === 'name_input') {
+                handleNameKeyboard(e);
+                return;
+            }
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    handleMovement('up', true);
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    handleMovement('down', true);
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    handleMovement('left', true);
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    handleMovement('right', true);
+                    break;
+                case 'Enter':
+                    handleAButton();
+                    break;
+                case 'Escape':
+                case 'Backspace':
+                    handleBButton();
+                    break;
+                case ' ':
+                    handleStartButton();
+                    break;
+            }
+            
+            // Prevent default for game keys
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter', 'Escape'].includes(e.key)) {
+                e.preventDefault();
+            }
+        }
+
+        // Start Intro Sequence
         function startIntro() {
             // Nintendo logo animation
             setTimeout(() => {
                 introScreen.style.display = 'none';
                 titleScreen.style.display = 'flex';
-                gameState.screen = 'title';
+                GameState.current = 'title';
                 
-                // Play title music (would be audio in real game)
-                console.log("♪ Pokémon Theme Playing ♪");
+                // Play title music
+                playSound('title');
             }, 4000);
         }
 
-        // CREATE GBA-STYLE MAP
-        function createMap() {
-            gameScreen.innerHTML = '';
-            
-            // Create grass background
-            for (let y = 0; y < 10; y++) {
-                for (let x = 0; x < 15; x++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'map-tile grass-tile';
-                    tile.style.left = (x * 32) + 'px';
-                    tile.style.top = (y * 32) + 'px';
-                    gameScreen.appendChild(tile);
-                }
-            }
-            
-            // Create path
-            for (let x = 6; x < 9; x++) {
-                for (let y = 0; y < 10; y++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'map-tile path-tile';
-                    tile.style.left = (x * 32) + 'px';
-                    tile.style.top = (y * 32) + 'px';
-                    gameScreen.appendChild(tile);
-                }
-            }
-            
-            // Create player house
-            createBuilding(3, 2, 3, 3, '#d87070');
-            createBuilding(9, 2, 3, 3, '#70a0d8'); // Lab
-            createBuilding(6, 7, 3, 2, '#f08080'); // Pokémon Center
-            
-            // Create player sprite
-            createPlayer();
-            
-            // Create NPCs
-            createNPC(100, 100, 'oak');
-            createNPC(300, 200, 'rival');
-        }
-
-        function createBuilding(x, y, width, height, color) {
-            for (let dy = 0; dy < height; dy++) {
-                for (let dx = 0; dx < width; dx++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'map-tile';
-                    tile.style.left = ((x + dx) * 32) + 'px';
-                    tile.style.top = ((y + dy) * 32) + 'px';
-                    tile.style.backgroundColor = color;
-                    tile.style.border = '2px solid ' + colors.green1;
-                    gameScreen.appendChild(tile);
-                }
-            }
-        }
-
-        function createPlayer() {
-            const player = document.createElement('div');
-            player.id = 'player';
-            player.className = 'sprite player-sprite';
-            player.style.left = gameState.player.x + 'px';
-            player.style.top = gameState.player.y + 'px';
-            player.style.backgroundColor = '#3060a8'; // Blue for player
-            player.style.border = '2px solid #0f380f';
-            gameScreen.appendChild(player);
-        }
-
-        function createNPC(x, y, type) {
-            const npc = document.createElement('div');
-            npc.className = 'sprite npc-sprite';
-            npc.style.left = x + 'px';
-            npc.style.top = y + 'px';
-            npc.style.backgroundColor = type === 'oak' ? '#a89050' : '#d85050';
-            npc.style.border = '2px solid #0f380f';
-            gameScreen.appendChild(npc);
-        }
-
-        // DIALOG SYSTEM
-        function showDialog(text) {
-            if (typeof text === 'string') {
-                gameState.dialog.lines = text.split('\n');
-            } else {
-                gameState.dialog.lines = text;
-            }
-            gameState.dialog.currentLine = 0;
-            gameState.dialog.active = true;
-            gameState.dialog.typing = true;
-            
-            dialogBox.style.display = 'block';
-            showNextDialogLine();
-        }
-
-        function showNextDialogLine() {
-            if (gameState.dialog.currentLine >= gameState.dialog.lines.length) {
-                closeDialog();
-                return;
-            }
-            
-            const line = gameState.dialog.lines[gameState.dialog.currentLine];
-            dialogText.innerHTML = '';
-            dialogText.classList.add('text-typing');
-            
-            // Simulate GBA typing effect
-            let i = 0;
-            const typeChar = () => {
-                if (i < line.length) {
-                    dialogText.innerHTML += line.charAt(i);
-                    i++;
-                    setTimeout(typeChar, 30); // GBA typing speed
-                } else {
-                    dialogText.classList.remove('text-typing');
-                    gameState.dialog.typing = false;
-                }
-            };
-            
-            typeChar();
-            gameState.dialog.currentLine++;
-        }
-
-        function closeDialog() {
-            dialogBox.style.display = 'none';
-            gameState.dialog.active = false;
-        }
-
-        // NAME INPUT SYSTEM
-        function startNameInput() {
-            gameState.input.name = '';
-            gameState.input.cursor = 0;
-            nameInput.style.display = 'block';
+        // Start New Game
+        function startNewGame() {
+            titleScreen.style.display = 'none';
+            nameInputScreen.style.display = 'block';
+            GameState.current = 'name_input';
             updateNameDisplay();
         }
 
+        // Continue Game
+        function continueGame() {
+            const saved = localStorage.getItem('pokemon_save');
+            if (saved) {
+                GameState.player = JSON.parse(saved);
+                titleScreen.style.display = 'none';
+                gameplayScreen.style.display = 'block';
+                GameState.current = 'gameplay';
+                initOverworld();
+                showDialog(`Welcome back, ${GameState.player.name}!`);
+            } else {
+                showDialog("No save file found...\nStarting new game!");
+                setTimeout(startNewGame, 2000);
+            }
+        }
+
+        // Show Options
+        function showOptions() {
+            showDialog([
+                "OPTIONS",
+                "Sound: ON",
+                "Music: ON",
+                "Text Speed: FAST",
+                "Battle Style: SET",
+                "Save and quit"
+            ]);
+        }
+
+        // Handle Name Input
+        function handleNameInput(e) {
+            const action = e.target.getAttribute('data-action');
+            
+            switch(action) {
+                case 'prev':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor - 1 + GameState.nameInput.letters.length) % GameState.nameInput.letters.length;
+                    break;
+                case 'next':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor + 1) % GameState.nameInput.letters.length;
+                    break;
+                case 'space':
+                    GameState.nameInput.name += ' ';
+                    break;
+                case 'delete':
+                    GameState.nameInput.name = GameState.nameInput.name.slice(0, -1);
+                    break;
+                case 'back':
+                    if (GameState.nameInput.name.length > 0) {
+                        GameState.nameInput.name = GameState.nameInput.name.slice(0, -1);
+                    }
+                    break;
+                case 'confirm':
+                    if (GameState.nameInput.name.trim().length > 0) {
+                        confirmName();
+                    }
+                    break;
+            }
+            
+            if (action === 'prev' || action === 'next') {
+                GameState.nameInput.name += GameState.nameInput.letters[GameState.nameInput.cursor];
+            }
+            
+            updateNameDisplay();
+        }
+
+        // Handle Name Keyboard Input
+        function handleNameKeyboard(e) {
+            switch(e.key) {
+                case 'ArrowUp':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor - 7 + GameState.nameInput.letters.length) % GameState.nameInput.letters.length;
+                    break;
+                case 'ArrowDown':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor + 7) % GameState.nameInput.letters.length;
+                    break;
+                case 'ArrowLeft':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor - 1 + GameState.nameInput.letters.length) % GameState.nameInput.letters.length;
+                    break;
+                case 'ArrowRight':
+                    GameState.nameInput.cursor = (GameState.nameInput.cursor + 1) % GameState.nameInput.letters.length;
+                    break;
+                case 'Enter':
+                    if (GameState.nameInput.name.trim().length > 0) {
+                        confirmName();
+                    }
+                    break;
+                case 'Backspace':
+                    GameState.nameInput.name = GameState.nameInput.name.slice(0, -1);
+                    break;
+                case ' ':
+                    GameState.nameInput.name += ' ';
+                    break;
+                default:
+                    if (e.key.length === 1 && /[A-Za-z]/.test(e.key)) {
+                        GameState.nameInput.name += e.key.toUpperCase();
+                    }
+            }
+            
+            updateNameDisplay();
+            e.preventDefault();
+        }
+
+        // Update Name Display
         function updateNameDisplay() {
-            nameDisplay.textContent = gameState.input.name.padEnd(10, '_');
+            nameDisplay.textContent = GameState.nameInput.name.padEnd(10, '_');
         }
 
-        function addLetter(letter) {
-            if (gameState.input.name.length < 10) {
-                gameState.input.name += letter;
-                updateNameDisplay();
-            }
-        }
-
-        function removeLetter() {
-            if (gameState.input.name.length > 0) {
-                gameState.input.name = gameState.input.name.slice(0, -1);
-                updateNameDisplay();
-            }
-        }
-
+        // Confirm Name and Start Game
         function confirmName() {
-            if (gameState.input.name.trim().length > 0) {
-                gameState.player.name = gameState.input.name;
-                nameInput.style.display = 'none';
-                startGameIntro();
-            }
+            GameState.player.name = GameState.nameInput.name.trim().toUpperCase() || 'ASH';
+            nameInputScreen.style.display = 'none';
+            gameplayScreen.style.display = 'block';
+            GameState.current = 'gameplay';
+            
+            initOverworld();
+            startGameIntro();
         }
 
-        // GBA GAME INTRO SEQUENCE
+        // Start Game Intro (Professor Oak)
         function startGameIntro() {
             showDialog([
-                "Hello there! Welcome to the world\nof POKéMON!",
-                "My name is OAK! People call me the\nPOKéMON PROFESSOR!",
-                "This world is inhabited by creatures\ncalled POKéMON!",
-                "For some people, POKéMON are pets.\nOthers use them for fights.",
-                "Myself... I study POKéMON as a\nprofession.",
-                "First, what is your name?"
-            ]);
-            
-            // After intro, ask for rival name
-            setTimeout(() => {
-                showDialog([
-                    "Right! So your name is\n" + gameState.player.name + "!",
-                    "This is my grandson. He's been\nyour rival since you were a baby.",
-                    "...Erm, what is his name again?"
-                ]);
-                
-                // Would normally ask for rival name here
+                "Hello there! Welcome to the world",
+                "of POKéMON! My name is OAK!",
+                "People call me the POKéMON PROFESSOR!"
+            ], () => {
                 setTimeout(() => {
                     showDialog([
-                        "That's right! I remember now!\nHis name is GARY!",
-                        gameState.player.name + "!",
-                        "Your very own POKéMON legend is\nabout to unfold!",
-                        "A world of dreams and adventures\nwith POKéMON awaits! Let's go!"
-                    ]);
-                    
-                    // Start the game
-                    setTimeout(() => {
-                        closeDialog();
-                        startOverworld();
-                    }, 5000);
-                }, 4000);
-            }, 7000);
+                        "This world is inhabited by creatures",
+                        "called POKéMON! For some people,",
+                        "POKéMON are pets. Others use them",
+                        "for fights. Myself... I study POKéMON!"
+                    ], () => {
+                        setTimeout(() => {
+                            showDialog([
+                                `Right! So your name is`,
+                                `${GameState.player.name}!`,
+                                `This is my grandson. He's been`,
+                                `your rival since you were a baby.`
+                            ], () => {
+                                setTimeout(() => {
+                                    showDialog([
+                                        `...Erm, what is his name again?`
+                                    ], () => {
+                                        setTimeout(() => {
+                                            showDialog([
+                                                `That's right! I remember now!`,
+                                                `His name is GARY!`,
+                                                `${GameState.player.name}!`,
+                                                `Your very own POKéMON legend`,
+                                                `is about to unfold! Let's go!`
+                                            ]);
+                                        }, 1000);
+                                    });
+                                }, 1000);
+                            });
+                        }, 1000);
+                    });
+                }, 1000);
+            });
         }
 
-        function startOverworld() {
-            gameState.screen = 'overworld';
-            document.getElementById('controls').style.bottom = '0';
+        // Initialize Overworld
+        function initOverworld() {
+            // Clear canvas
+            ctx.fillStyle = '#8bac0f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            showDialog([
-                "You are in your room.",
-                "The sun is shining through your\nwindow.",
-                "Your adventure begins today!"
-            ]);
+            // Draw initial map
+            drawMap();
+            
+            // Draw player
+            drawPlayer();
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
         }
 
-        // PLAYER MOVEMENT
-        function movePlayer(direction) {
-            if (gameState.screen !== 'overworld' || gameState.dialog.active) return;
-            
-            const player = document.getElementById('player');
-            const step = 4;
-            
-            switch(direction) {
-                case 'up':
-                    gameState.player.y = Math.max(0, gameState.player.y - step);
-                    gameState.player.direction = 'up';
-                    break;
-                case 'down':
-                    gameState.player.y = Math.min(288, gameState.player.y + step);
-                    gameState.player.direction = 'down';
-                    break;
-                case 'left':
-                    gameState.player.x = Math.max(0, gameState.player.x - step);
-                    gameState.player.direction = 'left';
-                    break;
-                case 'right':
-                    gameState.player.x = Math.min(448, gameState.player.x + step);
-                    gameState.player.direction = 'right';
-                    break;
-            }
-            
-            player.style.left = gameState.player.x + 'px';
-            player.style.top = gameState.player.y + 'px';
-            
-            // Check for encounters in grass
-            if (isInGrass()) {
-                if (Math.random() < 0.005) { // 0.5% chance per step
-                    startBattle();
+        // Draw Map
+        function drawMap() {
+            // Draw grass background
+            ctx.fillStyle = '#4a752c';
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 15; x++) {
+                    if (x >= 6 && x <= 8) {
+                        ctx.fillStyle = '#a8a878'; // Path
+                    } else {
+                        ctx.fillStyle = '#4a752c'; // Grass
+                    }
+                    ctx.fillRect(x * 32, y * 32, 32, 32);
+                    ctx.strokeStyle = '#0f380f';
+                    ctx.strokeRect(x * 32, y * 32, 32, 32);
                 }
             }
             
-            // Check for NPC interactions
-            checkNPCInteraction();
+            // Draw buildings
+            drawBuilding(3, 2, 3, 3, '#d87070'); // Player house
+            drawBuilding(9, 2, 3, 3, '#70a0d8'); // Lab
+            drawBuilding(6, 7, 3, 2, '#f08080'); // Pokémon Center
+            
+            // Add text labels
+            ctx.fillStyle = '#0f380f';
+            ctx.font = '12px "Pokemon GB"';
+            ctx.textAlign = 'center';
+            ctx.fillText("HOME", 3.5 * 32, 3 * 32);
+            ctx.fillText("LAB", 10 * 32, 3 * 32);
+            ctx.fillText("POKéMON", 7 * 32, 7.5 * 32);
+            ctx.fillText("CENTER", 7 * 32, 8 * 32);
         }
 
+        // Draw Building
+        function drawBuilding(x, y, width, height, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * 32, y * 32, width * 32, height * 32);
+            
+            // Roof
+            ctx.fillStyle = '#306230';
+            ctx.beginPath();
+            ctx.moveTo(x * 32 - 8, y * 32);
+            ctx.lineTo((x + width) * 32 + 8, y * 32);
+            ctx.lineTo((x + width/2) * 32, y * 32 - 16);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Door
+            ctx.fillStyle = '#0f380f';
+            ctx.fillRect((x + width/2) * 32 - 8, (y + height - 1) * 32, 16, 32);
+        }
+
+        // Draw Player
+        function drawPlayer() {
+            ctx.fillStyle = '#3060a8'; // Blue
+            ctx.fillRect(GameState.player.x - 8, GameState.player.y - 8, 16, 16);
+            
+            // Face direction indicator
+            ctx.fillStyle = '#ffcc00';
+            switch(GameState.player.direction) {
+                case 'up':
+                    ctx.fillRect(GameState.player.x - 4, GameState.player.y - 8, 8, 4);
+                    break;
+                case 'down':
+                    ctx.fillRect(GameState.player.x - 4, GameState.player.y + 4, 8, 4);
+                    break;
+                case 'left':
+                    ctx.fillRect(GameState.player.x - 8, GameState.player.y - 4, 4, 8);
+                    break;
+                case 'right':
+                    ctx.fillRect(GameState.player.x + 4, GameState.player.y - 4, 4, 8);
+                    break;
+            }
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (GameState.current === 'gameplay' && !GameState.dialog.active && !GameState.battle.active) {
+                // Clear and redraw
+                drawMap();
+                drawPlayer();
+                
+                // Check for random encounters
+                if (GameState.player.moving && isInGrass()) {
+                    if (Math.random() < 0.008) {
+                        startBattle();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Handle Movement
+        let movementInterval;
+        function handleMovement(direction, start) {
+            if (GameState.current !== 'gameplay' || GameState.dialog.active || GameState.battle.active) return;
+            
+            if (start) {
+                GameState.player.moving = true;
+                GameState.player.direction = direction;
+                
+                // Clear any existing interval
+                if (movementInterval) clearInterval(movementInterval);
+                
+                // Start continuous movement
+                movementInterval = setInterval(() => {
+                    const speed = 2;
+                    let newX = GameState.player.x;
+                    let newY = GameState.player.y;
+                    
+                    switch(direction) {
+                        case 'up': newY -= speed; break;
+                        case 'down': newY += speed; break;
+                        case 'left': newX -= speed; break;
+                        case 'right': newX += speed; break;
+                    }
+                    
+                    // Boundary check
+                    if (newX >= 8 && newX <= canvas.width - 8 && 
+                        newY >= 8 && newY <= canvas.height - 8) {
+                        GameState.player.x = newX;
+                        GameState.player.y = newY;
+                    }
+                }, 16);
+            } else {
+                GameState.player.moving = false;
+                if (movementInterval) {
+                    clearInterval(movementInterval);
+                    movementInterval = null;
+                }
+            }
+        }
+
+        // Check if in grass
         function isInGrass() {
-            const tileX = Math.floor(gameState.player.x / 32);
-            const tileY = Math.floor(gameState.player.y / 32);
+            const tileX = Math.floor(GameState.player.x / 32);
+            const tileY = Math.floor(GameState.player.y / 32);
             return tileX < 6 || tileX > 8;
         }
 
-        function checkNPCInteraction() {
-            // Simple distance check for NPCs
-            const npcs = document.querySelectorAll('.npc-sprite');
-            npcs.forEach(npc => {
-                const npcX = parseInt(npc.style.left);
-                const npcY = parseInt(npc.style.top);
-                const distance = Math.sqrt(
-                    Math.pow(gameState.player.x - npcX, 2) + 
-                    Math.pow(gameState.player.y - npcY, 2)
-                );
-                
-                if (distance < 40 && gameState.player.direction === 'up') {
-                    showDialog("Hello! I'm an NPC!\nWelcome to our town!");
-                }
-            });
-        }
-
-        // BATTLE SYSTEM
+        // Start Battle
         function startBattle() {
-            gameState.screen = 'battle';
+            GameState.current = 'battle';
+            GameState.battle.active = true;
             battleScreen.style.display = 'block';
             
-            showDialog("A wild PIDGEY appeared!");
+            showDialog(`Wild ${GameState.battle.enemy.name} appeared!`);
         }
 
-        function endBattle() {
-            gameState.screen = 'overworld';
-            battleScreen.style.display = 'none';
-        }
-
-        // CONTROLS
-        function setupControls() {
-            // D-pad buttons
-            document.getElementById('btn-up').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('up');
-            });
-            document.getElementById('btn-down').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('down');
-            });
-            document.getElementById('btn-left').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('left');
-            });
-            document.getElementById('btn-right').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                movePlayer('right');
-            });
+        // Handle Battle Action
+        function handleBattleAction(e) {
+            if (!GameState.battle.active) return;
             
-            // A button
-            document.getElementById('btn-a').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleAButton();
-            });
+            const action = e.target.getAttribute('data-action');
             
-            // B button
-            document.getElementById('btn-b').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleBButton();
-            });
-            
-            // Start button
-            document.getElementById('btn-start').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                showMenu();
-            });
-            
-            // Title screen options
-            document.getElementById('new-game').addEventListener('click', () => {
-                startNameInput();
-            });
-            
-            document.getElementById('continue-game').addEventListener('click', () => {
-                showDialog("No save file found...");
-            });
-            
-            // Name input buttons
-            document.getElementById('confirm-name').addEventListener('click', confirmName);
-            document.getElementById('cancel-name').addEventListener('click', () => {
-                nameInput.style.display = 'none';
-                titleScreen.style.display = 'flex';
-            });
-            
-            // Dialog box click
-            dialogBox.addEventListener('click', () => {
-                if (gameState.dialog.active) {
-                    if (gameState.dialog.typing) {
-                        // Skip typing animation
-                        const line = gameState.dialog.lines[gameState.dialog.currentLine - 1];
-                        dialogText.innerHTML = line;
-                        dialogText.classList.remove('text-typing');
-                        gameState.dialog.typing = false;
-                    } else {
-                        showNextDialogLine();
-                    }
-                }
-            });
-        }
-
-        function handleAButton() {
-            switch(gameState.screen) {
-                case 'overworld':
-                    if (!gameState.dialog.active) {
-                        // Check for interactions
-                        const playerTileX = Math.floor(gameState.player.x / 32);
-                        const playerTileY = Math.floor(gameState.player.y / 32);
-                        
-                        if (playerTileX >= 3 && playerTileX <= 5 && playerTileY >= 2 && playerTileY <= 4) {
-                            showDialog("This is your house.\nYour mom is making lunch!");
-                        } else if (playerTileX >= 9 && playerTileX <= 11 && playerTileY >= 2 && playerTileY <= 4) {
-                            showDialog("This is PROF. OAK's LAB.\nHe studies POKéMON here.");
-                        } else if (playerTileX >= 6 && playerTileX <= 8 && playerTileY >= 7 && playerTileY <= 8) {
-                            showDialog("Welcome to the POKéMON\nCENTER! We heal POKéMON!");
-                        } else {
-                            showDialog("Nothing interesting here...");
-                        }
-                    }
+            switch(action) {
+                case 'fight':
+                    showDialog(`What will ${GameState.player.pokemon[0].name} do?`);
+                    // In full game, this would show move selection
                     break;
-                    
-                case 'battle':
-                    // Handle battle actions
+                case 'pokemon':
+                    showDialog("Choose a POKéMON.");
+                    break;
+                case 'bag':
+                    showDialog("Opened the BAG.");
+                    break;
+                case 'run':
+                    if (Math.random() > 0.2) {
+                        showDialog("Got away safely!");
+                        setTimeout(endBattle, 1000);
+                    } else {
+                        showDialog("Can't escape!");
+                    }
                     break;
             }
         }
 
+        // End Battle
+        function endBattle() {
+            GameState.current = 'gameplay';
+            GameState.battle.active = false;
+            battleScreen.style.display = 'none';
+        }
+
+        // Handle A Button
+        function handleAButton() {
+            switch(GameState.current) {
+                case 'title':
+                    // Handle menu selection
+                    break;
+                case 'gameplay':
+                    if (GameState.dialog.active) {
+                        advanceDialog();
+                    } else {
+                        // Interact with object/NPC
+                        const tileX = Math.floor(GameState.player.x / 32);
+                        const tileY = Math.floor(GameState.player.y / 32);
+                        
+                        if (tileX >= 3 && tileX <= 5 && tileY >= 2 && tileY <= 4) {
+                            showDialog("This is your house.\nYour mom is cooking!");
+                        } else if (tileX >= 9 && tileX <= 11 && tileY >= 2 && tileY <= 4) {
+                            showDialog("PROF. OAK's POKéMON LAB.\nHe's not here right now.");
+                        } else if (tileX >= 6 && tileX <= 8 && tileY >= 7 && tileY <= 8) {
+                            showDialog("Welcome to POKéMON CENTER!\nWe heal your POKéMON!");
+                        } else {
+                            showDialog("Nothing special here...");
+                        }
+                    }
+                    break;
+                case 'battle':
+                    // Battle action
+                    break;
+            }
+        }
+
+        // Handle B Button
         function handleBButton() {
-            if (gameState.dialog.active) {
-                closeDialog();
-            } else if (gameState.screen === 'battle') {
+            if (GameState.dialog.active) {
+                if (GameState.dialog.typing) {
+                    // Skip typing
+                    GameState.dialog.typing = false;
+                    dialogText.textContent = GameState.dialog.lines[GameState.dialog.currentLine - 1];
+                } else {
+                    advanceDialog();
+                }
+            } else if (GameState.current === 'battle') {
                 endBattle();
             }
         }
 
-        function showMenu() {
-            showDialog([
-                "POKéDEX: 1 seen\n",
-                "POKéMON: 1\n",
-                gameState.player.name + "\n",
-                "BADGES: 0\n",
-                "TIME: 10:45"
-            ]);
+        // Handle Start Button
+        function handleStartButton() {
+            if (GameState.current === 'gameplay' && !GameState.dialog.active) {
+                showDialog([
+                    `${GameState.player.name}`,
+                    `POKéDEX: ${GameState.player.pokedex}`,
+                    `TIME: 0:00`,
+                    `BADGES: ${GameState.player.badges}`,
+                    `──────`,
+                    `POKéMON`,
+                    `BAG`,
+                    `SAVE`,
+                    `OPTIONS`
+                ]);
+            }
         }
 
-        // KEYBOARD FOR NAME INPUT
-        function setupKeyboard() {
-            document.addEventListener('keydown', (e) => {
-                if (nameInput.style.display === 'block') {
-                    e.preventDefault();
-                    
-                    if (e.key === 'a' || e.key === 'A') {
-                        // Next letter
-                        gameState.input.cursor = (gameState.input.cursor + 1) % gameState.input.letters.length;
-                        addLetter(gameState.input.letters[gameState.input.cursor]);
-                    } else if (e.key === 'z' || e.key === 'Z') {
-                        // Previous letter
-                        gameState.input.cursor = (gameState.input.cursor - 1 + gameState.input.letters.length) % gameState.input.letters.length;
-                        addLetter(gameState.input.letters[gameState.input.cursor]);
-                    } else if (e.key === 'Backspace' || e.key === 'b' || e.key === 'B') {
-                        removeLetter();
-                    } else if (e.key === 'Enter') {
-                        confirmName();
-                    }
+        // Dialog System
+        function showDialog(lines, callback = null) {
+            if (typeof lines === 'string') {
+                GameState.dialog.lines = lines.split('\n');
+            } else {
+                GameState.dialog.lines = lines;
+            }
+            
+            GameState.dialog.currentLine = 0;
+            GameState.dialog.active = true;
+            GameState.dialog.typing = true;
+            GameState.dialog.callback = callback;
+            
+            dialogBox.style.display = 'block';
+            typeDialogText();
+        }
+
+        function typeDialogText() {
+            if (GameState.dialog.currentLine >= GameState.dialog.lines.length) {
+                GameState.dialog.typing = false;
+                if (GameState.dialog.callback) {
+                    GameState.dialog.callback();
                 }
-            });
+                return;
+            }
+            
+            const line = GameState.dialog.lines[GameState.dialog.currentLine];
+            dialogText.textContent = '';
+            GameState.dialog.currentLine++;
+            
+            let i = 0;
+            const typeChar = () => {
+                if (i < line.length && GameState.dialog.typing) {
+                    dialogText.textContent += line.charAt(i);
+                    i++;
+                    setTimeout(typeChar, GameState.dialog.speed);
+                    playSound('text');
+                } else {
+                    GameState.dialog.typing = false;
+                }
+            };
+            
+            typeChar();
         }
 
-        // START THE GAME
+        function advanceDialog() {
+            if (GameState.dialog.typing) {
+                GameState.dialog.typing = false;
+                dialogText.textContent = GameState.dialog.lines[GameState.dialog.currentLine - 1];
+            } else {
+                if (GameState.dialog.currentLine < GameState.dialog.lines.length) {
+                    typeDialogText();
+                } else {
+                    closeDialog();
+                }
+            }
+        }
+
+        function closeDialog() {
+            GameState.dialog.active = false;
+            dialogBox.style.display = 'none';
+            GameState.dialog.callback = null;
+        }
+
+        // Audio System
+        function initAudio() {
+            // In a real game, you would load audio files here
+            // For this demo, we'll use placeholder functions
+        }
+
+        function playSound(sound) {
+            // Play sound effect
+            console.log(`Playing sound: ${sound}`);
+        }
+
+        // Fullscreen
+        function requestFullscreen() {
+            const elem = document.documentElement;
+            
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+            
+            fullscreenInstructions.style.display = 'none';
+            localStorage.setItem('pokemon_fullscreen_shown', 'true');
+        }
+
+        // Orientation Check
+        function checkOrientation() {
+            if (window.innerHeight > window.innerWidth) {
+                landscapeWarning.style.display = 'flex';
+            } else {
+                landscapeWarning.style.display = 'none';
+            }
+        }
+
+        // Save Game
+        function saveGame() {
+            localStorage.setItem('pokemon_save', JSON.stringify(GameState.player));
+            showDialog("Game saved!");
+        }
+
+        // Initialize when page loads
         window.addEventListener('load', initGame);
+        
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        
+        // Prevent pull-to-refresh
+        document.addEventListener('touchmove', (e) => {
+            if (GameState.current === 'gameplay') {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>
