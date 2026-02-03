@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Gamma Adventure</title>
+    <title>Pokémon Gamma Village</title>
     <style>
         * {
             margin: 0;
@@ -49,12 +49,6 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            animation: bgPulse 10s infinite;
-        }
-
-        @keyframes bgPulse {
-            0%, 100% { background-position: 0 0; }
-            50% { background-position: 100px 100px; }
         }
 
         .title-logo {
@@ -66,20 +60,12 @@
                          -2px -2px 0 #000;
             margin-bottom: 50px;
             animation: logoGlow 2s infinite;
-            font-family: 'Pokemon Solid', sans-serif;
             letter-spacing: 5px;
         }
 
         @keyframes logoGlow {
             0%, 100% { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 2px 2px 0 #000; }
             50% { text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 2px 2px 0 #000; }
-        }
-
-        .title-subtitle {
-            color: #fff;
-            font-size: 24px;
-            margin-bottom: 100px;
-            text-shadow: 2px 2px 0 #000;
         }
 
         .title-menu {
@@ -109,7 +95,7 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
         }
 
-        /* Joystick - Gamma Emerald Style */
+        /* Joystick */
         #joyBase {
             position: fixed;
             bottom: 30px;
@@ -138,7 +124,7 @@
             transition: transform 0.1s;
         }
 
-        /* HUD - Gamma Emerald Style */
+        /* HUD */
         #hud {
             position: fixed;
             top: 20px;
@@ -155,166 +141,7 @@
             backdrop-filter: blur(5px);
         }
 
-        .hud-title {
-            color: #ffd700;
-            font-size: 16px;
-            margin-bottom: 5px;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        /* Battle System - Gamma Emerald Style */
-        #battleScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #1a5f7a, #0a3d62);
-            z-index: 900;
-            display: none;
-            overflow: hidden;
-        }
-
-        .battle-background {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 30%, #2c8b9f, #1a5f7a 40%, #0a3d62 70%);
-            filter: blur(1px);
-        }
-
-        .battle-platform {
-            position: absolute;
-            width: 300px;
-            height: 150px;
-            background: linear-gradient(to bottom, #8b4513, #654321);
-            border-radius: 75px;
-            border: 5px solid #a0522d;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-        }
-
-        .player-platform {
-            bottom: 100px;
-            left: 100px;
-            transform: rotate(-5deg);
-        }
-
-        .enemy-platform {
-            top: 100px;
-            right: 100px;
-            transform: rotate(5deg);
-        }
-
-        .pokemon-sprite {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
-        }
-
-        .player-sprite {
-            bottom: 150px;
-            left: 150px;
-        }
-
-        .enemy-sprite {
-            top: 150px;
-            right: 150px;
-        }
-
-        .battle-hud {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.85);
-            border: 4px solid #4a90e2;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .player-hud {
-            bottom: 50px;
-            right: 50px;
-            width: 350px;
-        }
-
-        .enemy-hud {
-            top: 50px;
-            left: 50px;
-            width: 350px;
-        }
-
-        .hp-bar {
-            width: 100%;
-            height: 25px;
-            background: #333;
-            border: 2px solid #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 10px 0;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .hp-fill {
-            height: 100%;
-            background: linear-gradient(to right, #ff4444, #44ff44);
-            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border-radius: 10px;
-        }
-
-        .battle-menu {
-            position: absolute;
-            bottom: 50px;
-            left: 50px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 4px solid #ffd700;
-            border-radius: 15px;
-            padding: 25px;
-            width: 400px;
-            display: none;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .battle-btn {
-            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .battle-btn:hover {
-            background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
-            transform: translateY(-2px);
-        }
-
-        .battle-log {
-            position: absolute;
-            bottom: 200px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            border: 4px solid #fff;
-            border-radius: 15px;
-            padding: 20px;
-            width: 600px;
-            color: white;
-            font-size: 18px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-
-        /* Dialog System */
+        /* Dialog Box */
         #dialogBox {
             position: fixed;
             bottom: 20px;
@@ -360,104 +187,6 @@
             min-width: 150px;
         }
 
-        .dialog-btn:hover {
-            background: linear-gradient(to bottom, #ff5555, #dd1111);
-            transform: translateY(-2px);
-        }
-
-        /* Starter Selection */
-        #starterSelection {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 800px;
-            background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
-            border: 6px solid #ffd700;
-            border-radius: 25px;
-            padding: 40px;
-            color: white;
-            z-index: 700;
-            display: none;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
-        }
-
-        .starter-title {
-            color: #ffd700;
-            font-size: 32px;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px #000;
-        }
-
-        .starter-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .starter-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-            backdrop-filter: blur(5px);
-        }
-
-        .starter-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #fff;
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
-        }
-
-        .starter-card.selected {
-            border-color: #ffd700;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.7);
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        .starter-icon {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
-        }
-
-        /* Animations */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        @keyframes flash {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .float { animation: float 3s ease-in-out infinite; }
-        .shake { animation: shake 0.5s; }
-        .flash { animation: flash 0.3s; }
-        .pulse { animation: pulse 0.5s; }
-
         /* Controls */
         #controls {
             position: fixed;
@@ -486,175 +215,69 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
         }
 
-        .control-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.7);
-        }
-
-        /* Inventory */
-        #inventoryScreen {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 900px;
-            height: 80vh;
-            background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
-            border: 6px solid #ffd700;
-            border-radius: 25px;
-            z-index: 600;
-            display: none;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
-        }
-
-        .inventory-header {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            text-align: center;
-            border-bottom: 3px solid #4a90e2;
-        }
-
-        .inventory-title {
-            color: #ffd700;
-            font-size: 28px;
-            text-shadow: 2px 2px 4px #000;
-        }
-
-        .inventory-tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            gap: 10px;
-        }
-
-        .inventory-tab {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .inventory-tab.active {
-            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-        }
-
-        .inventory-content {
-            padding: 20px;
-            height: calc(100% - 150px);
-            overflow-y: auto;
-        }
-
-        .pokemon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .pokemon-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .pokemon-card:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .pokemon-card.active {
-            border-color: #ffd700;
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        /* Loading Screen */
-        #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .loading-text {
-            color: #ffd700;
-            font-size: 24px;
-            margin-top: 30px;
-            animation: pulse 1s infinite;
-        }
-
-        .loading-bar {
-            width: 300px;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 20px;
-            border: 2px solid #4a90e2;
-        }
-
-        .loading-fill {
-            height: 100%;
-            background: linear-gradient(to right, #4a90e2, #2c6cb0);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        /* Particle Effects */
-        .particles {
+        /* Village Sign */
+        .village-sign {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
+            background: linear-gradient(to bottom, #8b4513, #654321);
+            color: #ffd700;
+            padding: 10px 20px;
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            font-size: 20px;
+            text-align: center;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Minimap */
+        #minimap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #4a90e2;
+            border-radius: 10px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        /* NPC Dialog */
+        .npc-dialog {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #4a90e2;
+            font-size: 14px;
+            max-width: 200px;
+            text-align: center;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
         }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .title-logo { font-size: 32px; }
             .title-btn { padding: 12px 30px; font-size: 18px; min-width: 180px; }
-            .battle-menu { width: 90%; left: 5%; }
-            .battle-log { width: 90%; }
-            .starter-grid { grid-template-columns: 1fr; }
             #joyBase { width: 100px; height: 100px; }
             #joy { width: 40px; height: 40px; left: 30px; top: 30px; }
+            #minimap { width: 120px; height: 120px; }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <div class="loading-text">LOADING POKÉMON GAMMA ADVENTURE...</div>
-        <div class="loading-bar"><div class="loading-fill"></div></div>
-    </div>
-
     <!-- Title Screen -->
     <div id="titleScreen">
-        <div class="title-logo">POKÉMON γ</div>
-        <div class="title-subtitle">Gamma Emerald Adventure</div>
+        <div class="title-logo">POKÉMON VILLAGE</div>
         <div class="title-menu">
-            <button class="title-btn" onclick="newGame()">NEW GAME</button>
-            <button class="title-btn" onclick="continueGame()">CONTINUE</button>
-            <button class="title-btn" onclick="showOptions()">OPTIONS</button>
+            <button class="title-btn" onclick="startGame()">START GAME</button>
+            <button class="title-btn" onclick="showCredits()">CREDITS</button>
         </div>
     </div>
 
@@ -662,349 +285,239 @@
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
         
-        <!-- Battle Screen -->
-        <div id="battleScreen">
-            <div class="battle-background"></div>
-            <div class="battle-platform player-platform"></div>
-            <div class="battle-platform enemy-platform"></div>
-            <div class="pokemon-sprite player-sprite float"></div>
-            <div class="pokemon-sprite enemy-sprite float"></div>
-            
-            <div class="battle-hud player-hud">
-                <div class="hud-title" id="playerName">TRAINER</div>
-                <div class="hp-bar">
-                    <div class="hp-fill" id="playerHP" style="width: 100%"></div>
-                </div>
-                <div id="playerHPText">HP: 100/100</div>
-            </div>
-            
-            <div class="battle-hud enemy-hud">
-                <div class="hud-title" id="enemyName">WILD POKÉMON</div>
-                <div class="hp-bar">
-                    <div class="hp-fill" id="enemyHP" style="width: 100%"></div>
-                </div>
-                <div id="enemyHPText">HP: 100/100</div>
-            </div>
-            
-            <div class="battle-log" id="battleLog">A wild Pokémon appeared!</div>
-            
-            <div class="battle-menu" id="battleMenu">
-                <button class="battle-btn" onclick="attack()">FIGHT</button>
-                <button class="battle-btn" onclick="showPokemonMenu()">POKÉMON</button>
-                <button class="battle-btn" onclick="useItem()">ITEM</button>
-                <button class="battle-btn" onclick="run()">RUN</button>
-            </div>
-        </div>
-
         <!-- Dialog Box -->
         <div id="dialogBox">
             <div class="dialog-text" id="dialogText"></div>
             <div class="dialog-options" id="dialogOptions"></div>
         </div>
 
-        <!-- Starter Selection -->
-        <div id="starterSelection">
-            <div class="starter-title">CHOOSE YOUR STARTER POKÉMON</div>
-            <p>The professor offers you three Pokémon. Which will you choose?</p>
-            <div class="starter-grid">
-                <div class="starter-card" onclick="selectStarter('bulbasaur')">
-                    <div class="starter-icon" style="background-color: #78c850; border-radius: 50%;"></div>
-                    <div class="starter-name" style="color: #78c850; font-size: 24px; font-weight: bold;">BULBASAUR</div>
-                    <div class="starter-type" style="color: #aaa;">GRASS/POISON</div>
-                    <div class="starter-desc">A strange seed was planted on its back at birth.</div>
-                </div>
-                <div class="starter-card" onclick="selectStarter('charmander')">
-                    <div class="starter-icon" style="background-color: #f08030; border-radius: 50%;"></div>
-                    <div class="starter-name" style="color: #f08030; font-size: 24px; font-weight: bold;">CHARMANDER</div>
-                    <div class="starter-type" style="color: #aaa;">FIRE</div>
-                    <div class="starter-desc">The flame on its tail shows the strength of its life force.</div>
-                </div>
-                <div class="starter-card" onclick="selectStarter('squirtle')">
-                    <div class="starter-icon" style="background-color: #6890f0; border-radius: 50%;"></div>
-                    <div class="starter-name" style="color: #6890f0; font-size: 24px; font-weight: bold;">SQUIRTLE</div>
-                    <div class="starter-type" style="color: #aaa;">WATER</div>
-                    <div class="starter-desc">After birth, its back swells and hardens into a shell.</div>
-                </div>
-            </div>
-            <button class="dialog-btn" onclick="confirmStarter()" style="margin-top: 30px; padding: 15px 50px; font-size: 20px;">BEGIN ADVENTURE</button>
-        </div>
-
-        <!-- Inventory Screen -->
-        <div id="inventoryScreen">
-            <div class="inventory-header">
-                <div class="inventory-title">POKÉDEX & INVENTORY</div>
-            </div>
-            <div class="inventory-tabs">
-                <button class="inventory-tab active" onclick="showInventoryTab('pokemon')">POKÉMON</button>
-                <button class="inventory-tab" onclick="showInventoryTab('items')">ITEMS</button>
-                <button class="inventory-tab" onclick="showInventoryTab('key')">KEY ITEMS</button>
-                <button class="inventory-tab" onclick="showInventoryTab('save')">SAVE</button>
-            </div>
-            <div class="inventory-content" id="inventoryContent">
-                <!-- Content loaded dynamically -->
-            </div>
-        </div>
-
         <!-- Controls -->
         <div id="joyBase"><div id="joy"></div></div>
         <div id="hud">
-            <div class="hud-title">TRAINER</div>
-            <div id="hudContent">HP: 100/100</div>
+            <div id="hudContent">Welcome to the Village!</div>
         </div>
         <div id="controls">
-            <div class="control-btn" onclick="toggleInventory()">📦</div>
-            <div class="control-btn" onclick="toggleMenu()">⚙️</div>
+            <div class="control-btn" onclick="interact()">💬</div>
+            <div class="control-btn" onclick="toggleMap()">🗺️</div>
         </div>
+        
+        <!-- Minimap -->
+        <canvas id="minimap"></canvas>
     </div>
-
-    <!-- Audio Elements -->
-    <audio id="bgMusic" loop>
-        <source src="data:audio/mpeg;base64,//T2dnUwACAAAAAAAAAADhqW5K" type="audio/mpeg">
-    </audio>
-    <audio id="battleMusic">
-        <source src="data:audio/mpeg;base64,//T2dnUwACAAAAAAAAAADhqW5K" type="audio/mpeg">
-    </audio>
-    <audio id="sfxClick">
-        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ" type="audio/wav">
-    </audio>
 
     <script>
         // Game initialization
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const minimapCanvas = document.getElementById('minimap');
+        const minimapCtx = minimapCanvas.getContext('2d');
         
         // Game state
         let gameState = {
-            currentScreen: 'title',
             player: {
-                name: 'TRAINER',
-                x: 0,
-                y: 0,
+                x: 400,
+                y: 300,
                 direction: 0, // 0: down, 1: left, 2: right, 3: up
                 speed: 3,
-                spriteFrame: 0
+                spriteFrame: 0,
+                inHouse: false,
+                currentHouse: null
             },
             camera: { x: 0, y: 0 },
-            world: 'overworld',
-            inBattle: false,
+            village: {
+                name: "Sunflower Village",
+                time: "Morning",
+                weather: "Sunny"
+            },
             inDialog: false,
-            inInventory: false,
-            starterChosen: false,
-            selectedStarter: null,
-            inventory: {
-                pokemon: [],
-                items: {
-                    pokeballs: 5,
-                    potions: 3,
-                    greatballs: 0,
-                    superpotions: 0
-                },
-                money: 3000
-            },
-            currentPokemon: null,
-            battle: {
-                enemy: null,
-                playerTeam: [],
-                enemyTeam: []
-            }
+            showMinimap: false
         };
 
-        // Pokémon database
-        const pokemonDB = {
-            bulbasaur: {
-                id: 1,
-                name: 'BULBASAUR',
-                type: ['GRASS', 'POISON'],
-                color: '#78c850',
-                hp: 45,
-                attack: 49,
-                defense: 49,
-                speed: 45,
-                moves: [
-                    { name: 'TACKLE', power: 40, type: 'NORMAL', pp: 35 },
-                    { name: 'GROWL', power: 0, type: 'NORMAL', pp: 40, effect: 'atk-down' },
-                    { name: 'VINE WHIP', power: 45, type: 'GRASS', pp: 25 },
-                    { name: 'LEECH SEED', power: 0, type: 'GRASS', pp: 10, effect: 'leech' }
-                ],
-                sprite: '#78c850',
-                evolves: 16
-            },
-            charmander: {
-                id: 4,
-                name: 'CHARMANDER',
-                type: ['FIRE'],
-                color: '#f08030',
-                hp: 39,
-                attack: 52,
-                defense: 43,
-                speed: 65,
-                moves: [
-                    { name: 'SCRATCH', power: 40, type: 'NORMAL', pp: 35 },
-                    { name: 'GROWL', power: 0, type: 'NORMAL', pp: 40, effect: 'atk-down' },
-                    { name: 'EMBER', power: 40, type: 'FIRE', pp: 25 },
-                    { name: 'SMOKESCREEN', power: 0, type: 'NORMAL', pp: 20, effect: 'acc-down' }
-                ],
-                sprite: '#f08030',
-                evolves: 16
-            },
-            squirtle: {
-                id: 7,
-                name: 'SQUIRTLE',
-                type: ['WATER'],
-                color: '#6890f0',
-                hp: 44,
-                attack: 48,
-                defense: 65,
-                speed: 43,
-                moves: [
-                    { name: 'TACKLE', power: 40, type: 'NORMAL', pp: 35 },
-                    { name: 'TAIL WHIP', power: 0, type: 'NORMAL', pp: 30, effect: 'def-down' },
-                    { name: 'WATER GUN', power: 40, type: 'WATER', pp: 25 },
-                    { name: 'WITHDRAW', power: 0, type: 'WATER', pp: 40, effect: 'def-up' }
-                ],
-                sprite: '#6890f0',
-                evolves: 16
-            }
+        // Village Data - Houses and Buildings
+        const village = {
+            // Main village area
+            bounds: { x: 0, y: 0, width: 1600, height: 1200 },
+            
+            // Houses (20 houses in total)
+            houses: [
+                // Row 1 - Upper village (5 houses)
+                { id: 1, x: 200, y: 100, width: 80, height: 60, color: '#a0522d', roof: '#8b4513', name: "Pokémon Lab", type: "lab" },
+                { id: 2, x: 320, y: 100, width: 70, height: 55, color: '#d2691e', roof: '#8b4513', name: "Trainer House", type: "house" },
+                { id: 3, x: 420, y: 100, width: 75, height: 58, color: '#cd853f', roof: '#8b4513', name: "Berry Shop", type: "shop" },
+                { id: 4, x: 520, y: 100, width: 65, height: 52, color: '#8b4513', roof: '#654321', name: "Family Home", type: "house" },
+                { id: 5, x: 620, y: 100, width: 80, height: 60, color: '#a0522d', roof: '#8b4513', name: "Day Care", type: "special" },
+                
+                // Row 2 - Middle village (5 houses)
+                { id: 6, x: 180, y: 220, width: 72, height: 56, color: '#d2691e', roof: '#8b4513', name: "Item Shop", type: "shop" },
+                { id: 7, x: 280, y: 220, width: 68, height: 54, color: '#cd853f', roof: '#8b4513', name: "Home", type: "house" },
+                { id: 8, x: 380, y: 220, width: 76, height: 59, color: '#8b4513', roof: '#654321', name: "Gym", type: "gym" },
+                { id: 9, x: 500, y: 220, width: 70, height: 55, color: '#a0522d', roof: '#8b4513', name: "Poké Mart", type: "shop" },
+                { id: 10, x: 600, y: 220, width: 65, height: 52, color: '#d2691e', roof: '#8b4513', name: "Home", type: "house" },
+                
+                // Row 3 - Lower village (5 houses)
+                { id: 11, x: 150, y: 350, width: 78, height: 60, color: '#cd853f', roof: '#8b4513', name: "Poké Center", type: "center", color: '#ff9999', roof: '#ff6b6b' },
+                { id: 12, x: 260, y: 350, width: 72, height: 56, color: '#8b4513', roof: '#654321', name: "Home", type: "house" },
+                { id: 13, x: 370, y: 350, width: 70, height: 55, color: '#a0522d', roof: '#8b4513', name: "School", type: "special" },
+                { id: 14, x: 480, y: 350, width: 68, height: 54, color: '#d2691e', roof: '#8b4513', name: "Home", type: "house" },
+                { id: 15, x: 590, y: 350, width: 75, height: 58, color: '#cd853f', roof: '#8b4513', name: "Trainer's House", type: "house" },
+                
+                // Row 4 - Bottom village (5 houses)
+                { id: 16, x: 220, y: 480, width: 70, height: 55, color: '#8b4513', roof: '#654321', name: "Home", type: "house" },
+                { id: 17, x: 320, y: 480, width: 65, height: 52, color: '#a0522d', roof: '#8b4513', name: "Move Tutor", type: "special" },
+                { id: 18, x: 420, y: 480, width: 80, height: 60, color: '#d2691e', roof: '#8b4513', name: "Battle House", type: "special" },
+                { id: 19, x: 530, y: 480, width: 72, height: 56, color: '#cd853f', roof: '#8b4513', name: "Home", type: "house" },
+                { id: 20, x: 640, y: 480, width: 68, height: 54, color: '#8b4513', roof: '#654321', name: "Elder's House", type: "house" }
+            ],
+            
+            // NPCs with dialog
+            npcs: [
+                { x: 240, y: 180, type: 'scientist', dialog: "Welcome to our Pokémon Lab! We research Pokémon evolution here." },
+                { x: 350, y: 180, type: 'trainer', dialog: "I'm training my Pokémon for the upcoming tournament!" },
+                { x: 550, y: 180, type: 'child', dialog: "Look at my cute Pokémon! Want to see?" },
+                { x: 200, y: 280, type: 'shopkeeper', dialog: "Fresh berries for sale! Good for your Pokémon's health." },
+                { x: 410, y: 280, type: 'gymleader', dialog: "The gym is open! Challenge me if you dare!" },
+                { x: 620, y: 280, type: 'oldman', dialog: "I've lived here for 50 years. This village has grown so much!" },
+                { x: 180, y: 410, type: 'nurse', dialog: "Welcome to the Pokémon Center! We heal your Pokémon for free." },
+                { x: 400, y: 410, type: 'teacher', dialog: "I teach young trainers about Pokémon types and weaknesses." },
+                { x: 610, y: 410, type: 'fisherman', dialog: "Caught any good Pokémon lately? The lake has Magikarp." },
+                { x: 320, y: 530, type: 'move_tutor', dialog: "I can teach special moves to your Pokémon. Come see me!" }
+            ],
+            
+            // Special locations
+            special: [
+                { x: 700, y: 200, type: 'fountain', name: "Village Fountain" },
+                { x: 100, y: 300, type: 'statue', name: "Founder's Statue" },
+                { x: 750, y: 400, type: 'bench', name: "Resting Bench" },
+                { x: 100, y: 550, type: 'tree', name: "Ancient Tree" }
+            ],
+            
+            // Paths connecting houses
+            paths: [
+                // Main horizontal paths
+                { x: 150, y: 180, width: 550, height: 20, color: '#8b7355' },
+                { x: 150, y: 300, width: 550, height: 20, color: '#8b7355' },
+                { x: 150, y: 420, width: 550, height: 20, color: '#8b7355' },
+                { x: 150, y: 540, width: 550, height: 20, color: '#8b7355' },
+                
+                // Vertical paths
+                { x: 250, y: 80, width: 20, height: 520, color: '#8b7355' },
+                { x: 450, y: 80, width: 20, height: 520, color: '#8b7355' },
+                { x: 650, y: 80, width: 20, height: 520, color: '#8b7355' },
+                
+                // Cross paths
+                { x: 350, y: 240, width: 20, height: 120, color: '#8b7355' },
+                { x: 550, y: 240, width: 20, height: 120, color: '#8b7355' }
+            ],
+            
+            // Trees and decorations
+            trees: [
+                { x: 100, y: 150, size: 25, color: '#2d5a27' },
+                { x: 100, y: 450, size: 30, color: '#2d5a27' },
+                { x: 750, y: 150, size: 28, color: '#2d5a27' },
+                { x: 750, y: 450, size: 26, color: '#2d5a27' },
+                { x: 50, y: 300, size: 32, color: '#2d5a27' },
+                { x: 800, y: 300, size: 30, color: '#2d5a27' },
+                // Row of trees
+                { x: 50, y: 100, size: 20, color: '#2d5a27' },
+                { x: 50, y: 200, size: 22, color: '#2d5a27' },
+                { x: 50, y: 400, size: 24, color: '#2d5a27' },
+                { x: 50, y: 500, size: 21, color: '#2d5a27' },
+                { x: 800, y: 100, size: 23, color: '#2d5a27' },
+                { x: 800, y: 200, size: 25, color: '#2d5a27' },
+                { x: 800, y: 400, size: 22, color: '#2d5a27' },
+                { x: 800, y: 500, size: 24, color: '#2d5a27' }
+            ],
+            
+            // Flowers and bushes
+            decorations: []
         };
 
-        // Game assets
-        const assets = {
-            tiles: {},
-            sprites: {},
-            loaded: false
-        };
+        // Generate random decorations
+        for (let i = 0; i < 100; i++) {
+            village.decorations.push({
+                x: Math.random() * 800,
+                y: Math.random() * 600,
+                type: Math.random() > 0.5 ? 'flower' : 'bush',
+                color: ['#ff6b9d', '#ffd166', '#06d6a0', '#118ab2'][Math.floor(Math.random() * 4)],
+                size: Math.random() * 8 + 4
+            });
+        }
 
-        // Initialize canvas
-        function initCanvas() {
+        // Initialize game
+        function initGame() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            minimapCanvas.width = 150;
+            minimapCanvas.height = 150;
+            
             window.addEventListener('resize', () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             });
-        }
-
-        // Loading system
-        let loadingProgress = 0;
-        function simulateLoading() {
-            const interval = setInterval(() => {
-                loadingProgress += Math.random() * 10;
-                if (loadingProgress >= 100) {
-                    loadingProgress = 100;
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('loadingScreen').style.display = 'none';
-                        document.getElementById('titleScreen').style.display = 'flex';
-                        playSound('click');
-                    }, 500);
-                }
-                document.querySelector('.loading-fill').style.width = loadingProgress + '%';
-            }, 100);
-        }
-
-        // Sound system
-        function playSound(sound) {
-            const audio = document.getElementById(sound + 'Music') || document.getElementById('sfx' + sound);
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(e => console.log("Audio play failed:", e));
-            }
-        }
-
-        // Title screen functions
-        function newGame() {
-            playSound('click');
-            document.getElementById('titleScreen').style.display = 'none';
-            document.getElementById('starterSelection').style.display = 'block';
-            gameState.player.name = 'TRAINER';
-        }
-
-        function continueGame() {
-            playSound('click');
-            const save = localStorage.getItem('pokemonGammaSave');
-            if (save) {
-                try {
-                    const loaded = JSON.parse(save);
-                    gameState = { ...gameState, ...loaded };
-                    startGame();
-                } catch {
-                    showDialog('No valid save found! Starting new game.', () => newGame());
-                }
-            } else {
-                showDialog('No save data found! Starting new game.', () => newGame());
-            }
-        }
-
-        function showOptions() {
-            playSound('click');
-            showDialog('Options Menu', [
-                { text: 'Music: ON', action: () => {} },
-                { text: 'SFX: ON', action: () => {} },
-                { text: 'Controls', action: () => {} },
-                { text: 'Back', action: () => {} }
-            ]);
-        }
-
-        // Starter selection
-        function selectStarter(starter) {
-            playSound('click');
-            gameState.selectedStarter = starter;
-            document.querySelectorAll('.starter-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-        }
-
-        function confirmStarter() {
-            if (!gameState.selectedStarter) {
-                showDialog('Please select a starter Pokémon!');
-                return;
-            }
             
-            playSound('click');
-            const starter = pokemonDB[gameState.selectedStarter];
-            gameState.currentPokemon = {
-                ...starter,
-                level: 5,
-                currentHp: starter.hp,
-                exp: 0,
-                moves: [...starter.moves]
-            };
-            gameState.inventory.pokemon.push(gameState.currentPokemon);
-            gameState.starterChosen = true;
+            // Setup joystick
+            setupJoystick();
             
-            document.getElementById('starterSelection').style.display = 'none';
-            startGame();
-            
-            showDialog(`You received a ${starter.name}!`, [
-                { text: 'Continue', action: () => {
-                    showDialog(`Professor: "Take good care of ${starter.name}!\nYour adventure begins now!"`, [
-                        { text: 'Begin!', action: () => {
-                            document.getElementById('hud').style.display = 'block';
-                            document.getElementById('controls').style.display = 'flex';
-                            document.getElementById('joyBase').style.display = 'block';
-                            updateHUD();
-                        }}
-                    ]);
-                }}
-            ]);
-        }
-
-        // Start the game
-        function startGame() {
-            gameState.currentScreen = 'game';
+            // Start game loop
             gameLoop();
         }
 
-        // HUD system
-        function updateHUD() {
-            if (gameState.currentPokemon) {
-                const hpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
-                document.getElementById('hudContent').innerHTML = `
-                    ${gameState.currentPokemon.name} Lv.${gameState.currentPokemon.level}<br>
-                    HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}<br>
-                    Money: $${gameState.inventory.money}
-                `;
+        // Joystick controls
+        let joystick = { x: 0, y: 0, active: false };
+        function setupJoystick() {
+            const joyBase = document.getElementById('joyBase');
+            const joyStick = document.getElementById('joy');
+
+            joyBase.addEventListener('mousedown', startDrag);
+            joyBase.addEventListener('touchstart', startDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+
+            function startDrag(e) {
+                e.preventDefault();
+                joystick.active = true;
+                updateJoystick(e);
+            }
+
+            function endDrag() {
+                joystick.active = false;
+                joystick.x = joystick.y = 0;
+                joyStick.style.transform = 'translate(0, 0)';
+            }
+
+            function drag(e) {
+                if (!joystick.active) return;
+                updateJoystick(e);
+            }
+
+            function updateJoystick(e) {
+                const rect = joyBase.getBoundingClientRect();
+                const touch = e.touches ? e.touches[0] : e;
+                
+                let x = touch.clientX - rect.left - 60;
+                let y = touch.clientY - rect.top - 60;
+                
+                const distance = Math.sqrt(x * x + y * y);
+                const maxDistance = 50;
+                
+                if (distance > maxDistance) {
+                    x = (x / distance) * maxDistance;
+                    y = (y / distance) * maxDistance;
+                }
+                
+                joystick.x = x / maxDistance;
+                joystick.y = y / maxDistance;
+                
+                joyStick.style.transform = `translate(${x}px, ${y}px)`;
+                
+                // Update player direction
+                if (Math.abs(joystick.x) > Math.abs(joystick.y)) {
+                    gameState.player.direction = joystick.x > 0 ? 2 : 1;
+                } else {
+                    gameState.player.direction = joystick.y > 0 ? 0 : 3;
+                }
             }
         }
 
@@ -1020,7 +533,6 @@
                 btn.className = 'dialog-btn';
                 btn.textContent = 'Continue';
                 btn.onclick = () => {
-                    playSound('click');
                     document.getElementById('dialogBox').style.display = 'none';
                     gameState.inDialog = false;
                 };
@@ -1031,7 +543,6 @@
                     btn.className = 'dialog-btn';
                     btn.textContent = opt.text;
                     btn.onclick = () => {
-                        playSound('click');
                         document.getElementById('dialogBox').style.display = 'none';
                         gameState.inDialog = false;
                         opt.action();
@@ -1043,368 +554,268 @@
             document.getElementById('dialogBox').style.display = 'block';
         }
 
-        // Inventory system
-        function toggleInventory() {
-            playSound('click');
-            if (gameState.inBattle || gameState.inDialog) return;
+        // Interaction system
+        function interact() {
+            if (gameState.inDialog) return;
             
-            gameState.inInventory = !gameState.inInventory;
-            if (gameState.inInventory) {
-                showInventoryTab('pokemon');
-                document.getElementById('inventoryScreen').style.display = 'block';
-            } else {
-                document.getElementById('inventoryScreen').style.display = 'none';
-            }
-        }
-
-        function showInventoryTab(tab) {
-            document.querySelectorAll('.inventory-tab').forEach(t => t.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            const content = document.getElementById('inventoryContent');
-            switch(tab) {
-                case 'pokemon':
-                    content.innerHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <h3 style="color: #ffd700;">YOUR POKÉMON</h3>
-                            <p>${gameState.inventory.pokemon.length}/6 Pokémon</p>
-                        </div>
-                        <div class="pokemon-grid">
-                            ${gameState.inventory.pokemon.map((pkm, i) => `
-                                <div class="pokemon-card ${pkm === gameState.currentPokemon ? 'active' : ''}" 
-                                     onclick="switchPokemon(${i})">
-                                    <div style="width: 60px; height: 60px; background: ${pkm.color}; 
-                                         border-radius: 50%; margin: 0 auto 10px;"></div>
-                                    <h4 style="color: ${pkm.color}">${pkm.name}</h4>
-                                    <p>Lv. ${pkm.level}</p>
-                                    <p>HP: ${pkm.currentHp}/${pkm.hp}</p>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    break;
-                case 'items':
-                    content.innerHTML = `
-                        <div style="text-align: center; margin: 20px 0;">
-                            <h3 style="color: #ffd700;">ITEMS</h3>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                                <h4>Poké Balls: ${gameState.inventory.items.pokeballs}</h4>
-                                <p>Catches wild Pokémon</p>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                                <h4>Potions: ${gameState.inventory.items.potions}</h4>
-                                <p>Restores 20 HP</p>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                case 'save':
-                    content.innerHTML = `
-                        <div style="text-align: center; margin: 40px 0;">
-                            <h3 style="color: #ffd700;">SAVE GAME</h3>
-                            <p>Your progress will be saved.</p>
-                            <button class="dialog-btn" onclick="saveGame()" 
-                                    style="margin-top: 30px; padding: 15px 30px;">
-                                SAVE
-                            </button>
-                            <button class="dialog-btn" onclick="toggleInventory()" 
-                                    style="margin-top: 15px; padding: 15px 30px; background: #666;">
-                                BACK
-                            </button>
-                        </div>
-                    `;
-                    break;
-            }
-        }
-
-        function switchPokemon(index) {
-            if (index >= 0 && index < gameState.inventory.pokemon.length) {
-                gameState.currentPokemon = gameState.inventory.pokemon[index];
-                updateHUD();
-                playSound('click');
-                toggleInventory();
-                showDialog(`Switched to ${gameState.currentPokemon.name}!`);
-            }
-        }
-
-        function saveGame() {
-            localStorage.setItem('pokemonGammaSave', JSON.stringify(gameState));
-            playSound('click');
-            showDialog('Game saved successfully!');
-        }
-
-        // Battle system
-        function startBattle(wildPokemon) {
-            gameState.inBattle = true;
-            gameState.battle.enemy = wildPokemon;
-            
-            // Set up battle display
-            document.getElementById('playerName').textContent = gameState.currentPokemon.name;
-            document.getElementById('enemyName').textContent = wildPokemon.name;
-            document.getElementById('playerHP').style.width = '100%';
-            document.getElementById('enemyHP').style.width = '100%';
-            document.getElementById('playerHPText').textContent = 
-                `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
-            document.getElementById('enemyHPText').textContent = 
-                `HP: ${wildPokemon.currentHp}/${wildPokemon.hp}`;
-            
-            // Update sprites
-            document.querySelector('.player-sprite').style.backgroundColor = gameState.currentPokemon.color;
-            document.querySelector('.enemy-sprite').style.backgroundColor = wildPokemon.color;
-            
-            document.getElementById('battleScreen').style.display = 'block';
-            document.getElementById('battleMenu').style.display = 'grid';
-            playSound('battle');
-        }
-
-        function attack() {
-            if (!gameState.inBattle) return;
-            
-            const playerMove = gameState.currentPokemon.moves[0]; // Simple attack
-            const enemyMove = gameState.battle.enemy.moves[0];
-            
-            // Player attacks
-            const playerDamage = Math.floor(playerMove.power * (gameState.currentPokemon.attack / 50));
-            gameState.battle.enemy.currentHp = Math.max(0, gameState.battle.enemy.currentHp - playerDamage);
-            
-            document.getElementById('battleLog').textContent = 
-                `${gameState.currentPokemon.name} used ${playerMove.name}!`;
-            
-            // Update enemy HP bar
-            const enemyHpPercent = (gameState.battle.enemy.currentHp / gameState.battle.enemy.hp) * 100;
-            document.getElementById('enemyHP').style.width = enemyHpPercent + '%';
-            document.getElementById('enemyHPText').textContent = 
-                `HP: ${gameState.battle.enemy.currentHp}/${gameState.battle.enemy.hp}`;
-            
-            document.querySelector('.enemy-sprite').classList.add('shake');
-            setTimeout(() => {
-                document.querySelector('.enemy-sprite').classList.remove('shake');
+            // Check for nearby NPCs
+            for (const npc of village.npcs) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - npc.x, 2) + 
+                    Math.pow(gameState.player.y - npc.y, 2)
+                );
                 
-                if (gameState.battle.enemy.currentHp <= 0) {
-                    winBattle();
+                if (distance < 50) {
+                    showDialog(`${getNPCTypeName(npc.type)}: "${npc.dialog}"`);
                     return;
                 }
+            }
+            
+            // Check for nearby houses
+            for (const house of village.houses) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - house.x, 2) + 
+                    Math.pow(gameState.player.y - house.y, 2)
+                );
                 
-                // Enemy attacks
-                setTimeout(() => {
-                    const enemyDamage = Math.floor(enemyMove.power * (gameState.battle.enemy.attack / 50));
-                    gameState.currentPokemon.currentHp = Math.max(0, gameState.currentPokemon.currentHp - enemyDamage);
-                    
-                    document.getElementById('battleLog').textContent = 
-                        `${gameState.battle.enemy.name} used ${enemyMove.name}!`;
-                    
-                    // Update player HP bar
-                    const playerHpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
-                    document.getElementById('playerHP').style.width = playerHpPercent + '%';
-                    document.getElementById('playerHPText').textContent = 
-                        `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
-                    
-                    document.querySelector('.player-sprite').classList.add('shake');
-                    setTimeout(() => {
-                        document.querySelector('.player-sprite').classList.remove('shake');
-                        updateHUD();
-                        
-                        if (gameState.currentPokemon.currentHp <= 0) {
-                            loseBattle();
-                        }
-                    }, 500);
-                }, 1000);
-            }, 500);
-        }
-
-        function winBattle() {
-            document.getElementById('battleLog').textContent = 
-                `Wild ${gameState.battle.enemy.name} fainted!`;
-            
-            // Give rewards
-            const expGain = gameState.battle.enemy.level * 100;
-            gameState.currentPokemon.exp += expGain;
-            gameState.inventory.money += 150;
-            
-            setTimeout(() => {
-                document.getElementById('battleScreen').style.display = 'none';
-                gameState.inBattle = false;
-                showDialog(`${gameState.currentPokemon.name} gained ${expGain} EXP!\nYou got $150!`);
-                updateHUD();
-            }, 2000);
-        }
-
-        function loseBattle() {
-            document.getElementById('battleLog').textContent = 
-                `${gameState.currentPokemon.name} fainted!`;
-            
-            setTimeout(() => {
-                document.getElementById('battleScreen').style.display = 'none';
-                gameState.inBattle = false;
-                showDialog('You blacked out!');
-                // Heal all Pokémon
-                gameState.inventory.pokemon.forEach(p => p.currentHp = p.hp);
-                updateHUD();
-            }, 2000);
-        }
-
-        function run() {
-            if (!gameState.inBattle) return;
-            
-            const success = Math.random() > 0.3;
-            if (success) {
-                document.getElementById('battleLog').textContent = 'Got away safely!';
-                setTimeout(() => {
-                    document.getElementById('battleScreen').style.display = 'none';
-                    gameState.inBattle = false;
-                }, 1500);
-            } else {
-                document.getElementById('battleLog').textContent = "Can't escape!";
-                // Enemy gets a free attack
-                setTimeout(() => {
-                    const enemyMove = gameState.battle.enemy.moves[0];
-                    const enemyDamage = Math.floor(enemyMove.power * (gameState.battle.enemy.attack / 50));
-                    gameState.currentPokemon.currentHp = Math.max(0, gameState.currentPokemon.currentHp - enemyDamage);
-                    
-                    const playerHpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
-                    document.getElementById('playerHP').style.width = playerHpPercent + '%';
-                    document.getElementById('playerHPText').textContent = 
-                        `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
-                    
-                    updateHUD();
-                    
-                    if (gameState.currentPokemon.currentHp <= 0) {
-                        loseBattle();
+                if (distance < 60) {
+                    if (gameState.player.inHouse && gameState.player.currentHouse === house.id) {
+                        // Exit house
+                        gameState.player.inHouse = false;
+                        gameState.player.currentHouse = null;
+                        showDialog(`You left ${house.name}.`);
+                    } else if (!gameState.player.inHouse) {
+                        // Enter house
+                        gameState.player.inHouse = true;
+                        gameState.player.currentHouse = house.id;
+                        const houseDialog = getHouseDialog(house);
+                        showDialog(houseDialog);
                     }
-                }, 1000);
-            }
-        }
-
-        // Random wild Pokémon encounter
-        function randomEncounter() {
-            if (gameState.inBattle || gameState.inDialog || gameState.inInventory) return;
-            
-            if (Math.random() < 0.005) { // 0.5% chance per frame
-                const wildPokemon = {
-                    ...pokemonDB.bulbasaur,
-                    level: Math.floor(Math.random() * 5) + 3,
-                    currentHp: pokemonDB.bulbasaur.hp
-                };
-                startBattle(wildPokemon);
-            }
-        }
-
-        // Joystick controls
-        let joystick = { x: 0, y: 0, active: false };
-        const joyBase = document.getElementById('joyBase');
-        const joyStick = document.getElementById('joy');
-
-        joyBase.addEventListener('mousedown', startDrag);
-        joyBase.addEventListener('touchstart', startDrag);
-        document.addEventListener('mouseup', endDrag);
-        document.addEventListener('touchend', endDrag);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('touchmove', drag);
-
-        function startDrag(e) {
-            e.preventDefault();
-            joystick.active = true;
-            updateJoystick(e);
-        }
-
-        function endDrag() {
-            joystick.active = false;
-            joystick.x = joystick.y = 0;
-            joyStick.style.transform = 'translate(0, 0)';
-        }
-
-        function drag(e) {
-            if (!joystick.active) return;
-            updateJoystick(e);
-        }
-
-        function updateJoystick(e) {
-            const rect = joyBase.getBoundingClientRect();
-            const touch = e.touches ? e.touches[0] : e;
-            
-            let x = touch.clientX - rect.left - 60;
-            let y = touch.clientY - rect.top - 60;
-            
-            const distance = Math.sqrt(x * x + y * y);
-            const maxDistance = 50;
-            
-            if (distance > maxDistance) {
-                x = (x / distance) * maxDistance;
-                y = (y / distance) * maxDistance;
+                    return;
+                }
             }
             
-            joystick.x = x / maxDistance;
-            joystick.y = y / maxDistance;
-            
-            joyStick.style.transform = `translate(${x}px, ${y}px)`;
-            
-            // Update player direction for animation
-            if (Math.abs(joystick.x) > Math.abs(joystick.y)) {
-                gameState.player.direction = joystick.x > 0 ? 2 : 1;
-            } else {
-                gameState.player.direction = joystick.y > 0 ? 0 : 3;
+            // Check for special locations
+            for (const special of village.special) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - special.x, 2) + 
+                    Math.pow(gameState.player.y - special.y, 2)
+                );
+                
+                if (distance < 40) {
+                    showDialog(`You're at the ${special.name}. ${getSpecialDialog(special.type)}`);
+                    return;
+                }
             }
+            
+            // Default dialog
+            showDialog("There's nothing special here. Try talking to someone or entering a building.");
         }
 
-        // Game rendering
+        function getNPCTypeName(type) {
+            const names = {
+                'scientist': 'Scientist',
+                'trainer': 'Pokémon Trainer',
+                'child': 'Youngster',
+                'shopkeeper': 'Shopkeeper',
+                'gymleader': 'Gym Leader',
+                'oldman': 'Elder',
+                'nurse': 'Nurse Joy',
+                'teacher': 'Teacher',
+                'fisherman': 'Fisherman',
+                'move_tutor': 'Move Tutor'
+            };
+            return names[type] || 'Villager';
+        }
+
+        function getHouseDialog(house) {
+            const dialogs = {
+                'lab': `Welcome to ${house.name}! This is where Pokémon research happens.`,
+                'shop': `Welcome to ${house.name}! We have items for sale.`,
+                'gym': `Welcome to ${house.name}! Trainers battle here.`,
+                'center': `Welcome to ${house.name}! We heal your Pokémon.`,
+                'special': `You entered ${house.name}.`,
+                'house': `You're in ${house.name}. It's cozy inside.`
+            };
+            return dialogs[house.type] || `You entered ${house.name}.`;
+        }
+
+        function getSpecialDialog(type) {
+            const dialogs = {
+                'fountain': "The water looks refreshing!",
+                'statue': "This statue commemorates the village founder.",
+                'bench': "A good place to rest and watch the village.",
+                'tree': "This ancient tree has stood here for centuries."
+            };
+            return dialogs[type] || "This is a special place in the village.";
+        }
+
+        // Minimap
+        function toggleMap() {
+            gameState.showMinimap = !gameState.showMinimap;
+            document.getElementById('minimap').style.display = gameState.showMinimap ? 'block' : 'none';
+        }
+
+        function renderMinimap() {
+            if (!gameState.showMinimap) return;
+            
+            minimapCtx.clearRect(0, 0, 150, 150);
+            
+            // Draw minimap background
+            minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            minimapCtx.fillRect(0, 0, 150, 150);
+            
+            // Draw village bounds
+            const scale = 0.1;
+            const offsetX = 10;
+            const offsetY = 10;
+            
+            // Draw paths
+            minimapCtx.fillStyle = '#8b7355';
+            village.paths.forEach(path => {
+                minimapCtx.fillRect(
+                    path.x * scale + offsetX,
+                    path.y * scale + offsetY,
+                    path.width * scale,
+                    path.height * scale
+                );
+            });
+            
+            // Draw houses
+            village.houses.forEach(house => {
+                minimapCtx.fillStyle = house.type === 'center' ? '#ff9999' : '#a0522d';
+                minimapCtx.fillRect(
+                    house.x * scale + offsetX,
+                    house.y * scale + offsetY,
+                    house.width * scale,
+                    house.height * scale
+                );
+            });
+            
+            // Draw player
+            minimapCtx.fillStyle = '#ff4444';
+            minimapCtx.beginPath();
+            minimapCtx.arc(
+                gameState.player.x * scale + offsetX,
+                gameState.player.y * scale + offsetY,
+                3, 0, Math.PI * 2
+            );
+            minimapCtx.fill();
+            
+            // Draw border
+            minimapCtx.strokeStyle = '#4a90e2';
+            minimapCtx.lineWidth = 2;
+            minimapCtx.strokeRect(0, 0, 150, 150);
+            
+            // Draw label
+            minimapCtx.fillStyle = '#fff';
+            minimapCtx.font = '10px Arial';
+            minimapCtx.fillText('SUNFLOWER VILLAGE', 5, 145);
+        }
+
+        // Rendering
         function render() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            if (gameState.currentScreen === 'game' && !gameState.inBattle) {
-                // Render overworld
-                renderOverworld();
-                
-                // Render player
-                renderPlayer();
+            if (gameState.player.inHouse) {
+                renderHouseInterior();
+            } else {
+                renderVillage();
             }
+            
+            renderMinimap();
         }
 
-        function renderOverworld() {
-            // Draw sky gradient
+        function renderVillage() {
+            // Sky
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             gradient.addColorStop(0, '#87CEEB');
             gradient.addColorStop(1, '#E0F6FF');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw clouds
+            // Clouds
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            for (let i = 0; i < 3; i++) {
-                const cloudX = (gameState.camera.x * 0.1 + i * 200) % (canvas.width + 400) - 200;
-                const cloudY = 50 + Math.sin(Date.now() * 0.0005 + i) * 20;
+            for (let i = 0; i < 5; i++) {
+                const cloudX = (gameState.camera.x * 0.1 + i * 150) % (canvas.width + 300) - 150;
+                const cloudY = 50 + Math.sin(Date.now() * 0.0003 + i) * 25;
                 drawCloud(cloudX, cloudY);
             }
             
-            // Draw grass
-            const tileSize = 32;
-            for (let x = -10; x < 20; x++) {
-                for (let y = -10; y < 20; y++) {
-                    const tileX = x * tileSize - gameState.camera.x % tileSize;
-                    const tileY = y * tileSize - gameState.camera.y % tileSize;
-                    
-                    ctx.fillStyle = (x + y) % 2 === 0 ? '#5dbb63' : '#6fcf97';
-                    ctx.fillRect(tileX, tileY, tileSize, tileSize);
-                    
-                    // Grass details
-                    if ((x + y) % 3 === 0) {
-                        ctx.fillStyle = '#3a7d34';
-                        ctx.fillRect(tileX + 10, tileY + 10, 3, 12);
-                    }
+            // Apply camera transform
+            ctx.save();
+            ctx.translate(canvas.width/2 - gameState.player.x, canvas.height/2 - gameState.player.y);
+            
+            // Draw paths
+            village.paths.forEach(path => {
+                ctx.fillStyle = path.color;
+                ctx.fillRect(path.x, path.y, path.width, path.height);
+            });
+            
+            // Draw decorations
+            village.decorations.forEach(deco => {
+                ctx.fillStyle = deco.color;
+                if (deco.type === 'flower') {
+                    ctx.beginPath();
+                    ctx.arc(deco.x, deco.y, deco.size/2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(deco.x, deco.y, deco.size, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-            }
+            });
             
-            // Draw path
-            ctx.fillStyle = '#8b7355';
-            const pathWidth = 200;
-            const pathHeight = 40;
-            ctx.fillRect(canvas.width/2 - pathWidth/2, canvas.height/2 + 20, pathWidth, pathHeight);
-            ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - pathWidth/2, 40, pathWidth);
+            // Draw trees
+            village.trees.forEach(tree => {
+                ctx.fillStyle = tree.color;
+                ctx.beginPath();
+                ctx.arc(tree.x, tree.y, tree.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Tree trunk
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(tree.x - 5, tree.y + tree.size/2, 10, 20);
+            });
             
-            // Draw buildings
-            drawBuilding(canvas.width/2 - 100, canvas.height/2 - 80, 80, 60, '#a0522d', '#8b4513'); // House
-            drawBuilding(canvas.width/2 + 100, canvas.height/2 - 80, 100, 60, '#ff9999', '#ff6b6b'); // Center
+            // Draw houses
+            village.houses.forEach(house => {
+                drawHouse(house);
+                
+                // House label
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(house.name, house.x + house.width/2, house.y - 10);
+            });
+            
+            // Draw NPCs
+            village.npcs.forEach(npc => {
+                drawNPC(npc);
+            });
+            
+            // Draw special locations
+            village.special.forEach(special => {
+                drawSpecial(special);
+            });
+            
+            // Draw village boundaries
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, 50, 700, 550);
+            
+            // Draw village sign
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(350, 30, 100, 40);
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('SUNFLOWER VILLAGE', 400, 55);
+            
+            // Draw player
+            drawPlayer();
+            
+            ctx.restore();
         }
 
         function drawCloud(x, y) {
@@ -1415,44 +826,142 @@
             ctx.fill();
         }
 
-        function drawBuilding(x, y, width, height, color, roofColor) {
+        function drawHouse(house) {
             // Main building
-            ctx.fillStyle = color;
-            ctx.fillRect(x - width/2, y - height, width, height);
+            ctx.fillStyle = house.color || '#a0522d';
+            ctx.fillRect(house.x, house.y, house.width, house.height);
             
             // Roof
-            ctx.fillStyle = roofColor;
+            ctx.fillStyle = house.roof || '#8b4513';
             ctx.beginPath();
-            ctx.moveTo(x - width/2 - 10, y - height);
-            ctx.lineTo(x, y - height - 20);
-            ctx.lineTo(x + width/2 + 10, y - height);
+            ctx.moveTo(house.x - 10, house.y);
+            ctx.lineTo(house.x + house.width/2, house.y - 20);
+            ctx.lineTo(house.x + house.width + 10, house.y);
             ctx.closePath();
             ctx.fill();
             
             // Door
             ctx.fillStyle = '#654321';
-            ctx.fillRect(x - 8, y - 20, 16, 20);
+            ctx.fillRect(house.x + house.width/2 - 8, house.y + house.height - 20, 16, 20);
             
             // Windows
             ctx.fillStyle = '#4a8bca';
-            ctx.fillRect(x - 25, y - 40, 12, 12);
-            ctx.fillRect(x + 13, y - 40, 12, 12);
+            ctx.fillRect(house.x + 15, house.y + 15, 12, 12);
+            ctx.fillRect(house.x + house.width - 27, house.y + 15, 12, 12);
+            
+            // Special features based on type
+            if (house.type === 'center') {
+                // Red cross
+                ctx.fillStyle = '#ff4444';
+                ctx.fillRect(house.x + house.width/2 - 15, house.y - 25, 30, 5);
+                ctx.fillRect(house.x + house.width/2 - 2, house.y - 35, 4, 25);
+            } else if (house.type === 'shop') {
+                // Shop sign
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(house.x + house.width/2, house.y - 25, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
-        function renderPlayer() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const size = 24;
+        function drawNPC(npc) {
+            // NPC body
+            const npcColors = {
+                'scientist': '#4a90e2',
+                'trainer': '#ff4444',
+                'child': '#ff6b9d',
+                'shopkeeper': '#8b4513',
+                'gymleader': '#ffd700',
+                'oldman': '#888',
+                'nurse': '#ff9999',
+                'teacher': '#78c850',
+                'fisherman': '#6890f0',
+                'move_tutor': '#f08030'
+            };
             
-            ctx.save();
-            ctx.translate(centerX, centerY);
+            ctx.fillStyle = npcColors[npc.type] || '#fff';
+            ctx.beginPath();
+            ctx.arc(npc.x, npc.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // NPC face
+            ctx.fillStyle = '#ffcc99';
+            ctx.beginPath();
+            ctx.arc(npc.x, npc.y - 3, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Interaction indicator
+            ctx.fillStyle = '#4a90e2';
+            ctx.beginPath();
+            ctx.arc(npc.x, npc.y - 20, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawSpecial(special) {
+            switch(special.type) {
+                case 'fountain':
+                    ctx.fillStyle = '#4a8bca';
+                    ctx.beginPath();
+                    ctx.arc(special.x, special.y, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Water effect
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    for(let i = 0; i < 3; i++) {
+                        const offset = Math.sin(Date.now() * 0.002 + i) * 3;
+                        ctx.beginPath();
+                        ctx.arc(special.x, special.y - 5 + offset, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+                    
+                case 'statue':
+                    ctx.fillStyle = '#888';
+                    // Base
+                    ctx.fillRect(special.x - 10, special.y, 20, 5);
+                    // Body
+                    ctx.fillRect(special.x - 5, special.y - 20, 10, 20);
+                    // Head
+                    ctx.beginPath();
+                    ctx.arc(special.x, special.y - 25, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
+                case 'bench':
+                    ctx.fillStyle = '#8b4513';
+                    // Seat
+                    ctx.fillRect(special.x - 20, special.y, 40, 5);
+                    // Back
+                    ctx.fillRect(special.x - 20, special.y - 10, 40, 3);
+                    // Legs
+                    ctx.fillRect(special.x - 18, special.y + 5, 4, 10);
+                    ctx.fillRect(special.x + 14, special.y + 5, 4, 10);
+                    break;
+                    
+                case 'tree':
+                    ctx.fillStyle = '#2d5a27';
+                    ctx.beginPath();
+                    ctx.arc(special.x, special.y, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#8b4513';
+                    ctx.fillRect(special.x - 8, special.y + 15, 16, 25);
+                    break;
+            }
+        }
+
+        function drawPlayer() {
+            const player = gameState.player;
             
             // Walking animation
             if (joystick.x !== 0 || joystick.y !== 0) {
-                gameState.player.spriteFrame = (gameState.player.spriteFrame + 0.2) % 8;
+                player.spriteFrame = (player.spriteFrame + 0.2) % 8;
             }
             
-            // Draw player (trainer sprite)
+            // Draw player (trainer)
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            
+            // Body
             ctx.fillStyle = '#ff4444'; // Red hat
             ctx.fillRect(-8, -20, 16, 8);
             
@@ -1475,51 +984,129 @@
             // Legs with animation
             let legOffset = 0;
             if (joystick.x !== 0 || joystick.y !== 0) {
-                legOffset = Math.sin(gameState.player.spriteFrame) * 3;
+                legOffset = Math.sin(player.spriteFrame) * 3;
             }
             
             ctx.fillStyle = '#000';
             ctx.fillRect(-6, 12, 4, 8 + legOffset);
             ctx.fillRect(2, 12, 4, 8 - legOffset);
             
-            ctx.restore();
-            
-            // Draw following Pokémon
-            if (gameState.currentPokemon) {
-                drawFollowingPokemon(centerX, centerY);
+            // Interaction indicator
+            if (checkNearbyInteraction()) {
+                ctx.fillStyle = '#4a90e2';
+                ctx.beginPath();
+                ctx.arc(0, -30, 5, 0, Math.PI * 2);
+                ctx.fill();
             }
+            
+            ctx.restore();
         }
 
-        function drawFollowingPokemon(playerX, playerY) {
-            const offsetX = gameState.player.direction === 1 ? -35 : gameState.player.direction === 2 ? 35 : 0;
-            const offsetY = gameState.player.direction === 0 ? 30 : gameState.player.direction === 3 ? -30 : 0;
-            const bobOffset = Math.sin(Date.now() * 0.005) * 3;
+        function renderHouseInterior() {
+            // House interior background
+            ctx.fillStyle = '#d2b48c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.fillStyle = gameState.currentPokemon.color;
-            ctx.beginPath();
-            ctx.arc(playerX + offsetX, playerY + offsetY + bobOffset, 12, 0, Math.PI * 2);
-            ctx.fill();
+            // Wood floor pattern
+            for(let x = 0; x < canvas.width; x += 40) {
+                for(let y = 0; y < canvas.height; y += 40) {
+                    ctx.fillStyle = (x + y) % 80 === 0 ? '#8b7355' : '#a0522d';
+                    ctx.fillRect(x, y, 40, 40);
+                }
+            }
             
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            // Furniture
+            const house = village.houses.find(h => h.id === gameState.player.currentHouse);
+            if (house) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(house.name, canvas.width/2, 50);
+                
+                // Draw some furniture based on house type
+                ctx.fillStyle = '#8b4513';
+                
+                if (house.type === 'house') {
+                    // Bed
+                    ctx.fillRect(canvas.width/2 - 60, canvas.height/2 - 30, 120, 60);
+                    // Table
+                    ctx.fillRect(canvas.width/2 - 40, canvas.height/2 + 50, 80, 20);
+                    // Chairs
+                    ctx.fillRect(canvas.width/2 - 60, canvas.height/2 + 40, 20, 30);
+                    ctx.fillRect(canvas.width/2 + 40, canvas.height/2 + 40, 20, 30);
+                } else if (house.type === 'shop') {
+                    // Counter
+                    ctx.fillRect(canvas.width/2 - 100, canvas.height/2 - 20, 200, 40);
+                    // Shelves
+                    for(let i = 0; i < 3; i++) {
+                        ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 80 + i * 30, 240, 5);
+                    }
+                }
+            }
+            
+            // Exit sign
+            ctx.fillStyle = '#333';
+            ctx.fillRect(canvas.width/2 - 40, canvas.height - 80, 80, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.fillText('EXIT', canvas.width/2, canvas.height - 60);
+            
+            // Draw player in house
+            ctx.save();
+            ctx.translate(canvas.width/2, canvas.height/2);
+            drawPlayer();
+            ctx.restore();
+        }
+
+        function checkNearbyInteraction() {
+            // Check NPCs
+            for (const npc of village.npcs) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - npc.x, 2) + 
+                    Math.pow(gameState.player.y - npc.y, 2)
+                );
+                if (distance < 50) return true;
+            }
+            
+            // Check houses
+            for (const house of village.houses) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - house.x, 2) + 
+                    Math.pow(gameState.player.y - house.y, 2)
+                );
+                if (distance < 60) return true;
+            }
+            
+            // Check special locations
+            for (const special of village.special) {
+                const distance = Math.sqrt(
+                    Math.pow(gameState.player.x - special.x, 2) + 
+                    Math.pow(gameState.player.y - special.y, 2)
+                );
+                if (distance < 40) return true;
+            }
+            
+            return false;
         }
 
         // Game loop
         function gameLoop() {
-            // Update
-            if (gameState.currentScreen === 'game' && !gameState.inBattle && !gameState.inDialog && !gameState.inInventory) {
-                // Move player with joystick
+            // Update player position
+            if (!gameState.inDialog && !gameState.player.inHouse) {
                 gameState.player.x += joystick.x * gameState.player.speed;
                 gameState.player.y += joystick.y * gameState.player.speed;
                 
-                // Update camera
-                gameState.camera.x = gameState.player.x;
-                gameState.camera.y = gameState.player.y;
-                
-                // Random encounters
-                randomEncounter();
+                // Keep player in village bounds
+                gameState.player.x = Math.max(50, Math.min(750, gameState.player.x));
+                gameState.player.y = Math.max(50, Math.min(550, gameState.player.y));
             }
+            
+            // Update HUD
+            document.getElementById('hudContent').innerHTML = `
+                Sunflower Village<br>
+                Position: ${Math.floor(gameState.player.x)}, ${Math.floor(gameState.player.y)}<br>
+                ${gameState.player.inHouse ? 'Inside Building' : 'Exploring Village'}
+            `;
             
             // Render
             render();
@@ -1528,11 +1115,21 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Initialize everything
-        window.addEventListener('load', () => {
-            initCanvas();
-            simulateLoading();
-        });
+        // Start game
+        function startGame() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('joyBase').style.display = 'block';
+            document.getElementById('hud').style.display = 'block';
+            document.getElementById('controls').style.display = 'flex';
+            
+            showDialog("Welcome to Sunflower Village! A peaceful village with many houses and friendly people. Use the joystick to move and the 💬 button to interact with villagers and buildings.");
+            
+            initGame();
+        }
+
+        function showCredits() {
+            showDialog("Pokémon Village Adventure\n\nCreated with HTML5 Canvas\nInspired by Pokémon games\n\nUse the joystick to explore!");
+        }
     </script>
 </body>
 </html>
