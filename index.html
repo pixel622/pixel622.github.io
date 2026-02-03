@@ -1,1936 +1,1538 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Pokemon Adventure</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Gamma Adventure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    background: #000;
-    font-family: 'Arial', sans-serif;
-    overflow: hidden;
-    color: #fff;
-}
+        body {
+            background: #000;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
 
-canvas {
-    display: block;
-}
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
 
-/* Login Screen */
-#loginScreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-}
+        /* Game Container */
+        #gameContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
 
-.login-container {
-    background: rgba(0, 0, 0, 0.8);
-    border: 4px solid #ffd700;
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-}
+        /* Title Screen */
+        #titleScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%23005287"/><circle cx="200" cy="200" r="150" fill="%23006bb3"/><circle cx="200" cy="200" r="100" fill="%230084d1"/></svg>');
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: bgPulse 10s infinite;
+        }
 
-.login-title {
-    color: #ffd700;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
+        @keyframes bgPulse {
+            0%, 100% { background-position: 0 0; }
+            50% { background-position: 100px 100px; }
+        }
 
-.login-input {
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #ffd700;
-    border-radius: 8px;
-    color: white;
-    font-size: 16px;
-}
+        .title-logo {
+            font-size: 48px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700,
+                         0 0 20px #ffd700,
+                         2px 2px 0 #000,
+                         -2px -2px 0 #000;
+            margin-bottom: 50px;
+            animation: logoGlow 2s infinite;
+            font-family: 'Pokemon Solid', sans-serif;
+            letter-spacing: 5px;
+        }
 
-.login-btn {
-    background: linear-gradient(to bottom, #ff4444, #cc0000);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    margin: 10px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+        @keyframes logoGlow {
+            0%, 100% { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 2px 2px 0 #000; }
+            50% { text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 2px 2px 0 #000; }
+        }
 
-.login-btn:hover {
-    transform: scale(1.05);
-}
+        .title-subtitle {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 100px;
+            text-shadow: 2px 2px 0 #000;
+        }
 
-.new-game-btn {
-    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-}
+        .title-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
 
-/* Joystick */
-#joyBase {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 100px;
-    height: 100px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    border-radius: 50%;
-    z-index: 100;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    touch-action: none;
-}
+        .title-btn {
+            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+        }
 
-#joy {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    left: 30px;
-    top: 30px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    border: 2px solid rgba(100, 100, 255, 0.8);
-    box-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
-    transition: transform 0.1s;
-    touch-action: none;
-}
+        .title-btn:hover {
+            background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+        }
 
-/* Battle UI */
-#battle {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, #1a5f7a, #0a3d62);
-    color: white;
-    display: none;
-    z-index: 1000;
-    font-family: 'Arial', sans-serif;
-}
+        /* Joystick - Gamma Emerald Style */
+        #joyBase {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #4a90e2;
+            border-radius: 50%;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+            display: none;
+            touch-action: none;
+        }
 
-.battle-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        #joy {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            left: 35px;
+            top: 35px;
+            background: linear-gradient(to bottom, #ffd700, #ffaa00);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            transition: transform 0.1s;
+        }
 
-.enemy-area {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding-top: 40px;
-}
+        /* HUD - Gamma Emerald Style */
+        #hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(to right, rgba(0, 40, 80, 0.9), rgba(0, 60, 120, 0.9));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 3px solid #4a90e2;
+            font-size: 14px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+            backdrop-filter: blur(5px);
+        }
 
-.player-area {
-    flex: 1;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-    padding-bottom: 40px;
-}
+        .hud-title {
+            color: #ffd700;
+            font-size: 16px;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px #000;
+        }
 
-.hp-bar {
-    width: 200px;
-    height: 20px;
-    background: #333;
-    border: 2px solid #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 10px 0;
-}
+        /* Battle System - Gamma Emerald Style */
+        #battleScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #1a5f7a, #0a3d62);
+            z-index: 900;
+            display: none;
+            overflow: hidden;
+        }
 
-.hp-fill {
-    height: 100%;
-    background: linear-gradient(to right, #ff4444, #ffaa44);
-    transition: width 0.3s;
-    width: 100%;
-}
+        .battle-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #2c8b9f, #1a5f7a 40%, #0a3d62 70%);
+            filter: blur(1px);
+        }
 
-.battle-menu {
-    background: rgba(0, 0, 0, 0.8);
-    border: 3px solid #fff;
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 20px;
-    display: none;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    max-width: 300px;
-    align-self: center;
-}
+        .battle-platform {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background: linear-gradient(to bottom, #8b4513, #654321);
+            border-radius: 75px;
+            border: 5px solid #a0522d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        }
 
-.battle-menu button {
-    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: bold;
-}
+        .player-platform {
+            bottom: 100px;
+            left: 100px;
+            transform: rotate(-5deg);
+        }
 
-.battle-menu button:hover {
-    background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
-    transform: translateY(-2px);
-}
+        .enemy-platform {
+            top: 100px;
+            right: 100px;
+            transform: rotate(5deg);
+        }
 
-#battleLog {
-    background: rgba(0, 0, 0, 0.7);
-    border: 2px solid #fff;
-    border-radius: 10px;
-    padding: 15px;
-    margin: 20px 0;
-    min-height: 60px;
-    font-size: 18px;
-    color: #fff;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .pokemon-sprite {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
+        }
 
-/* Dialog Box */
-#dialogBox {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    background: rgba(0, 0, 0, 0.9);
-    border: 3px solid #fff;
-    border-radius: 15px;
-    padding: 20px;
-    color: white;
-    font-size: 18px;
-    z-index: 2000;
-    display: none;
-}
+        .player-sprite {
+            bottom: 150px;
+            left: 150px;
+        }
 
-#dialogText {
-    margin-bottom: 15px;
-    min-height: 60px;
-    line-height: 1.5;
-}
+        .enemy-sprite {
+            top: 150px;
+            right: 150px;
+        }
 
-#dialogOptions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
+        .battle-hud {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            border: 4px solid #4a90e2;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5);
+            backdrop-filter: blur(5px);
+        }
 
-.dialog-option {
-    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-width: 120px;
-}
+        .player-hud {
+            bottom: 50px;
+            right: 50px;
+            width: 350px;
+        }
 
-.dialog-option:hover {
-    background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
-    transform: translateY(-2px);
-}
+        .enemy-hud {
+            top: 50px;
+            left: 50px;
+            width: 350px;
+        }
 
-/* Starter Selection */
-#starterSelection {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 500px;
-    background: rgba(0, 0, 0, 0.95);
-    border: 4px solid #fff;
-    border-radius: 20px;
-    padding: 30px;
-    color: white;
-    z-index: 3000;
-    display: none;
-    text-align: center;
-}
+        .hp-bar {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
 
-.starter-title {
-    color: #ffd700;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
+        .hp-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ff4444, #44ff44);
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 10px;
+        }
 
-.starter-options {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
+        .battle-menu {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #ffd700;
+            border-radius: 15px;
+            padding: 25px;
+            width: 400px;
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
 
-.starter-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    width: 120px;
-    border: 2px solid transparent;
-}
+        .battle-btn {
+            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
 
-.starter-card:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.2);
-    border-color: #fff;
-}
+        .battle-btn:hover {
+            background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
+            transform: translateY(-2px);
+        }
 
-.starter-card.selected {
-    border-color: #ffd700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-}
+        .battle-log {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            border: 4px solid #fff;
+            border-radius: 15px;
+            padding: 20px;
+            width: 600px;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
 
-.starter-name {
-    font-size: 20px;
-    margin: 10px 0;
-    font-weight: bold;
-}
+        /* Dialog System */
+        #dialogBox {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
+            border: 4px solid #ffd700;
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            font-size: 18px;
+            z-index: 800;
+            display: none;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
 
-/* Animation for attacks */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-}
+        .dialog-text {
+            margin-bottom: 20px;
+            min-height: 80px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px #000;
+        }
 
-@keyframes flash {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
+        .dialog-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
+        .dialog-btn {
+            background: linear-gradient(to bottom, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 150px;
+        }
 
-.shake { animation: shake 0.3s; }
-.flash { animation: flash 0.3s; }
-.float { animation: float 2s infinite; }
+        .dialog-btn:hover {
+            background: linear-gradient(to bottom, #ff5555, #dd1111);
+            transform: translateY(-2px);
+        }
 
-/* HUD */
-#hud {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: 2px solid #fff;
-    font-size: 14px;
-    z-index: 50;
-}
+        /* Starter Selection */
+        #starterSelection {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
+            border: 6px solid #ffd700;
+            border-radius: 25px;
+            padding: 40px;
+            color: white;
+            z-index: 700;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
 
-.enemy-info, .player-info {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 10px 20px;
-    border-radius: 10px;
-    border: 2px solid #fff;
-}
+        .starter-title {
+            color: #ffd700;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px #000;
+        }
 
-.battle-sprite {
-    width: 100px;
-    height: 100px;
-    margin: 0 20px;
-}
+        .starter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
 
-/* Inventory */
-#inventory {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 700px;
-    max-height: 80vh;
-    background: rgba(0, 0, 0, 0.95);
-    border: 4px solid #fff;
-    border-radius: 20px;
-    padding: 20px;
-    color: white;
-    z-index: 4000;
-    display: none;
-    overflow-y: auto;
-}
+        .starter-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            backdrop-filter: blur(5px);
+        }
 
-.inventory-title {
-    color: #ffd700;
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 20px;
-}
+        .starter-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+        }
 
-.inventory-tabs {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-}
+        .starter-card.selected {
+            border-color: #ffd700;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.7);
+            background: rgba(255, 215, 0, 0.1);
+        }
 
-.inventory-tab {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-}
+        .starter-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
+        }
 
-.inventory-tab.active {
-    background: #4a90e2;
-}
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
 
-.pokemon-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
 
-.pokemon-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
 
-.pokemon-card:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-5px);
-}
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
 
-.pokemon-card.active {
-    border: 2px solid #ffd700;
-    background: rgba(255, 215, 0, 0.1);
-}
+        .float { animation: float 3s ease-in-out infinite; }
+        .shake { animation: shake 0.5s; }
+        .flash { animation: flash 0.3s; }
+        .pulse { animation: pulse 0.5s; }
 
-.item-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
+        /* Controls */
+        #controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+            display: none;
+        }
 
-.item-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-}
+        .control-btn {
+            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+            border: 3px solid #fff;
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
 
-.shop-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.7);
+        }
 
-.shop-item {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-}
+        /* Inventory */
+        #inventoryScreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 900px;
+            height: 80vh;
+            background: linear-gradient(to bottom, rgba(0, 40, 80, 0.95), rgba(0, 60, 120, 0.95));
+            border: 6px solid #ffd700;
+            border-radius: 25px;
+            z-index: 600;
+            display: none;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
 
-.shop-item button {
-    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 10px;
-    width: 100%;
-}
+        .inventory-header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #4a90e2;
+        }
 
-.sell-btn {
-    background: linear-gradient(to bottom, #ff6b6b, #cc4444) !important;
-    margin-top: 10px;
-}
+        .inventory-title {
+            color: #ffd700;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px #000;
+        }
 
-/* Controls */
-#controls {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 100;
-}
+        .inventory-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            gap: 10px;
+        }
 
-.control-btn {
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+        .inventory-tab {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
 
-.control-btn:hover {
-    background: rgba(0, 0, 0, 0.7);
-    transform: scale(1.1);
-}
-</style>
+        .inventory-tab.active {
+            background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+        }
+
+        .inventory-content {
+            padding: 20px;
+            height: calc(100% - 150px);
+            overflow-y: auto;
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .pokemon-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .pokemon-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .pokemon-card.active {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .loading-text {
+            color: #ffd700;
+            font-size: 24px;
+            margin-top: 30px;
+            animation: pulse 1s infinite;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            border: 2px solid #4a90e2;
+        }
+
+        .loading-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4a90e2, #2c6cb0);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Particle Effects */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .title-logo { font-size: 32px; }
+            .title-btn { padding: 12px 30px; font-size: 18px; min-width: 180px; }
+            .battle-menu { width: 90%; left: 5%; }
+            .battle-log { width: 90%; }
+            .starter-grid { grid-template-columns: 1fr; }
+            #joyBase { width: 100px; height: 100px; }
+            #joy { width: 40px; height: 40px; left: 30px; top: 30px; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
-
 <body>
-<canvas id="game"></canvas>
-<div id="joyBase"><div id="joy"></div></div>
-<div id="hud"></div>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-text">LOADING POKÉMON GAMMA ADVENTURE...</div>
+        <div class="loading-bar"><div class="loading-fill"></div></div>
+    </div>
 
-<!-- Login Screen -->
-<div id="loginScreen">
-    <div class="login-container">
-        <div class="login-title">POKÉMON ADVENTURE</div>
-        <input type="text" id="username" class="login-input" placeholder="Enter Trainer Name" maxlength="12">
-        <div style="margin: 20px 0;">
-            <button class="login-btn" onclick="loadGame()">CONTINUE</button>
-            <button class="login-btn new-game-btn" onclick="newGame()">NEW GAME</button>
+    <!-- Title Screen -->
+    <div id="titleScreen">
+        <div class="title-logo">POKÉMON γ</div>
+        <div class="title-subtitle">Gamma Emerald Adventure</div>
+        <div class="title-menu">
+            <button class="title-btn" onclick="newGame()">NEW GAME</button>
+            <button class="title-btn" onclick="continueGame()">CONTINUE</button>
+            <button class="title-btn" onclick="showOptions()">OPTIONS</button>
         </div>
     </div>
-</div>
 
-<!-- Controls -->
-<div id="controls">
-    <div class="control-btn" onclick="toggleInventory()">📦</div>
-    <div class="control-btn" onclick="switchPokemon()">🔄</div>
-</div>
-
-<!-- Starter Selection -->
-<div id="starterSelection">
-    <div class="starter-title">CHOOSE YOUR STARTER POKÉMON!</div>
-    <p>Select your first Pokémon to begin your journey.</p>
-    <div class="starter-options">
-        <div class="starter-card" onclick="selectStarter('bulbasaur')" data-type="bulbasaur">
-            <div class="starter-name" style="color: #78c850">Bulbasaur</div>
-            <div class="starter-type">Grass/Poison</div>
-        </div>
-        <div class="starter-card" onclick="selectStarter('charmander')" data-type="charmander">
-            <div class="starter-name" style="color: #f08030">Charmander</div>
-            <div class="starter-type">Fire</div>
-        </div>
-        <div class="starter-card" onclick="selectStarter('squirtle')" data-type="squirtle">
-            <div class="starter-name" style="color: #6890f0">Squirtle</div>
-            <div class="starter-type">Water</div>
-        </div>
-    </div>
-    <button onclick="confirmStarter()" style="margin-top: 20px; padding: 10px 30px; font-size: 18px;">START ADVENTURE!</button>
-</div>
-
-<!-- Dialog Box -->
-<div id="dialogBox">
-    <div id="dialogText"></div>
-    <div id="dialogOptions"></div>
-</div>
-
-<!-- Inventory -->
-<div id="inventory">
-    <div class="inventory-title">INVENTORY</div>
-    <div class="inventory-tabs">
-        <button class="inventory-tab active" onclick="showInventoryTab('pokemon')">POKÉMON (0)</button>
-        <button class="inventory-tab" onclick="showInventoryTab('items')">ITEMS</button>
-        <button class="inventory-tab" onclick="showInventoryTab('shop')">SHOP</button>
-    </div>
-    
-    <div id="pokemonTab" class="inventory-content active">
-        <div class="pokemon-grid" id="pokemonGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
-    </div>
-    
-    <div id="itemsTab" class="inventory-content">
-        <div class="item-grid" id="itemGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
-    </div>
-    
-    <div id="shopTab" class="inventory-content">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h3>POKÉMON CENTER SHOP</h3>
-            <p>COINS: <span id="coinCount">100</span> <span style="color: gold">🪙</span></p>
-        </div>
-        <div class="shop-grid" id="shopGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
-    </div>
-</div>
-
-<!-- Battle UI -->
-<div id="battle">
-    <div class="battle-container">
-        <div class="enemy-area">
-            <div class="enemy-info">
-                <h2 id="enemyName">Wild Pokémon</h2>
+    <!-- Game Container -->
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- Battle Screen -->
+        <div id="battleScreen">
+            <div class="battle-background"></div>
+            <div class="battle-platform player-platform"></div>
+            <div class="battle-platform enemy-platform"></div>
+            <div class="pokemon-sprite player-sprite float"></div>
+            <div class="pokemon-sprite enemy-sprite float"></div>
+            
+            <div class="battle-hud player-hud">
+                <div class="hud-title" id="playerName">TRAINER</div>
                 <div class="hp-bar">
-                    <div id="enemyHPFill" class="hp-fill"></div>
+                    <div class="hp-fill" id="playerHP" style="width: 100%"></div>
                 </div>
-                <div id="enemyHPText">HP: 20/20</div>
+                <div id="playerHPText">HP: 100/100</div>
             </div>
-            <div id="enemySprite" class="battle-sprite"></div>
-        </div>
-        
-        <div id="battleLog">A wild Pokémon appeared!</div>
-        
-        <div class="player-area">
-            <div id="playerSprite" class="battle-sprite"></div>
-            <div class="player-info">
-                <h2 id="playerPokemonName">Bulbasaur</h2>
+            
+            <div class="battle-hud enemy-hud">
+                <div class="hud-title" id="enemyName">WILD POKÉMON</div>
                 <div class="hp-bar">
-                    <div id="playerHPFill" class="hp-fill"></div>
+                    <div class="hp-fill" id="enemyHP" style="width: 100%"></div>
                 </div>
-                <div id="playerHPText">HP: 30/30</div>
+                <div id="enemyHPText">HP: 100/100</div>
+            </div>
+            
+            <div class="battle-log" id="battleLog">A wild Pokémon appeared!</div>
+            
+            <div class="battle-menu" id="battleMenu">
+                <button class="battle-btn" onclick="attack()">FIGHT</button>
+                <button class="battle-btn" onclick="showPokemonMenu()">POKÉMON</button>
+                <button class="battle-btn" onclick="useItem()">ITEM</button>
+                <button class="battle-btn" onclick="run()">RUN</button>
             </div>
         </div>
-        
-        <div class="battle-menu" id="battleMenu">
-            <button onclick="showAttackMenu()">FIGHT</button>
-            <button onclick="showPokemonMenu()">POKÉMON</button>
-            <button onclick="showItemMenu()">ITEM</button>
-            <button onclick="run()">RUN</button>
+
+        <!-- Dialog Box -->
+        <div id="dialogBox">
+            <div class="dialog-text" id="dialogText"></div>
+            <div class="dialog-options" id="dialogOptions"></div>
         </div>
-        
-        <div class="battle-menu" id="attackMenu" style="display: none;">
-            <button class="attack-btn" onclick="useAttack(0)">Tackle</button>
-            <button class="attack-btn" onclick="useAttack(1)">Growl</button>
-            <button class="attack-btn" onclick="useAttack(2)">Vine Whip</button>
-            <button class="attack-btn" onclick="useAttack(3)">Leech Seed</button>
-            <button class="back-btn" onclick="showBattleMenu()">Back</button>
+
+        <!-- Starter Selection -->
+        <div id="starterSelection">
+            <div class="starter-title">CHOOSE YOUR STARTER POKÉMON</div>
+            <p>The professor offers you three Pokémon. Which will you choose?</p>
+            <div class="starter-grid">
+                <div class="starter-card" onclick="selectStarter('bulbasaur')">
+                    <div class="starter-icon" style="background-color: #78c850; border-radius: 50%;"></div>
+                    <div class="starter-name" style="color: #78c850; font-size: 24px; font-weight: bold;">BULBASAUR</div>
+                    <div class="starter-type" style="color: #aaa;">GRASS/POISON</div>
+                    <div class="starter-desc">A strange seed was planted on its back at birth.</div>
+                </div>
+                <div class="starter-card" onclick="selectStarter('charmander')">
+                    <div class="starter-icon" style="background-color: #f08030; border-radius: 50%;"></div>
+                    <div class="starter-name" style="color: #f08030; font-size: 24px; font-weight: bold;">CHARMANDER</div>
+                    <div class="starter-type" style="color: #aaa;">FIRE</div>
+                    <div class="starter-desc">The flame on its tail shows the strength of its life force.</div>
+                </div>
+                <div class="starter-card" onclick="selectStarter('squirtle')">
+                    <div class="starter-icon" style="background-color: #6890f0; border-radius: 50%;"></div>
+                    <div class="starter-name" style="color: #6890f0; font-size: 24px; font-weight: bold;">SQUIRTLE</div>
+                    <div class="starter-type" style="color: #aaa;">WATER</div>
+                    <div class="starter-desc">After birth, its back swells and hardens into a shell.</div>
+                </div>
+            </div>
+            <button class="dialog-btn" onclick="confirmStarter()" style="margin-top: 30px; padding: 15px 50px; font-size: 20px;">BEGIN ADVENTURE</button>
         </div>
-        
-        <div class="battle-menu" id="pokemonMenu" style="display: none;"></div>
-        <div class="battle-menu" id="itemMenu" style="display: none;"></div>
+
+        <!-- Inventory Screen -->
+        <div id="inventoryScreen">
+            <div class="inventory-header">
+                <div class="inventory-title">POKÉDEX & INVENTORY</div>
+            </div>
+            <div class="inventory-tabs">
+                <button class="inventory-tab active" onclick="showInventoryTab('pokemon')">POKÉMON</button>
+                <button class="inventory-tab" onclick="showInventoryTab('items')">ITEMS</button>
+                <button class="inventory-tab" onclick="showInventoryTab('key')">KEY ITEMS</button>
+                <button class="inventory-tab" onclick="showInventoryTab('save')">SAVE</button>
+            </div>
+            <div class="inventory-content" id="inventoryContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div id="joyBase"><div id="joy"></div></div>
+        <div id="hud">
+            <div class="hud-title">TRAINER</div>
+            <div id="hudContent">HP: 100/100</div>
+        </div>
+        <div id="controls">
+            <div class="control-btn" onclick="toggleInventory()">📦</div>
+            <div class="control-btn" onclick="toggleMenu()">⚙️</div>
+        </div>
     </div>
-</div>
 
-<script>
-// Initialize canvas
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+    <!-- Audio Elements -->
+    <audio id="bgMusic" loop>
+        <source src="data:audio/mpeg;base64,//T2dnUwACAAAAAAAAAADhqW5K" type="audio/mpeg">
+    </audio>
+    <audio id="battleMusic">
+        <source src="data:audio/mpeg;base64,//T2dnUwACAAAAAAAAAADhqW5K" type="audio/mpeg">
+    </audio>
+    <audio id="sfxClick">
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ" type="audio/wav">
+    </audio>
 
-// Set canvas size
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-// Game constants
-const TILE = 64;
-const GRASS_COLORS = ['#5dbb63', '#6fcf97', '#57a773'];
-
-// Game state
-let world = "outside";
-let inBattle = false;
-let inDialog = false;
-let inInventory = false;
-let gameTime = 0;
-let playerPokemon = null;
-let starterChosen = false;
-let coins = 100;
-let playerName = "";
-let currentSaveSlot = "";
-
-// Player inventory
-let inventory = {
-    pokemon: [],
-    items: {
-        potions: 3,
-        pokeballs: 5,
-        superPotions: 0,
-        greatBalls: 0
-    }
-};
-
-// Player
-const player = {
-    x: 0,
-    y: 0,
-    size: 24,
-    speed: 3,
-    direction: 0,
-    animationFrame: 0
-};
-
-// Camera
-const cam = { x: 0, y: 0 };
-
-// Pokémon data
-const pokemonData = {
-    bulbasaur: {
-        id: "bulbasaur",
-        name: "Bulbasaur",
-        type: "Grass/Poison",
-        color: "#78c850",
-        hp: 30,
-        maxHp: 30,
-        level: 5,
-        exp: 0,
-        expToNext: 50,
-        attacks: [
-            { name: "Tackle", damage: 4, type: "Normal" },
-            { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
-            { name: "Vine Whip", damage: 7, type: "Grass" },
-            { name: "Leech Seed", damage: 2, type: "Grass", effect: "drain" }
-        ],
-        spriteColor: "#78c850",
-        price: 50
-    },
-    charmander: {
-        id: "charmander",
-        name: "Charmander",
-        type: "Fire",
-        color: "#f08030",
-        hp: 28,
-        maxHp: 28,
-        level: 5,
-        exp: 0,
-        expToNext: 50,
-        attacks: [
-            { name: "Scratch", damage: 4, type: "Normal" },
-            { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
-            { name: "Ember", damage: 7, type: "Fire" },
-            { name: "Smokescreen", damage: 0, type: "Status", effect: "accuracyDown" }
-        ],
-        spriteColor: "#f08030",
-        price: 50
-    },
-    squirtle: {
-        id: "squirtle",
-        name: "Squirtle",
-        type: "Water",
-        color: "#6890f0",
-        hp: 32,
-        maxHp: 32,
-        level: 5,
-        exp: 0,
-        expToNext: 50,
-        attacks: [
-            { name: "Tackle", damage: 4, type: "Normal" },
-            { name: "Tail Whip", damage: 0, type: "Status", effect: "defenseDown" },
-            { name: "Water Gun", damage: 7, type: "Water" },
-            { name: "Withdraw", damage: 0, type: "Status", effect: "defenseUp" }
-        ],
-        spriteColor: "#6890f0",
-        price: 50
-    },
-    // Wild Pokémon
-    pikachu: {
-        id: "pikachu",
-        name: "Pikachu",
-        type: "Electric",
-        color: "#ffd700",
-        hp: 25,
-        maxHp: 25,
-        level: 4,
-        exp: 0,
-        expToNext: 40,
-        attacks: [
-            { name: "Thunder Shock", damage: 6, type: "Electric" },
-            { name: "Quick Attack", damage: 4, type: "Normal" }
-        ],
-        spriteColor: "#ffd700",
-        price: 40
-    },
-    rattata: {
-        id: "rattata",
-        name: "Rattata",
-        type: "Normal",
-        color: "#a8a878",
-        hp: 22,
-        maxHp: 22,
-        level: 3,
-        exp: 0,
-        expToNext: 30,
-        attacks: [
-            { name: "Tackle", damage: 4, type: "Normal" },
-            { name: "Quick Attack", damage: 4, type: "Normal" }
-        ],
-        spriteColor: "#a8a878",
-        price: 30
-    },
-    pidgey: {
-        id: "pidgey",
-        name: "Pidgey",
-        type: "Normal/Flying",
-        color: "#a890f0",
-        hp: 24,
-        maxHp: 24,
-        level: 3,
-        exp: 0,
-        expToNext: 30,
-        attacks: [
-            { name: "Gust", damage: 5, type: "Flying" },
-            { name: "Sand Attack", damage: 0, type: "Status", effect: "accuracyDown" }
-        ],
-        spriteColor: "#a890f0",
-        price: 30
-    }
-};
-
-// Terrain details
-const terrainDetails = [];
-for(let i = 0; i < 50; i++) {
-    terrainDetails.push({
-        x: Math.random() * 1200 - 600,
-        y: Math.random() * 1200 - 600,
-        type: Math.random() > 0.5 ? 'flower' : 'bush',
-        color: ['#ff6b9d', '#ffd166', '#06d6a0', '#118ab2'][Math.floor(Math.random() * 4)],
-        size: Math.random() * 8 + 4
-    });
-}
-
-// Buildings
-const buildings = [
-    { x: 300, y: 0, type: "house", width: 80, height: 60 },
-    { x: -300, y: 0, type: "center", width: 100, height: 60 }
-];
-
-// Battle system
-let enemyPokemon = null;
-let battleState = "menu";
-
-// Login and Save System
-function loadGame() {
-    playerName = document.getElementById("username").value.trim() || "Trainer";
-    if (!playerName) {
-        alert("Please enter a trainer name!");
-        return;
-    }
-    
-    // Check for existing save
-    const saveData = localStorage.getItem(`pokemon_save_${playerName}`);
-    if (saveData) {
-        const data = JSON.parse(saveData);
+    <script>
+        // Game initialization
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         
-        playerName = data.playerName;
-        world = data.world || "outside";
-        player.x = data.playerX || 0;
-        player.y = data.playerY || 0;
-        inventory = data.inventory || { pokemon: [], items: { potions: 3, pokeballs: 5 } };
-        playerPokemon = data.playerPokemon;
-        coins = data.coins || 100;
-        starterChosen = data.starterChosen || false;
-        
-        document.getElementById('loginScreen').style.display = 'none';
-        updateHUD();
-        
-        if (!starterChosen) {
-            document.getElementById('starterSelection').style.display = 'block';
-        } else {
-            showDialog(`Welcome back, ${playerName}!`);
-        }
-    } else {
-        alert("No save found for this name. Start a new game!");
-    }
-}
-
-function newGame() {
-    playerName = document.getElementById("username").value.trim() || "Trainer";
-    if (!playerName) {
-        alert("Please enter a trainer name!");
-        return;
-    }
-    
-    // Reset game state
-    world = "outside";
-    player.x = 0;
-    player.y = 0;
-    inventory = {
-        pokemon: [],
-        items: { potions: 3, pokeballs: 5, superPotions: 0, greatBalls: 0 }
-    };
-    coins = 100;
-    starterChosen = false;
-    
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('starterSelection').style.display = 'block';
-}
-
-function saveGame() {
-    const saveData = {
-        playerName: playerName,
-        world: world,
-        playerX: player.x,
-        playerY: player.y,
-        inventory: inventory,
-        playerPokemon: playerPokemon,
-        coins: coins,
-        starterChosen: starterChosen,
-        timestamp: Date.now()
-    };
-    
-    localStorage.setItem(`pokemon_save_${playerName}`, JSON.stringify(saveData));
-    showDialog("Game saved!");
-}
-
-// Auto-save every 30 seconds
-setInterval(() => {
-    if (starterChosen) {
-        saveGame();
-    }
-}, 30000);
-
-// Joystick
-let joyX = 0, joyY = 0, drag = false;
-const base = document.getElementById("joyBase");
-const stick = document.getElementById("joy");
-
-base.addEventListener('mousedown', startDrag);
-base.addEventListener('touchstart', startDrag);
-window.addEventListener('mouseup', endDrag);
-window.addEventListener('touchend', endDrag);
-window.addEventListener('mousemove', handleMove);
-window.addEventListener('touchmove', handleMove);
-
-function startDrag(e) {
-    e.preventDefault();
-    drag = true;
-    updateJoy(e);
-}
-
-function endDrag() {
-    drag = false;
-    joyX = joyY = 0;
-    stick.style.transform = 'translate(0, 0)';
-    player.animationFrame = 0;
-}
-
-function handleMove(e) {
-    if (!drag) return;
-    updateJoy(e);
-}
-
-function updateJoy(e) {
-    const rect = base.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    
-    let x = touch.clientX - rect.left - 50;
-    let y = touch.clientY - rect.top - 50;
-    
-    const distance = Math.sqrt(x * x + y * y);
-    const maxDistance = 50;
-    
-    if (distance > maxDistance) {
-        x = (x / distance) * maxDistance;
-        y = (y / distance) * maxDistance;
-    }
-    
-    joyX = x / maxDistance;
-    joyY = y / maxDistance;
-    
-    stick.style.transform = `translate(${x}px, ${y}px)`;
-    
-    // Update player direction
-    if (Math.abs(joyX) > Math.abs(joyY)) {
-        player.direction = joyX > 0 ? 2 : 1;
-    } else {
-        player.direction = joyY > 0 ? 0 : 3;
-    }
-}
-
-// Dialog System
-function showDialog(text, options = []) {
-    inDialog = true;
-    document.getElementById("dialogText").textContent = text;
-    const optionsDiv = document.getElementById("dialogOptions");
-    optionsDiv.innerHTML = '';
-    
-    if (options.length === 0) {
-        const continueBtn = document.createElement("button");
-        continueBtn.className = "dialog-option";
-        continueBtn.textContent = "Continue";
-        continueBtn.onclick = closeDialog;
-        optionsDiv.appendChild(continueBtn);
-    } else {
-        options.forEach(option => {
-            const btn = document.createElement("button");
-            btn.className = "dialog-option";
-            btn.textContent = option.text;
-            btn.onclick = option.action;
-            optionsDiv.appendChild(btn);
-        });
-    }
-    
-    document.getElementById("dialogBox").style.display = "block";
-}
-
-function closeDialog() {
-    inDialog = false;
-    document.getElementById("dialogBox").style.display = "none";
-}
-
-// Inventory System
-function toggleInventory() {
-    if (inBattle || inDialog || !starterChosen) return;
-    
-    inInventory = !inInventory;
-    if (inInventory) {
-        updateInventory();
-        document.getElementById("inventory").style.display = "block";
-    } else {
-        document.getElementById("inventory").style.display = "none";
-    }
-}
-
-function closeInventory() {
-    inInventory = false;
-    document.getElementById("inventory").style.display = "none";
-}
-
-function showInventoryTab(tabName) {
-    document.querySelectorAll('.inventory-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.inventory-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    document.querySelector(`button[onclick="showInventoryTab('${tabName}')"]`).classList.add('active');
-    document.getElementById(`${tabName}Tab`).classList.add('active');
-    
-    if (tabName === 'pokemon') {
-        updatePokemonTab();
-    } else if (tabName === 'items') {
-        updateItemsTab();
-    } else if (tabName === 'shop') {
-        updateShopTab();
-    }
-}
-
-function updateInventory() {
-    updatePokemonTab();
-    updateItemsTab();
-    updateShopTab();
-}
-
-function updatePokemonTab() {
-    const pokemonGrid = document.getElementById("pokemonGrid");
-    pokemonGrid.innerHTML = '';
-    
-    const pokemonTab = document.querySelector('button[onclick="showInventoryTab(\'pokemon\')"]');
-    pokemonTab.textContent = `POKÉMON (${inventory.pokemon.length})`;
-    
-    inventory.pokemon.forEach((pokemon, index) => {
-        const card = document.createElement("div");
-        card.className = "pokemon-card";
-        if (pokemon === playerPokemon) {
-            card.classList.add("active");
-        }
-        
-        card.innerHTML = `
-            <h4 style="color: ${pokemon.color}">${pokemon.name}</h4>
-            <p>Lv. ${pokemon.level}</p>
-            <p>HP: ${pokemon.hp}/${pokemon.maxHp}</p>
-            <p>Type: ${pokemon.type}</p>
-            <button class="sell-btn" onclick="sellPokemon(${index})" ${pokemon === playerPokemon ? 'disabled' : ''}>Sell for ${Math.floor(pokemon.price * 0.7)} coins</button>
-        `;
-        
-        card.onclick = () => selectActivePokemon(index);
-        pokemonGrid.appendChild(card);
-    });
-}
-
-function updateItemsTab() {
-    const itemGrid = document.getElementById("itemGrid");
-    itemGrid.innerHTML = `
-        <div class="item-card">
-            <h4>Pokéballs</h4>
-            <p>${inventory.items.pokeballs}</p>
-            <p>Catch wild Pokémon</p>
-        </div>
-        <div class="item-card">
-            <h4>Great Balls</h4>
-            <p>${inventory.items.greatBalls}</p>
-            <p>Better catch rate</p>
-        </div>
-        <div class="item-card">
-            <h4>Potions</h4>
-            <p>${inventory.items.potions}</p>
-            <p>Heals 20 HP</p>
-        </div>
-        <div class="item-card">
-            <h4>Super Potions</h4>
-            <p>${inventory.items.superPotions}</p>
-            <p>Heals 50 HP</p>
-        </div>
-    `;
-}
-
-function updateShopTab() {
-    document.getElementById("coinCount").textContent = coins;
-    
-    const shopGrid = document.getElementById("shopGrid");
-    shopGrid.innerHTML = `
-        <div class="shop-item">
-            <h4>Pokéball</h4>
-            <p>Price: 20 coins</p>
-            <p>Catch wild Pokémon</p>
-            <button onclick="buyItem('pokeball')" ${coins < 20 ? 'disabled' : ''}>Buy</button>
-        </div>
-        <div class="shop-item">
-            <h4>Great Ball</h4>
-            <p>Price: 50 coins</p>
-            <p>Better catch rate</p>
-            <button onclick="buyItem('greatball')" ${coins < 50 ? 'disabled' : ''}>Buy</button>
-        </div>
-        <div class="shop-item">
-            <h4>Potion</h4>
-            <p>Price: 30 coins</p>
-            <p>Heals 20 HP</p>
-            <button onclick="buyItem('potion')" ${coins < 30 ? 'disabled' : ''}>Buy</button>
-        </div>
-        <div class="shop-item">
-            <h4>Super Potion</h4>
-            <p>Price: 70 coins</p>
-            <p>Heals 50 HP</p>
-            <button onclick="buyItem('superpotion')" ${coins < 70 ? 'disabled' : ''}>Buy</button>
-        </div>
-    `;
-}
-
-function buyItem(itemType) {
-    const prices = {
-        pokeball: 20,
-        greatball: 50,
-        potion: 30,
-        superpotion: 70
-    };
-    
-    if (coins >= prices[itemType]) {
-        coins -= prices[itemType];
-        
-        switch(itemType) {
-            case 'pokeball':
-                inventory.items.pokeballs++;
-                break;
-            case 'greatball':
-                inventory.items.greatBalls++;
-                break;
-            case 'potion':
-                inventory.items.potions++;
-                break;
-            case 'superpotion':
-                inventory.items.superPotions++;
-                break;
-        }
-        
-        updateShopTab();
-        updateItemsTab();
-        updateHUD();
-        showDialog(`You bought a ${itemType === 'pokeball' ? 'Pokéball' : 
-                    itemType === 'greatball' ? 'Great Ball' : 
-                    itemType === 'potion' ? 'Potion' : 'Super Potion'}!`);
-    }
-}
-
-function sellPokemon(index) {
-    if (index < 0 || index >= inventory.pokemon.length) return;
-    
-    const pokemon = inventory.pokemon[index];
-    const sellPrice = Math.floor(pokemon.price * 0.7);
-    
-    coins += sellPrice;
-    inventory.pokemon.splice(index, 1);
-    
-    if (pokemon === playerPokemon) {
-        if (inventory.pokemon.length > 0) {
-            playerPokemon = inventory.pokemon[0];
-        } else {
-            playerPokemon = null;
-            showDialog("You have no Pokémon left!");
-        }
-    }
-    
-    updateInventory();
-    updateHUD();
-    showDialog(`You sold ${pokemon.name} for ${sellPrice} coins!`);
-}
-
-function selectActivePokemon(index) {
-    if (index < 0 || index >= inventory.pokemon.length) return;
-    
-    playerPokemon = inventory.pokemon[index];
-    updateInventory();
-    updateHUD();
-    showDialog(`${playerPokemon.name} is now your active Pokémon!`);
-}
-
-function switchPokemon() {
-    if (inBattle || inDialog || !starterChosen) return;
-    
-    if (inventory.pokemon.length <= 1) {
-        showDialog("You only have one Pokémon!");
-        return;
-    }
-    
-    const options = inventory.pokemon.map((pokemon, index) => ({
-        text: `${pokemon.name} (Lv. ${pokemon.level})`,
-        action: () => {
-            playerPokemon = pokemon;
-            closeDialog();
-            updateHUD();
-            showDialog(`${pokemon.name} is now your active Pokémon!`);
-        }
-    }));
-    
-    showDialog("Select a Pokémon to switch to:", options);
-}
-
-// Starter Selection
-let selectedStarter = null;
-
-function selectStarter(type) {
-    selectedStarter = type;
-    document.querySelectorAll('.starter-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
-}
-
-function confirmStarter() {
-    if (!selectedStarter) {
-        alert("Please select a starter Pokémon!");
-        return;
-    }
-    
-    const starterData = pokemonData[selectedStarter];
-    playerPokemon = JSON.parse(JSON.stringify(starterData));
-    inventory.pokemon.push(playerPokemon);
-    
-    starterChosen = true;
-    document.getElementById("starterSelection").style.display = "none";
-    
-    showDialog(`Congratulations! You chose ${playerPokemon.name}!`, [
-        { text: "Begin!", action: () => {
-            closeDialog();
-            updateHUD();
-            showDialog(`Welcome, ${playerName}! Explore the world, catch wild Pokémon, and visit the Pokémon Center.`);
-        }}
-    ]);
-}
-
-// Battle functions
-function startBattle() {
-    const wildPokemon = Math.random();
-    if (wildPokemon < 0.33) {
-        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.pikachu));
-    } else if (wildPokemon < 0.66) {
-        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.rattata));
-    } else {
-        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.pidgey));
-    }
-    
-    inBattle = true;
-    battleState = "menu";
-    
-    document.getElementById("battle").style.display = "block";
-    document.getElementById("enemyName").textContent = "Wild " + enemyPokemon.name;
-    document.getElementById("enemyName").style.color = enemyPokemon.color;
-    document.getElementById("playerPokemonName").textContent = playerPokemon.name;
-    document.getElementById("playerPokemonName").style.color = playerPokemon.color;
-    
-    updateBattleText();
-    createBattleSprites();
-    
-    setTimeout(() => {
-        showBattleMenu();
-        addBattleLog(`A wild ${enemyPokemon.name} appeared!`);
-    }, 1000);
-}
-
-function updateBattleText() {
-    const enemyPercent = Math.max(0, (enemyPokemon.hp / enemyPokemon.maxHp) * 100);
-    const playerPercent = Math.max(0, (playerPokemon.hp / playerPokemon.maxHp) * 100);
-    
-    document.getElementById("enemyHPFill").style.width = enemyPercent + "%";
-    document.getElementById("playerHPFill").style.width = playerPercent + "%";
-    
-    document.getElementById("enemyHPText").textContent = `HP: ${Math.max(0, enemyPokemon.hp)}/${enemyPokemon.maxHp}`;
-    document.getElementById("playerHPText").textContent = `HP: ${Math.max(0, playerPokemon.hp)}/${playerPokemon.maxHp}`;
-}
-
-function createBattleSprites() {
-    const enemySprite = document.getElementById("enemySprite");
-    const playerSprite = document.getElementById("playerSprite");
-    
-    enemySprite.innerHTML = '';
-    playerSprite.innerHTML = '';
-    
-    const enemyCanvas = document.createElement('canvas');
-    enemyCanvas.width = 100;
-    enemyCanvas.height = 100;
-    const enemyCtx = enemyCanvas.getContext('2d');
-    drawPokemonSprite(enemyCtx, 50, 50, enemyPokemon, 1.5);
-    enemySprite.appendChild(enemyCanvas);
-    
-    const playerCanvas = document.createElement('canvas');
-    playerCanvas.width = 100;
-    playerCanvas.height = 100;
-    const playerCtx = playerCanvas.getContext('2d');
-    drawPokemonSprite(playerCtx, 50, 50, playerPokemon, 1.5);
-    playerSprite.appendChild(playerCanvas);
-}
-
-function drawPokemonSprite(ctx, x, y, pokemon, scale = 1) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(scale, scale);
-    
-    switch(pokemon.name) {
-        case "Bulbasaur":
-            ctx.fillStyle = pokemon.spriteColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#a8e6a8";
-            ctx.beginPath();
-            ctx.arc(0, -12, 8, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#000";
-            ctx.fillRect(-6, -3, 3, 5);
-            ctx.fillRect(3, -3, 3, 5);
-            break;
-            
-        case "Charmander":
-            ctx.fillStyle = pokemon.spriteColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#ff4444";
-            ctx.beginPath();
-            ctx.arc(15, -5, 6, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#000";
-            ctx.fillRect(-6, -3, 3, 5);
-            ctx.fillRect(3, -3, 3, 5);
-            break;
-            
-        case "Squirtle":
-            ctx.fillStyle = pokemon.spriteColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#a0522d";
-            ctx.beginPath();
-            ctx.arc(0, 0, 12, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = "#000";
-            ctx.fillRect(-6, -3, 3, 5);
-            ctx.fillRect(3, -3, 3, 5);
-            break;
-    }
-    
-    ctx.restore();
-}
-
-function addBattleLog(message) {
-    document.getElementById("battleLog").textContent = message;
-}
-
-function showBattleMenu() {
-    battleState = "menu";
-    document.getElementById("battleMenu").style.display = "grid";
-    document.getElementById("attackMenu").style.display = "none";
-    document.getElementById("pokemonMenu").style.display = "none";
-    document.getElementById("itemMenu").style.display = "none";
-}
-
-function showAttackMenu() {
-    battleState = "attack";
-    document.getElementById("battleMenu").style.display = "none";
-    document.getElementById("attackMenu").style.display = "grid";
-}
-
-function showPokemonMenu() {
-    battleState = "pokemon";
-    document.getElementById("battleMenu").style.display = "none";
-    document.getElementById("pokemonMenu").style.display = "grid";
-    
-    const pokemonMenu = document.getElementById("pokemonMenu");
-    pokemonMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select a Pokémon to switch to:</p></div>';
-    
-    inventory.pokemon.forEach((pokemon, index) => {
-        if (pokemon.hp > 0 && pokemon !== playerPokemon) {
-            const btn = document.createElement("button");
-            btn.className = "attack-btn";
-            btn.textContent = `${pokemon.name} (HP: ${pokemon.hp}/${pokemon.maxHp})`;
-            btn.onclick = () => switchInBattle(index);
-            pokemonMenu.appendChild(btn);
-        }
-    });
-    
-    const backBtn = document.createElement("button");
-    backBtn.className = "back-btn";
-    backBtn.textContent = "Back";
-    backBtn.onclick = showBattleMenu;
-    pokemonMenu.appendChild(backBtn);
-}
-
-function showItemMenu() {
-    battleState = "item";
-    document.getElementById("battleMenu").style.display = "none";
-    document.getElementById("itemMenu").style.display = "grid";
-    
-    const itemMenu = document.getElementById("itemMenu");
-    itemMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select an item to use:</p></div>';
-    
-    if (inventory.items.potions > 0) {
-        const btn = document.createElement("button");
-        btn.className = "attack-btn";
-        btn.textContent = `Potion (${inventory.items.potions})`;
-        btn.onclick = () => useItemInBattle('potion');
-        itemMenu.appendChild(btn);
-    }
-    
-    if (inventory.items.superPotions > 0) {
-        const btn = document.createElement("button");
-        btn.className = "attack-btn";
-        btn.textContent = `Super Potion (${inventory.items.superPotions})`;
-        btn.onclick = () => useItemInBattle('superpotion');
-        itemMenu.appendChild(btn);
-    }
-    
-    const backBtn = document.createElement("button");
-    backBtn.className = "back-btn";
-    backBtn.textContent = "Back";
-    backBtn.onclick = showBattleMenu;
-    itemMenu.appendChild(backBtn);
-}
-
-function useItemInBattle(itemType) {
-    let healAmount = 0;
-    
-    switch(itemType) {
-        case 'potion':
-            if (inventory.items.potions > 0) {
-                inventory.items.potions--;
-                healAmount = 20;
-                addBattleLog(`Used a Potion!`);
+        // Game state
+        let gameState = {
+            currentScreen: 'title',
+            player: {
+                name: 'TRAINER',
+                x: 0,
+                y: 0,
+                direction: 0, // 0: down, 1: left, 2: right, 3: up
+                speed: 3,
+                spriteFrame: 0
+            },
+            camera: { x: 0, y: 0 },
+            world: 'overworld',
+            inBattle: false,
+            inDialog: false,
+            inInventory: false,
+            starterChosen: false,
+            selectedStarter: null,
+            inventory: {
+                pokemon: [],
+                items: {
+                    pokeballs: 5,
+                    potions: 3,
+                    greatballs: 0,
+                    superpotions: 0
+                },
+                money: 3000
+            },
+            currentPokemon: null,
+            battle: {
+                enemy: null,
+                playerTeam: [],
+                enemyTeam: []
             }
-            break;
-        case 'superpotion':
-            if (inventory.items.superPotions > 0) {
-                inventory.items.superPotions--;
-                healAmount = 50;
-                addBattleLog(`Used a Super Potion!`);
+        };
+
+        // Pokémon database
+        const pokemonDB = {
+            bulbasaur: {
+                id: 1,
+                name: 'BULBASAUR',
+                type: ['GRASS', 'POISON'],
+                color: '#78c850',
+                hp: 45,
+                attack: 49,
+                defense: 49,
+                speed: 45,
+                moves: [
+                    { name: 'TACKLE', power: 40, type: 'NORMAL', pp: 35 },
+                    { name: 'GROWL', power: 0, type: 'NORMAL', pp: 40, effect: 'atk-down' },
+                    { name: 'VINE WHIP', power: 45, type: 'GRASS', pp: 25 },
+                    { name: 'LEECH SEED', power: 0, type: 'GRASS', pp: 10, effect: 'leech' }
+                ],
+                sprite: '#78c850',
+                evolves: 16
+            },
+            charmander: {
+                id: 4,
+                name: 'CHARMANDER',
+                type: ['FIRE'],
+                color: '#f08030',
+                hp: 39,
+                attack: 52,
+                defense: 43,
+                speed: 65,
+                moves: [
+                    { name: 'SCRATCH', power: 40, type: 'NORMAL', pp: 35 },
+                    { name: 'GROWL', power: 0, type: 'NORMAL', pp: 40, effect: 'atk-down' },
+                    { name: 'EMBER', power: 40, type: 'FIRE', pp: 25 },
+                    { name: 'SMOKESCREEN', power: 0, type: 'NORMAL', pp: 20, effect: 'acc-down' }
+                ],
+                sprite: '#f08030',
+                evolves: 16
+            },
+            squirtle: {
+                id: 7,
+                name: 'SQUIRTLE',
+                type: ['WATER'],
+                color: '#6890f0',
+                hp: 44,
+                attack: 48,
+                defense: 65,
+                speed: 43,
+                moves: [
+                    { name: 'TACKLE', power: 40, type: 'NORMAL', pp: 35 },
+                    { name: 'TAIL WHIP', power: 0, type: 'NORMAL', pp: 30, effect: 'def-down' },
+                    { name: 'WATER GUN', power: 40, type: 'WATER', pp: 25 },
+                    { name: 'WITHDRAW', power: 0, type: 'WATER', pp: 40, effect: 'def-up' }
+                ],
+                sprite: '#6890f0',
+                evolves: 16
             }
-            break;
-    }
-    
-    if (healAmount > 0) {
-        playerPokemon.hp = Math.min(playerPokemon.hp + healAmount, playerPokemon.maxHp);
-        addBattleLog(`${playerPokemon.name} recovered ${healAmount} HP!`);
-        updateBattleText();
-        updateHUD();
-        updateInventory();
-        
-        setTimeout(() => enemyAttack(), 1000);
-    } else {
-        addBattleLog("No items left!");
-        showBattleMenu();
-    }
-}
+        };
 
-function switchInBattle(index) {
-    if (index < 0 || index >= inventory.pokemon.length) return;
-    
-    const newPokemon = inventory.pokemon[index];
-    if (newPokemon.hp <= 0) {
-        addBattleLog(`${newPokemon.name} has no HP left!`);
-        return;
-    }
-    
-    addBattleLog(`Come back, ${playerPokemon.name}!`);
-    addBattleLog(`Go, ${newPokemon.name}!`);
-    
-    playerPokemon = newPokemon;
-    document.getElementById("playerPokemonName").textContent = playerPokemon.name;
-    document.getElementById("playerPokemonName").style.color = playerPokemon.color;
-    
-    createBattleSprites();
-    updateBattleText();
-    updateHUD();
-    
-    setTimeout(() => {
-        showBattleMenu();
-        setTimeout(() => enemyAttack(), 500);
-    }, 1500);
-}
+        // Game assets
+        const assets = {
+            tiles: {},
+            sprites: {},
+            loaded: false
+        };
 
-function useAttack(index) {
-    if (!playerPokemon.attacks[index]) return;
-    
-    const attack = playerPokemon.attacks[index];
-    let damage = attack.damage;
-    
-    damage += Math.floor(Math.random() * 3) - 1;
-    if (damage < 0) damage = 0;
-    
-    enemyPokemon.hp -= damage;
-    
-    document.getElementById("enemySprite").classList.add('shake');
-    document.getElementById("enemyHPFill").classList.add('flash');
-    
-    addBattleLog(`${playerPokemon.name} used ${attack.name}!`);
-    if (damage > 0) {
-        addBattleLog(`It did ${damage} damage!`);
-    }
-    
-    updateBattleText();
-    
-    setTimeout(() => {
-        document.getElementById("enemySprite").classList.remove('shake');
-        document.getElementById("enemyHPFill").classList.remove('flash');
-        
-        if (enemyPokemon.hp <= 0) {
-            addBattleLog(`Wild ${enemyPokemon.name} fainted!`);
-            giveExp();
-            setTimeout(() => endBattle(true), 1500);
-            return;
+        // Initialize canvas
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
         }
-        
-        setTimeout(() => enemyAttack(), 800);
-    }, 500);
-}
 
-function giveExp() {
-    const expGain = enemyPokemon.level * 10;
-    playerPokemon.exp += expGain;
-    addBattleLog(`${playerPokemon.name} gained ${expGain} EXP!`);
-    
-    if (playerPokemon.exp >= playerPokemon.expToNext) {
-        playerPokemon.level++;
-        playerPokemon.exp = 0;
-        playerPokemon.expToNext = playerPokemon.level * 20;
-        playerPokemon.maxHp += 5;
-        playerPokemon.hp = playerPokemon.maxHp;
-        
-        addBattleLog(`${playerPokemon.name} grew to Level ${playerPokemon.level}!`);
-    }
-}
-
-function enemyAttack() {
-    const attackIndex = Math.floor(Math.random() * enemyPokemon.attacks.length);
-    const attack = enemyPokemon.attacks[attackIndex];
-    let damage = attack.damage;
-    
-    damage += Math.floor(Math.random() * 3) - 1;
-    if (damage < 0) damage = 0;
-    
-    playerPokemon.hp -= damage;
-    
-    document.getElementById("playerSprite").classList.add('shake');
-    document.getElementById("playerHPFill").classList.add('flash');
-    
-    addBattleLog(`Wild ${enemyPokemon.name} used ${attack.name}!`);
-    if (damage > 0) {
-        addBattleLog(`It did ${damage} damage!`);
-    }
-    
-    updateBattleText();
-    updateHUD();
-    updateInventory();
-    
-    setTimeout(() => {
-        document.getElementById("playerSprite").classList.remove('shake');
-        document.getElementById("playerHPFill").classList.remove('flash');
-        
-        if (playerPokemon.hp <= 0) {
-            addBattleLog(`${playerPokemon.name} fainted!`);
-            
-            const alivePokemon = inventory.pokemon.filter(p => p.hp > 0);
-            if (alivePokemon.length > 0) {
-                addBattleLog("Select another Pokémon!");
-                showPokemonMenu();
-            } else {
-                setTimeout(() => endBattle(false), 1500);
-            }
-        } else {
-            showBattleMenu();
-        }
-    }, 500);
-}
-
-function run() {
-    const runChance = 0.7;
-    if (Math.random() < runChance) {
-        addBattleLog("Got away safely!");
-        setTimeout(() => endBattle(false), 1000);
-    } else {
-        addBattleLog("Couldn't escape!");
-        setTimeout(() => enemyAttack(), 800);
-    }
-}
-
-function endBattle(victory) {
-    inBattle = false;
-    document.getElementById("battle").style.display = "none";
-    showBattleMenu();
-    
-    if (!victory && inventory.pokemon.filter(p => p.hp > 0).length === 0) {
-        showDialog(`All your Pokémon fainted!`, [
-            { text: "OK", action: () => {
-                closeDialog();
-                player.x = buildings[1].x;
-                player.y = buildings[1].y + 100;
-                inventory.pokemon.forEach(p => p.hp = p.maxHp);
-                updateHUD();
-                updateInventory();
-            }}
-        ]);
-    }
-}
-
-function updateHUD() {
-    if (!playerPokemon) return;
-    
-    document.getElementById("hud").innerHTML = 
-        `${playerPokemon.name} Lv.${playerPokemon.level}<br>` +
-        `HP: ${playerPokemon.hp}/${playerPokemon.maxHp}<br>` +
-        `Pokéballs: ${inventory.items.pokeballs}<br>` +
-        `Potions: ${inventory.items.potions}<br>` +
-        `Coins: ${coins} 🪙`;
-}
-
-// Drawing functions
-function drawPlayer() {
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    
-    // Player character (trainer) - NO CROSS
-    ctx.fillStyle = '#ff4444'; // Red hat
-    ctx.fillRect(-8, -20, 16, 8);
-    
-    ctx.fillStyle = '#2c8bff'; // Blue shirt
-    ctx.fillRect(-10, -12, 20, 16);
-    
-    ctx.fillStyle = '#000'; // Pants
-    ctx.fillRect(-10, 4, 20, 8);
-    
-    // Face
-    ctx.fillStyle = '#ffcc99';
-    ctx.beginPath();
-    ctx.arc(0, -15, 6, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Hair
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(-8, -22, 16, 8);
-    
-    // Legs with walking animation
-    let legOffset = 0;
-    if ((joyX !== 0 || joyY !== 0) && !inBattle) {
-        player.animationFrame = (player.animationFrame + 0.2) % 8;
-        legOffset = Math.sin(player.animationFrame) * 3;
-    }
-    
-    ctx.fillStyle = '#000';
-    ctx.fillRect(-6, 12, 4, 8 + legOffset);
-    ctx.fillRect(2, 12, 4, 8 - legOffset);
-    
-    ctx.restore();
-}
-
-function drawFollowingPokemon() {
-    if (!playerPokemon || !starterChosen) return;
-    
-    ctx.save();
-    const offsetX = player.direction === 1 ? -30 : player.direction === 2 ? 30 : 0;
-    const offsetY = player.direction === 0 ? 20 : player.direction === 3 ? -20 : 0;
-    
-    const pokemonX = canvas.width / 2 + offsetX;
-    const pokemonY = canvas.height / 2 + offsetY + Math.sin(gameTime * 0.1) * 2;
-    
-    drawPokemonSprite(ctx, pokemonX, pokemonY, playerPokemon, 0.8);
-    ctx.restore();
-}
-
-function drawGrass() {
-    const startX = Math.floor(cam.x / TILE);
-    const endX = Math.ceil((cam.x + canvas.width) / TILE);
-    const startY = Math.floor(cam.y / TILE);
-    const endY = Math.ceil((cam.y + canvas.height) / TILE);
-    
-    for (let x = startX; x <= endX; x++) {
-        for (let y = startY; y <= endY; y++) {
-            const colorIndex = (x + y) % GRASS_COLORS.length;
-            ctx.fillStyle = GRASS_COLORS[colorIndex];
-            ctx.fillRect(x * TILE - cam.x, y * TILE - cam.y, TILE, TILE);
-            
-            if ((x + y) % 3 === 0) {
-                ctx.fillStyle = '#3a7d34';
-                ctx.fillRect(x * TILE - cam.x + 10, y * TILE - cam.y + 10, 3, 12);
-                ctx.fillRect(x * TILE - cam.x + 20, y * TILE - cam.y + 15, 3, 8);
-            }
-        }
-    }
-}
-
-function drawDetails() {
-    terrainDetails.forEach(detail => {
-        const dx = detail.x - cam.x;
-        const dy = detail.y - cam.y;
-        
-        if (dx > -50 && dx < canvas.width + 50 && dy > -50 && dy < canvas.height + 50) {
-            if (detail.type === 'flower') {
-                ctx.fillStyle = '#2d5a27';
-                ctx.fillRect(dx - 1, dy, 2, detail.size);
-                
-                ctx.fillStyle = detail.color;
-                ctx.beginPath();
-                ctx.arc(dx, dy - 5, 4, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.fillStyle = detail.color;
-                ctx.beginPath();
-                ctx.arc(dx, dy, detail.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-    });
-}
-
-function drawBuilding(building) {
-    const dx = building.x - cam.x;
-    const dy = building.y - cam.y;
-    
-    if (building.type === "house") {
-        ctx.fillStyle = '#a0522d';
-        ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-        
-        ctx.fillStyle = '#8b4513';
-        ctx.beginPath();
-        ctx.moveTo(dx - building.width/2 - 10, dy - building.height);
-        ctx.lineTo(dx, dy - building.height - 20);
-        ctx.lineTo(dx + building.width/2 + 10, dy - building.height);
-        ctx.closePath();
-        ctx.fill();
-        
-        ctx.fillStyle = '#654321';
-        ctx.fillRect(dx - 8, dy - 20, 16, 20);
-        
-        ctx.fillStyle = '#87CEEB';
-        ctx.fillRect(dx - 25, dy - 40, 12, 12);
-        ctx.fillRect(dx + 13, dy - 40, 12, 12);
-        
-    } else if (building.type === "center") {
-        ctx.fillStyle = '#ff9999';
-        ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-        
-        ctx.fillStyle = '#ff6b6b';
-        ctx.fillRect(dx - building.width/2 - 5, dy - building.height - 10, building.width + 10, 10);
-        
-        ctx.fillStyle = '#87CEEB';
-        for (let i = 0; i < 3; i++) {
-            ctx.fillRect(dx - 35 + i * 25, dy - 40, 15, 15);
-        }
-        
-        ctx.fillStyle = '#8b4513';
-        ctx.fillRect(dx - 15, dy - 25, 30, 25);
-    }
-}
-
-// Game loop functions
-function update() {
-    if (inBattle || inDialog || inInventory || !starterChosen) return;
-    
-    gameTime++;
-    
-    player.x += joyX * player.speed;
-    player.y += joyY * player.speed;
-    
-    const BOUNDARY = 500;
-    player.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.x));
-    player.y = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.y));
-    
-    if (world === "outside") {
-        buildings.forEach(building => {
-            const dx = player.x - building.x;
-            const dy = player.y - building.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < 50) {
-                if (building.type === "house") {
-                    world = "house";
-                    player.x = 0;
-                    player.y = 40;
-                    showDialog("Welcome to the house! Rest here.");
-                } else if (building.type === "center") {
-                    world = "center";
-                    player.x = 0;
-                    player.y = 40;
-                    inventory.pokemon.forEach(p => p.hp = p.maxHp);
-                    updateHUD();
-                    updateInventory();
-                    showDialog("Welcome to the Pokémon Center! Your Pokémon have been healed!");
+        // Loading system
+        let loadingProgress = 0;
+        function simulateLoading() {
+            const interval = setInterval(() => {
+                loadingProgress += Math.random() * 10;
+                if (loadingProgress >= 100) {
+                    loadingProgress = 100;
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        document.getElementById('titleScreen').style.display = 'flex';
+                        playSound('click');
+                    }, 500);
                 }
-            }
-        });
-    }
-    
-    if ((world === "house" || world === "center") && player.y > 100) {
-        world = "outside";
-        const buildingIndex = world === "house" ? 0 : 1;
-        player.x = buildings[buildingIndex].x;
-        player.y = buildings[buildingIndex].y + 80;
-    }
-    
-    if (world === "outside" && Math.random() < 0.003 && joyX !== 0 && joyY !== 0) {
-        startBattle();
-    }
-    
-    cam.x += (player.x - canvas.width/2 - cam.x) * 0.1;
-    cam.y += (player.y - canvas.height/2 - cam.y) * 0.1;
-}
+                document.querySelector('.loading-fill').style.width = loadingProgress + '%';
+            }, 100);
+        }
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (!inBattle && starterChosen) {
-        if (world === "outside") {
-            // Sky
-            ctx.fillStyle = '#87CEEB';
+        // Sound system
+        function playSound(sound) {
+            const audio = document.getElementById(sound + 'Music') || document.getElementById('sfx' + sound);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("Audio play failed:", e));
+            }
+        }
+
+        // Title screen functions
+        function newGame() {
+            playSound('click');
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('starterSelection').style.display = 'block';
+            gameState.player.name = 'TRAINER';
+        }
+
+        function continueGame() {
+            playSound('click');
+            const save = localStorage.getItem('pokemonGammaSave');
+            if (save) {
+                try {
+                    const loaded = JSON.parse(save);
+                    gameState = { ...gameState, ...loaded };
+                    startGame();
+                } catch {
+                    showDialog('No valid save found! Starting new game.', () => newGame());
+                }
+            } else {
+                showDialog('No save data found! Starting new game.', () => newGame());
+            }
+        }
+
+        function showOptions() {
+            playSound('click');
+            showDialog('Options Menu', [
+                { text: 'Music: ON', action: () => {} },
+                { text: 'SFX: ON', action: () => {} },
+                { text: 'Controls', action: () => {} },
+                { text: 'Back', action: () => {} }
+            ]);
+        }
+
+        // Starter selection
+        function selectStarter(starter) {
+            playSound('click');
+            gameState.selectedStarter = starter;
+            document.querySelectorAll('.starter-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        function confirmStarter() {
+            if (!gameState.selectedStarter) {
+                showDialog('Please select a starter Pokémon!');
+                return;
+            }
+            
+            playSound('click');
+            const starter = pokemonDB[gameState.selectedStarter];
+            gameState.currentPokemon = {
+                ...starter,
+                level: 5,
+                currentHp: starter.hp,
+                exp: 0,
+                moves: [...starter.moves]
+            };
+            gameState.inventory.pokemon.push(gameState.currentPokemon);
+            gameState.starterChosen = true;
+            
+            document.getElementById('starterSelection').style.display = 'none';
+            startGame();
+            
+            showDialog(`You received a ${starter.name}!`, [
+                { text: 'Continue', action: () => {
+                    showDialog(`Professor: "Take good care of ${starter.name}!\nYour adventure begins now!"`, [
+                        { text: 'Begin!', action: () => {
+                            document.getElementById('hud').style.display = 'block';
+                            document.getElementById('controls').style.display = 'flex';
+                            document.getElementById('joyBase').style.display = 'block';
+                            updateHUD();
+                        }}
+                    ]);
+                }}
+            ]);
+        }
+
+        // Start the game
+        function startGame() {
+            gameState.currentScreen = 'game';
+            gameLoop();
+        }
+
+        // HUD system
+        function updateHUD() {
+            if (gameState.currentPokemon) {
+                const hpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
+                document.getElementById('hudContent').innerHTML = `
+                    ${gameState.currentPokemon.name} Lv.${gameState.currentPokemon.level}<br>
+                    HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}<br>
+                    Money: $${gameState.inventory.money}
+                `;
+            }
+        }
+
+        // Dialog system
+        function showDialog(text, options = []) {
+            gameState.inDialog = true;
+            document.getElementById('dialogText').textContent = text;
+            const optionsDiv = document.getElementById('dialogOptions');
+            optionsDiv.innerHTML = '';
+            
+            if (options.length === 0) {
+                const btn = document.createElement('button');
+                btn.className = 'dialog-btn';
+                btn.textContent = 'Continue';
+                btn.onclick = () => {
+                    playSound('click');
+                    document.getElementById('dialogBox').style.display = 'none';
+                    gameState.inDialog = false;
+                };
+                optionsDiv.appendChild(btn);
+            } else {
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'dialog-btn';
+                    btn.textContent = opt.text;
+                    btn.onclick = () => {
+                        playSound('click');
+                        document.getElementById('dialogBox').style.display = 'none';
+                        gameState.inDialog = false;
+                        opt.action();
+                    };
+                    optionsDiv.appendChild(btn);
+                });
+            }
+            
+            document.getElementById('dialogBox').style.display = 'block';
+        }
+
+        // Inventory system
+        function toggleInventory() {
+            playSound('click');
+            if (gameState.inBattle || gameState.inDialog) return;
+            
+            gameState.inInventory = !gameState.inInventory;
+            if (gameState.inInventory) {
+                showInventoryTab('pokemon');
+                document.getElementById('inventoryScreen').style.display = 'block';
+            } else {
+                document.getElementById('inventoryScreen').style.display = 'none';
+            }
+        }
+
+        function showInventoryTab(tab) {
+            document.querySelectorAll('.inventory-tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            const content = document.getElementById('inventoryContent');
+            switch(tab) {
+                case 'pokemon':
+                    content.innerHTML = `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h3 style="color: #ffd700;">YOUR POKÉMON</h3>
+                            <p>${gameState.inventory.pokemon.length}/6 Pokémon</p>
+                        </div>
+                        <div class="pokemon-grid">
+                            ${gameState.inventory.pokemon.map((pkm, i) => `
+                                <div class="pokemon-card ${pkm === gameState.currentPokemon ? 'active' : ''}" 
+                                     onclick="switchPokemon(${i})">
+                                    <div style="width: 60px; height: 60px; background: ${pkm.color}; 
+                                         border-radius: 50%; margin: 0 auto 10px;"></div>
+                                    <h4 style="color: ${pkm.color}">${pkm.name}</h4>
+                                    <p>Lv. ${pkm.level}</p>
+                                    <p>HP: ${pkm.currentHp}/${pkm.hp}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    break;
+                case 'items':
+                    content.innerHTML = `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h3 style="color: #ffd700;">ITEMS</h3>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <h4>Poké Balls: ${gameState.inventory.items.pokeballs}</h4>
+                                <p>Catches wild Pokémon</p>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <h4>Potions: ${gameState.inventory.items.potions}</h4>
+                                <p>Restores 20 HP</p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'save':
+                    content.innerHTML = `
+                        <div style="text-align: center; margin: 40px 0;">
+                            <h3 style="color: #ffd700;">SAVE GAME</h3>
+                            <p>Your progress will be saved.</p>
+                            <button class="dialog-btn" onclick="saveGame()" 
+                                    style="margin-top: 30px; padding: 15px 30px;">
+                                SAVE
+                            </button>
+                            <button class="dialog-btn" onclick="toggleInventory()" 
+                                    style="margin-top: 15px; padding: 15px 30px; background: #666;">
+                                BACK
+                            </button>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        function switchPokemon(index) {
+            if (index >= 0 && index < gameState.inventory.pokemon.length) {
+                gameState.currentPokemon = gameState.inventory.pokemon[index];
+                updateHUD();
+                playSound('click');
+                toggleInventory();
+                showDialog(`Switched to ${gameState.currentPokemon.name}!`);
+            }
+        }
+
+        function saveGame() {
+            localStorage.setItem('pokemonGammaSave', JSON.stringify(gameState));
+            playSound('click');
+            showDialog('Game saved successfully!');
+        }
+
+        // Battle system
+        function startBattle(wildPokemon) {
+            gameState.inBattle = true;
+            gameState.battle.enemy = wildPokemon;
+            
+            // Set up battle display
+            document.getElementById('playerName').textContent = gameState.currentPokemon.name;
+            document.getElementById('enemyName').textContent = wildPokemon.name;
+            document.getElementById('playerHP').style.width = '100%';
+            document.getElementById('enemyHP').style.width = '100%';
+            document.getElementById('playerHPText').textContent = 
+                `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
+            document.getElementById('enemyHPText').textContent = 
+                `HP: ${wildPokemon.currentHp}/${wildPokemon.hp}`;
+            
+            // Update sprites
+            document.querySelector('.player-sprite').style.backgroundColor = gameState.currentPokemon.color;
+            document.querySelector('.enemy-sprite').style.backgroundColor = wildPokemon.color;
+            
+            document.getElementById('battleScreen').style.display = 'block';
+            document.getElementById('battleMenu').style.display = 'grid';
+            playSound('battle');
+        }
+
+        function attack() {
+            if (!gameState.inBattle) return;
+            
+            const playerMove = gameState.currentPokemon.moves[0]; // Simple attack
+            const enemyMove = gameState.battle.enemy.moves[0];
+            
+            // Player attacks
+            const playerDamage = Math.floor(playerMove.power * (gameState.currentPokemon.attack / 50));
+            gameState.battle.enemy.currentHp = Math.max(0, gameState.battle.enemy.currentHp - playerDamage);
+            
+            document.getElementById('battleLog').textContent = 
+                `${gameState.currentPokemon.name} used ${playerMove.name}!`;
+            
+            // Update enemy HP bar
+            const enemyHpPercent = (gameState.battle.enemy.currentHp / gameState.battle.enemy.hp) * 100;
+            document.getElementById('enemyHP').style.width = enemyHpPercent + '%';
+            document.getElementById('enemyHPText').textContent = 
+                `HP: ${gameState.battle.enemy.currentHp}/${gameState.battle.enemy.hp}`;
+            
+            document.querySelector('.enemy-sprite').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.enemy-sprite').classList.remove('shake');
+                
+                if (gameState.battle.enemy.currentHp <= 0) {
+                    winBattle();
+                    return;
+                }
+                
+                // Enemy attacks
+                setTimeout(() => {
+                    const enemyDamage = Math.floor(enemyMove.power * (gameState.battle.enemy.attack / 50));
+                    gameState.currentPokemon.currentHp = Math.max(0, gameState.currentPokemon.currentHp - enemyDamage);
+                    
+                    document.getElementById('battleLog').textContent = 
+                        `${gameState.battle.enemy.name} used ${enemyMove.name}!`;
+                    
+                    // Update player HP bar
+                    const playerHpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
+                    document.getElementById('playerHP').style.width = playerHpPercent + '%';
+                    document.getElementById('playerHPText').textContent = 
+                        `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
+                    
+                    document.querySelector('.player-sprite').classList.add('shake');
+                    setTimeout(() => {
+                        document.querySelector('.player-sprite').classList.remove('shake');
+                        updateHUD();
+                        
+                        if (gameState.currentPokemon.currentHp <= 0) {
+                            loseBattle();
+                        }
+                    }, 500);
+                }, 1000);
+            }, 500);
+        }
+
+        function winBattle() {
+            document.getElementById('battleLog').textContent = 
+                `Wild ${gameState.battle.enemy.name} fainted!`;
+            
+            // Give rewards
+            const expGain = gameState.battle.enemy.level * 100;
+            gameState.currentPokemon.exp += expGain;
+            gameState.inventory.money += 150;
+            
+            setTimeout(() => {
+                document.getElementById('battleScreen').style.display = 'none';
+                gameState.inBattle = false;
+                showDialog(`${gameState.currentPokemon.name} gained ${expGain} EXP!\nYou got $150!`);
+                updateHUD();
+            }, 2000);
+        }
+
+        function loseBattle() {
+            document.getElementById('battleLog').textContent = 
+                `${gameState.currentPokemon.name} fainted!`;
+            
+            setTimeout(() => {
+                document.getElementById('battleScreen').style.display = 'none';
+                gameState.inBattle = false;
+                showDialog('You blacked out!');
+                // Heal all Pokémon
+                gameState.inventory.pokemon.forEach(p => p.currentHp = p.hp);
+                updateHUD();
+            }, 2000);
+        }
+
+        function run() {
+            if (!gameState.inBattle) return;
+            
+            const success = Math.random() > 0.3;
+            if (success) {
+                document.getElementById('battleLog').textContent = 'Got away safely!';
+                setTimeout(() => {
+                    document.getElementById('battleScreen').style.display = 'none';
+                    gameState.inBattle = false;
+                }, 1500);
+            } else {
+                document.getElementById('battleLog').textContent = "Can't escape!";
+                // Enemy gets a free attack
+                setTimeout(() => {
+                    const enemyMove = gameState.battle.enemy.moves[0];
+                    const enemyDamage = Math.floor(enemyMove.power * (gameState.battle.enemy.attack / 50));
+                    gameState.currentPokemon.currentHp = Math.max(0, gameState.currentPokemon.currentHp - enemyDamage);
+                    
+                    const playerHpPercent = (gameState.currentPokemon.currentHp / gameState.currentPokemon.hp) * 100;
+                    document.getElementById('playerHP').style.width = playerHpPercent + '%';
+                    document.getElementById('playerHPText').textContent = 
+                        `HP: ${gameState.currentPokemon.currentHp}/${gameState.currentPokemon.hp}`;
+                    
+                    updateHUD();
+                    
+                    if (gameState.currentPokemon.currentHp <= 0) {
+                        loseBattle();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Random wild Pokémon encounter
+        function randomEncounter() {
+            if (gameState.inBattle || gameState.inDialog || gameState.inInventory) return;
+            
+            if (Math.random() < 0.005) { // 0.5% chance per frame
+                const wildPokemon = {
+                    ...pokemonDB.bulbasaur,
+                    level: Math.floor(Math.random() * 5) + 3,
+                    currentHp: pokemonDB.bulbasaur.hp
+                };
+                startBattle(wildPokemon);
+            }
+        }
+
+        // Joystick controls
+        let joystick = { x: 0, y: 0, active: false };
+        const joyBase = document.getElementById('joyBase');
+        const joyStick = document.getElementById('joy');
+
+        joyBase.addEventListener('mousedown', startDrag);
+        joyBase.addEventListener('touchstart', startDrag);
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+
+        function startDrag(e) {
+            e.preventDefault();
+            joystick.active = true;
+            updateJoystick(e);
+        }
+
+        function endDrag() {
+            joystick.active = false;
+            joystick.x = joystick.y = 0;
+            joyStick.style.transform = 'translate(0, 0)';
+        }
+
+        function drag(e) {
+            if (!joystick.active) return;
+            updateJoystick(e);
+        }
+
+        function updateJoystick(e) {
+            const rect = joyBase.getBoundingClientRect();
+            const touch = e.touches ? e.touches[0] : e;
+            
+            let x = touch.clientX - rect.left - 60;
+            let y = touch.clientY - rect.top - 60;
+            
+            const distance = Math.sqrt(x * x + y * y);
+            const maxDistance = 50;
+            
+            if (distance > maxDistance) {
+                x = (x / distance) * maxDistance;
+                y = (y / distance) * maxDistance;
+            }
+            
+            joystick.x = x / maxDistance;
+            joystick.y = y / maxDistance;
+            
+            joyStick.style.transform = `translate(${x}px, ${y}px)`;
+            
+            // Update player direction for animation
+            if (Math.abs(joystick.x) > Math.abs(joystick.y)) {
+                gameState.player.direction = joystick.x > 0 ? 2 : 1;
+            } else {
+                gameState.player.direction = joystick.y > 0 ? 0 : 3;
+            }
+        }
+
+        // Game rendering
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (gameState.currentScreen === 'game' && !gameState.inBattle) {
+                // Render overworld
+                renderOverworld();
+                
+                // Render player
+                renderPlayer();
+            }
+        }
+
+        function renderOverworld() {
+            // Draw sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Clouds
+            // Draw clouds
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             for (let i = 0; i < 3; i++) {
-                const cloudX = (cam.x * 0.2 + i * 200) % (canvas.width + 400) - 200;
-                const cloudY = 50 + Math.sin(gameTime * 0.001 + i) * 20;
-                ctx.beginPath();
-                ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
-                ctx.arc(cloudX + 25, cloudY - 10, 25, 0, Math.PI * 2);
-                ctx.arc(cloudX + 55, cloudY, 20, 0, Math.PI * 2);
-                ctx.fill();
+                const cloudX = (gameState.camera.x * 0.1 + i * 200) % (canvas.width + 400) - 200;
+                const cloudY = 50 + Math.sin(Date.now() * 0.0005 + i) * 20;
+                drawCloud(cloudX, cloudY);
             }
             
-            drawGrass();
-            drawDetails();
-            buildings.forEach(drawBuilding);
+            // Draw grass
+            const tileSize = 32;
+            for (let x = -10; x < 20; x++) {
+                for (let y = -10; y < 20; y++) {
+                    const tileX = x * tileSize - gameState.camera.x % tileSize;
+                    const tileY = y * tileSize - gameState.camera.y % tileSize;
+                    
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#5dbb63' : '#6fcf97';
+                    ctx.fillRect(tileX, tileY, tileSize, tileSize);
+                    
+                    // Grass details
+                    if ((x + y) % 3 === 0) {
+                        ctx.fillStyle = '#3a7d34';
+                        ctx.fillRect(tileX + 10, tileY + 10, 3, 12);
+                    }
+                }
+            }
             
-            // Paths
+            // Draw path
             ctx.fillStyle = '#8b7355';
-            ctx.fillRect(canvas.width/2 - 150, canvas.height/2, 300, 20);
-            ctx.fillRect(canvas.width/2 - 10, canvas.height/2 - 150, 20, 300);
+            const pathWidth = 200;
+            const pathHeight = 40;
+            ctx.fillRect(canvas.width/2 - pathWidth/2, canvas.height/2 + 20, pathWidth, pathHeight);
+            ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - pathWidth/2, 40, pathWidth);
             
-        } else if (world === "house") {
-            ctx.fillStyle = '#d2b48c';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = 0; y < canvas.height; y += 40) {
-                    ctx.fillStyle = (x + y) % 80 === 0 ? '#8b7355' : '#a0522d';
-                    ctx.fillRect(x, y, 40, 40);
-                }
-            }
-            
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(canvas.width/2 - 100, canvas.height/2 - 50, 200, 20);
-            ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 30, 40, 30);
-            ctx.fillRect(canvas.width/2 + 80, canvas.height/2 - 30, 40, 30);
-            ctx.fillRect(canvas.width/2 - 40, canvas.height/2 + 40, 80, 40);
-            
-            ctx.fillStyle = '#333';
-            ctx.fillRect(canvas.width/2 - 30, canvas.height - 50, 60, 30);
-            ctx.fillStyle = '#fff';
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('EXIT', canvas.width/2, canvas.height - 30);
-            
-        } else if (world === "center") {
-            ctx.fillStyle = '#f8f8f8';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = 0; y < canvas.height; y += 40) {
-                    ctx.fillStyle = (x + y) % 80 === 0 ? '#d0d0d0' : '#e8e8e8';
-                    ctx.fillRect(x, y, 40, 40);
-                }
-            }
-            
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 30, 240, 20);
-            
-            ctx.fillStyle = '#4a8bca';
-            ctx.fillRect(canvas.width/2 - 40, canvas.height/2 - 80, 80, 60);
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - 60, 40, 20);
-            
-            ctx.fillStyle = '#333';
-            ctx.fillRect(canvas.width/2 - 30, canvas.height - 50, 60, 30);
-            ctx.fillStyle = '#fff';
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('EXIT', canvas.width/2, canvas.height - 30);
+            // Draw buildings
+            drawBuilding(canvas.width/2 - 100, canvas.height/2 - 80, 80, 60, '#a0522d', '#8b4513'); // House
+            drawBuilding(canvas.width/2 + 100, canvas.height/2 - 80, 100, 60, '#ff9999', '#ff6b6b'); // Center
         }
-        
-        drawPlayer();
-        drawFollowingPokemon();
-    }
-}
 
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
+        function drawCloud(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.arc(x + 25, y - 10, 25, 0, Math.PI * 2);
+            ctx.arc(x + 55, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
-// Start the game
-gameLoop();
-</script>
+        function drawBuilding(x, y, width, height, color, roofColor) {
+            // Main building
+            ctx.fillStyle = color;
+            ctx.fillRect(x - width/2, y - height, width, height);
+            
+            // Roof
+            ctx.fillStyle = roofColor;
+            ctx.beginPath();
+            ctx.moveTo(x - width/2 - 10, y - height);
+            ctx.lineTo(x, y - height - 20);
+            ctx.lineTo(x + width/2 + 10, y - height);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Door
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(x - 8, y - 20, 16, 20);
+            
+            // Windows
+            ctx.fillStyle = '#4a8bca';
+            ctx.fillRect(x - 25, y - 40, 12, 12);
+            ctx.fillRect(x + 13, y - 40, 12, 12);
+        }
+
+        function renderPlayer() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = 24;
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // Walking animation
+            if (joystick.x !== 0 || joystick.y !== 0) {
+                gameState.player.spriteFrame = (gameState.player.spriteFrame + 0.2) % 8;
+            }
+            
+            // Draw player (trainer sprite)
+            ctx.fillStyle = '#ff4444'; // Red hat
+            ctx.fillRect(-8, -20, 16, 8);
+            
+            ctx.fillStyle = '#2c8bff'; // Blue shirt
+            ctx.fillRect(-10, -12, 20, 16);
+            
+            ctx.fillStyle = '#000'; // Pants
+            ctx.fillRect(-10, 4, 20, 8);
+            
+            // Face
+            ctx.fillStyle = '#ffcc99';
+            ctx.beginPath();
+            ctx.arc(0, -15, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Hair
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(-8, -22, 16, 8);
+            
+            // Legs with animation
+            let legOffset = 0;
+            if (joystick.x !== 0 || joystick.y !== 0) {
+                legOffset = Math.sin(gameState.player.spriteFrame) * 3;
+            }
+            
+            ctx.fillStyle = '#000';
+            ctx.fillRect(-6, 12, 4, 8 + legOffset);
+            ctx.fillRect(2, 12, 4, 8 - legOffset);
+            
+            ctx.restore();
+            
+            // Draw following Pokémon
+            if (gameState.currentPokemon) {
+                drawFollowingPokemon(centerX, centerY);
+            }
+        }
+
+        function drawFollowingPokemon(playerX, playerY) {
+            const offsetX = gameState.player.direction === 1 ? -35 : gameState.player.direction === 2 ? 35 : 0;
+            const offsetY = gameState.player.direction === 0 ? 30 : gameState.player.direction === 3 ? -30 : 0;
+            const bobOffset = Math.sin(Date.now() * 0.005) * 3;
+            
+            ctx.fillStyle = gameState.currentPokemon.color;
+            ctx.beginPath();
+            ctx.arc(playerX + offsetX, playerY + offsetY + bobOffset, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Game loop
+        function gameLoop() {
+            // Update
+            if (gameState.currentScreen === 'game' && !gameState.inBattle && !gameState.inDialog && !gameState.inInventory) {
+                // Move player with joystick
+                gameState.player.x += joystick.x * gameState.player.speed;
+                gameState.player.y += joystick.y * gameState.player.speed;
+                
+                // Update camera
+                gameState.camera.x = gameState.player.x;
+                gameState.camera.y = gameState.player.y;
+                
+                // Random encounters
+                randomEncounter();
+            }
+            
+            // Render
+            render();
+            
+            // Next frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize everything
+        window.addEventListener('load', () => {
+            initCanvas();
+            simulateLoading();
+        });
+    </script>
 </body>
 </html>
