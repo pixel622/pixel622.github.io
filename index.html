@@ -289,15 +289,9 @@ canvas {
     50% { transform: translateY(-10px); }
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-}
-
 .shake { animation: shake 0.3s; }
 .flash { animation: flash 0.3s; }
 .float { animation: float 2s infinite; }
-.bounce { animation: bounce 0.5s; }
 
 /* HUD */
 #hud {
@@ -311,6 +305,7 @@ canvas {
     border: 2px solid #fff;
     font-size: 14px;
     z-index: 50;
+    max-width: 200px;
 }
 
 .enemy-info, .player-info {
@@ -356,6 +351,176 @@ canvas {
     background: linear-gradient(to bottom, #666, #333);
     grid-column: span 2;
 }
+
+/* Inventory */
+#inventory {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    background: rgba(0, 0, 0, 0.95);
+    border: 4px solid #fff;
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    z-index: 4000;
+    display: none;
+    overflow-y: auto;
+}
+
+.inventory-title {
+    color: #ffd700;
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.inventory-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.inventory-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.inventory-tab.active {
+    background: #4a90e2;
+}
+
+.inventory-content {
+    display: none;
+}
+
+.inventory-content.active {
+    display: block;
+}
+
+.pokemon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pokemon-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pokemon-card:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px);
+}
+
+.pokemon-card.active {
+    border: 2px solid #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.pokemon-card h4 {
+    margin: 10px 0 5px 0;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.item-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.shop-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.shop-item button {
+    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.sell-btn {
+    background: linear-gradient(to bottom, #ff6b6b, #cc4444) !important;
+    margin-top: 10px;
+}
+
+/* Controls */
+#controls {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+}
+
+.control-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.1);
+}
+
+/* Level up animation */
+@keyframes levelUp {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.8; }
+}
+
+.level-up {
+    animation: levelUp 0.5s;
+}
 </style>
 </head>
 
@@ -363,6 +528,12 @@ canvas {
 <canvas id="game"></canvas>
 <div id="joyBase"><div id="joy"></div></div>
 <div id="hud"></div>
+
+<!-- Controls -->
+<div id="controls">
+    <div class="control-btn" onclick="toggleInventory()">📦</div>
+    <div class="control-btn" onclick="switchPokemon()">🔄</div>
+</div>
 
 <!-- Starter Selection -->
 <div id="starterSelection">
@@ -389,6 +560,41 @@ canvas {
 <div id="dialogBox">
     <div id="dialogText"></div>
     <div id="dialogOptions"></div>
+</div>
+
+<!-- Inventory -->
+<div id="inventory">
+    <div class="inventory-title">Inventory</div>
+    <div class="inventory-tabs">
+        <button class="inventory-tab active" onclick="showInventoryTab('pokemon')">Pokémon (0)</button>
+        <button class="inventory-tab" onclick="showInventoryTab('items')">Items</button>
+        <button class="inventory-tab" onclick="showInventoryTab('shop')">Shop</button>
+    </div>
+    
+    <div id="pokemonTab" class="inventory-content active">
+        <div class="pokemon-grid" id="pokemonGrid">
+            <!-- Pokémon will be added here -->
+        </div>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">Close</button>
+    </div>
+    
+    <div id="itemsTab" class="inventory-content">
+        <div class="item-grid" id="itemGrid">
+            <!-- Items will be added here -->
+        </div>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">Close</button>
+    </div>
+    
+    <div id="shopTab" class="inventory-content">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h3>Pokémon Center Shop</h3>
+            <p>Coins: <span id="coinCount">100</span> <span style="color: gold">🪙</span></p>
+        </div>
+        <div class="shop-grid" id="shopGrid">
+            <!-- Shop items will be added here -->
+        </div>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">Close</button>
+    </div>
 </div>
 
 <!-- Battle UI -->
@@ -420,16 +626,29 @@ canvas {
         
         <div class="battle-menu" id="battleMenu">
             <button onclick="showAttackMenu()">FIGHT</button>
-            <button onclick="usePotion()">POTION</button>
-            <button onclick="usePokeball()">POKéBALL</button>
+            <button onclick="showPokemonMenu()">POKéMON</button>
+            <button onclick="useItem()">ITEM</button>
             <button onclick="run()">RUN</button>
         </div>
         
         <div class="battle-menu" id="attackMenu" style="display: none;">
-            <button class="attack-btn" onclick="useAttack(0)">Tackle</button>
-            <button class="attack-btn" onclick="useAttack(1)">Growl</button>
-            <button class="attack-btn" onclick="useAttack(2)">Vine Whip</button>
-            <button class="attack-btn" onclick="useAttack(3)">Leech Seed</button>
+            <!-- Attack buttons will be dynamically added -->
+            <button class="back-btn" onclick="showBattleMenu()">Back</button>
+        </div>
+        
+        <div class="battle-menu" id="pokemonMenu" style="display: none;">
+            <div style="grid-column: span 2; text-align: center; margin-bottom: 10px;">
+                <p>Select a Pokémon to switch to:</p>
+            </div>
+            <!-- Pokémon buttons will be dynamically added -->
+            <button class="back-btn" onclick="showBattleMenu()">Back</button>
+        </div>
+        
+        <div class="battle-menu" id="itemMenu" style="display: none;">
+            <div style="grid-column: span 2; text-align: center; margin-bottom: 10px;">
+                <p>Select an item to use:</p>
+            </div>
+            <!-- Item buttons will be dynamically added -->
             <button class="back-btn" onclick="showBattleMenu()">Back</button>
         </div>
     </div>
@@ -456,19 +675,30 @@ const GRASS_COLORS = ['#5dbb63', '#6fcf97', '#57a773'];
 let world = "outside";
 let inBattle = false;
 let inDialog = false;
+let inInventory = false;
 let gameTime = 0;
 let playerPokemon = null;
 let starterChosen = false;
+let coins = 100;
+
+// Player inventory
+let inventory = {
+    pokemon: [],
+    items: {
+        potions: 3,
+        pokeballs: 5,
+        superPotions: 0,
+        greatBalls: 0
+    }
+};
 
 // Player
 const player = {
     x: 0,
     y: 0,
-    size: 24,
     speed: 3,
     direction: 0,
-    animationFrame: 0,
-    pokemonFollowing: null
+    animationFrame: 0
 };
 
 // Camera
@@ -477,12 +707,15 @@ const cam = { x: 0, y: 0 };
 // Pokémon data
 const pokemonData = {
     bulbasaur: {
+        id: "bulbasaur",
         name: "Bulbasaur",
         type: "Grass/Poison",
         color: "#78c850",
         hp: 30,
         maxHp: 30,
         level: 5,
+        exp: 0,
+        expToNext: 50,
         attacks: [
             { name: "Tackle", damage: 4, type: "Normal" },
             { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
@@ -490,15 +723,18 @@ const pokemonData = {
             { name: "Leech Seed", damage: 2, type: "Grass", effect: "drain" }
         ],
         spriteColor: "#78c850",
-        followingOffset: { x: -20, y: 0 }
+        price: 50
     },
     charmander: {
+        id: "charmander",
         name: "Charmander",
         type: "Fire",
         color: "#f08030",
         hp: 28,
         maxHp: 28,
         level: 5,
+        exp: 0,
+        expToNext: 50,
         attacks: [
             { name: "Scratch", damage: 4, type: "Normal" },
             { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
@@ -506,15 +742,18 @@ const pokemonData = {
             { name: "Smokescreen", damage: 0, type: "Status", effect: "accuracyDown" }
         ],
         spriteColor: "#f08030",
-        followingOffset: { x: 20, y: 0 }
+        price: 50
     },
     squirtle: {
+        id: "squirtle",
         name: "Squirtle",
         type: "Water",
         color: "#6890f0",
         hp: 32,
         maxHp: 32,
         level: 5,
+        exp: 0,
+        expToNext: 50,
         attacks: [
             { name: "Tackle", damage: 4, type: "Normal" },
             { name: "Tail Whip", damage: 0, type: "Status", effect: "defenseDown" },
@@ -522,44 +761,59 @@ const pokemonData = {
             { name: "Withdraw", damage: 0, type: "Status", effect: "defenseUp" }
         ],
         spriteColor: "#6890f0",
-        followingOffset: { x: 0, y: -20 }
+        price: 50
     },
     // Wild Pokémon
     pikachu: {
+        id: "pikachu",
         name: "Pikachu",
         type: "Electric",
         color: "#ffd700",
         hp: 25,
         maxHp: 25,
         level: 4,
+        exp: 0,
+        expToNext: 40,
         attacks: [
             { name: "Thunder Shock", damage: 6, type: "Electric" },
             { name: "Quick Attack", damage: 4, type: "Normal" }
-        ]
+        ],
+        spriteColor: "#ffd700",
+        price: 40
     },
     rattata: {
+        id: "rattata",
         name: "Rattata",
         type: "Normal",
         color: "#a8a878",
         hp: 22,
         maxHp: 22,
         level: 3,
+        exp: 0,
+        expToNext: 30,
         attacks: [
             { name: "Tackle", damage: 4, type: "Normal" },
             { name: "Quick Attack", damage: 4, type: "Normal" }
-        ]
+        ],
+        spriteColor: "#a8a878",
+        price: 30
     },
     pidgey: {
+        id: "pidgey",
         name: "Pidgey",
         type: "Normal/Flying",
         color: "#a890f0",
         hp: 24,
         maxHp: 24,
         level: 3,
+        exp: 0,
+        expToNext: 30,
         attacks: [
             { name: "Gust", damage: 5, type: "Flying" },
             { name: "Sand Attack", damage: 0, type: "Status", effect: "accuracyDown" }
-        ]
+        ],
+        spriteColor: "#a890f0",
+        price: 30
     }
 };
 
@@ -583,9 +837,7 @@ const buildings = [
 
 // Battle system
 let enemyPokemon = null;
-let potions = 3;
-let pokeballs = 5;
-let battleState = "menu"; // menu, attack, item
+let battleState = "menu";
 
 // Joystick
 let joyX = 0, joyY = 0, drag = false;
@@ -677,6 +929,229 @@ function closeDialog() {
     document.getElementById("dialogBox").style.display = "none";
 }
 
+// Inventory System
+function toggleInventory() {
+    if (inBattle || inDialog || !starterChosen) return;
+    
+    inInventory = !inInventory;
+    if (inInventory) {
+        updateInventory();
+        document.getElementById("inventory").style.display = "block";
+    } else {
+        document.getElementById("inventory").style.display = "none";
+    }
+}
+
+function closeInventory() {
+    inInventory = false;
+    document.getElementById("inventory").style.display = "none";
+}
+
+function showInventoryTab(tabName) {
+    // Update tabs
+    document.querySelectorAll('.inventory-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.inventory-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    document.querySelector(`button[onclick="showInventoryTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`${tabName}Tab`).classList.add('active');
+    
+    // Update specific tab content
+    if (tabName === 'pokemon') {
+        updatePokemonTab();
+    } else if (tabName === 'items') {
+        updateItemsTab();
+    } else if (tabName === 'shop') {
+        updateShopTab();
+    }
+}
+
+function updateInventory() {
+    updatePokemonTab();
+    updateItemsTab();
+    updateShopTab();
+}
+
+function updatePokemonTab() {
+    const pokemonGrid = document.getElementById("pokemonGrid");
+    pokemonGrid.innerHTML = '';
+    
+    // Update tab count
+    const pokemonTab = document.querySelector('button[onclick="showInventoryTab(\'pokemon\')"]');
+    pokemonTab.textContent = `Pokémon (${inventory.pokemon.length})`;
+    
+    inventory.pokemon.forEach((pokemon, index) => {
+        const card = document.createElement("div");
+        card.className = "pokemon-card";
+        if (pokemon === playerPokemon) {
+            card.classList.add("active");
+        }
+        
+        card.innerHTML = `
+            <h4 style="color: ${pokemon.color}">${pokemon.name}</h4>
+            <p>Lv. ${pokemon.level}</p>
+            <p>HP: ${pokemon.hp}/${pokemon.maxHp}</p>
+            <p>Type: ${pokemon.type}</p>
+            <button class="sell-btn" onclick="sellPokemon(${index})" ${pokemon === playerPokemon ? 'disabled' : ''}>Sell for ${Math.floor(pokemon.price * 0.7)} coins</button>
+        `;
+        
+        card.onclick = () => selectActivePokemon(index);
+        pokemonGrid.appendChild(card);
+    });
+}
+
+function updateItemsTab() {
+    const itemGrid = document.getElementById("itemGrid");
+    itemGrid.innerHTML = `
+        <div class="item-card">
+            <h4>Pokéballs</h4>
+            <p>${inventory.items.pokeballs}</p>
+            <p>Catch wild Pokémon</p>
+        </div>
+        <div class="item-card">
+            <h4>Great Balls</h4>
+            <p>${inventory.items.greatBalls}</p>
+            <p>Better catch rate</p>
+        </div>
+        <div class="item-card">
+            <h4>Potions</h4>
+            <p>${inventory.items.potions}</p>
+            <p>Heals 20 HP</p>
+        </div>
+        <div class="item-card">
+            <h4>Super Potions</h4>
+            <p>${inventory.items.superPotions}</p>
+            <p>Heals 50 HP</p>
+        </div>
+    `;
+}
+
+function updateShopTab() {
+    document.getElementById("coinCount").textContent = coins;
+    
+    const shopGrid = document.getElementById("shopGrid");
+    shopGrid.innerHTML = `
+        <div class="shop-item">
+            <h4>Pokéball</h4>
+            <p>Price: 20 coins</p>
+            <p>Catch wild Pokémon</p>
+            <button onclick="buyItem('pokeball')" ${coins < 20 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Great Ball</h4>
+            <p>Price: 50 coins</p>
+            <p>Better catch rate</p>
+            <button onclick="buyItem('greatball')" ${coins < 50 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Potion</h4>
+            <p>Price: 30 coins</p>
+            <p>Heals 20 HP</p>
+            <button onclick="buyItem('potion')" ${coins < 30 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Super Potion</h4>
+            <p>Price: 70 coins</p>
+            <p>Heals 50 HP</p>
+            <button onclick="buyItem('superpotion')" ${coins < 70 ? 'disabled' : ''}>Buy</button>
+        </div>
+    `;
+}
+
+function buyItem(itemType) {
+    const prices = {
+        pokeball: 20,
+        greatball: 50,
+        potion: 30,
+        superpotion: 70
+    };
+    
+    if (coins >= prices[itemType]) {
+        coins -= prices[itemType];
+        
+        switch(itemType) {
+            case 'pokeball':
+                inventory.items.pokeballs++;
+                break;
+            case 'greatball':
+                inventory.items.greatBalls++;
+                break;
+            case 'potion':
+                inventory.items.potions++;
+                break;
+            case 'superpotion':
+                inventory.items.superPotions++;
+                break;
+        }
+        
+        updateShopTab();
+        updateItemsTab();
+        updateHUD();
+        showDialog(`You bought a ${itemType === 'pokeball' ? 'Pokéball' : 
+                    itemType === 'greatball' ? 'Great Ball' : 
+                    itemType === 'potion' ? 'Potion' : 'Super Potion'}!`);
+    }
+}
+
+function sellPokemon(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    const pokemon = inventory.pokemon[index];
+    const sellPrice = Math.floor(pokemon.price * 0.7);
+    
+    coins += sellPrice;
+    
+    // Remove from inventory
+    inventory.pokemon.splice(index, 1);
+    
+    // If this was the active Pokémon, select the first one
+    if (pokemon === playerPokemon) {
+        if (inventory.pokemon.length > 0) {
+            playerPokemon = inventory.pokemon[0];
+        } else {
+            playerPokemon = null;
+            showDialog("You have no Pokémon left! You should catch some more.");
+        }
+    }
+    
+    updateInventory();
+    updateHUD();
+    showDialog(`You sold ${pokemon.name} for ${sellPrice} coins!`);
+}
+
+function selectActivePokemon(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    playerPokemon = inventory.pokemon[index];
+    updateInventory();
+    updateHUD();
+    showDialog(`${playerPokemon.name} is now your active Pokémon!`);
+}
+
+function switchPokemon() {
+    if (inBattle || inDialog || !starterChosen) return;
+    
+    if (inventory.pokemon.length <= 1) {
+        showDialog("You only have one Pokémon!");
+        return;
+    }
+    
+    const options = inventory.pokemon.map((pokemon, index) => ({
+        text: `${pokemon.name} (Lv. ${pokemon.level})`,
+        action: () => {
+            playerPokemon = pokemon;
+            closeDialog();
+            updateHUD();
+            showDialog(`${pokemon.name} is now your active Pokémon!`);
+        }
+    }));
+    
+    showDialog("Select a Pokémon to switch to:", options);
+}
+
 // Starter Selection
 let selectedStarter = null;
 
@@ -694,7 +1169,10 @@ function confirmStarter() {
         return;
     }
     
-    playerPokemon = JSON.parse(JSON.stringify(pokemonData[selectedStarter]));
+    const starterData = pokemonData[selectedStarter];
+    playerPokemon = JSON.parse(JSON.stringify(starterData));
+    inventory.pokemon.push(playerPokemon);
+    
     starterChosen = true;
     document.getElementById("starterSelection").style.display = "none";
     
@@ -702,7 +1180,7 @@ function confirmStarter() {
         { text: "Begin!", action: () => {
             closeDialog();
             updateHUD();
-            showDialog("Welcome to the world of Pokémon! Explore the world, catch wild Pokémon, and visit the Pokémon Center to heal your team. Good luck on your adventure!");
+            showDialog("Welcome to the world of Pokémon! Explore the world, catch wild Pokémon, and visit the Pokémon Center to heal your team and buy items. You can access your inventory with the 📦 button and switch Pokémon with the 🔄 button.");
         }}
     ]);
 }
@@ -738,8 +1216,7 @@ function startBattle() {
     createBattleSprites();
     
     setTimeout(() => {
-        document.getElementById("battleMenu").style.display = "grid";
-        document.getElementById("attackMenu").style.display = "none";
+        showBattleMenu();
         addBattleLog(`A wild ${enemyPokemon.name} appeared!`);
     }, 1000);
 }
@@ -866,27 +1343,163 @@ function addBattleLog(message) {
     document.getElementById("battleLog").textContent = message;
 }
 
+function showBattleMenu() {
+    battleState = "menu";
+    document.getElementById("battleMenu").style.display = "grid";
+    document.getElementById("attackMenu").style.display = "none";
+    document.getElementById("pokemonMenu").style.display = "none";
+    document.getElementById("itemMenu").style.display = "none";
+}
+
 function showAttackMenu() {
     battleState = "attack";
     document.getElementById("battleMenu").style.display = "none";
     document.getElementById("attackMenu").style.display = "grid";
     
-    // Update attack buttons
-    const attackButtons = document.querySelectorAll('.attack-btn');
-    attackButtons.forEach((btn, index) => {
-        if (playerPokemon.attacks[index]) {
-            btn.textContent = playerPokemon.attacks[index].name;
-            btn.style.display = "block";
-        } else {
-            btn.style.display = "none";
-        }
+    // Clear and update attack buttons
+    const attackMenu = document.getElementById("attackMenu");
+    attackMenu.innerHTML = '';
+    
+    playerPokemon.attacks.forEach((attack, index) => {
+        const btn = document.createElement("button");
+        btn.className = "attack-btn";
+        btn.textContent = attack.name;
+        btn.onclick = () => useAttack(index);
+        attackMenu.appendChild(btn);
     });
+    
+    const backBtn = document.createElement("button");
+    backBtn.className = "back-btn";
+    backBtn.textContent = "Back";
+    backBtn.onclick = showBattleMenu;
+    attackMenu.appendChild(backBtn);
 }
 
-function showBattleMenu() {
-    battleState = "menu";
-    document.getElementById("battleMenu").style.display = "grid";
-    document.getElementById("attackMenu").style.display = "none";
+function showPokemonMenu() {
+    battleState = "pokemon";
+    document.getElementById("battleMenu").style.display = "none";
+    document.getElementById("pokemonMenu").style.display = "grid";
+    
+    // Clear and update Pokémon buttons
+    const pokemonMenu = document.getElementById("pokemonMenu");
+    pokemonMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select a Pokémon to switch to:</p></div>';
+    
+    inventory.pokemon.forEach((pokemon, index) => {
+        if (pokemon.hp > 0 && pokemon !== playerPokemon) {
+            const btn = document.createElement("button");
+            btn.className = "attack-btn";
+            btn.textContent = `${pokemon.name} (HP: ${pokemon.hp}/${pokemon.maxHp})`;
+            btn.onclick = () => switchInBattle(index);
+            pokemonMenu.appendChild(btn);
+        }
+    });
+    
+    const backBtn = document.createElement("button");
+    backBtn.className = "back-btn";
+    backBtn.textContent = "Back";
+    backBtn.onclick = showBattleMenu;
+    pokemonMenu.appendChild(backBtn);
+}
+
+function showItemMenu() {
+    battleState = "item";
+    document.getElementById("battleMenu").style.display = "none";
+    document.getElementById("itemMenu").style.display = "grid";
+    
+    // Clear and update item buttons
+    const itemMenu = document.getElementById("itemMenu");
+    itemMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select an item to use:</p></div>';
+    
+    // Add potions
+    if (inventory.items.potions > 0) {
+        const btn = document.createElement("button");
+        btn.className = "attack-btn";
+        btn.textContent = `Potion (${inventory.items.potions})`;
+        btn.onclick = () => useItemInBattle('potion');
+        itemMenu.appendChild(btn);
+    }
+    
+    if (inventory.items.superPotions > 0) {
+        const btn = document.createElement("button");
+        btn.className = "attack-btn";
+        btn.textContent = `Super Potion (${inventory.items.superPotions})`;
+        btn.onclick = () => useItemInBattle('superpotion');
+        itemMenu.appendChild(btn);
+    }
+    
+    const backBtn = document.createElement("button");
+    backBtn.className = "back-btn";
+    backBtn.textContent = "Back";
+    backBtn.onclick = showBattleMenu;
+    itemMenu.appendChild(backBtn);
+}
+
+function useItem() {
+    if (inventory.items.potions === 0 && inventory.items.superPotions === 0) {
+        addBattleLog("No items available!");
+        return;
+    }
+    showItemMenu();
+}
+
+function useItemInBattle(itemType) {
+    let healAmount = 0;
+    
+    switch(itemType) {
+        case 'potion':
+            if (inventory.items.potions > 0) {
+                inventory.items.potions--;
+                healAmount = 20;
+                addBattleLog(`Used a Potion!`);
+            }
+            break;
+        case 'superpotion':
+            if (inventory.items.superPotions > 0) {
+                inventory.items.superPotions--;
+                healAmount = 50;
+                addBattleLog(`Used a Super Potion!`);
+            }
+            break;
+    }
+    
+    if (healAmount > 0) {
+        playerPokemon.hp = Math.min(playerPokemon.hp + healAmount, playerPokemon.maxHp);
+        addBattleLog(`${playerPokemon.name} recovered ${healAmount} HP!`);
+        updateBattleText();
+        updateHUD();
+        updateInventory();
+        
+        setTimeout(() => enemyAttack(), 1000);
+    } else {
+        addBattleLog("No items left!");
+        showBattleMenu();
+    }
+}
+
+function switchInBattle(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    const newPokemon = inventory.pokemon[index];
+    if (newPokemon.hp <= 0) {
+        addBattleLog(`${newPokemon.name} has no HP left!`);
+        return;
+    }
+    
+    addBattleLog(`Come back, ${playerPokemon.name}!`);
+    addBattleLog(`Go, ${newPokemon.name}!`);
+    
+    playerPokemon = newPokemon;
+    document.getElementById("playerPokemonName").textContent = playerPokemon.name;
+    document.getElementById("playerPokemonName").style.color = playerPokemon.color;
+    
+    createBattleSprites();
+    updateBattleText();
+    updateHUD();
+    
+    setTimeout(() => {
+        showBattleMenu();
+        setTimeout(() => enemyAttack(), 500);
+    }, 1500);
 }
 
 function useAttack(index) {
@@ -918,12 +1531,34 @@ function useAttack(index) {
         
         if (enemyPokemon.hp <= 0) {
             addBattleLog(`Wild ${enemyPokemon.name} fainted!`);
+            giveExp();
             setTimeout(() => endBattle(true), 1500);
             return;
         }
         
         setTimeout(() => enemyAttack(), 800);
     }, 500);
+}
+
+function giveExp() {
+    const expGain = enemyPokemon.level * 10;
+    playerPokemon.exp += expGain;
+    addBattleLog(`${playerPokemon.name} gained ${expGain} EXP!`);
+    
+    if (playerPokemon.exp >= playerPokemon.expToNext) {
+        playerPokemon.level++;
+        playerPokemon.exp = 0;
+        playerPokemon.expToNext = playerPokemon.level * 20;
+        playerPokemon.maxHp += 5;
+        playerPokemon.hp = playerPokemon.maxHp;
+        
+        addBattleLog(`${playerPokemon.name} grew to Level ${playerPokemon.level}!`);
+        document.getElementById("playerSprite").classList.add('level-up');
+        
+        setTimeout(() => {
+            document.getElementById("playerSprite").classList.remove('level-up');
+        }, 1000);
+    }
 }
 
 function enemyAttack() {
@@ -947,6 +1582,7 @@ function enemyAttack() {
     
     updateBattleText();
     updateHUD();
+    updateInventory();
     
     setTimeout(() => {
         document.getElementById("playerSprite").classList.remove('shake');
@@ -954,45 +1590,19 @@ function enemyAttack() {
         
         if (playerPokemon.hp <= 0) {
             addBattleLog(`${playerPokemon.name} fainted!`);
-            setTimeout(() => endBattle(false), 1500);
+            
+            // Check if any Pokémon left
+            const alivePokemon = inventory.pokemon.filter(p => p.hp > 0);
+            if (alivePokemon.length > 0) {
+                addBattleLog("Select another Pokémon!");
+                showPokemonMenu();
+            } else {
+                setTimeout(() => endBattle(false), 1500);
+            }
         } else {
             showBattleMenu();
         }
     }, 500);
-}
-
-function usePotion() {
-    if (potions > 0) {
-        potions--;
-        const heal = 20;
-        playerPokemon.hp = Math.min(playerPokemon.hp + heal, playerPokemon.maxHp);
-        addBattleLog(`You used a Potion! ${playerPokemon.name} recovered ${heal} HP!`);
-        updateBattleText();
-        updateHUD();
-        
-        setTimeout(() => enemyAttack(), 1000);
-    } else {
-        addBattleLog("No potions left!");
-    }
-}
-
-function usePokeball() {
-    if (pokeballs > 0) {
-        pokeballs--;
-        addBattleLog(`You threw a Pokéball!`);
-        updateHUD();
-        
-        const catchChance = (enemyPokemon.hp / enemyPokemon.maxHp) * 0.5 + 0.3;
-        if (Math.random() < catchChance) {
-            addBattleLog(`Gotcha! ${enemyPokemon.name} was caught!`);
-            setTimeout(() => endBattle(true), 2000);
-        } else {
-            addBattleLog(`Oh no! ${enemyPokemon.name} broke free!`);
-            setTimeout(() => enemyAttack(), 1000);
-        }
-    } else {
-        addBattleLog("No Pokéballs left!");
-    }
 }
 
 function run() {
@@ -1006,22 +1616,50 @@ function run() {
     }
 }
 
+function catchPokemon() {
+    if (inventory.items.pokeballs > 0) {
+        inventory.items.pokeballs--;
+        addBattleLog(`You threw a Pokéball!`);
+        updateHUD();
+        updateInventory();
+        
+        const catchChance = (enemyPokemon.hp / enemyPokemon.maxHp) * 0.5 + 0.3;
+        if (Math.random() < catchChance) {
+            // Add caught Pokémon to inventory
+            const caughtPokemon = JSON.parse(JSON.stringify(enemyPokemon));
+            caughtPokemon.hp = caughtPokemon.maxHp; // Heal when caught
+            inventory.pokemon.push(caughtPokemon);
+            
+            addBattleLog(`Gotcha! ${enemyPokemon.name} was caught!`);
+            setTimeout(() => {
+                endBattle(true);
+                showDialog(`You caught ${enemyPokemon.name}! It has been added to your inventory.`);
+            }, 2000);
+        } else {
+            addBattleLog(`Oh no! ${enemyPokemon.name} broke free!`);
+            setTimeout(() => enemyAttack(), 1000);
+        }
+    } else {
+        addBattleLog("No Pokéballs left!");
+    }
+}
+
 function endBattle(victory) {
     inBattle = false;
     document.getElementById("battle").style.display = "none";
-    document.getElementById("battleMenu").style.display = "none";
-    document.getElementById("attackMenu").style.display = "none";
+    showBattleMenu();
     
-    if (!victory && playerPokemon.hp <= 0) {
-        // Player's Pokémon fainted
-        showDialog(`Your ${playerPokemon.name} fainted! You blacked out and woke up at the Pokémon Center.`, [
+    if (!victory && inventory.pokemon.filter(p => p.hp > 0).length === 0) {
+        // All Pokémon fainted
+        showDialog(`All your Pokémon fainted! You blacked out and woke up at the Pokémon Center.`, [
             { text: "OK", action: () => {
                 closeDialog();
                 // Reset position and heal
                 player.x = buildings[1].x;
                 player.y = buildings[1].y + 100;
-                playerPokemon.hp = playerPokemon.maxHp;
+                inventory.pokemon.forEach(p => p.hp = p.maxHp);
                 updateHUD();
+                updateInventory();
             }}
         ]);
     }
@@ -1033,8 +1671,9 @@ function updateHUD() {
     document.getElementById("hud").innerHTML = 
         `${playerPokemon.name} Lv.${playerPokemon.level}<br>` +
         `HP: ${playerPokemon.hp}/${playerPokemon.maxHp}<br>` +
-        `Potions: ${potions}<br>` +
-        `Pokéballs: ${pokeballs}`;
+        `Pokéballs: ${inventory.items.pokeballs}<br>` +
+        `Potions: ${inventory.items.potions}<br>` +
+        `Coins: ${coins} 🪙`;
 }
 
 // Drawing functions
@@ -1125,16 +1764,6 @@ function drawDetails() {
                 ctx.beginPath();
                 ctx.arc(dx, dy - 5, 4, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Petals
-                for (let i = 0; i < 5; i++) {
-                    const angle = (i / 5) * Math.PI * 2;
-                    const px = dx + Math.cos(angle) * 8;
-                    const py = dy - 5 + Math.sin(angle) * 8;
-                    ctx.beginPath();
-                    ctx.arc(px, py, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
             } else {
                 // Bush
                 ctx.fillStyle = detail.color;
@@ -1204,7 +1833,7 @@ function drawBuilding(building) {
 
 // Game loop functions
 function update() {
-    if (inBattle || inDialog || !starterChosen) return;
+    if (inBattle || inDialog || inInventory || !starterChosen) return;
     
     gameTime++;
     
@@ -1234,10 +1863,11 @@ function update() {
                     world = "center";
                     player.x = 0;
                     player.y = 40;
-                    // Heal at center
-                    playerPokemon.hp = playerPokemon.maxHp;
-                    updateHUD();
-                    showDialog("Welcome to the Pokémon Center! Your Pokémon have been healed!");
+                    // Auto-open shop in center
+                    setTimeout(() => {
+                        toggleInventory();
+                        showInventoryTab('shop');
+                    }, 500);
                 }
             }
         });
@@ -1342,6 +1972,12 @@ function draw() {
             ctx.fillRect(canvas.width/2 - 40, canvas.height/2 - 80, 80, 60);
             ctx.fillStyle = '#00ff00';
             ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - 60, 40, 20);
+            
+            // Nurse
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2 - 10, 15, 0, Math.PI * 2);
+            ctx.fill();
             
             // Exit
             ctx.fillStyle = '#333';
