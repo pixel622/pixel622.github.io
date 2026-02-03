@@ -1,24 +1,22 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Pokémon Adventure</title>
+<title>Pokemon Adventure</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
 }
 
 body {
     background: #000;
-    font-family: 'Pokemon GB', 'Press Start 2P', monospace;
+    font-family: 'Arial', sans-serif;
     overflow: hidden;
     color: #fff;
-    font-size: 12px;
 }
 
 canvas {
@@ -41,55 +39,45 @@ canvas {
 
 .login-container {
     background: rgba(0, 0, 0, 0.8);
-    border: 8px solid #ffd700;
-    border-radius: 20px;
-    padding: 40px;
+    border: 4px solid #ffd700;
+    border-radius: 15px;
+    padding: 30px;
     text-align: center;
-    max-width: 500px;
+    max-width: 400px;
     width: 90%;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
 }
 
 .login-title {
     color: #ffd700;
-    font-size: 32px;
+    font-size: 28px;
     margin-bottom: 20px;
-    text-shadow: 3px 3px 0 #000;
 }
 
 .login-input {
     width: 100%;
-    padding: 15px;
-    margin: 15px 0;
+    padding: 12px;
+    margin: 10px 0;
     background: rgba(255, 255, 255, 0.1);
-    border: 3px solid #ffd700;
-    border-radius: 10px;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
     color: white;
     font-size: 16px;
-    font-family: inherit;
-}
-
-.login-input::placeholder {
-    color: #aaa;
 }
 
 .login-btn {
     background: linear-gradient(to bottom, #ff4444, #cc0000);
     color: white;
     border: none;
-    padding: 15px 40px;
+    padding: 12px 30px;
     margin: 10px;
-    border-radius: 10px;
-    font-size: 18px;
+    border-radius: 8px;
+    font-size: 16px;
     cursor: pointer;
-    font-family: inherit;
     transition: all 0.2s;
-    text-shadow: 2px 2px 0 #000;
 }
 
 .login-btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px #ff4444;
 }
 
 .new-game-btn {
@@ -101,26 +89,26 @@ canvas {
     position: fixed;
     bottom: 30px;
     left: 30px;
-    width: 120px;
-    height: 120px;
-    background: rgba(0, 0, 0, 0.5);
-    border: 4px solid rgba(255, 255, 255, 0.6);
+    width: 100px;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     z-index: 100;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     touch-action: none;
 }
 
 #joy {
     position: absolute;
-    width: 50px;
-    height: 50px;
-    left: 35px;
-    top: 35px;
-    background: rgba(255, 255, 255, 0.9);
+    width: 40px;
+    height: 40px;
+    left: 30px;
+    top: 30px;
+    background: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
-    border: 3px solid rgba(100, 100, 255, 0.9);
-    box-shadow: 0 0 15px rgba(100, 100, 255, 0.7);
+    border: 2px solid rgba(100, 100, 255, 0.8);
+    box-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
     transition: transform 0.1s;
     touch-action: none;
 }
@@ -133,9 +121,10 @@ canvas {
     width: 100%;
     height: 100%;
     background: linear-gradient(to bottom, #1a5f7a, #0a3d62);
+    color: white;
     display: none;
     z-index: 1000;
-    font-family: inherit;
+    font-family: 'Arial', sans-serif;
 }
 
 .battle-container {
@@ -151,23 +140,30 @@ canvas {
     box-sizing: border-box;
 }
 
-.battle-area {
+.enemy-area {
     flex: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-top: 40px;
+}
+
+.player-area {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-bottom: 40px;
 }
 
 .hp-bar {
     width: 200px;
-    height: 25px;
+    height: 20px;
     background: #333;
-    border: 3px solid #fff;
-    border-radius: 12px;
+    border: 2px solid #fff;
+    border-radius: 10px;
     overflow: hidden;
-    margin: 5px 0;
-    box-shadow: 2px 2px 0 #000;
+    margin: 10px 0;
 }
 
 .hp-fill {
@@ -178,31 +174,28 @@ canvas {
 }
 
 .battle-menu {
-    background: rgba(0, 0, 0, 0.9);
-    border: 4px solid #fff;
-    border-radius: 15px;
-    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #fff;
+    border-radius: 10px;
+    padding: 15px;
     margin-top: 20px;
     display: none;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    max-width: 400px;
+    gap: 10px;
+    max-width: 300px;
     align-self: center;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
 }
 
 .battle-menu button {
     background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
     color: white;
     border: none;
-    padding: 15px;
-    border-radius: 10px;
+    padding: 12px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.2s;
     font-weight: bold;
-    text-shadow: 2px 2px 0 #000;
-    font-family: inherit;
 }
 
 .battle-menu button:hover {
@@ -211,20 +204,18 @@ canvas {
 }
 
 #battleLog {
-    background: rgba(0, 0, 0, 0.8);
-    border: 4px solid #fff;
-    border-radius: 15px;
-    padding: 20px;
-    margin: 20px;
-    min-height: 80px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 20px 0;
+    min-height: 60px;
     font-size: 18px;
     color: #fff;
-    text-shadow: 2px 2px 0 #000;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
 /* Dialog Box */
@@ -234,48 +225,45 @@ canvas {
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
-    max-width: 700px;
-    background: rgba(0, 0, 0, 0.95);
-    border: 6px solid #fff;
-    border-radius: 20px;
-    padding: 25px;
+    max-width: 600px;
+    background: rgba(0, 0, 0, 0.9);
+    border: 3px solid #fff;
+    border-radius: 15px;
+    padding: 20px;
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     z-index: 2000;
     display: none;
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
 }
 
 #dialogText {
-    margin-bottom: 20px;
-    min-height: 80px;
-    line-height: 1.6;
+    margin-bottom: 15px;
+    min-height: 60px;
+    line-height: 1.5;
 }
 
 #dialogOptions {
     display: flex;
-    gap: 15px;
+    gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .dialog-option {
-    background: linear-gradient(to bottom, #ff4444, #cc0000);
+    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
     color: white;
     border: none;
-    padding: 12px 25px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 140px;
-    font-family: inherit;
-    text-shadow: 2px 2px 0 #000;
+    min-width: 120px;
 }
 
 .dialog-option:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 15px #ff4444;
+    background: linear-gradient(to bottom, #5a9cf2, #3c7cd0);
+    transform: translateY(-2px);
 }
 
 /* Starter Selection */
@@ -285,65 +273,63 @@ canvas {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
-    max-width: 600px;
+    max-width: 500px;
     background: rgba(0, 0, 0, 0.95);
-    border: 8px solid #ffd700;
-    border-radius: 25px;
-    padding: 40px;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    padding: 30px;
     color: white;
     z-index: 3000;
     display: none;
     text-align: center;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
 }
 
 .starter-title {
     color: #ffd700;
     font-size: 28px;
     margin-bottom: 20px;
-    text-shadow: 2px 2px 0 #000;
 }
 
 .starter-options {
     display: flex;
     justify-content: center;
-    gap: 25px;
-    margin: 40px 0;
+    gap: 20px;
+    margin: 30px 0;
     flex-wrap: wrap;
 }
 
 .starter-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 25px;
+    border-radius: 15px;
+    padding: 20px;
     cursor: pointer;
     transition: all 0.3s;
-    width: 160px;
-    border: 4px solid transparent;
+    width: 120px;
+    border: 2px solid transparent;
 }
 
 .starter-card:hover {
-    transform: translateY(-15px) scale(1.05);
+    transform: translateY(-10px);
     background: rgba(255, 255, 255, 0.2);
     border-color: #fff;
 }
 
 .starter-card.selected {
     border-color: #ffd700;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.7);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
 .starter-name {
-    font-size: 22px;
-    margin: 15px 0;
+    font-size: 20px;
+    margin: 10px 0;
     font-weight: bold;
 }
 
 /* Animation for attacks */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-15px); }
-    75% { transform: translateX(15px); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
 }
 
 @keyframes flash {
@@ -353,33 +339,38 @@ canvas {
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-30px); }
+    50% { transform: translateY(-10px); }
 }
 
 .shake { animation: shake 0.3s; }
 .flash { animation: flash 0.3s; }
 .float { animation: float 2s infinite; }
-.bounce { animation: bounce 0.5s; }
 
 /* HUD */
 #hud {
     position: fixed;
     top: 20px;
     left: 20px;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 15px 20px;
-    border-radius: 15px;
-    border: 4px solid #fff;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 2px solid #fff;
     font-size: 14px;
     z-index: 50;
-    max-width: 220px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.enemy-info, .player-info {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+.battle-sprite {
+    width: 100px;
+    height: 100px;
+    margin: 0 20px;
 }
 
 /* Inventory */
@@ -389,12 +380,12 @@ canvas {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
-    max-width: 800px;
-    max-height: 85vh;
+    max-width: 700px;
+    max-height: 80vh;
     background: rgba(0, 0, 0, 0.95);
-    border: 6px solid #fff;
-    border-radius: 25px;
-    padding: 30px;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    padding: 20px;
     color: white;
     z-index: 4000;
     display: none;
@@ -403,51 +394,46 @@ canvas {
 
 .inventory-title {
     color: #ffd700;
-    font-size: 28px;
+    font-size: 24px;
     text-align: center;
-    margin-bottom: 30px;
-    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 20px;
 }
 
 .inventory-tabs {
     display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 10px;
+    margin-bottom: 20px;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
 .inventory-tab {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    padding: 12px 25px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: all 0.2s;
-    font-family: inherit;
 }
 
 .inventory-tab.active {
-    background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
+    background: #4a90e2;
 }
 
 .pokemon-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .pokemon-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 15px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    border: 3px solid transparent;
 }
 
 .pokemon-card:hover {
@@ -456,40 +442,35 @@ canvas {
 }
 
 .pokemon-card.active {
-    border-color: #ffd700;
+    border: 2px solid #ffd700;
     background: rgba(255, 215, 0, 0.1);
-}
-
-.pokemon-card h4 {
-    margin: 10px 0 5px 0;
-    font-size: 18px;
 }
 
 .item-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .item-card {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 15px;
     text-align: center;
 }
 
 .shop-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .shop-item {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 15px;
     text-align: center;
 }
 
@@ -497,17 +478,16 @@ canvas {
     background: linear-gradient(to bottom, #4a90e2, #2c6cb0);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 8px 15px;
+    border-radius: 6px;
     cursor: pointer;
-    margin-top: 15px;
+    margin-top: 10px;
     width: 100%;
-    font-family: inherit;
 }
 
 .sell-btn {
     background: linear-gradient(to bottom, #ff6b6b, #cc4444) !important;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 /* Controls */
@@ -517,75 +497,28 @@ canvas {
     right: 30px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     z-index: 100;
 }
 
 .control-btn {
-    background: rgba(0, 0, 0, 0.6);
-    border: 4px solid rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     color: white;
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 24px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .control-btn:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.7);
     transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-}
-
-/* Level up animation */
-@keyframes levelUp {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.8); opacity: 0.8; }
-}
-
-.level-up {
-    animation: levelUp 0.5s;
-}
-
-/* Arena UI */
-.arena-team {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.arena-pokemon {
-    width: 100px;
-    height: 100px;
-    position: relative;
-}
-
-.arena-pokemon.active {
-    border: 4px solid #ffd700;
-    border-radius: 20px;
-    box-shadow: 0 0 20px #ffd700;
-}
-
-.arena-hp {
-    position: absolute;
-    bottom: -25px;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 12px;
-    color: white;
-    text-shadow: 1px 1px 0 #000;
-}
-
-/* Font */
-@font-face {
-    font-family: 'Pokemon GB';
-    src: url('https://fonts.cdnfonts.com/s/14166/Pokemon GB.woff') format('woff');
 }
 </style>
 </head>
@@ -601,10 +534,9 @@ canvas {
         <div class="login-title">POKÉMON ADVENTURE</div>
         <input type="text" id="username" class="login-input" placeholder="Enter Trainer Name" maxlength="12">
         <div style="margin: 20px 0;">
-            <button class="login-btn" onclick="login()">CONTINUE ADVENTURE</button>
+            <button class="login-btn" onclick="loadGame()">CONTINUE</button>
             <button class="login-btn new-game-btn" onclick="newGame()">NEW GAME</button>
         </div>
-        <div id="saveSlots" style="margin-top: 20px; max-height: 200px; overflow-y: auto;"></div>
     </div>
 </div>
 
@@ -620,22 +552,19 @@ canvas {
     <p>Select your first Pokémon to begin your journey.</p>
     <div class="starter-options">
         <div class="starter-card" onclick="selectStarter('bulbasaur')" data-type="bulbasaur">
-            <div style="width:80px;height:80px;margin:0 auto;background:#78c850;border-radius:50%;border:4px solid #fff;"></div>
-            <div class="starter-name" style="color: #78c850">BULBASAUR</div>
-            <div class="starter-type">GRASS/POISON</div>
+            <div class="starter-name" style="color: #78c850">Bulbasaur</div>
+            <div class="starter-type">Grass/Poison</div>
         </div>
         <div class="starter-card" onclick="selectStarter('charmander')" data-type="charmander">
-            <div style="width:80px;height:80px;margin:0 auto;background:#f08030;border-radius:50%;border:4px solid #fff;"></div>
-            <div class="starter-name" style="color: #f08030">CHARMANDER</div>
-            <div class="starter-type">FIRE</div>
+            <div class="starter-name" style="color: #f08030">Charmander</div>
+            <div class="starter-type">Fire</div>
         </div>
         <div class="starter-card" onclick="selectStarter('squirtle')" data-type="squirtle">
-            <div style="width:80px;height:80px;margin:0 auto;background:#6890f0;border-radius:50%;border:4px solid #fff;"></div>
-            <div class="starter-name" style="color: #6890f0">SQUIRTLE</div>
-            <div class="starter-type">WATER</div>
+            <div class="starter-name" style="color: #6890f0">Squirtle</div>
+            <div class="starter-type">Water</div>
         </div>
     </div>
-    <button onclick="confirmStarter()" style="margin-top: 20px; padding: 15px 40px; font-size: 20px;">START ADVENTURE!</button>
+    <button onclick="confirmStarter()" style="margin-top: 20px; padding: 10px 30px; font-size: 18px;">START ADVENTURE!</button>
 </div>
 
 <!-- Dialog Box -->
@@ -655,35 +584,49 @@ canvas {
     
     <div id="pokemonTab" class="inventory-content active">
         <div class="pokemon-grid" id="pokemonGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 30px; padding: 15px; width: 100%; font-size: 18px;">CLOSE</button>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
     </div>
     
     <div id="itemsTab" class="inventory-content">
         <div class="item-grid" id="itemGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 30px; padding: 15px; width: 100%; font-size: 18px;">CLOSE</button>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
     </div>
     
     <div id="shopTab" class="inventory-content">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h3 style="color:#ffd700;">POKÉMON CENTER SHOP</h3>
-            <p style="font-size: 20px;">COINS: <span id="coinCount">100</span> <span style="color: gold">🪙</span></p>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h3>POKÉMON CENTER SHOP</h3>
+            <p>COINS: <span id="coinCount">100</span> <span style="color: gold">🪙</span></p>
         </div>
         <div class="shop-grid" id="shopGrid"></div>
-        <button onclick="closeInventory()" style="margin-top: 30px; padding: 15px; width: 100%; font-size: 18px;">CLOSE</button>
+        <button onclick="closeInventory()" style="margin-top: 20px; padding: 10px 20px; width: 100%;">CLOSE</button>
     </div>
 </div>
 
 <!-- Battle UI -->
 <div id="battle">
     <div class="battle-container">
-        <div class="battle-area" style="height: 40%;">
-            <div id="enemyTeam" class="arena-team"></div>
+        <div class="enemy-area">
+            <div class="enemy-info">
+                <h2 id="enemyName">Wild Pokémon</h2>
+                <div class="hp-bar">
+                    <div id="enemyHPFill" class="hp-fill"></div>
+                </div>
+                <div id="enemyHPText">HP: 20/20</div>
+            </div>
+            <div id="enemySprite" class="battle-sprite"></div>
         </div>
         
-        <div id="battleLog">A WILD POKÉMON APPEARED!</div>
+        <div id="battleLog">A wild Pokémon appeared!</div>
         
-        <div class="battle-area" style="height: 40%;">
-            <div id="playerTeam" class="arena-team"></div>
+        <div class="player-area">
+            <div id="playerSprite" class="battle-sprite"></div>
+            <div class="player-info">
+                <h2 id="playerPokemonName">Bulbasaur</h2>
+                <div class="hp-bar">
+                    <div id="playerHPFill" class="hp-fill"></div>
+                </div>
+                <div id="playerHPText">HP: 30/30</div>
+            </div>
         </div>
         
         <div class="battle-menu" id="battleMenu">
@@ -693,17 +636,23 @@ canvas {
             <button onclick="run()">RUN</button>
         </div>
         
-        <div class="battle-menu" id="attackMenu" style="display: none;"></div>
+        <div class="battle-menu" id="attackMenu" style="display: none;">
+            <button class="attack-btn" onclick="useAttack(0)">Tackle</button>
+            <button class="attack-btn" onclick="useAttack(1)">Growl</button>
+            <button class="attack-btn" onclick="useAttack(2)">Vine Whip</button>
+            <button class="attack-btn" onclick="useAttack(3)">Leech Seed</button>
+            <button class="back-btn" onclick="showBattleMenu()">Back</button>
+        </div>
+        
         <div class="battle-menu" id="pokemonMenu" style="display: none;"></div>
         <div class="battle-menu" id="itemMenu" style="display: none;"></div>
     </div>
 </div>
 
 <script>
-// Initialize canvas with pixel art style
+// Initialize canvas
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false;
 
 // Set canvas size
 function resizeCanvas() {
@@ -713,12 +662,9 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// Game constants - Pixel art style
-const TILE = 32;
-const GRASS_TILES = [
-    '#5dbb63', '#57a773', '#4a9c5f', 
-    '#6fcf97', '#5dbb63', '#57a773'
-];
+// Game constants
+const TILE = 64;
+const GRASS_COLORS = ['#5dbb63', '#6fcf97', '#57a773'];
 
 // Game state
 let world = "outside";
@@ -732,10 +678,6 @@ let coins = 100;
 let playerName = "";
 let currentSaveSlot = "";
 
-// Game settings
-const MAX_POKEMON = 6;
-const ARENA_REQUIREMENT = 3;
-
 // Player inventory
 let inventory = {
     pokemon: [],
@@ -747,35 +689,25 @@ let inventory = {
     }
 };
 
-// Player data
+// Player
 const player = {
     x: 0,
     y: 0,
-    speed: 2,
+    size: 24,
+    speed: 3,
     direction: 0,
-    animationFrame: 0,
-    spriteX: 0,
-    spriteY: 0
+    animationFrame: 0
 };
 
 // Camera
 const cam = { x: 0, y: 0 };
 
-// Buildings data
-const buildings = [
-    { x: 320, y: 0, type: "house", width: 64, height: 48 },
-    { x: -320, y: 0, type: "center", width: 80, height: 48 },
-    { x: 0, y: -320, type: "arena", width: 96, height: 64 },
-    { x: 320, y: -320, type: "gym", width: 80, height: 56 },
-    { x: -320, y: -320, type: "shop", width: 72, height: 48 }
-];
-
-// Pokémon data with Gen 1-2 style
+// Pokémon data
 const pokemonData = {
     bulbasaur: {
         id: "bulbasaur",
-        name: "BULBASAUR",
-        type: "GRASS/POISON",
+        name: "Bulbasaur",
+        type: "Grass/Poison",
         color: "#78c850",
         hp: 30,
         maxHp: 30,
@@ -783,18 +715,18 @@ const pokemonData = {
         exp: 0,
         expToNext: 50,
         attacks: [
-            { name: "TACKLE", damage: 4, type: "NORMAL", pp: 35 },
-            { name: "GROWL", damage: 0, type: "STATUS", effect: "attackDown", pp: 40 },
-            { name: "VINE WHIP", damage: 7, type: "GRASS", pp: 25 },
-            { name: "LEECH SEED", damage: 2, type: "GRASS", effect: "drain", pp: 10 }
+            { name: "Tackle", damage: 4, type: "Normal" },
+            { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
+            { name: "Vine Whip", damage: 7, type: "Grass" },
+            { name: "Leech Seed", damage: 2, type: "Grass", effect: "drain" }
         ],
         spriteColor: "#78c850",
         price: 50
     },
     charmander: {
         id: "charmander",
-        name: "CHARMANDER",
-        type: "FIRE",
+        name: "Charmander",
+        type: "Fire",
         color: "#f08030",
         hp: 28,
         maxHp: 28,
@@ -802,18 +734,18 @@ const pokemonData = {
         exp: 0,
         expToNext: 50,
         attacks: [
-            { name: "SCRATCH", damage: 4, type: "NORMAL", pp: 35 },
-            { name: "GROWL", damage: 0, type: "STATUS", effect: "attackDown", pp: 40 },
-            { name: "EMBER", damage: 7, type: "FIRE", pp: 25 },
-            { name: "SMOKESCREEN", damage: 0, type: "STATUS", effect: "accuracyDown", pp: 20 }
+            { name: "Scratch", damage: 4, type: "Normal" },
+            { name: "Growl", damage: 0, type: "Status", effect: "attackDown" },
+            { name: "Ember", damage: 7, type: "Fire" },
+            { name: "Smokescreen", damage: 0, type: "Status", effect: "accuracyDown" }
         ],
         spriteColor: "#f08030",
         price: 50
     },
     squirtle: {
         id: "squirtle",
-        name: "SQUIRTLE",
-        type: "WATER",
+        name: "Squirtle",
+        type: "Water",
         color: "#6890f0",
         hp: 32,
         maxHp: 32,
@@ -821,10 +753,10 @@ const pokemonData = {
         exp: 0,
         expToNext: 50,
         attacks: [
-            { name: "TACKLE", damage: 4, type: "NORMAL", pp: 35 },
-            { name: "TAIL WHIP", damage: 0, type: "STATUS", effect: "defenseDown", pp: 30 },
-            { name: "WATER GUN", damage: 7, type: "WATER", pp: 25 },
-            { name: "WITHDRAW", damage: 0, type: "STATUS", effect: "defenseUp", pp: 40 }
+            { name: "Tackle", damage: 4, type: "Normal" },
+            { name: "Tail Whip", damage: 0, type: "Status", effect: "defenseDown" },
+            { name: "Water Gun", damage: 7, type: "Water" },
+            { name: "Withdraw", damage: 0, type: "Status", effect: "defenseUp" }
         ],
         spriteColor: "#6890f0",
         price: 50
@@ -832,8 +764,8 @@ const pokemonData = {
     // Wild Pokémon
     pikachu: {
         id: "pikachu",
-        name: "PIKACHU",
-        type: "ELECTRIC",
+        name: "Pikachu",
+        type: "Electric",
         color: "#ffd700",
         hp: 25,
         maxHp: 25,
@@ -841,16 +773,16 @@ const pokemonData = {
         exp: 0,
         expToNext: 40,
         attacks: [
-            { name: "THUNDERSHOCK", damage: 6, type: "ELECTRIC", pp: 30 },
-            { name: "QUICK ATTACK", damage: 4, type: "NORMAL", pp: 30 }
+            { name: "Thunder Shock", damage: 6, type: "Electric" },
+            { name: "Quick Attack", damage: 4, type: "Normal" }
         ],
         spriteColor: "#ffd700",
         price: 40
     },
     rattata: {
         id: "rattata",
-        name: "RATTATA",
-        type: "NORMAL",
+        name: "Rattata",
+        type: "Normal",
         color: "#a8a878",
         hp: 22,
         maxHp: 22,
@@ -858,16 +790,16 @@ const pokemonData = {
         exp: 0,
         expToNext: 30,
         attacks: [
-            { name: "TACKLE", damage: 4, type: "NORMAL", pp: 35 },
-            { name: "QUICK ATTACK", damage: 4, type: "NORMAL", pp: 30 }
+            { name: "Tackle", damage: 4, type: "Normal" },
+            { name: "Quick Attack", damage: 4, type: "Normal" }
         ],
         spriteColor: "#a8a878",
         price: 30
     },
     pidgey: {
         id: "pidgey",
-        name: "PIDGEY",
-        type: "NORMAL/FLYING",
+        name: "Pidgey",
+        type: "Normal/Flying",
         color: "#a890f0",
         hp: 24,
         maxHp: 24,
@@ -875,142 +807,77 @@ const pokemonData = {
         exp: 0,
         expToNext: 30,
         attacks: [
-            { name: "GUST", damage: 5, type: "FLYING", pp: 35 },
-            { name: "SAND ATTACK", damage: 0, type: "STATUS", effect: "accuracyDown", pp: 15 }
+            { name: "Gust", damage: 5, type: "Flying" },
+            { name: "Sand Attack", damage: 0, type: "Status", effect: "accuracyDown" }
         ],
         spriteColor: "#a890f0",
         price: 30
-    },
-    geodude: {
-        id: "geodude",
-        name: "GEODUDE",
-        type: "ROCK/GROUND",
-        color: "#b8a038",
-        hp: 26,
-        maxHp: 26,
-        level: 4,
-        attacks: [
-            { name: "TACKLE", damage: 4, type: "NORMAL", pp: 35 },
-            { name: "ROCK THROW", damage: 5, type: "ROCK", pp: 15 }
-        ],
-        price: 35
-    },
-    abra: {
-        id: "abra",
-        name: "ABRA",
-        type: "PSYCHIC",
-        color: "#f85888",
-        hp: 20,
-        maxHp: 20,
-        level: 5,
-        attacks: [
-            { name: "TELEPORT", damage: 0, type: "PSYCHIC", pp: 20 }
-        ],
-        price: 45
-    },
-    magikarp: {
-        id: "magikarp",
-        name: "MAGIKARP",
-        type: "WATER",
-        color: "#ee99ac",
-        hp: 15,
-        maxHp: 15,
-        level: 2,
-        attacks: [
-            { name: "SPLASH", damage: 0, type: "NORMAL", pp: 40 }
-        ],
-        price: 20
     }
 };
 
-// Save/Load System
-function loadSaveSlots() {
-    const saveSlots = document.getElementById('saveSlots');
-    saveSlots.innerHTML = '';
-    
-    for (let i = 1; i <= 3; i++) {
-        const saveData = localStorage.getItem(`pokemon_save_${i}`);
-        if (saveData) {
-            const data = JSON.parse(saveData);
-            const slot = document.createElement('div');
-            slot.style.cssText = `
-                background: rgba(255,255,255,0.1);
-                padding: 10px;
-                margin: 5px 0;
-                border-radius: 10px;
-                cursor: pointer;
-                border: 2px solid #4a90e2;
-            `;
-            slot.innerHTML = `
-                <strong>Slot ${i}:</strong> ${data.playerName || 'Trainer'}<br>
-                Pokémon: ${data.inventory?.pokemon?.length || 0}/6
-            `;
-            slot.onclick = () => loadGame(i);
-            saveSlots.appendChild(slot);
-        }
+// Terrain details
+const terrainDetails = [];
+for(let i = 0; i < 50; i++) {
+    terrainDetails.push({
+        x: Math.random() * 1200 - 600,
+        y: Math.random() * 1200 - 600,
+        type: Math.random() > 0.5 ? 'flower' : 'bush',
+        color: ['#ff6b9d', '#ffd166', '#06d6a0', '#118ab2'][Math.floor(Math.random() * 4)],
+        size: Math.random() * 8 + 4
+    });
+}
+
+// Buildings
+const buildings = [
+    { x: 300, y: 0, type: "house", width: 80, height: 60 },
+    { x: -300, y: 0, type: "center", width: 100, height: 60 }
+];
+
+// Battle system
+let enemyPokemon = null;
+let battleState = "menu";
+
+// Login and Save System
+function loadGame() {
+    playerName = document.getElementById("username").value.trim() || "Trainer";
+    if (!playerName) {
+        alert("Please enter a trainer name!");
+        return;
     }
-}
-
-function saveGame() {
-    if (!currentSaveSlot) return;
     
-    const saveData = {
-        playerName: playerName,
-        world: world,
-        playerX: player.x,
-        playerY: player.y,
-        inventory: inventory,
-        playerPokemon: playerPokemon,
-        coins: coins,
-        starterChosen: starterChosen,
-        timestamp: Date.now()
-    };
-    
-    localStorage.setItem(`pokemon_save_${currentSaveSlot}`, JSON.stringify(saveData));
-    showDialog("GAME SAVED!");
-}
-
-function loadGame(slot) {
-    const saveData = localStorage.getItem(`pokemon_save_${slot}`);
-    if (!saveData) return;
-    
-    const data = JSON.parse(saveData);
-    
-    playerName = data.playerName;
-    world = data.world || "outside";
-    player.x = data.playerX || 0;
-    player.y = data.playerY || 0;
-    inventory = data.inventory || { pokemon: [], items: { potions: 3, pokeballs: 5 } };
-    playerPokemon = data.playerPokemon;
-    coins = data.coins || 100;
-    starterChosen = data.starterChosen || false;
-    currentSaveSlot = slot;
-    
-    document.getElementById('loginScreen').style.display = 'none';
-    updateHUD();
-    
-    if (!starterChosen) {
-        document.getElementById('starterSelection').style.display = 'block';
+    // Check for existing save
+    const saveData = localStorage.getItem(`pokemon_save_${playerName}`);
+    if (saveData) {
+        const data = JSON.parse(saveData);
+        
+        playerName = data.playerName;
+        world = data.world || "outside";
+        player.x = data.playerX || 0;
+        player.y = data.playerY || 0;
+        inventory = data.inventory || { pokemon: [], items: { potions: 3, pokeballs: 5 } };
+        playerPokemon = data.playerPokemon;
+        coins = data.coins || 100;
+        starterChosen = data.starterChosen || false;
+        
+        document.getElementById('loginScreen').style.display = 'none';
+        updateHUD();
+        
+        if (!starterChosen) {
+            document.getElementById('starterSelection').style.display = 'block';
+        } else {
+            showDialog(`Welcome back, ${playerName}!`);
+        }
     } else {
-        showDialog(`WELCOME BACK, ${playerName}!`);
+        alert("No save found for this name. Start a new game!");
     }
 }
 
 function newGame() {
-    playerName = document.getElementById('username').value.trim() || "TRAINER";
+    playerName = document.getElementById("username").value.trim() || "Trainer";
     if (!playerName) {
-        alert("PLEASE ENTER A TRAINER NAME!");
+        alert("Please enter a trainer name!");
         return;
     }
-    
-    // Ask for save slot
-    const slot = prompt("CHOOSE SAVE SLOT (1, 2, OR 3):");
-    if (!['1', '2', '3'].includes(slot)) {
-        alert("PLEASE CHOOSE A VALID SLOT (1, 2, OR 3)!");
-        return;
-    }
-    
-    currentSaveSlot = slot;
     
     // Reset game state
     world = "outside";
@@ -1027,42 +894,31 @@ function newGame() {
     document.getElementById('starterSelection').style.display = 'block';
 }
 
-function login() {
-    playerName = document.getElementById('username').value.trim() || "TRAINER";
-    if (!playerName) {
-        alert("PLEASE ENTER A TRAINER NAME!");
-        return;
-    }
+function saveGame() {
+    const saveData = {
+        playerName: playerName,
+        world: world,
+        playerX: player.x,
+        playerY: player.y,
+        inventory: inventory,
+        playerPokemon: playerPokemon,
+        coins: coins,
+        starterChosen: starterChosen,
+        timestamp: Date.now()
+    };
     
-    // Check if any save exists
-    let hasSave = false;
-    for (let i = 1; i <= 3; i++) {
-        if (localStorage.getItem(`pokemon_save_${i}`)) {
-            hasSave = true;
-            break;
-        }
-    }
-    
-    if (!hasSave) {
-        alert("NO SAVE FOUND! START A NEW GAME.");
-        return;
-    }
-    
-    // Show save slots
-    loadSaveSlots();
+    localStorage.setItem(`pokemon_save_${playerName}`, JSON.stringify(saveData));
+    showDialog("Game saved!");
 }
-
-// Initialize save slots on load
-window.addEventListener('load', loadSaveSlots);
 
 // Auto-save every 30 seconds
 setInterval(() => {
-    if (currentSaveSlot && starterChosen) {
+    if (starterChosen) {
         saveGame();
     }
 }, 30000);
 
-// Joystick controls
+// Joystick
 let joyX = 0, joyY = 0, drag = false;
 const base = document.getElementById("joyBase");
 const stick = document.getElementById("joy");
@@ -1096,11 +952,11 @@ function updateJoy(e) {
     const rect = base.getBoundingClientRect();
     const touch = e.touches ? e.touches[0] : e;
     
-    let x = touch.clientX - rect.left - 60;
-    let y = touch.clientY - rect.top - 60;
+    let x = touch.clientX - rect.left - 50;
+    let y = touch.clientY - rect.top - 50;
     
     const distance = Math.sqrt(x * x + y * y);
-    const maxDistance = 60;
+    const maxDistance = 50;
     
     if (distance > maxDistance) {
         x = (x / distance) * maxDistance;
@@ -1120,59 +976,711 @@ function updateJoy(e) {
     }
 }
 
-// Drawing functions with pixel art style
-function drawPixelArtTile(x, y, color, pattern = 0) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, TILE, TILE);
+// Dialog System
+function showDialog(text, options = []) {
+    inDialog = true;
+    document.getElementById("dialogText").textContent = text;
+    const optionsDiv = document.getElementById("dialogOptions");
+    optionsDiv.innerHTML = '';
     
-    // Add pattern for visual interest
-    ctx.fillStyle = pattern === 0 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-    for(let i = 0; i < TILE; i += 4) {
-        for(let j = 0; j < TILE; j += 4) {
-            if((i + j) % 8 === pattern * 4) {
-                ctx.fillRect(x + i, y + j, 2, 2);
-            }
-        }
+    if (options.length === 0) {
+        const continueBtn = document.createElement("button");
+        continueBtn.className = "dialog-option";
+        continueBtn.textContent = "Continue";
+        continueBtn.onclick = closeDialog;
+        optionsDiv.appendChild(continueBtn);
+    } else {
+        options.forEach(option => {
+            const btn = document.createElement("button");
+            btn.className = "dialog-option";
+            btn.textContent = option.text;
+            btn.onclick = option.action;
+            optionsDiv.appendChild(btn);
+        });
+    }
+    
+    document.getElementById("dialogBox").style.display = "block";
+}
+
+function closeDialog() {
+    inDialog = false;
+    document.getElementById("dialogBox").style.display = "none";
+}
+
+// Inventory System
+function toggleInventory() {
+    if (inBattle || inDialog || !starterChosen) return;
+    
+    inInventory = !inInventory;
+    if (inInventory) {
+        updateInventory();
+        document.getElementById("inventory").style.display = "block";
+    } else {
+        document.getElementById("inventory").style.display = "none";
     }
 }
 
-function drawPlayer() {
-    ctx.save();
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+function closeInventory() {
+    inInventory = false;
+    document.getElementById("inventory").style.display = "none";
+}
+
+function showInventoryTab(tabName) {
+    document.querySelectorAll('.inventory-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.inventory-content').forEach(content => {
+        content.classList.remove('active');
+    });
     
-    // Draw trainer sprite (pixel art style)
-    const spriteSize = 24;
-    const offsetX = centerX - spriteSize / 2;
-    const offsetY = centerY - spriteSize / 2;
+    document.querySelector(`button[onclick="showInventoryTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`${tabName}Tab`).classList.add('active');
     
-    // Body (red jacket)
-    ctx.fillStyle = '#ff4444';
-    ctx.fillRect(offsetX + 4, offsetY + 4, 16, 16);
+    if (tabName === 'pokemon') {
+        updatePokemonTab();
+    } else if (tabName === 'items') {
+        updateItemsTab();
+    } else if (tabName === 'shop') {
+        updateShopTab();
+    }
+}
+
+function updateInventory() {
+    updatePokemonTab();
+    updateItemsTab();
+    updateShopTab();
+}
+
+function updatePokemonTab() {
+    const pokemonGrid = document.getElementById("pokemonGrid");
+    pokemonGrid.innerHTML = '';
     
-    // Pants (blue)
-    ctx.fillStyle = '#2c8bff';
-    ctx.fillRect(offsetX + 4, offsetY + 20, 16, 8);
+    const pokemonTab = document.querySelector('button[onclick="showInventoryTab(\'pokemon\')"]');
+    pokemonTab.textContent = `POKÉMON (${inventory.pokemon.length})`;
     
-    // Head
-    ctx.fillStyle = '#ffcc99';
-    ctx.fillRect(offsetX + 8, offsetY, 8, 8);
+    inventory.pokemon.forEach((pokemon, index) => {
+        const card = document.createElement("div");
+        card.className = "pokemon-card";
+        if (pokemon === playerPokemon) {
+            card.classList.add("active");
+        }
+        
+        card.innerHTML = `
+            <h4 style="color: ${pokemon.color}">${pokemon.name}</h4>
+            <p>Lv. ${pokemon.level}</p>
+            <p>HP: ${pokemon.hp}/${pokemon.maxHp}</p>
+            <p>Type: ${pokemon.type}</p>
+            <button class="sell-btn" onclick="sellPokemon(${index})" ${pokemon === playerPokemon ? 'disabled' : ''}>Sell for ${Math.floor(pokemon.price * 0.7)} coins</button>
+        `;
+        
+        card.onclick = () => selectActivePokemon(index);
+        pokemonGrid.appendChild(card);
+    });
+}
+
+function updateItemsTab() {
+    const itemGrid = document.getElementById("itemGrid");
+    itemGrid.innerHTML = `
+        <div class="item-card">
+            <h4>Pokéballs</h4>
+            <p>${inventory.items.pokeballs}</p>
+            <p>Catch wild Pokémon</p>
+        </div>
+        <div class="item-card">
+            <h4>Great Balls</h4>
+            <p>${inventory.items.greatBalls}</p>
+            <p>Better catch rate</p>
+        </div>
+        <div class="item-card">
+            <h4>Potions</h4>
+            <p>${inventory.items.potions}</p>
+            <p>Heals 20 HP</p>
+        </div>
+        <div class="item-card">
+            <h4>Super Potions</h4>
+            <p>${inventory.items.superPotions}</p>
+            <p>Heals 50 HP</p>
+        </div>
+    `;
+}
+
+function updateShopTab() {
+    document.getElementById("coinCount").textContent = coins;
     
-    // Hat (red)
-    ctx.fillStyle = '#ff4444';
-    ctx.fillRect(offsetX + 6, offsetY - 4, 12, 6);
+    const shopGrid = document.getElementById("shopGrid");
+    shopGrid.innerHTML = `
+        <div class="shop-item">
+            <h4>Pokéball</h4>
+            <p>Price: 20 coins</p>
+            <p>Catch wild Pokémon</p>
+            <button onclick="buyItem('pokeball')" ${coins < 20 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Great Ball</h4>
+            <p>Price: 50 coins</p>
+            <p>Better catch rate</p>
+            <button onclick="buyItem('greatball')" ${coins < 50 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Potion</h4>
+            <p>Price: 30 coins</p>
+            <p>Heals 20 HP</p>
+            <button onclick="buyItem('potion')" ${coins < 30 ? 'disabled' : ''}>Buy</button>
+        </div>
+        <div class="shop-item">
+            <h4>Super Potion</h4>
+            <p>Price: 70 coins</p>
+            <p>Heals 50 HP</p>
+            <button onclick="buyItem('superpotion')" ${coins < 70 ? 'disabled' : ''}>Buy</button>
+        </div>
+    `;
+}
+
+function buyItem(itemType) {
+    const prices = {
+        pokeball: 20,
+        greatball: 50,
+        potion: 30,
+        superpotion: 70
+    };
     
-    // Walking animation
-    let legOffset = 0;
-    if ((joyX !== 0 || joyY !== 0) && !inBattle) {
-        player.animationFrame = (player.animationFrame + 0.1) % 8;
-        legOffset = Math.sin(player.animationFrame) * 2;
+    if (coins >= prices[itemType]) {
+        coins -= prices[itemType];
+        
+        switch(itemType) {
+            case 'pokeball':
+                inventory.items.pokeballs++;
+                break;
+            case 'greatball':
+                inventory.items.greatBalls++;
+                break;
+            case 'potion':
+                inventory.items.potions++;
+                break;
+            case 'superpotion':
+                inventory.items.superPotions++;
+                break;
+        }
+        
+        updateShopTab();
+        updateItemsTab();
+        updateHUD();
+        showDialog(`You bought a ${itemType === 'pokeball' ? 'Pokéball' : 
+                    itemType === 'greatball' ? 'Great Ball' : 
+                    itemType === 'potion' ? 'Potion' : 'Super Potion'}!`);
+    }
+}
+
+function sellPokemon(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    const pokemon = inventory.pokemon[index];
+    const sellPrice = Math.floor(pokemon.price * 0.7);
+    
+    coins += sellPrice;
+    inventory.pokemon.splice(index, 1);
+    
+    if (pokemon === playerPokemon) {
+        if (inventory.pokemon.length > 0) {
+            playerPokemon = inventory.pokemon[0];
+        } else {
+            playerPokemon = null;
+            showDialog("You have no Pokémon left!");
+        }
     }
     
-    // Legs
+    updateInventory();
+    updateHUD();
+    showDialog(`You sold ${pokemon.name} for ${sellPrice} coins!`);
+}
+
+function selectActivePokemon(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    playerPokemon = inventory.pokemon[index];
+    updateInventory();
+    updateHUD();
+    showDialog(`${playerPokemon.name} is now your active Pokémon!`);
+}
+
+function switchPokemon() {
+    if (inBattle || inDialog || !starterChosen) return;
+    
+    if (inventory.pokemon.length <= 1) {
+        showDialog("You only have one Pokémon!");
+        return;
+    }
+    
+    const options = inventory.pokemon.map((pokemon, index) => ({
+        text: `${pokemon.name} (Lv. ${pokemon.level})`,
+        action: () => {
+            playerPokemon = pokemon;
+            closeDialog();
+            updateHUD();
+            showDialog(`${pokemon.name} is now your active Pokémon!`);
+        }
+    }));
+    
+    showDialog("Select a Pokémon to switch to:", options);
+}
+
+// Starter Selection
+let selectedStarter = null;
+
+function selectStarter(type) {
+    selectedStarter = type;
+    document.querySelectorAll('.starter-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+}
+
+function confirmStarter() {
+    if (!selectedStarter) {
+        alert("Please select a starter Pokémon!");
+        return;
+    }
+    
+    const starterData = pokemonData[selectedStarter];
+    playerPokemon = JSON.parse(JSON.stringify(starterData));
+    inventory.pokemon.push(playerPokemon);
+    
+    starterChosen = true;
+    document.getElementById("starterSelection").style.display = "none";
+    
+    showDialog(`Congratulations! You chose ${playerPokemon.name}!`, [
+        { text: "Begin!", action: () => {
+            closeDialog();
+            updateHUD();
+            showDialog(`Welcome, ${playerName}! Explore the world, catch wild Pokémon, and visit the Pokémon Center.`);
+        }}
+    ]);
+}
+
+// Battle functions
+function startBattle() {
+    const wildPokemon = Math.random();
+    if (wildPokemon < 0.33) {
+        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.pikachu));
+    } else if (wildPokemon < 0.66) {
+        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.rattata));
+    } else {
+        enemyPokemon = JSON.parse(JSON.stringify(pokemonData.pidgey));
+    }
+    
+    inBattle = true;
+    battleState = "menu";
+    
+    document.getElementById("battle").style.display = "block";
+    document.getElementById("enemyName").textContent = "Wild " + enemyPokemon.name;
+    document.getElementById("enemyName").style.color = enemyPokemon.color;
+    document.getElementById("playerPokemonName").textContent = playerPokemon.name;
+    document.getElementById("playerPokemonName").style.color = playerPokemon.color;
+    
+    updateBattleText();
+    createBattleSprites();
+    
+    setTimeout(() => {
+        showBattleMenu();
+        addBattleLog(`A wild ${enemyPokemon.name} appeared!`);
+    }, 1000);
+}
+
+function updateBattleText() {
+    const enemyPercent = Math.max(0, (enemyPokemon.hp / enemyPokemon.maxHp) * 100);
+    const playerPercent = Math.max(0, (playerPokemon.hp / playerPokemon.maxHp) * 100);
+    
+    document.getElementById("enemyHPFill").style.width = enemyPercent + "%";
+    document.getElementById("playerHPFill").style.width = playerPercent + "%";
+    
+    document.getElementById("enemyHPText").textContent = `HP: ${Math.max(0, enemyPokemon.hp)}/${enemyPokemon.maxHp}`;
+    document.getElementById("playerHPText").textContent = `HP: ${Math.max(0, playerPokemon.hp)}/${playerPokemon.maxHp}`;
+}
+
+function createBattleSprites() {
+    const enemySprite = document.getElementById("enemySprite");
+    const playerSprite = document.getElementById("playerSprite");
+    
+    enemySprite.innerHTML = '';
+    playerSprite.innerHTML = '';
+    
+    const enemyCanvas = document.createElement('canvas');
+    enemyCanvas.width = 100;
+    enemyCanvas.height = 100;
+    const enemyCtx = enemyCanvas.getContext('2d');
+    drawPokemonSprite(enemyCtx, 50, 50, enemyPokemon, 1.5);
+    enemySprite.appendChild(enemyCanvas);
+    
+    const playerCanvas = document.createElement('canvas');
+    playerCanvas.width = 100;
+    playerCanvas.height = 100;
+    const playerCtx = playerCanvas.getContext('2d');
+    drawPokemonSprite(playerCtx, 50, 50, playerPokemon, 1.5);
+    playerSprite.appendChild(playerCanvas);
+}
+
+function drawPokemonSprite(ctx, x, y, pokemon, scale = 1) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    
+    switch(pokemon.name) {
+        case "Bulbasaur":
+            ctx.fillStyle = pokemon.spriteColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#a8e6a8";
+            ctx.beginPath();
+            ctx.arc(0, -12, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#000";
+            ctx.fillRect(-6, -3, 3, 5);
+            ctx.fillRect(3, -3, 3, 5);
+            break;
+            
+        case "Charmander":
+            ctx.fillStyle = pokemon.spriteColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#ff4444";
+            ctx.beginPath();
+            ctx.arc(15, -5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#000";
+            ctx.fillRect(-6, -3, 3, 5);
+            ctx.fillRect(3, -3, 3, 5);
+            break;
+            
+        case "Squirtle":
+            ctx.fillStyle = pokemon.spriteColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#a0522d";
+            ctx.beginPath();
+            ctx.arc(0, 0, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = "#000";
+            ctx.fillRect(-6, -3, 3, 5);
+            ctx.fillRect(3, -3, 3, 5);
+            break;
+    }
+    
+    ctx.restore();
+}
+
+function addBattleLog(message) {
+    document.getElementById("battleLog").textContent = message;
+}
+
+function showBattleMenu() {
+    battleState = "menu";
+    document.getElementById("battleMenu").style.display = "grid";
+    document.getElementById("attackMenu").style.display = "none";
+    document.getElementById("pokemonMenu").style.display = "none";
+    document.getElementById("itemMenu").style.display = "none";
+}
+
+function showAttackMenu() {
+    battleState = "attack";
+    document.getElementById("battleMenu").style.display = "none";
+    document.getElementById("attackMenu").style.display = "grid";
+}
+
+function showPokemonMenu() {
+    battleState = "pokemon";
+    document.getElementById("battleMenu").style.display = "none";
+    document.getElementById("pokemonMenu").style.display = "grid";
+    
+    const pokemonMenu = document.getElementById("pokemonMenu");
+    pokemonMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select a Pokémon to switch to:</p></div>';
+    
+    inventory.pokemon.forEach((pokemon, index) => {
+        if (pokemon.hp > 0 && pokemon !== playerPokemon) {
+            const btn = document.createElement("button");
+            btn.className = "attack-btn";
+            btn.textContent = `${pokemon.name} (HP: ${pokemon.hp}/${pokemon.maxHp})`;
+            btn.onclick = () => switchInBattle(index);
+            pokemonMenu.appendChild(btn);
+        }
+    });
+    
+    const backBtn = document.createElement("button");
+    backBtn.className = "back-btn";
+    backBtn.textContent = "Back";
+    backBtn.onclick = showBattleMenu;
+    pokemonMenu.appendChild(backBtn);
+}
+
+function showItemMenu() {
+    battleState = "item";
+    document.getElementById("battleMenu").style.display = "none";
+    document.getElementById("itemMenu").style.display = "grid";
+    
+    const itemMenu = document.getElementById("itemMenu");
+    itemMenu.innerHTML = '<div style="grid-column: span 2; text-align: center; margin-bottom: 10px;"><p>Select an item to use:</p></div>';
+    
+    if (inventory.items.potions > 0) {
+        const btn = document.createElement("button");
+        btn.className = "attack-btn";
+        btn.textContent = `Potion (${inventory.items.potions})`;
+        btn.onclick = () => useItemInBattle('potion');
+        itemMenu.appendChild(btn);
+    }
+    
+    if (inventory.items.superPotions > 0) {
+        const btn = document.createElement("button");
+        btn.className = "attack-btn";
+        btn.textContent = `Super Potion (${inventory.items.superPotions})`;
+        btn.onclick = () => useItemInBattle('superpotion');
+        itemMenu.appendChild(btn);
+    }
+    
+    const backBtn = document.createElement("button");
+    backBtn.className = "back-btn";
+    backBtn.textContent = "Back";
+    backBtn.onclick = showBattleMenu;
+    itemMenu.appendChild(backBtn);
+}
+
+function useItemInBattle(itemType) {
+    let healAmount = 0;
+    
+    switch(itemType) {
+        case 'potion':
+            if (inventory.items.potions > 0) {
+                inventory.items.potions--;
+                healAmount = 20;
+                addBattleLog(`Used a Potion!`);
+            }
+            break;
+        case 'superpotion':
+            if (inventory.items.superPotions > 0) {
+                inventory.items.superPotions--;
+                healAmount = 50;
+                addBattleLog(`Used a Super Potion!`);
+            }
+            break;
+    }
+    
+    if (healAmount > 0) {
+        playerPokemon.hp = Math.min(playerPokemon.hp + healAmount, playerPokemon.maxHp);
+        addBattleLog(`${playerPokemon.name} recovered ${healAmount} HP!`);
+        updateBattleText();
+        updateHUD();
+        updateInventory();
+        
+        setTimeout(() => enemyAttack(), 1000);
+    } else {
+        addBattleLog("No items left!");
+        showBattleMenu();
+    }
+}
+
+function switchInBattle(index) {
+    if (index < 0 || index >= inventory.pokemon.length) return;
+    
+    const newPokemon = inventory.pokemon[index];
+    if (newPokemon.hp <= 0) {
+        addBattleLog(`${newPokemon.name} has no HP left!`);
+        return;
+    }
+    
+    addBattleLog(`Come back, ${playerPokemon.name}!`);
+    addBattleLog(`Go, ${newPokemon.name}!`);
+    
+    playerPokemon = newPokemon;
+    document.getElementById("playerPokemonName").textContent = playerPokemon.name;
+    document.getElementById("playerPokemonName").style.color = playerPokemon.color;
+    
+    createBattleSprites();
+    updateBattleText();
+    updateHUD();
+    
+    setTimeout(() => {
+        showBattleMenu();
+        setTimeout(() => enemyAttack(), 500);
+    }, 1500);
+}
+
+function useAttack(index) {
+    if (!playerPokemon.attacks[index]) return;
+    
+    const attack = playerPokemon.attacks[index];
+    let damage = attack.damage;
+    
+    damage += Math.floor(Math.random() * 3) - 1;
+    if (damage < 0) damage = 0;
+    
+    enemyPokemon.hp -= damage;
+    
+    document.getElementById("enemySprite").classList.add('shake');
+    document.getElementById("enemyHPFill").classList.add('flash');
+    
+    addBattleLog(`${playerPokemon.name} used ${attack.name}!`);
+    if (damage > 0) {
+        addBattleLog(`It did ${damage} damage!`);
+    }
+    
+    updateBattleText();
+    
+    setTimeout(() => {
+        document.getElementById("enemySprite").classList.remove('shake');
+        document.getElementById("enemyHPFill").classList.remove('flash');
+        
+        if (enemyPokemon.hp <= 0) {
+            addBattleLog(`Wild ${enemyPokemon.name} fainted!`);
+            giveExp();
+            setTimeout(() => endBattle(true), 1500);
+            return;
+        }
+        
+        setTimeout(() => enemyAttack(), 800);
+    }, 500);
+}
+
+function giveExp() {
+    const expGain = enemyPokemon.level * 10;
+    playerPokemon.exp += expGain;
+    addBattleLog(`${playerPokemon.name} gained ${expGain} EXP!`);
+    
+    if (playerPokemon.exp >= playerPokemon.expToNext) {
+        playerPokemon.level++;
+        playerPokemon.exp = 0;
+        playerPokemon.expToNext = playerPokemon.level * 20;
+        playerPokemon.maxHp += 5;
+        playerPokemon.hp = playerPokemon.maxHp;
+        
+        addBattleLog(`${playerPokemon.name} grew to Level ${playerPokemon.level}!`);
+    }
+}
+
+function enemyAttack() {
+    const attackIndex = Math.floor(Math.random() * enemyPokemon.attacks.length);
+    const attack = enemyPokemon.attacks[attackIndex];
+    let damage = attack.damage;
+    
+    damage += Math.floor(Math.random() * 3) - 1;
+    if (damage < 0) damage = 0;
+    
+    playerPokemon.hp -= damage;
+    
+    document.getElementById("playerSprite").classList.add('shake');
+    document.getElementById("playerHPFill").classList.add('flash');
+    
+    addBattleLog(`Wild ${enemyPokemon.name} used ${attack.name}!`);
+    if (damage > 0) {
+        addBattleLog(`It did ${damage} damage!`);
+    }
+    
+    updateBattleText();
+    updateHUD();
+    updateInventory();
+    
+    setTimeout(() => {
+        document.getElementById("playerSprite").classList.remove('shake');
+        document.getElementById("playerHPFill").classList.remove('flash');
+        
+        if (playerPokemon.hp <= 0) {
+            addBattleLog(`${playerPokemon.name} fainted!`);
+            
+            const alivePokemon = inventory.pokemon.filter(p => p.hp > 0);
+            if (alivePokemon.length > 0) {
+                addBattleLog("Select another Pokémon!");
+                showPokemonMenu();
+            } else {
+                setTimeout(() => endBattle(false), 1500);
+            }
+        } else {
+            showBattleMenu();
+        }
+    }, 500);
+}
+
+function run() {
+    const runChance = 0.7;
+    if (Math.random() < runChance) {
+        addBattleLog("Got away safely!");
+        setTimeout(() => endBattle(false), 1000);
+    } else {
+        addBattleLog("Couldn't escape!");
+        setTimeout(() => enemyAttack(), 800);
+    }
+}
+
+function endBattle(victory) {
+    inBattle = false;
+    document.getElementById("battle").style.display = "none";
+    showBattleMenu();
+    
+    if (!victory && inventory.pokemon.filter(p => p.hp > 0).length === 0) {
+        showDialog(`All your Pokémon fainted!`, [
+            { text: "OK", action: () => {
+                closeDialog();
+                player.x = buildings[1].x;
+                player.y = buildings[1].y + 100;
+                inventory.pokemon.forEach(p => p.hp = p.maxHp);
+                updateHUD();
+                updateInventory();
+            }}
+        ]);
+    }
+}
+
+function updateHUD() {
+    if (!playerPokemon) return;
+    
+    document.getElementById("hud").innerHTML = 
+        `${playerPokemon.name} Lv.${playerPokemon.level}<br>` +
+        `HP: ${playerPokemon.hp}/${playerPokemon.maxHp}<br>` +
+        `Pokéballs: ${inventory.items.pokeballs}<br>` +
+        `Potions: ${inventory.items.potions}<br>` +
+        `Coins: ${coins} 🪙`;
+}
+
+// Drawing functions
+function drawPlayer() {
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    
+    // Player character (trainer) - NO CROSS
+    ctx.fillStyle = '#ff4444'; // Red hat
+    ctx.fillRect(-8, -20, 16, 8);
+    
+    ctx.fillStyle = '#2c8bff'; // Blue shirt
+    ctx.fillRect(-10, -12, 20, 16);
+    
+    ctx.fillStyle = '#000'; // Pants
+    ctx.fillRect(-10, 4, 20, 8);
+    
+    // Face
+    ctx.fillStyle = '#ffcc99';
+    ctx.beginPath();
+    ctx.arc(0, -15, 6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Hair
+    ctx.fillStyle = '#8b4513';
+    ctx.fillRect(-8, -22, 16, 8);
+    
+    // Legs with walking animation
+    let legOffset = 0;
+    if ((joyX !== 0 || joyY !== 0) && !inBattle) {
+        player.animationFrame = (player.animationFrame + 0.2) % 8;
+        legOffset = Math.sin(player.animationFrame) * 3;
+    }
+    
     ctx.fillStyle = '#000';
-    ctx.fillRect(offsetX + 6, offsetY + 28, 4, 6 + legOffset);
-    ctx.fillRect(offsetX + 14, offsetY + 28, 4, 6 - legOffset);
+    ctx.fillRect(-6, 12, 4, 8 + legOffset);
+    ctx.fillRect(2, 12, 4, 8 - legOffset);
     
     ctx.restore();
 }
@@ -1181,422 +1689,152 @@ function drawFollowingPokemon() {
     if (!playerPokemon || !starterChosen) return;
     
     ctx.save();
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const offsetX = player.direction === 1 ? -30 : player.direction === 2 ? 30 : 0;
+    const offsetY = player.direction === 0 ? 20 : player.direction === 3 ? -20 : 0;
     
-    // Position based on player direction
-    let offsetX = 0, offsetY = 0;
-    switch(player.direction) {
-        case 0: offsetY = 30; break; // Down
-        case 1: offsetX = -30; break; // Left
-        case 2: offsetX = 30; break; // Right
-        case 3: offsetY = -30; break; // Up
-    }
+    const pokemonX = canvas.width / 2 + offsetX;
+    const pokemonY = canvas.height / 2 + offsetY + Math.sin(gameTime * 0.1) * 2;
     
-    const pokemonX = centerX + offsetX;
-    const pokemonY = centerY + offsetY + Math.sin(gameTime * 0.1) * 3;
-    
-    // Draw Pokémon sprite
-    ctx.fillStyle = playerPokemon.spriteColor;
-    ctx.beginPath();
-    ctx.arc(pokemonX, pokemonY, 12, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Add pixelated outline
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
+    drawPokemonSprite(ctx, pokemonX, pokemonY, playerPokemon, 0.8);
     ctx.restore();
+}
+
+function drawGrass() {
+    const startX = Math.floor(cam.x / TILE);
+    const endX = Math.ceil((cam.x + canvas.width) / TILE);
+    const startY = Math.floor(cam.y / TILE);
+    const endY = Math.ceil((cam.y + canvas.height) / TILE);
+    
+    for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; y++) {
+            const colorIndex = (x + y) % GRASS_COLORS.length;
+            ctx.fillStyle = GRASS_COLORS[colorIndex];
+            ctx.fillRect(x * TILE - cam.x, y * TILE - cam.y, TILE, TILE);
+            
+            if ((x + y) % 3 === 0) {
+                ctx.fillStyle = '#3a7d34';
+                ctx.fillRect(x * TILE - cam.x + 10, y * TILE - cam.y + 10, 3, 12);
+                ctx.fillRect(x * TILE - cam.x + 20, y * TILE - cam.y + 15, 3, 8);
+            }
+        }
+    }
+}
+
+function drawDetails() {
+    terrainDetails.forEach(detail => {
+        const dx = detail.x - cam.x;
+        const dy = detail.y - cam.y;
+        
+        if (dx > -50 && dx < canvas.width + 50 && dy > -50 && dy < canvas.height + 50) {
+            if (detail.type === 'flower') {
+                ctx.fillStyle = '#2d5a27';
+                ctx.fillRect(dx - 1, dy, 2, detail.size);
+                
+                ctx.fillStyle = detail.color;
+                ctx.beginPath();
+                ctx.arc(dx, dy - 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = detail.color;
+                ctx.beginPath();
+                ctx.arc(dx, dy, detail.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    });
 }
 
 function drawBuilding(building) {
     const dx = building.x - cam.x;
     const dy = building.y - cam.y;
     
-    // Only draw if on screen
-    if (dx < -100 || dx > canvas.width + 100 || dy < -100 || dy > canvas.height + 100) return;
-    
-    ctx.save();
-    
-    switch(building.type) {
-        case "house":
-            // House base
-            ctx.fillStyle = '#a0522d';
-            ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-            
-            // Roof
-            ctx.fillStyle = '#8b4513';
-            ctx.beginPath();
-            ctx.moveTo(dx - building.width/2 - 8, dy - building.height);
-            ctx.lineTo(dx, dy - building.height - 16);
-            ctx.lineTo(dx + building.width/2 + 8, dy - building.height);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Windows
-            ctx.fillStyle = '#4a8bca';
-            ctx.fillRect(dx - 20, dy - 32, 12, 12);
-            ctx.fillRect(dx + 8, dy - 32, 12, 12);
-            
-            // Door
-            ctx.fillStyle = '#654321';
-            ctx.fillRect(dx - 6, dy - 16, 12, 16);
-            break;
-            
-        case "center":
-            // Center base (pink)
-            ctx.fillStyle = '#ff9999';
-            ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-            
-            // Roof (darker pink)
-            ctx.fillStyle = '#ff6b6b';
-            ctx.fillRect(dx - building.width/2 - 4, dy - building.height - 8, building.width + 8, 8);
-            
-            // Windows
-            ctx.fillStyle = '#4a8bca';
-            for (let i = 0; i < 3; i++) {
-                ctx.fillRect(dx - 28 + i * 20, dy - 32, 12, 12);
-            }
-            
-            // Sign
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(dx - 32, dy - building.height - 24, 64, 16);
-            ctx.fillStyle = '#ff4444';
-            ctx.font = 'bold 10px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText('POKé CENTER', dx, dy - building.height - 14);
-            break;
-            
-        case "arena":
-            // Arena base (stone)
-            ctx.fillStyle = '#888';
-            ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-            
-            // Arena roof
-            ctx.fillStyle = '#666';
-            ctx.fillRect(dx - building.width/2 - 8, dy - building.height - 12, building.width + 16, 12);
-            
-            // Entrance
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(dx - 16, dy - 12, 32, 12);
-            
-            // Sign
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 12px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText('ARENA', dx, dy - building.height - 20);
-            break;
-            
-        case "gym":
-            // Gym base
-            ctx.fillStyle = '#4a8bca';
-            ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-            
-            // Gym roof
-            ctx.fillStyle = '#2c6cb0';
-            ctx.fillRect(dx - building.width/2 - 6, dy - building.height - 10, building.width + 12, 10);
-            
-            // Gym sign
-            ctx.fillStyle = '#ffd700';
-            ctx.font = 'bold 12px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText('GYM', dx, dy - building.height - 18);
-            break;
-            
-        case "shop":
-            // Shop base
-            ctx.fillStyle = '#78c850';
-            ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
-            
-            // Shop roof
-            ctx.fillStyle = '#57a773';
-            ctx.fillRect(dx - building.width/2 - 5, dy - building.height - 8, building.width + 10, 8);
-            
-            // Shop sign
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 10px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText('SHOP', dx, dy - building.height - 16);
-            break;
-    }
-    
-    ctx.restore();
-}
-
-function drawWorld() {
-    // Draw sky with gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(1, '#E0F6FF');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw clouds
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    for (let i = 0; i < 3; i++) {
-        const cloudX = (cam.x * 0.1 + i * 150) % (canvas.width + 200) - 100;
-        const cloudY = 40 + Math.sin(gameTime * 0.0005 + i) * 15;
+    if (building.type === "house") {
+        ctx.fillStyle = '#a0522d';
+        ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
         
-        // Pixelated cloud
-        for(let j = 0; j < 3; j++) {
-            ctx.beginPath();
-            ctx.arc(cloudX + j * 20, cloudY, 16, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-    
-    // Draw grass tiles with checkerboard pattern
-    const startX = Math.floor(cam.x / TILE) - 2;
-    const endX = Math.ceil((cam.x + canvas.width) / TILE) + 2;
-    const startY = Math.floor(cam.y / TILE) - 2;
-    const endY = Math.ceil((cam.y + canvas.height) / TILE) + 2;
-    
-    for (let x = startX; x <= endX; x++) {
-        for (let y = startY; y <= endY; y++) {
-            const tileX = x * TILE - cam.x;
-            const tileY = y * TILE - cam.y;
-            const colorIndex = (x + y) % GRASS_TILES.length;
-            const pattern = (x + y) % 2;
-            
-            drawPixelArtTile(tileX, tileY, GRASS_TILES[colorIndex], pattern);
-            
-            // Add occasional grass tufts
-            if ((x + y) % 5 === 0) {
-                ctx.fillStyle = '#3a7d34';
-                for(let i = 0; i < 3; i++) {
-                    ctx.fillRect(tileX + 8 + i * 6, tileY + 8, 2, 8);
-                }
-            }
-        }
-    }
-    
-    // Draw path
-    ctx.fillStyle = '#8b7355';
-    const pathWidth = 64;
-    const pathHeight = 16;
-    
-    // Horizontal path
-    ctx.fillRect(canvas.width/2 - pathWidth, canvas.height/2 + 8, pathWidth * 2, pathHeight);
-    // Vertical path
-    ctx.fillRect(canvas.width/2 - 8, canvas.height/2 - pathWidth, 16, pathWidth * 2);
-    
-    // Draw buildings
-    buildings.forEach(drawBuilding);
-    
-    // Draw trees around edges
-    ctx.fillStyle = '#2d5a27';
-    const treeSpacing = 64;
-    for(let x = -512; x <= 512; x += treeSpacing) {
-        // Top and bottom rows
+        ctx.fillStyle = '#8b4513';
         ctx.beginPath();
-        ctx.arc(x - cam.x, -384 - cam.y, 16, 0, Math.PI * 2);
+        ctx.moveTo(dx - building.width/2 - 10, dy - building.height);
+        ctx.lineTo(dx, dy - building.height - 20);
+        ctx.lineTo(dx + building.width/2 + 10, dy - building.height);
+        ctx.closePath();
         ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x - cam.x, 384 - cam.y, 16, 0, Math.PI * 2);
-        ctx.fill();
+        
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(dx - 8, dy - 20, 16, 20);
+        
+        ctx.fillStyle = '#87CEEB';
+        ctx.fillRect(dx - 25, dy - 40, 12, 12);
+        ctx.fillRect(dx + 13, dy - 40, 12, 12);
+        
+    } else if (building.type === "center") {
+        ctx.fillStyle = '#ff9999';
+        ctx.fillRect(dx - building.width/2, dy - building.height, building.width, building.height);
+        
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fillRect(dx - building.width/2 - 5, dy - building.height - 10, building.width + 10, 10);
+        
+        ctx.fillStyle = '#87CEEB';
+        for (let i = 0; i < 3; i++) {
+            ctx.fillRect(dx - 35 + i * 25, dy - 40, 15, 15);
+        }
+        
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(dx - 15, dy - 25, 30, 25);
     }
 }
 
-function drawInterior(type) {
-    ctx.fillStyle = type === 'house' ? '#d2b48c' : '#f8f8f8';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw floor pattern
-    const tileSize = 32;
-    for(let x = 0; x < canvas.width; x += tileSize) {
-        for(let y = 0; y < canvas.height; y += tileSize) {
-            ctx.fillStyle = (x + y) % (tileSize * 2) === 0 ? 
-                (type === 'house' ? '#8b7355' : '#d0d0d0') : 
-                (type === 'house' ? '#a0522d' : '#e8e8e8');
-            ctx.fillRect(x, y, tileSize, tileSize);
-        }
-    }
-    
-    // Draw exit
-    ctx.fillStyle = '#333';
-    ctx.fillRect(canvas.width/2 - 32, canvas.height - 60, 64, 30);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 14px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('EXIT', canvas.width/2, canvas.height - 40);
-}
-
-// Battle system for 3v3
-let enemyTeam = [];
-let playerTeam = [];
-let currentBattleType = "wild"; // wild, arena, gym
-let currentPlayerIndex = 0;
-let currentEnemyIndex = 0;
-
-function startBattle(type = "wild") {
-    currentBattleType = type;
-    
-    if (type === "wild") {
-        // Single wild Pokémon
-        const wildTypes = ['pikachu', 'rattata', 'pidgey', 'geodude', 'abra', 'magikarp'];
-        const wildPokemon = wildTypes[Math.floor(Math.random() * wildTypes.length)];
-        enemyTeam = [JSON.parse(JSON.stringify(pokemonData[wildPokemon]))];
-        
-        playerTeam = [playerPokemon];
-        currentEnemyIndex = 0;
-        currentPlayerIndex = 0;
-        
-    } else if (type === "arena") {
-        // Arena battle - need 3 Pokémon
-        if (inventory.pokemon.length < ARENA_REQUIREMENT) {
-            showDialog(`YOU NEED AT LEAST ${ARENA_REQUIREMENT} POKÉMON TO ENTER THE ARENA!`);
-            return;
-        }
-        
-        // Create opponent team
-        enemyTeam = [];
-        const arenaPokemon = ['pikachu', 'rattata', 'pidgey', 'geodude', 'abra'];
-        for(let i = 0; i < 3; i++) {
-            const pokemonType = arenaPokemon[Math.floor(Math.random() * arenaPokemon.length)];
-            const pokemon = JSON.parse(JSON.stringify(pokemonData[pokemonType]));
-            pokemon.level = 5 + Math.floor(Math.random() * 3);
-            pokemon.hp = pokemon.maxHp = 20 + pokemon.level * 2;
-            enemyTeam.push(pokemon);
-        }
-        
-        // Select player's first 3 Pokémon
-        playerTeam = inventory.pokemon.slice(0, 3);
-        currentEnemyIndex = 0;
-        currentPlayerIndex = 0;
-    }
-    
-    inBattle = true;
-    document.getElementById("battle").style.display = "block";
-    
-    updateBattleDisplay();
-    createBattleSprites();
-    
-    setTimeout(() => {
-        document.getElementById("battleMenu").style.display = "grid";
-        addBattleLog(currentBattleType === "arena" ? 
-            "ARENA BATTLE START!" : 
-            "A WILD POKÉMON APPEARED!");
-    }, 1000);
-}
-
-function updateBattleDisplay() {
-    const playerTeamDiv = document.getElementById("playerTeam");
-    const enemyTeamDiv = document.getElementById("enemyTeam");
-    
-    playerTeamDiv.innerHTML = '';
-    enemyTeamDiv.innerHTML = '';
-    
-    // Draw player team
-    playerTeam.forEach((pokemon, index) => {
-        const div = document.createElement("div");
-        div.className = `arena-pokemon ${index === currentPlayerIndex ? 'active' : ''}`;
-        div.innerHTML = `
-            <div style="width:80px;height:80px;background:${pokemon.color};border-radius:20px;border:3px solid #fff;"></div>
-            <div class="arena-hp">${pokemon.name}<br>HP: ${pokemon.hp}/${pokemon.maxHp}</div>
-        `;
-        playerTeamDiv.appendChild(div);
-    });
-    
-    // Draw enemy team
-    enemyTeam.forEach((pokemon, index) => {
-        const div = document.createElement("div");
-        div.className = `arena-pokemon ${index === currentEnemyIndex ? 'active' : ''}`;
-        div.innerHTML = `
-            <div style="width:80px;height:80px;background:${pokemon.color};border-radius:20px;border:3px solid #fff;"></div>
-            <div class="arena-hp">${pokemon.name}<br>HP: ${pokemon.hp}/${pokemon.maxHp}</div>
-        `;
-        enemyTeamDiv.appendChild(div);
-    });
-}
-
-// [Previous game logic functions remain similar but adjusted for 3v3 battles]
-// Due to character limit, I'll include the core functions that changed
-
+// Game loop functions
 function update() {
     if (inBattle || inDialog || inInventory || !starterChosen) return;
     
     gameTime++;
     
-    // Move player
     player.x += joyX * player.speed;
     player.y += joyY * player.speed;
     
-    // Boundaries
-    const BOUNDARY = 400;
+    const BOUNDARY = 500;
     player.x = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.x));
     player.y = Math.max(-BOUNDARY, Math.min(BOUNDARY, player.y));
     
-    // Check building entry
     if (world === "outside") {
         buildings.forEach(building => {
             const dx = player.x - building.x;
             const dy = player.y - building.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            if (distance < 40) {
+            if (distance < 50) {
                 if (building.type === "house") {
                     world = "house";
                     player.x = 0;
                     player.y = 40;
-                    showDialog("WELCOME HOME! REST HERE.");
+                    showDialog("Welcome to the house! Rest here.");
                 } else if (building.type === "center") {
                     world = "center";
                     player.x = 0;
                     player.y = 40;
-                    // Heal all Pokémon
                     inventory.pokemon.forEach(p => p.hp = p.maxHp);
                     updateHUD();
                     updateInventory();
-                    showDialog("YOUR POKÉMON HAVE BEEN HEALED!");
-                } else if (building.type === "arena") {
-                    world = "arena";
-                    player.x = 0;
-                    player.y = 40;
-                    if (inventory.pokemon.length >= ARENA_REQUIREMENT) {
-                        showDialog("WELCOME TO THE ARENA! FIGHT 3V3 BATTLES HERE.", [
-                            { text: "BATTLE", action: () => startBattle("arena") },
-                            { text: "LEAVE", action: () => {
-                                world = "outside";
-                                player.x = building.x;
-                                player.y = building.y + 80;
-                                closeDialog();
-                            }}
-                        ]);
-                    } else {
-                        showDialog(`YOU NEED ${ARENA_REQUIREMENT} POKÉMON TO ENTER THE ARENA!`);
-                        world = "outside";
-                        player.x = building.x;
-                        player.y = building.y + 80;
-                    }
+                    showDialog("Welcome to the Pokémon Center! Your Pokémon have been healed!");
                 }
             }
         });
     }
     
-    // Check building exit
-    if (world !== "outside" && player.y > 100) {
-        const building = buildings.find(b => b.type === world);
-        if (building) {
-            world = "outside";
-            player.x = building.x;
-            player.y = building.y + 80;
-        }
+    if ((world === "house" || world === "center") && player.y > 100) {
+        world = "outside";
+        const buildingIndex = world === "house" ? 0 : 1;
+        player.x = buildings[buildingIndex].x;
+        player.y = buildings[buildingIndex].y + 80;
     }
     
-    // Random wild battle
     if (world === "outside" && Math.random() < 0.003 && joyX !== 0 && joyY !== 0) {
-        startBattle("wild");
+        startBattle();
     }
     
-    // Smooth camera
     cam.x += (player.x - canvas.width/2 - cam.x) * 0.1;
     cam.y += (player.y - canvas.height/2 - cam.y) * 0.1;
-    
-    // Auto-save check
-    if (gameTime % 1800 === 0 && currentSaveSlot) { // Every 30 seconds at 60fps
-        saveGame();
-    }
 }
 
 function draw() {
@@ -1604,47 +1842,95 @@ function draw() {
     
     if (!inBattle && starterChosen) {
         if (world === "outside") {
-            drawWorld();
-            drawPlayer();
-            drawFollowingPokemon();
-        } else {
-            drawInterior(world);
-            drawPlayer();
+            // Sky
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Clouds
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            for (let i = 0; i < 3; i++) {
+                const cloudX = (cam.x * 0.2 + i * 200) % (canvas.width + 400) - 200;
+                const cloudY = 50 + Math.sin(gameTime * 0.001 + i) * 20;
+                ctx.beginPath();
+                ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
+                ctx.arc(cloudX + 25, cloudY - 10, 25, 0, Math.PI * 2);
+                ctx.arc(cloudX + 55, cloudY, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            drawGrass();
+            drawDetails();
+            buildings.forEach(drawBuilding);
+            
+            // Paths
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(canvas.width/2 - 150, canvas.height/2, 300, 20);
+            ctx.fillRect(canvas.width/2 - 10, canvas.height/2 - 150, 20, 300);
+            
+        } else if (world === "house") {
+            ctx.fillStyle = '#d2b48c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let x = 0; x < canvas.width; x += 40) {
+                for (let y = 0; y < canvas.height; y += 40) {
+                    ctx.fillStyle = (x + y) % 80 === 0 ? '#8b7355' : '#a0522d';
+                    ctx.fillRect(x, y, 40, 40);
+                }
+            }
+            
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(canvas.width/2 - 100, canvas.height/2 - 50, 200, 20);
+            ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 30, 40, 30);
+            ctx.fillRect(canvas.width/2 + 80, canvas.height/2 - 30, 40, 30);
+            ctx.fillRect(canvas.width/2 - 40, canvas.height/2 + 40, 80, 40);
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(canvas.width/2 - 30, canvas.height - 50, 60, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('EXIT', canvas.width/2, canvas.height - 30);
+            
+        } else if (world === "center") {
+            ctx.fillStyle = '#f8f8f8';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let x = 0; x < canvas.width; x += 40) {
+                for (let y = 0; y < canvas.height; y += 40) {
+                    ctx.fillStyle = (x + y) % 80 === 0 ? '#d0d0d0' : '#e8e8e8';
+                    ctx.fillRect(x, y, 40, 40);
+                }
+            }
+            
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(canvas.width/2 - 120, canvas.height/2 - 30, 240, 20);
+            
+            ctx.fillStyle = '#4a8bca';
+            ctx.fillRect(canvas.width/2 - 40, canvas.height/2 - 80, 80, 60);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - 60, 40, 20);
+            
+            ctx.fillStyle = '#333';
+            ctx.fillRect(canvas.width/2 - 30, canvas.height - 50, 60, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('EXIT', canvas.width/2, canvas.height - 30);
         }
+        
+        drawPlayer();
+        drawFollowingPokemon();
     }
 }
 
-// Initialize game
 function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
 
-// Start the game loop
+// Start the game
 gameLoop();
-
-// [Include all the other functions from previous version - inventory, battle, dialog, etc.]
-// They work similarly but need to be adapted for 3v3 battles
-// Due to character limit, I've included the core systems
-
-// Note: The full implementation would include all the inventory, battle, 
-// and dialog functions from the previous version, adapted for 3v3 battles
-// and with the new pixel art graphics.
-
-// For a complete working version, you would need to integrate all the
-// previously working systems with these new graphics and 3v3 battle system.
-
-// Key additions in this version:
-// 1. Login/Save system with 3 save slots
-// 2. Pixel art graphics
-// 3. Multiple buildings (Arena, Gym, Shop)
-// 4. 3v3 battle system for arenas
-// 5. Auto-save feature
-// 6. Improved UI with Pokémon GB font
-
-// The game now has professional save/load functionality and
-// authentic Pokémon-style graphics and gameplay!
 </script>
 </body>
 </html>
