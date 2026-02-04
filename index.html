@@ -3,266 +3,2705 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: K&E Version</title>
+    <title>Pokémon Amber Version - Mobile Game</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
     <style>
-        :root {
-            --pkm-blue: #3a86ff;
-            --gba-text: #424242;
-            --amber: #ffbf00;
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: none;
+            text-size-adjust: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-        body {
-            margin: 0; background: #1a1a1a;
-            color: white; font-family: 'Courier New', Courier, monospace;
-            display: flex; flex-direction: column; align-items: center;
-            overflow: hidden; touch-action: none;
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background: #000;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            color: #ffffff;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            font-smooth: never;
+            -webkit-font-smoothing: none;
+            font-size: 16px;
         }
+        
+        /* ===== GAME CONTAINER ===== */
         #game-container {
-            position: relative; width: 100vw; max-width: 500px; height: 60vh;
-            background: black; border: 4px solid #444; margin-top: 10px;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #0a0a2a 0%, #1a1a3a 50%, #0a0a2a 100%);
             overflow: hidden;
         }
-        canvas { width: 100%; height: 100%; image-rendering: pixelated; }
         
-        /* UI Elements */
-        #textbox {
-            position: absolute; bottom: 5px; left: 5px; right: 5px;
-            height: 30%; background: #fff; border: 3px solid var(--gba-text);
-            border-radius: 5px; padding: 10px; color: var(--gba-text);
-            font-weight: bold; font-size: 14px; display: none; z-index: 10;
+        /* ===== SCREEN SYSTEM ===== */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            z-index: 1;
         }
-        #joystick-zone {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        
+        .screen.active {
+            display: flex;
         }
-        #starter-ui {
-            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
-            display: none; flex-direction: column; gap: 10px; z-index: 20;
+        
+        /* ===== TITLE SCREEN ===== */
+        #title-screen {
+            background: linear-gradient(to bottom, 
+                #000825 0%, 
+                #001035 30%, 
+                #002855 70%, 
+                #001035 100%);
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
         }
-        .choice-btn {
-            background: var(--amber); border: 2px solid #fff; padding: 10px;
-            font-weight: bold; border-radius: 5px; cursor: pointer;
+        
+        .title-graphics {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
         }
-        #controls {
-            width: 100%; max-width: 500px; height: 35vh;
-            display: flex; justify-content: space-around; align-items: center;
+        
+        .title-main {
+            font-size: 2.8rem;
+            color: #ffcc00;
+            text-shadow: 
+                0.3rem 0.3rem 0 #cc0000,
+                0.6rem 0.6rem 0 #000,
+                0 0 2rem rgba(255, 204, 0, 0.5);
+            letter-spacing: 0.2rem;
+            margin-bottom: 1rem;
+            animation: titleGlow 3s ease-in-out infinite;
+            line-height: 1.2;
         }
-        .action-circle {
-            width: 70px; height: 70px; background: #cc0000;
-            border-radius: 50%; border: 5px solid #880000;
-            color: white; font-size: 24px; font-weight: bold;
+        
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 
+                0.3rem 0.3rem 0 #cc0000,
+                0.6rem 0.6rem 0 #000,
+                0 0 2rem rgba(255, 204, 0, 0.5); }
+            50% { text-shadow: 
+                0.3rem 0.3rem 0 #cc0000,
+                0.6rem 0.6rem 0 #000,
+                0 0 4rem rgba(255, 204, 0, 0.8); }
+        }
+        
+        .title-sub {
+            font-size: 1.2rem;
+            color: #4af2ff;
+            text-shadow: 
+                0.2rem 0.2rem 0 #0066cc,
+                0 0 1rem rgba(74, 242, 255, 0.5);
+            margin-bottom: 2rem;
+            animation: subtitlePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes subtitlePulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .title-pokeball {
+            width: 120px;
+            height: 120px;
+            margin: 30px auto;
+            background: radial-gradient(circle at 30% 30%, #ff3333, #cc0000);
+            border-radius: 50%;
+            border: 8px solid #000;
+            position: relative;
+            animation: pokeballRotate 10s linear infinite;
+        }
+        
+        .title-pokeball::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: #000;
+            transform: translateY(-50%);
+        }
+        
+        .title-pokeball::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            border: 8px solid #000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        @keyframes pokeballRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .title-tagline {
+            font-size: 1rem;
+            color: #ff9900;
+            margin: 20px 0;
+            padding: 15px 30px;
+            border: 3px solid #ff9900;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: taglineFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes taglineFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .start-button {
+            font-size: 1.5rem;
+            padding: 20px 40px;
+            background: linear-gradient(to bottom, #ff9900, #cc6600);
+            border: 5px solid #ffcc00;
+            border-radius: 15px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.2s;
+            box-shadow: 
+                0 8px 0 #994400,
+                0 0 20px rgba(255, 153, 0, 0.5);
+            animation: startPulse 2s ease-in-out infinite;
+        }
+        
+        .start-button:active {
+            transform: translateY(8px);
+            box-shadow: 
+                0 0 0 #994400,
+                0 0 30px rgba(255, 153, 0, 0.8);
+        }
+        
+        @keyframes startPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .title-info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #888;
+            padding: 0 20px;
+        }
+        
+        .title-info p {
+            margin: 5px 0;
+        }
+        
+        /* ===== GAME SCREEN ===== */
+        #game-screen {
+            background-color: #1a1a2a;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 32px, rgba(0,0,0,0.1) 32px, rgba(0,0,0,0.1) 64px),
+                repeating-linear-gradient(90deg, transparent, transparent 32px, rgba(0,0,0,0.1) 32px, rgba(0,0,0,0.1) 64px);
+        }
+        
+        /* ===== GAME VIEWPORT ===== */
+        .game-viewport {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* ===== ROOM SYSTEM ===== */
+        .room {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .room.active {
+            display: block;
+        }
+        
+        /* ===== HOUSE ROOM ===== */
+        #room-house {
+            background-color: #8b7355;
+            background-image: 
+                linear-gradient(90deg, transparent 95%, rgba(0,0,0,0.1) 100%),
+                linear-gradient(180deg, transparent 95%, rgba(0,0,0,0.1) 100%);
+            background-size: 40px 40px;
+        }
+        
+        .house-floor {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 70%;
+            background-color: #deb887;
+            background-image: 
+                linear-gradient(90deg, #b8860b 1px, transparent 1px),
+                linear-gradient(180deg, #b8860b 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        
+        .house-carpet {
+            position: absolute;
+            bottom: 20%;
+            left: 35%;
+            width: 30%;
+            height: 25%;
+            background-color: #8b0000;
+            border: 4px solid #660000;
+            border-radius: 10px;
+        }
+        
+        .house-bed {
+            position: absolute;
+            bottom: 20%;
+            left: 10%;
+            width: 20%;
+            height: 25%;
+            background-color: #4169e1;
+            border: 4px solid #2a4a8f;
+            border-radius: 5px;
+        }
+        
+        .house-bed-pillow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 60%;
+            height: 30%;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        
+        .house-desk {
+            position: absolute;
+            bottom: 20%;
+            right: 10%;
+            width: 20%;
+            height: 15%;
+            background-color: #8b4513;
+            border: 4px solid #5d2906;
+        }
+        
+        .house-computer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 20px;
+            background-color: #333;
+            border: 2px solid #000;
+        }
+        
+        .house-walls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background-color: #d2b48c;
+            border-bottom: 8px solid #a0522d;
+        }
+        
+        .house-window {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 60%;
+            background-color: #87ceeb;
+            border: 8px solid #8b4513;
+            border-radius: 5px;
+        }
+        
+        .house-window-sill {
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background-color: #8b4513;
+        }
+        
+        .house-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15%;
+            height: 30%;
+            background-color: #8b4513;
+            border: 6px solid #5d2906;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            z-index: 30;
+            cursor: pointer;
+        }
+        
+        .house-door-knob {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .house-door:hover {
+            background-color: #a0522d;
+        }
+        
+        /* ===== TOWN ROOM ===== */
+        #room-town {
+            background: linear-gradient(to bottom, #87ceeb 0%, #98fb98 100%);
+        }
+        
+        .town-ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background-color: #98fb98;
+            background-image: 
+                radial-gradient(circle at 10% 20%, #90ee90 2px, transparent 2px),
+                radial-gradient(circle at 30% 40%, #90ee90 2px, transparent 2px),
+                radial-gradient(circle at 70% 60%, #90ee90 2px, transparent 2px);
+            background-size: 100px 100px;
+        }
+        
+        .town-path {
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            width: 60%;
+            height: 40%;
+            background-color: #d2b48c;
+            border-top: 4px solid #a0522d;
+        }
+        
+        .town-tree {
+            position: absolute;
+            bottom: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 120px;
+            background-color: #8b4513;
+            border-radius: 10px;
+        }
+        
+        .town-tree-top {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            background-color: #228b22;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 10px #006400,
+                0 0 30px rgba(0, 100, 0, 0.5);
+        }
+        
+        .town-lab {
+            position: absolute;
+            bottom: 30%;
+            right: 10%;
+            width: 25%;
+            height: 40%;
+            background: linear-gradient(135deg, #4a8faf, #2a6b8f);
+            border: 8px solid #2a4a8f;
+            border-radius: 15px;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .town-lab-sign {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120%;
+            padding: 8px;
+            background-color: #2a4a8f;
+            color: white;
+            font-size: 0.6rem;
+            text-align: center;
+            border-radius: 5px;
+            border: 3px solid #ffcc00;
+            white-space: nowrap;
+        }
+        
+        .town-lab-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 25%;
+            background-color: #8b4513;
+            border: 4px solid #5d2906;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            z-index: 30;
+        }
+        
+        .town-house {
+            position: absolute;
+            bottom: 30%;
+            left: 10%;
+            width: 20%;
+            height: 35%;
+            background-color: #d2b48c;
+            border: 6px solid #a0522d;
+            border-radius: 10px;
+        }
+        
+        .town-house-roof {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background-color: #8b0000;
+            clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+        }
+        
+        .town-house-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 30%;
+            background-color: #8b4513;
+            border: 3px solid #5d2906;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+        }
+        
+        /* ===== LAB GROUND FLOOR ===== */
+        #room-lab-ground {
+            background: linear-gradient(135deg, #2a4a6a, #1a2a4a);
+        }
+        
+        .lab-floor {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 70%;
+            background-color: #3a5a7a;
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        
+        .lab-left-area {
+            position: absolute;
+            bottom: 10%;
+            left: 5%;
+            width: 40%;
+            height: 80%;
+            background-color: rgba(30, 60, 90, 0.8);
+            border: 4px solid #2a4a8f;
+            border-radius: 10px;
+        }
+        
+        .lab-computer-station {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 80%;
+            height: 30%;
+            background-color: #111;
+            border: 3px solid #444;
+            border-radius: 5px;
+        }
+        
+        .lab-computer-screen {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            background-color: #004400;
+            border: 2px solid #00aa00;
+            font-size: 0.5rem;
+            color: #00ff00;
+            padding: 5px;
+            overflow: hidden;
+        }
+        
+        .lab-right-area {
+            position: absolute;
+            bottom: 10%;
+            right: 5%;
+            width: 40%;
+            height: 80%;
+            background-color: rgba(30, 60, 120, 0.8);
+            border: 4px solid #2a4a8f;
+            border-radius: 10px;
+        }
+        
+        .lab-water-tank {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: calc(100% - 40px);
+            height: calc(100% - 40px);
+            background: linear-gradient(to bottom, 
+                rgba(64, 164, 223, 0.8) 0%,
+                rgba(42, 143, 184, 0.9) 100%);
+            border: 5px solid #2a8fb8;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .lab-water-tank-fish {
+            position: absolute;
+            width: 30px;
+            height: 15px;
+            background-color: #ff3333;
+            border-radius: 50%;
+            animation: fishSwim 5s linear infinite;
+        }
+        
+        .lab-water-tank-fish:nth-child(1) {
+            top: 30%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+        
+        .lab-water-tank-fish:nth-child(2) {
+            top: 60%;
+            left: 60%;
+            animation-delay: 1s;
+        }
+        
+        @keyframes fishSwim {
+            0% { transform: translateX(0) scaleX(1); }
+            49% { transform: translateX(200%) scaleX(1); }
+            50% { transform: translateX(200%) scaleX(-1); }
+            99% { transform: translateX(0) scaleX(-1); }
+            100% { transform: translateX(0) scaleX(1); }
+        }
+        
+        .lab-stairs-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20%;
+            height: 25%;
+            background: linear-gradient(135deg, #8b4513, #5d2906);
+            border: 6px solid #5d2906;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            cursor: pointer;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .lab-stairs-door:hover {
+            background: linear-gradient(135deg, #a0522d, #8b4513);
+        }
+        
+        .lab-exit-door {
+            position: absolute;
+            bottom: 0;
+            right: 15%;
+            width: 15%;
+            height: 20%;
+            background-color: #8b4513;
+            border: 4px solid #5d2906;
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            z-index: 30;
+        }
+        
+        /* ===== LAB STUDY ===== */
+        #room-lab-study {
+            background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
+        }
+        
+        .study-floor {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 70%;
+            background-color: #deb887;
+            background-image: 
+                linear-gradient(90deg, #b8860b 1px, transparent 1px),
+                linear-gradient(180deg, #b8860b 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        
+        .study-left-bookshelf {
+            position: absolute;
+            bottom: 10%;
+            left: 5%;
+            width: 25%;
+            height: 80%;
+            background-color: #5d2906;
+            border: 6px solid #3a1803;
+            border-radius: 5px;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            padding: 5px;
+        }
+        
+        .study-book {
+            background: linear-gradient(90deg, #8b0000, #cc0000);
+            border-radius: 2px;
+        }
+        
+        .study-right-bookshelf {
+            position: absolute;
+            bottom: 10%;
+            right: 5%;
+            width: 25%;
+            height: 80%;
+            background-color: #5d2906;
+            border: 6px solid #3a1803;
+            border-radius: 5px;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            gap: 2px;
+            padding: 5px;
+        }
+        
+        .study-desk {
+            position: absolute;
+            bottom: 20%;
+            left: 35%;
+            width: 30%;
+            height: 40%;
+            background-color: #8b4513;
+            border: 6px solid #5d2906;
+            border-radius: 10px;
+        }
+        
+        .study-teleport-door {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20%;
+            height: 25%;
+            background: linear-gradient(135deg, 
+                rgba(139, 69, 19, 0.9),
+                rgba(93, 41, 6, 0.9));
+            border: 6px solid #5d2906;
+            border-bottom: none;
+            border-radius: 15px 15px 0 0;
+            cursor: pointer;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4af2ff;
+            font-size: 1.5rem;
+            text-shadow: 
+                0 0 10px #4af2ff,
+                2px 2px 0 #000;
+        }
+        
+        .study-teleport-door:hover {
+            background: linear-gradient(135deg, 
+                rgba(160, 82, 45, 0.9),
+                rgba(139, 69, 19, 0.9));
+            box-shadow: 0 0 20px rgba(74, 242, 255, 0.5);
+        }
+        
+        /* ===== POKÉMON SELECTION SCREEN ===== */
+        #pokemon-selection-screen {
+            background: linear-gradient(135deg, 
+                rgba(10, 10, 40, 0.95) 0%,
+                rgba(20, 20, 60, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .selection-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+            text-shadow: 
+                0.2rem 0.2rem 0 #cc0000,
+                0 0 1rem rgba(255, 204, 0, 0.5);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .pokemon-selection-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 900px;
+            margin-bottom: 40px;
+        }
+        
+        .pokemon-option {
+            width: 240px;
+            padding: 20px;
+            background: linear-gradient(135deg, 
+                rgba(30, 30, 60, 0.9) 0%,
+                rgba(50, 50, 100, 0.9) 100%);
+            border: 5px solid #333;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .pokemon-option:hover {
+            transform: translateY(-10px);
+            border-color: #ffcc00;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(255, 204, 0, 0.3);
+        }
+        
+        .pokemon-option.selected {
+            border-color: #4af2ff;
+            background: linear-gradient(135deg, 
+                rgba(20, 60, 100, 0.9) 0%,
+                rgba(40, 80, 140, 0.9) 100%);
+            box-shadow: 
+                0 0 30px rgba(74, 242, 255, 0.5),
+                inset 0 0 20px rgba(74, 242, 255, 0.2);
+        }
+        
+        .pokemon-sprite-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            background: radial-gradient(circle at center, 
+                rgba(40, 40, 80, 0.8) 0%,
+                rgba(20, 20, 40, 0.8) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pokemon-sprite-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent,
+                rgba(74, 242, 255, 0.1),
+                transparent 30%
+            );
+            animation: spriteRotate 3s linear infinite;
+        }
+        
+        @keyframes spriteRotate {
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pokemon-sprite {
+            width: 80px;
+            height: 80px;
+            z-index: 1;
+        }
+        
+        .pokemon-name {
+            font-size: 1.2rem;
+            color: #ffcc00;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 #000;
+        }
+        
+        .pokemon-type {
+            font-size: 0.9rem;
+            color: #4af2ff;
+            margin-bottom: 10px;
+            padding: 5px 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .pokemon-description {
+            font-size: 0.7rem;
+            color: #aaa;
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+        
+        .selection-instructions {
+            font-size: 0.8rem;
+            color: #4af2ff;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #4af2ff;
+        }
+        
+        /* ===== CHARACTERS ===== */
+        .character {
+            position: absolute;
+            width: 32px;
+            height: 48px;
+            background-color: #ff6666;
+            border-radius: 5px;
+            z-index: 20;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        .character::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background-color: inherit;
+            border-radius: 50%;
+        }
+        
+        .character.player {
+            background-color: #4af2ff;
+            z-index: 40;
+        }
+        
+        .character.mom {
+            background-color: #ff66aa;
+        }
+        
+        .character.professor {
+            background-color: #9966ff;
+        }
+        
+        .character.rival {
+            background-color: #ffcc00;
+        }
+        
+        .character.assistant {
+            background-color: #66ff99;
+        }
+        
+        .character:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* ===== POKÉ BALLS ===== */
+        .pokeball-container {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 25;
+            transition: transform 0.2s;
+        }
+        
+        .pokeball-container:hover {
+            transform: scale(1.2);
+        }
+        
+        .pokeball {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, #ff3333, #cc0000);
+            border-radius: 50%;
+            border: 3px solid #000;
+            position: relative;
+        }
+        
+        .pokeball::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #000;
+            transform: translateY(-50%);
+        }
+        
+        .pokeball::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background-color: #fff;
+            border: 3px solid #000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        /* ===== DIALOGUE SYSTEM ===== */
+        #dialogue-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            background-color: rgba(0, 0, 0, 0.95);
+            border-top: 8px solid #4af2ff;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        #dialogue-overlay.active {
+            display: flex;
+        }
+        
+        .dialogue-character {
+            font-size: 1rem;
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 #000;
+            min-height: 1.2rem;
+        }
+        
+        .dialogue-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .dialogue-text::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .dialogue-text::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .dialogue-text::-webkit-scrollbar-thumb {
+            background: #4af2ff;
+            border-radius: 4px;
+        }
+        
+        .dialogue-continue {
+            text-align: center;
+            color: #4af2ff;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            animation: continueBlink 1s infinite;
+        }
+        
+        @keyframes continueBlink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* ===== CONTROLS ===== */
+        #controls-overlay {
+            position: absolute;
+            bottom: 35%;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            z-index: 90;
+            pointer-events: none;
+            display: none;
+        }
+        
+        #controls-overlay.active {
+            display: block;
+        }
+        
+        .mobile-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 40px;
+            pointer-events: auto;
+        }
+        
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 5px;
+        }
+        
+        .d-pad-btn {
+            background-color: rgba(51, 51, 51, 0.9);
+            border: 3px solid #222;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+        }
+        
+        .d-pad-btn:active {
+            background-color: rgba(85, 85, 85, 0.9);
+            transform: scale(0.95);
+        }
+        
+        .d-pad-btn.up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .d-pad-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .d-pad-btn.center {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: rgba(85, 85, 85, 0.9);
+            pointer-events: none;
+        }
+        
+        .d-pad-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        .d-pad-btn.down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .action-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .a-btn {
+            background: linear-gradient(135deg, #ff3333, #cc0000);
+            border: 4px solid #ff6666;
+            box-shadow: 
+                0 6px 0 #990000,
+                0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        .b-btn {
+            background: linear-gradient(135deg, #4a6baf, #2a4a8f);
+            border: 4px solid #6a8bcf;
+            box-shadow: 
+                0 6px 0 #1a3a7f,
+                0 0 10px rgba(74, 107, 175, 0.5);
+        }
+        
+        .menu-swipe-indicator {
+            position: absolute;
+            right: 20px;
+            bottom: 40px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(30, 30, 60, 0.8);
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 2px solid #4af2ff;
+            pointer-events: none;
+        }
+        
+        .menu-swipe-text {
+            font-size: 0.7rem;
+            color: #4af2ff;
+            margin-right: 10px;
+        }
+        
+        .menu-swipe-arrow {
+            font-size: 1.5rem;
+            color: #4af2ff;
+            animation: swipeArrow 1.5s infinite;
+        }
+        
+        @keyframes swipeArrow {
+            0%, 100% { transform: translateX(0); opacity: 0.5; }
+            50% { transform: translateX(-10px); opacity: 1; }
+        }
+        
+        /* ===== TELEPORT EFFECT ===== */
+        .teleport-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(74, 242, 255, 0.8) 0%,
+                rgba(74, 242, 255, 0.4) 30%,
+                transparent 70%);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .teleport-effect.active {
+            animation: teleportAnimation 0.8s ease-out;
+        }
+        
+        @keyframes teleportAnimation {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+        
+        /* ===== MAP OVERLAY ===== */
+        #map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        #map-overlay.active {
+            display: flex;
+        }
+        
+        .map-title {
+            font-size: 1.5rem;
+            color: #ffcc00;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .map-container {
+            width: 90%;
+            max-width: 500px;
+            height: 60%;
+            background-color: #1a2a4a;
+            border: 5px solid #4af2ff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-region {
+            position: absolute;
+            border: 2px solid #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.6rem;
+            text-align: center;
+        }
+        
+        .map-player-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            z-index: 10;
+            animation: mapMarkerPulse 1s infinite;
+        }
+        
+        @keyframes mapMarkerPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 5px #ffcc00; }
+            50% { transform: scale(1.2); box-shadow: 0 0 15px #ffcc00; }
+        }
+        
+        /* ===== INSTRUCTIONS OVERLAY ===== */
+        #instructions-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+        
+        #instructions-overlay.active {
+            display: flex;
+        }
+        
+        .instructions-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .instructions-content {
+            max-width: 800px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            background-color: rgba(30, 30, 60, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #4af2ff;
+            overflow-y: auto;
+            max-height: 60%;
+        }
+        
+        .instructions-section {
+            margin-bottom: 25px;
+        }
+        
+        .instructions-section-title {
+            color: #4af2ff;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .title-main {
+                font-size: 1.8rem;
+            }
+            
+            .title-sub {
+                font-size: 0.9rem;
+            }
+            
+            .start-button {
+                font-size: 1.2rem;
+                padding: 15px 30px;
+            }
+            
+            .pokemon-option {
+                width: 200px;
+                padding: 15px;
+            }
+            
+            .mobile-controls {
+                bottom: 10px;
+                left: 10px;
+                gap: 20px;
+            }
+            
+            .d-pad {
+                grid-template-columns: repeat(3, 40px);
+                grid-template-rows: repeat(3, 40px);
+            }
+            
+            .d-pad-btn {
+                font-size: 1.2rem;
+            }
+            
+            .action-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 0.9rem;
+            }
+            
+            .dialogue-text {
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title-main {
+                font-size: 1.4rem;
+            }
+            
+            .pokemon-selection-container {
+                gap: 15px;
+            }
+            
+            .pokemon-option {
+                width: 160px;
+            }
+            
+            .pokemon-sprite-container {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .pokemon-sprite {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .pixel-border {
+            border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><rect x="0" y="0" width="12" height="12" fill="%234af2ff" stroke="%2300aaff" stroke-width="2"/></svg>') 12 / 12px;
+        }
+        
+        .text-typing {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end);
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        /* ===== LOADING SCREEN ===== */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .loading-text {
+            font-size: 1.2rem;
+            color: #4af2ff;
+            margin-top: 30px;
+            animation: loadingPulse 1.5s infinite;
+        }
+        
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .loading-bar {
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4af2ff, #00aaff);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        /* ===== MENU SYSTEM ===== */
+        #menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #menu-overlay.active {
+            display: flex;
+        }
+        
+        .menu-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+            margin-bottom: 40px;
+        }
+        
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        .menu-option {
+            padding: 20px;
+            background: linear-gradient(135deg, #2a4a8f, #1a2a4a);
+            border: 4px solid #4af2ff;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        
+        .menu-option:hover {
+            background: linear-gradient(135deg, #3a5a9f, #2a3a5a);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(74, 242, 255, 0.3);
         }
     </style>
 </head>
 <body>
-
-<div id="game-container">
-    <canvas id="gameCanvas"></canvas>
-    <div id="joystick-zone"></div>
-    <div id="textbox"></div>
-    <div id="starter-ui">
-        <button class="choice-btn" onclick="choosePokemon('Treecko')">TREECKO (Grass)</button>
-        <button class="choice-btn" onclick="choosePokemon('Charmander')">CHARMANDER (Fire)</button>
-        <button class="choice-btn" onclick="choosePokemon('Froakie')">FROAKIE (Water)</button>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="title-pokeball" style="animation: pokeballRotate 2s linear infinite;"></div>
+        <div class="loading-text">LOADING POKÉMON AMBER VERSION...</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
     </div>
-</div>
 
-<div id="controls">
-    <div id="stick-hint" style="color:#666; font-size: 12px;">TOUCH LEFT TO MOVE</div>
-    <button class="action-circle" id="btn-a">A</button>
-</div>
+    <!-- Game Container -->
+    <div id="game-container">
+        <!-- Title Screen -->
+        <div id="title-screen" class="screen">
+            <div class="title-graphics">
+                <h1 class="title-main">POKÉMON AMBER VERSION</h1>
+                <div class="title-sub">A FAITHFUL GBA-ERA MOBILE EXPERIENCE</div>
+                <div class="title-pokeball"></div>
+                <div class="title-tagline">A NEW ADVENTURE TAKES ROOT!</div>
+            </div>
+            <button class="start-button" id="start-button">PRESS START</button>
+            <div class="title-info">
+                <p>Platform: Mobile (iOS/Android) | Style: Faithful GBA-Era 2D Pixel Art</p>
+                <p>Tap anywhere to advance dialogue | Use on-screen controls to move</p>
+            </div>
+        </div>
 
-<script>
-/** * GAME CONFIG & STATE
- */
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const textbox = document.getElementById('textbox');
-const starterUI = document.getElementById('starter-ui');
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <!-- Game Viewport -->
+            <div class="game-viewport">
+                <!-- House Room -->
+                <div id="room-house" class="room">
+                    <div class="house-walls">
+                        <div class="house-window">
+                            <div class="house-window-sill"></div>
+                        </div>
+                    </div>
+                    <div class="house-floor">
+                        <div class="house-carpet"></div>
+                        <div class="house-bed">
+                            <div class="house-bed-pillow"></div>
+                        </div>
+                        <div class="house-desk">
+                            <div class="house-computer"></div>
+                        </div>
+                        <div class="house-door" id="house-exit-door">
+                            <div class="house-door-knob"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Characters in House -->
+                    <div class="character player" id="player-character" style="bottom: 25%; left: 50%;"></div>
+                    <div class="character mom" id="mom-character" style="bottom: 35%; left: 30%;"></div>
+                </div>
 
-canvas.width = 240; // GBA Width
-canvas.height = 160; // GBA Height
+                <!-- Town Room -->
+                <div id="room-town" class="room">
+                    <div class="town-ground">
+                        <div class="town-path"></div>
+                        <div class="town-tree">
+                            <div class="town-tree-top"></div>
+                        </div>
+                        <div class="town-lab">
+                            <div class="town-lab-sign">HABITAT RESEARCH LAB</div>
+                            <div class="town-lab-door" id="lab-entrance-door"></div>
+                        </div>
+                        <div class="town-house">
+                            <div class="town-house-roof"></div>
+                            <div class="town-house-door" id="house-entrance-door"></div>
+                        </div>
+                    </div>
+                </div>
 
-let state = 'MOM_HOUSE'; 
-let player = { x: 110, y: 100, dir: 'down', frame: 0 };
-let shimmer = 0;
-let dialogQueue = [];
+                <!-- Lab Ground Floor -->
+                <div id="room-lab-ground" class="room">
+                    <div class="lab-floor">
+                        <div class="lab-left-area">
+                            <div class="lab-computer-station">
+                                <div class="lab-computer-screen">POKÉDEX DATABASE v4.2<br>LOADING REGIONAL DATA...</div>
+                            </div>
+                        </div>
+                        <div class="lab-right-area">
+                            <div class="lab-water-tank">
+                                <div class="lab-water-tank-fish"></div>
+                                <div class="lab-water-tank-fish"></div>
+                            </div>
+                        </div>
+                        <div class="lab-stairs-door" id="lab-stairs-door">
+                            ↑ STUDY
+                        </div>
+                        <div class="lab-exit-door" id="lab-exit-door"></div>
+                    </div>
+                    
+                    <!-- Characters in Lab -->
+                    <div class="character assistant" id="assistant-character" style="bottom: 20%; left: 45%;"></div>
+                </div>
 
-// Narrative Script
-const script = {
-    intro: [
-        "Mom: Wake up! You're finally awake.",
-        "A letter arrived from Professor Sequoia. It's marked 'URGENT'!",
-        "Your rival already left for the Lab... better hurry!",
-        "Go through the door to Maple Root Town."
-    ],
-    lab1: [
-        "Lab Assistant: Ah, you must be the other recruit!",
-        "The Professor is waiting for you upstairs.",
-        "Just head through that door—it'll take you right to his study!"
-    ],
-    sequoia: [
-        "Sequoia: Welcome! Orebound is experiencing strange seismic tremors.",
-        "I need you to help me study these three Pokémon.",
-        "Go on... pick your partner."
-    ]
-};
+                <!-- Lab Study -->
+                <div id="room-lab-study" class="room">
+                    <div class="study-floor">
+                        <div class="study-left-bookshelf">
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                        </div>
+                        <div class="study-right-bookshelf">
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                            <div class="study-book"></div>
+                        </div>
+                        <div class="study-desk">
+                            <!-- Poké Balls on Desk -->
+                            <div class="pokeball-container" id="pokeball-1" style="top: 30%; left: 25%;">
+                                <div class="pokeball"></div>
+                            </div>
+                            <div class="pokeball-container" id="pokeball-2" style="top: 30%; left: 50%;">
+                                <div class="pokeball"></div>
+                            </div>
+                            <div class="pokeball-container" id="pokeball-3" style="top: 30%; left: 75%;">
+                                <div class="pokeball"></div>
+                            </div>
+                        </div>
+                        <div class="study-teleport-door" id="study-teleport-door">
+                            ↓ LAB
+                        </div>
+                    </div>
+                    
+                    <!-- Characters in Study -->
+                    <div class="character professor" id="professor-character" style="bottom: 35%; left: 45%;"></div>
+                    <div class="character rival" id="rival-character" style="bottom: 35%; right: 25%;"></div>
+                </div>
+            </div>
 
-/**
- * CORE LOGIC
- */
-function update() {
-    if (shimmer > 0) shimmer--;
-}
+            <!-- Controls Overlay -->
+            <div id="controls-overlay">
+                <div class="mobile-controls">
+                    <div class="d-pad">
+                        <div class="d-pad-btn up" id="move-up">↑</div>
+                        <div class="d-pad-btn left" id="move-left">←</div>
+                        <div class="d-pad-btn center"></div>
+                        <div class="d-pad-btn right" id="move-right">→</div>
+                        <div class="d-pad-btn down" id="move-down">↓</div>
+                    </div>
+                    <div class="action-buttons">
+                        <div class="action-btn a-btn" id="action-a">A</div>
+                        <div class="action-btn b-btn" id="action-b">B</div>
+                    </div>
+                </div>
+                <div class="menu-swipe-indicator">
+                    <div class="menu-swipe-text">SWIPE FOR MENU</div>
+                    <div class="menu-swipe-arrow">⇒</div>
+                </div>
+            </div>
+        </div>
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        <!-- Pokémon Selection Screen -->
+        <div id="pokemon-selection-screen" class="screen">
+            <h2 class="selection-title">CHOOSE YOUR FIRST POKÉMON</h2>
+            <div class="pokemon-selection-container">
+                <div class="pokemon-option" data-pokemon="treecko">
+                    <div class="pokemon-sprite-container">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/252.png" alt="Treecko" class="pokemon-sprite">
+                    </div>
+                    <div class="pokemon-name">TREECKO</div>
+                    <div class="pokemon-type">GRASS TYPE</div>
+                    <div class="pokemon-description">
+                        The Wood Gecko Pokémon from the Hoenn region. 
+                        It's cool, calm, and collected. It uses the sharp 
+                        blades on its arms to slice through tall grass.
+                    </div>
+                </div>
+                
+                <div class="pokemon-option" data-pokemon="charmander">
+                    <div class="pokemon-sprite-container">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander" class="pokemon-sprite">
+                    </div>
+                    <div class="pokemon-name">CHARMANDER</div>
+                    <div class="pokemon-type">FIRE TYPE</div>
+                    <div class="pokemon-description">
+                        The Fire Lizard Pokémon from the Kanto region.
+                        The flame on its tail indicates its life force.
+                        If the flame goes out, the Pokémon dies.
+                    </div>
+                </div>
+                
+                <div class="pokemon-option" data-pokemon="froakie">
+                    <div class="pokemon-sprite-container">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png" alt="Froakie" class="pokemon-sprite">
+                    </div>
+                    <div class="pokemon-name">FROAKIE</div>
+                    <div class="pokemon-type">WATER TYPE</div>
+                    <div class="pokemon-description">
+                        The Bubble Frog Pokémon from the Kalos region.
+                        It secretes flexible bubbles from its chest and back.
+                        The bubbles reduce damage from attacks.
+                    </div>
+                </div>
+            </div>
+            <div class="selection-instructions">
+                TAP A POKÉMON TO SELECT | PRESS A BUTTON TO CONFIRM
+            </div>
+        </div>
 
-    // 1. Draw World
-    if (state === 'MOM_HOUSE') drawRoom('#d2b48c', "HOME");
-    else if (state === 'TOWN') drawTown();
-    else if (state === 'LAB_1F') drawLab1();
-    else if (state === 'LAB_2F') drawLab2();
+        <!-- Dialogue Overlay -->
+        <div id="dialogue-overlay">
+            <div class="dialogue-character" id="dialogue-character"></div>
+            <div class="dialogue-text" id="dialogue-text"></div>
+            <div class="dialogue-continue" id="dialogue-continue">TAP TO CONTINUE...</div>
+        </div>
 
-    // 2. Draw Player
-    ctx.fillStyle = (shimmer > 0 && shimmer % 2 === 0) ? 'white' : '#3a86ff';
-    ctx.fillRect(player.x, player.y, 14, 16);
+        <!-- Map Overlay -->
+        <div id="map-overlay">
+            <div class="map-title">OREBOUND REGION MAP</div>
+            <div class="map-container">
+                <div class="map-region" style="top: 10%; left: 20%; width: 30%; height: 25%;">MAPLE ROOT TOWN</div>
+                <div class="map-region" style="top: 40%; left: 50%; width: 25%; height: 20%;">ROUTE 1</div>
+                <div class="map-region" style="top: 65%; left: 30%; width: 35%; height: 30%;">AMBER CITY</div>
+                <div class="map-player-marker" id="map-player-marker"></div>
+            </div>
+            <button class="btn" id="close-map" style="margin-top: 20px; padding: 10px 20px;">CLOSE MAP</button>
+        </div>
 
-    // 3. Shimmer Overlay
-    if (shimmer > 0) {
-        ctx.fillStyle = `rgba(255, 255, 255, ${shimmer/10})`;
-        ctx.fillRect(0,0,canvas.width, canvas.height);
-    }
+        <!-- Instructions Overlay -->
+        <div id="instructions-overlay">
+            <h2 class="instructions-title">POKÉMON AMBER VERSION</h2>
+            <div class="instructions-content">
+                <div class="instructions-section">
+                    <h3 class="instructions-section-title">GAME CONCEPT</h3>
+                    <p>Platform: Mobile (iOS/Android) | Style: Faithful GBA-Era 2D Pixel Art</p>
+                    <p>Region: Orebound – A land defined by tectonic activity, featuring volcanoes, deep canyons, gemstone caves, and resilient ecosystems.</p>
+                </div>
+                
+                <div class="instructions-section">
+                    <h3 class="instructions-section-title">NEW MECHANICS</h3>
+                    <p>• Core Gems: Type-altering held items that change a Pokémon's type in battle</p>
+                    <p>• Secret Bases: Customizable hideouts throughout the Orebound region</p>
+                    <p>• Underground Mining Mini-game: Excavate fossils, gems, and rare items</p>
+                    <p>• Pokémon Roster: 210 Pokémon from Generations 1-4 + 15 new Orebound species/forms</p>
+                </div>
+                
+                <div class="instructions-section">
+                    <h3 class="instructions-section-title">MOBILE-OPTIMIZED CONTROLS</h3>
+                    <p>• Dynamic Virtual Joystick: Appears where your thumb first touches</p>
+                    <p>• Context-Action Button: Large "A Button" for interactions</p>
+                    <p>• Seamless Navigation: Doors teleport instantly between areas</p>
+                    <p>• Swipe Menu: Quick access to Key Items and menus</p>
+                </div>
+                
+                <div class="instructions-section">
+                    <h3 class="instructions-section-title">VISUAL & AUDIO STYLE</h3>
+                    <p>• Graphics: Authentic 32-bit GBA pixel art with modern polish</p>
+                    <p>• UI: Large, readable text and touch-friendly menu buttons</p>
+                    <p>• Sound: Music composed in GBA soundfont style with dynamic day/night tracks</p>
+                </div>
+            </div>
+            <button class="btn" id="close-instructions" style="padding: 10px 20px;">START GAME</button>
+        </div>
 
-    requestAnimationFrame(draw);
-}
+        <!-- Menu Overlay -->
+        <div id="menu-overlay">
+            <h2 class="menu-title">MENU</h2>
+            <div class="menu-options">
+                <div class="menu-option" id="menu-save">SAVE GAME</div>
+                <div class="menu-option" id="menu-load">LOAD GAME</div>
+                <div class="menu-option" id="menu-map">VIEW MAP</div>
+                <div class="menu-option" id="menu-settings">SETTINGS</div>
+                <div class="menu-option" id="menu-instructions">INSTRUCTIONS</div>
+                <div class="menu-option" id="menu-quit">QUIT TO TITLE</div>
+                <div class="menu-option" id="menu-close">CLOSE MENU</div>
+            </div>
+        </div>
 
-function drawRoom(color, label) {
-    ctx.fillStyle = color;
-    ctx.fillRect(10, 10, 220, 140);
-    ctx.fillStyle = "#5d4037"; // Back Door
-    ctx.fillRect(110, 10, 20, 5);
-    ctx.fillStyle = "black";
-    ctx.fillText(label, 20, 30);
-}
+        <!-- Teleport Effect -->
+        <div class="teleport-effect" id="teleport-effect"></div>
+    </div>
 
-function drawTown() {
-    ctx.fillStyle = '#7cfc00'; // Grass
-    ctx.fillRect(0,0, 240, 160);
-    // Ancient Tree
-    ctx.fillStyle = '#4b3621';
-    ctx.fillRect(160, 20, 40, 60);
-    // Lab Building
-    ctx.fillStyle = '#95a5a6';
-    ctx.fillRect(20, 20, 80, 50);
-    ctx.fillStyle = '#2c3e50'; // Lab Door
-    ctx.fillRect(50, 60, 20, 10);
-}
-
-function drawLab1() {
-    ctx.fillStyle = '#ecf0f1';
-    ctx.fillRect(0,0, 240, 160);
-    // Water Tanks
-    ctx.fillStyle = '#3498db';
-    ctx.fillRect(150, 30, 60, 40);
-    // Teleport Door
-    ctx.fillStyle = '#e67e22';
-    ctx.fillRect(110, 5, 20, 10);
-}
-
-function drawLab2() {
-    ctx.fillStyle = '#f3e5ab';
-    ctx.fillRect(0,0, 240, 160);
-    // Study Desk
-    ctx.fillStyle = '#5d4037';
-    ctx.fillRect(80, 40, 80, 30);
-    // Pokeballs
-    ctx.fillStyle = 'red';
-    ctx.beginPath(); ctx.arc(95, 55, 4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(120, 55, 4, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(145, 55, 4, 0, Math.PI*2); ctx.fill();
-}
-
-/**
- * INTERACTION & NAVIGATION
- */
-function handleInput() {
-    // Collision / Teleport Check
-    if (state === 'MOM_HOUSE' && player.y < 15) {
-        teleport('TOWN', 60, 80);
-    } else if (state === 'TOWN' && player.y < 70 && player.x < 100) {
-        teleport('LAB_1F', 110, 130);
-    } else if (state === 'LAB_1F' && player.y < 20) {
-        teleport('LAB_2F', 110, 130);
-    }
-}
-
-function teleport(newState, x, y) {
-    shimmer = 20; // Trigger "Shimmer" pixel effect
-    setTimeout(() => {
-        state = newState;
-        player.x = x;
-        player.y = y;
-        if(state === 'TOWN') triggerDialogue(script.intro);
-        if(state === 'LAB_1F') triggerDialogue(script.lab1);
-        if(state === 'LAB_2F') triggerDialogue(script.sequoia);
-    }, 200);
-}
-
-function triggerDialogue(lines) {
-    dialogQueue = [...lines];
-    showNextLine();
-}
-
-function showNextLine() {
-    if (dialogQueue.length > 0) {
-        textbox.style.display = 'block';
-        textbox.innerText = dialogQueue.shift();
-    } else {
-        textbox.style.display = 'none';
-        if (state === 'LAB_2F') starterUI.style.display = 'flex';
-    }
-}
-
-function choosePokemon(name) {
-    starterUI.style.display = 'none';
-    triggerDialogue([
-        `You chose ${name}!`,
-        "Rival: Then I'll take the other one! I won't lose!",
-        "Sequoia: Here is your Pokedex. Orebound's future depends on you!"
-    ]);
-}
-
-// Controls
-document.getElementById('btn-a').addEventListener('click', () => {
-    if (textbox.style.display === 'block') showNextLine();
-    else if (state === 'MOM_HOUSE') triggerDialogue(script.intro);
-});
-
-// Joystick Simulation
-let isMoving = false;
-document.getElementById('joystick-zone').addEventListener('touchstart', (e) => {
-    isMoving = true;
-});
-document.getElementById('joystick-zone').addEventListener('touchmove', (e) => {
-    if(!isMoving) return;
-    let touch = e.touches[0];
-    if (touch.clientX < window.innerWidth / 2) {
-        player.x += (touch.clientX - 100) * 0.05; // Simple dynamic float
-        player.y += (touch.clientY - 300) * 0.05;
-        handleInput();
-    }
-});
-// Keyboard Fallback
-window.onkeydown = (e) => {
-    if (e.key === 'ArrowUp') player.y -= 5;
-    if (e.key === 'ArrowDown') player.y += 5;
-    if (e.key === 'ArrowLeft') player.x -= 5;
-    if (e.key === 'ArrowRight') player.x += 5;
-    if (e.key === 'z') document.getElementById('btn-a').click();
-    handleInput();
-};
-
-setInterval(update, 1000/30);
-draw();
-</script>
+    <script>
+        // ===== GAME STATE MANAGEMENT =====
+        const GameState = {
+            // Current game state
+            currentScreen: 'loading',
+            currentRoom: 'house',
+            playerPosition: { x: 50, y: 25 },
+            selectedPokemon: null,
+            storyProgress: 0,
+            dialogueQueue: [],
+            currentDialogue: null,
+            isTyping: false,
+            canMove: false,
+            gameStarted: false,
+            
+            // Story flags
+            flags: {
+                wokeUp: false,
+                receivedLetter: false,
+                leftHouse: false,
+                enteredLab: false,
+                metAssistant: false,
+                teleportedToStudy: false,
+                metProfessor: false,
+                chosenStarter: false,
+                rivalChosen: false,
+                receivedPokedex: false,
+                metMomOutside: false
+            },
+            
+            // Player data
+            player: {
+                name: 'ASH',
+                pokemon: [],
+                items: [],
+                pokedex: false,
+                pokeballs: 0
+            },
+            
+            // Game settings
+            settings: {
+                textSpeed: 'medium',
+                sound: true,
+                music: true,
+                autosave: true
+            },
+            
+            // Initialize game
+            init: function() {
+                this.loadSettings();
+                this.setupEventListeners();
+                this.showLoadingScreen();
+            },
+            
+            // Load saved settings
+            loadSettings: function() {
+                const savedSettings = localStorage.getItem('pokemonAmberSettings');
+                if (savedSettings) {
+                    this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                }
+            },
+            
+            // Save settings
+            saveSettings: function() {
+                localStorage.setItem('pokemonAmberSettings', JSON.stringify(this.settings));
+            },
+            
+            // Setup all event listeners
+            setupEventListeners: function() {
+                // Start button
+                document.getElementById('start-button').addEventListener('click', () => this.startGame());
+                
+                // Close instructions button
+                document.getElementById('close-instructions').addEventListener('click', () => {
+                    this.hideInstructions();
+                    this.startGame();
+                });
+                
+                // Movement controls
+                document.getElementById('move-up').addEventListener('touchstart', () => this.movePlayer(0, -10));
+                document.getElementById('move-down').addEventListener('touchstart', () => this.movePlayer(0, 10));
+                document.getElementById('move-left').addEventListener('touchstart', () => this.movePlayer(-10, 0));
+                document.getElementById('move-right').addEventListener('touchstart', () => this.movePlayer(10, 0));
+                
+                // Action buttons
+                document.getElementById('action-a').addEventListener('touchstart', () => this.handleAction());
+                document.getElementById('action-b').addEventListener('touchstart', () => this.handleCancel());
+                
+                // Door interactions
+                document.getElementById('house-exit-door').addEventListener('click', () => this.leaveHouse());
+                document.getElementById('house-entrance-door').addEventListener('click', () => this.enterHouse());
+                document.getElementById('lab-entrance-door').addEventListener('click', () => this.enterLab());
+                document.getElementById('lab-exit-door').addEventListener('click', () => this.leaveLab());
+                document.getElementById('lab-stairs-door').addEventListener('click', () => this.teleportToStudy());
+                document.getElementById('study-teleport-door').addEventListener('click', () => this.teleportToLab());
+                
+                // Poké Ball interactions
+                document.getElementById('pokeball-1').addEventListener('click', () => this.showPokemonSelection());
+                document.getElementById('pokeball-2').addEventListener('click', () => this.showPokemonSelection());
+                document.getElementById('pokeball-3').addEventListener('click', () => this.showPokemonSelection());
+                
+                // Pokémon selection
+                document.querySelectorAll('.pokemon-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectPokemon(e.currentTarget.dataset.pokemon));
+                });
+                
+                // Dialogue continue
+                document.getElementById('dialogue-overlay').addEventListener('click', () => this.continueDialogue());
+                
+                // Map controls
+                document.getElementById('close-map').addEventListener('click', () => this.hideMap());
+                
+                // Menu controls
+                document.getElementById('menu-save').addEventListener('click', () => this.saveGame());
+                document.getElementById('menu-load').addEventListener('click', () => this.loadGame());
+                document.getElementById('menu-map').addEventListener('click', () => this.showMap());
+                document.getElementById('menu-settings').addEventListener('click', () => this.showSettings());
+                document.getElementById('menu-instructions').addEventListener('click', () => this.showInstructions());
+                document.getElementById('menu-quit').addEventListener('click', () => this.quitToTitle());
+                document.getElementById('menu-close').addEventListener('click', () => this.hideMenu());
+                
+                // Keyboard controls for desktop
+                document.addEventListener('keydown', (e) => this.handleKeyPress(e));
+                
+                // Swipe for menu
+                let touchStartX = 0;
+                document.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                });
+                
+                document.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    if (touchStartX - touchEndX > 100) {
+                        this.showMenu();
+                    }
+                });
+            },
+            
+            // Handle keyboard input
+            handleKeyPress: function(e) {
+                if (!this.canMove) return;
+                
+                switch(e.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        this.movePlayer(0, -10);
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        this.movePlayer(0, 10);
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        this.movePlayer(-10, 0);
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        this.movePlayer(10, 0);
+                        break;
+                    case 'Enter':
+                    case ' ':
+                        this.handleAction();
+                        break;
+                    case 'Escape':
+                    case 'Backspace':
+                        this.handleCancel();
+                        break;
+                    case 'm':
+                    case 'M':
+                        this.showMap();
+                        break;
+                }
+            },
+            
+            // Show loading screen
+            showLoadingScreen: function() {
+                this.currentScreen = 'loading';
+                document.getElementById('loading-screen').style.display = 'flex';
+                
+                // Simulate loading progress
+                let progress = 0;
+                const progressBar = document.getElementById('loading-progress');
+                const interval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            this.hideLoadingScreen();
+                            this.showInstructions();
+                        }, 500);
+                    }
+                    progressBar.style.width = `${progress}%`;
+                }, 100);
+            },
+            
+            // Hide loading screen
+            hideLoadingScreen: function() {
+                document.getElementById('loading-screen').style.display = 'none';
+            },
+            
+            // Show instructions
+            showInstructions: function() {
+                this.currentScreen = 'instructions';
+                document.getElementById('instructions-overlay').classList.add('active');
+            },
+            
+            // Hide instructions
+            hideInstructions: function() {
+                document.getElementById('instructions-overlay').classList.remove('active');
+            },
+            
+            // Start the game
+            startGame: function() {
+                this.currentScreen = 'game';
+                this.gameStarted = true;
+                
+                // Show game screen
+                document.getElementById('title-screen').classList.remove('active');
+                document.getElementById('game-screen').classList.add('active');
+                document.getElementById('controls-overlay').classList.add('active');
+                
+                // Start with house room
+                this.changeRoom('house');
+                
+                // Start opening dialogue
+                setTimeout(() => {
+                    this.startDialogueSequence('opening');
+                }, 500);
+            },
+            
+            // Change current room
+            changeRoom: function(roomId) {
+                this.currentRoom = roomId;
+                
+                // Hide all rooms
+                document.querySelectorAll('.room').forEach(room => {
+                    room.classList.remove('active');
+                });
+                
+                // Show target room
+                document.getElementById(`room-${roomId}`).classList.add('active');
+                
+                // Update player position based on room
+                this.updatePlayerPositionForRoom(roomId);
+                
+                // Update map marker
+                this.updateMapMarker();
+            },
+            
+            // Update player position for specific room
+            updatePlayerPositionForRoom: function(roomId) {
+                const playerChar = document.getElementById('player-character');
+                
+                switch(roomId) {
+                    case 'house':
+                        this.playerPosition = { x: 50, y: 25 };
+                        playerChar.style.bottom = '25%';
+                        playerChar.style.left = '50%';
+                        break;
+                    case 'town':
+                        this.playerPosition = { x: 30, y: 30 };
+                        playerChar.style.bottom = '30%';
+                        playerChar.style.left = '30%';
+                        break;
+                    case 'lab-ground':
+                        this.playerPosition = { x: 30, y: 20 };
+                        playerChar.style.bottom = '20%';
+                        playerChar.style.left = '30%';
+                        break;
+                    case 'lab-study':
+                        this.playerPosition = { x: 45, y: 30 };
+                        playerChar.style.bottom = '30%';
+                        playerChar.style.left = '45%';
+                        break;
+                }
+            },
+            
+            // Move player character
+            movePlayer: function(dx, dy) {
+                if (!this.canMove) return;
+                
+                const playerChar = document.getElementById('player-character');
+                const newX = this.playerPosition.x + dx;
+                const newY = this.playerPosition.y + dy;
+                
+                // Boundary checking
+                if (newX >= 5 && newX <= 95 && newY >= 5 && newY <= 95) {
+                    this.playerPosition.x = newX;
+                    this.playerPosition.y = newY;
+                    
+                    playerChar.style.left = `${this.playerPosition.x}%`;
+                    playerChar.style.bottom = `${this.playerPosition.y}%`;
+                    
+                    // Check for interactions
+                    this.checkForInteractions();
+                }
+            },
+            
+            // Check for nearby interactions
+            checkForInteractions: function() {
+                // This would check proximity to NPCs and objects
+                // For now, we'll just show a generic indicator
+            },
+            
+            // Handle A button action
+            handleAction: function() {
+                if (this.currentScreen === 'pokemon-selection') {
+                    this.confirmPokemonSelection();
+                    return;
+                }
+                
+                if (this.dialogueQueue.length > 0 || this.currentDialogue) {
+                    this.continueDialogue();
+                    return;
+                }
+                
+                // Check what the player is facing/interacting with
+                this.interactWithCurrentObject();
+            },
+            
+            // Handle B button/cancel action
+            handleCancel: function() {
+                if (this.currentScreen === 'pokemon-selection') {
+                    this.hidePokemonSelection();
+                    return;
+                }
+                
+                if (document.getElementById('map-overlay').classList.contains('active')) {
+                    this.hideMap();
+                    return;
+                }
+                
+                if (document.getElementById('menu-overlay').classList.contains('active')) {
+                    this.hideMenu();
+                    return;
+                }
+                
+                // Cancel current action
+                this.canMove = true;
+            },
+            
+            // Interact with current object/NPC
+            interactWithCurrentObject: function() {
+                // Based on current room and position, interact with nearby objects
+                switch(this.currentRoom) {
+                    case 'house':
+                        if (!this.flags.wokeUp) {
+                            this.startDialogueSequence('wakeUp');
+                        } else if (this.flags.wokeUp && !this.flags.leftHouse) {
+                            this.showDialogue('MOM', "Don't forget to visit Professor Sequoia! He's waiting for you.");
+                        }
+                        break;
+                    case 'town':
+                        if (this.flags.leftHouse && !this.flags.enteredLab) {
+                            this.showDialogue('', "The Habitat Research Lab stands proudly in Maple Root Town. The door seems to be unlocked.");
+                        }
+                        break;
+                    case 'lab-ground':
+                        if (!this.flags.metAssistant) {
+                            this.startDialogueSequence('labAssistant');
+                        } else {
+                            this.showDialogue('ASSISTANT', "The Professor is waiting upstairs. Just use the teleport door!");
+                        }
+                        break;
+                    case 'lab-study':
+                        if (!this.flags.metProfessor) {
+                            this.startDialogueSequence('professorIntro');
+                        } else if (!this.flags.chosenStarter) {
+                            this.showDialogue('PROFESSOR', "Go ahead, choose your Pokémon partner from the three Poké Balls on the desk.");
+                        } else if (!this.flags.receivedPokedex) {
+                            this.showDialogue('PROFESSOR', "Good luck on your journey! Remember to visit my assistant on Route 1.");
+                        }
+                        break;
+                }
+            },
+            
+            // Leave house
+            leaveHouse: function() {
+                if (!this.flags.wokeUp) {
+                    this.showDialogue('MOM', "Wait! You haven't read the Professor's letter yet!");
+                    return;
+                }
+                
+                this.flags.leftHouse = true;
+                this.showTeleportEffect(() => {
+                    this.changeRoom('town');
+                    this.startDialogueSequence('townIntroduction');
+                });
+            },
+            
+            // Enter house
+            enterHouse: function() {
+                this.showTeleportEffect(() => {
+                    this.changeRoom('house');
+                });
+            },
+            
+            // Enter lab
+            enterLab: function() {
+                if (!this.flags.leftHouse) {
+                    this.showDialogue('', "You should probably go home first and see what your Mom wanted.");
+                    return;
+                }
+                
+                this.flags.enteredLab = true;
+                this.showTeleportEffect(() => {
+                    this.changeRoom('lab-ground');
+                    
+                    if (!this.flags.metAssistant) {
+                        setTimeout(() => {
+                            this.startDialogueSequence('labAssistant');
+                        }, 500);
+                    }
+                });
+            },
+            
+            // Leave lab
+            leaveLab: function() {
+                this.showTeleportEffect(() => {
+                    this.changeRoom('town');
+                });
+            },
+            
+            // Teleport to study
+            teleportToStudy: function() {
+                if (!this.flags.metAssistant) {
+                    this.showDialogue('', "The door has a strange shimmering effect, but you're not sure how to use it.");
+                    return;
+                }
+                
+                this.flags.teleportedToStudy = true;
+                this.showTeleportEffect(() => {
+                    this.changeRoom('lab-study');
+                    
+                    if (!this.flags.metProfessor) {
+                        setTimeout(() => {
+                            this.startDialogueSequence('professorIntro');
+                        }, 500);
+                    }
+                });
+            },
+            
+            // Teleport to lab
+            teleportToLab: function() {
+                this.showTeleportEffect(() => {
+                    this.changeRoom('lab-ground');
+                    
+                    if (this.flags.chosenStarter && !this.flags.metMomOutside) {
+                        setTimeout(() => {
+                            this.startDialogueSequence('momOutsideLab');
+                        }, 500);
+                    }
+                });
+            },
+            
+            // Show teleport effect
+            showTeleportEffect: function(callback) {
+                const effect = document.getElementById('teleport-effect');
+                effect.classList.add('active');
+                
+                setTimeout(() => {
+                    effect.classList.remove('active');
+                    if (callback) callback();
+                }, 800);
+            },
+            
+            // Show Pokémon selection screen
+            showPokemonSelection: function() {
+                if (!this.flags.metProfessor) {
+                    this.showDialogue('', "You should probably talk to the Professor first.");
+                    return;
+                }
+                
+                if (this.flags.chosenStarter) {
+                    this.showDialogue('', "You've already chosen your Pokémon partner.");
+                    return;
+                }
+                
+                this.currentScreen = 'pokemon-selection';
+                document.getElementById('game-screen').classList.remove('active');
+                document.getElementById('pokemon-selection-screen').classList.add('active');
+            },
+            
+            // Hide Pokémon selection screen
+            hidePokemonSelection: function() {
+                this.currentScreen = 'game';
+                document.getElementById('pokemon-selection-screen').classList.remove('active');
+                document.getElementById('game-screen').classList.add('active');
+            },
+            
+            // Select a Pokémon
+            selectPokemon: function(pokemon) {
+                this.selectedPokemon = pokemon;
+                
+                // Remove previous selection
+                document.querySelectorAll('.pokemon-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selection to clicked option
+                document.querySelector(`[data-pokemon="${pokemon}"]`).classList.add('selected');
+            },
+            
+            // Confirm Pokémon selection
+            confirmPokemonSelection: function() {
+                if (!this.selectedPokemon) {
+                    this.showDialogue('PROFESSOR', "Please choose a Pokémon first.");
+                    return;
+                }
+                
+                this.flags.chosenStarter = true;
+                this.player.pokemon.push({
+                    name: this.selectedPokemon.toUpperCase(),
+                    type: this.getPokemonType(this.selectedPokemon),
+                    level: 5,
+                    moves: ['TACKLE', 'GROWL']
+                });
+                
+                this.hidePokemonSelection();
+                
+                // Continue with story
+                this.startDialogueSequence('afterPokemonSelection');
+            },
+            
+            // Get Pokémon type
+            getPokemonType: function(pokemon) {
+                switch(pokemon) {
+                    case 'treecko': return 'GRASS';
+                    case 'charmander': return 'FIRE';
+                    case 'froakie': return 'WATER';
+                    default: return 'NORMAL';
+                }
+            },
+            
+            // Start a dialogue sequence
+            startDialogueSequence: function(sequenceName) {
+                this.canMove = false;
+                this.dialogueQueue = this.getDialogueSequence(sequenceName);
+                this.showDialogueOverlay();
+                this.showNextDialogue();
+            },
+            
+            // Get dialogue sequence by name
+            getDialogueSequence: function(sequenceName) {
+                const sequences = {
+                    opening: [
+                        { speaker: 'MOM', text: "[PLAYER]! Wake up, sleepyhead!" },
+                        { speaker: 'MOM', text: "Professor Sequoia sent this letter for you. It's marked 'URGENT'." },
+                        { speaker: 'MOM', text: "Your childhood friend, the Professor's grandchild, has already left for the lab." },
+                        { speaker: 'MOM', text: "You should hurry! The Professor needs your help." },
+                        { speaker: '', text: "You quickly get dressed and ready for the day. The path to the Professor's Lab is now open." }
+                    ],
+                    
+                    wakeUp: [
+                        { speaker: 'MOM', text: "Good morning, sweetie! You were sleeping so soundly." },
+                        { speaker: 'MOM', text: "Professor Sequoia sent this urgent letter for you." },
+                        { speaker: 'MOM', text: "Your friend already left for the lab. You should hurry!" }
+                    ],
+                    
+                    townIntroduction: [
+                        { speaker: '', text: "You step outside into Maple Root Town." },
+                        { speaker: '', text: "The cozy, rustic cottages surround the large, ancient tree at the town's center." },
+                        { speaker: '', text: "The modern Habitat Research Lab stands out among the traditional buildings." },
+                        { speaker: '', text: "Professor Sequoia is waiting for you inside." }
+                    ],
+                    
+                    labAssistant: [
+                        { speaker: 'ASSISTANT', text: "Ah, you must be [PLAYER]! Welcome to the Habitat Research Lab." },
+                        { speaker: 'ASSISTANT', text: "The Professor is waiting for you upstairs in his study." },
+                        { speaker: 'ASSISTANT', text: "Just head through that door over there—it'll take you right to him!" },
+                        { speaker: 'ASSISTANT', text: "It uses new teleport technology for instant room transitions. Pretty neat, huh?" },
+                        { speaker: '', text: "The assistant points to a door with a strange shimmering effect around it." }
+                    ],
+                    
+                    professorIntro: [
+                        { speaker: 'PROFESSOR SEQUOIA', text: "Ah, [PLAYER]! Thank you for coming on such short notice." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "I'm Professor Sequoia, the region's expert in Pokémon Habitats and Evolution." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "These three Pokémon from distant regions have been entrusted to me for a special habitat study in Orebound." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "However, we've been experiencing strange seismic activity recently." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "A mysterious tremor shook the lab earlier today." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "I need Trainers to help ensure these Pokémon are safe and well-understood in our region." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "Please, choose one as your partner on this journey." }
+                    ],
+                    
+                    afterPokemonSelection: [
+                        { speaker: 'RIVAL', text: "Perfect! I'll take this one then!" },
+                        { speaker: 'RIVAL', text: `It has the type advantage over your ${this.selectedPokemon ? this.selectedPokemon.toUpperCase() : 'Pokémon'}!` },
+                        { speaker: 'RIVAL', text: "Let the competition begin! I'll see you on Route 1!" },
+                        { speaker: '', text: "Your rival chooses the Pokémon with a type advantage over yours and rushes out of the lab." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "Excellent choice! Here, take this Pokédex." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "I want you to fill it while uncovering the cause of Orebound's strange seismic activity." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "Your first mission: find my assistant on Route 1 to receive Poké Balls." },
+                        { speaker: 'PROFESSOR SEQUOIA', text: "Good luck on your journey, [PLAYER]!" }
+                    ],
+                    
+                    momOutsideLab: [
+                        { speaker: 'MOM', text: "There you are! The Professor's assistant told me you'd be starting your journey." },
+                        { speaker: 'MOM', text: "I'm so proud of you! Here, take this Town Map." },
+                        { speaker: 'MOM', text: "I want you to be safe out there. Orebound can be dangerous with all the seismic activity." },
+                        { speaker: 'MOM', text: "Remember to call home sometimes! I'll be cheering for you!" },
+                        { speaker: '', text: "With your new Pokémon partner and your mother's blessing, your adventure in the Orebound region begins!" },
+                        { speaker: '', text: "Your mission: Travel to Route 1, receive Poké Balls from the Professor's assistant," },
+                        { speaker: '', text: "and begin your journey to become Orebound's Pokémon Champion!" }
+                    ]
+                };
+                
+                // Set appropriate flags
+                switch(sequenceName) {
+                    case 'opening':
+                    case 'wakeUp':
+                        this.flags.wokeUp = true;
+                        break;
+                    case 'labAssistant':
+                        this.flags.metAssistant = true;
+                        break;
+                    case 'professorIntro':
+                        this.flags.metProfessor = true;
+                        break;
+                    case 'afterPokemonSelection':
+                        this.flags.rivalChosen = true;
+                        this.flags.receivedPokedex = true;
+                        this.player.pokedex = true;
+                        break;
+                    case 'momOutsideLab':
+                        this.flags.metMomOutside = true;
+                        break;
+                }
+                
+                return sequences[sequenceName] || [];
+            },
+            
+            // Show dialogue overlay
+            showDialogueOverlay: function() {
+                document.getElementById('dialogue-overlay').classList.add('active');
+            },
+            
+            // Hide dialogue overlay
+            hideDialogueOverlay: function() {
+                document.getElementById('dialogue-overlay').classList.remove('active');
+                this.canMove = true;
+            },
+            
+            // Show next dialogue in queue
+            showNextDialogue: function() {
+                if (this.dialogueQueue.length === 0) {
+                    this.hideDialogueOverlay();
+                    this.currentDialogue = null;
+                    return;
+                }
+                
+                this.currentDialogue = this.dialogueQueue.shift();
+                this.showDialogue(this.currentDialogue.speaker, this.currentDialogue.text);
+            },
+            
+            // Show individual dialogue
+            showDialogue: function(speaker, text) {
+                this.canMove = false;
+                this.showDialogueOverlay();
+                
+                document.getElementById('dialogue-character').textContent = speaker;
+                document.getElementById('dialogue-text').textContent = '';
+                document.getElementById('dialogue-continue').style.display = 'none';
+                
+                this.typeText(text, () => {
+                    document.getElementById('dialogue-continue').style.display = 'block';
+                });
+            },
+            
+            // Type text with typewriter effect
+            typeText: function(text, callback) {
+                this.isTyping = true;
+                const dialogueText = document.getElementById('dialogue-text');
+                let index = 0;
+                
+                const typeInterval = setInterval(() => {
+                    if (index < text.length) {
+                        dialogueText.textContent += text.charAt(index);
+                        index++;
+                    } else {
+                        clearInterval(typeInterval);
+                        this.isTyping = false;
+                        if (callback) callback();
+                    }
+                }, this.settings.textSpeed === 'fast' ? 30 : this.settings.textSpeed === 'slow' ? 70 : 50);
+            },
+            
+            // Continue dialogue
+            continueDialogue: function() {
+                if (this.isTyping) {
+                    // Skip to end of typing
+                    document.getElementById('dialogue-text').textContent = this.currentDialogue.text;
+                    document.getElementById('dialogue-continue').style.display = 'block';
+                    this.isTyping = false;
+                    return;
+                }
+                
+                if (this.dialogueQueue.length > 0 || this.currentDialogue) {
+                    this.showNextDialogue();
+                } else {
+                    this.hideDialogueOverlay();
+                }
+            },
+            
+            // Show map
+            showMap: function() {
+                document.getElementById('map-overlay').classList.add('active');
+                this.updateMapMarker();
+            },
+            
+            // Hide map
+            hideMap: function() {
+                document.getElementById('map-overlay').classList.remove('active');
+            },
+            
+            // Update map marker position
+            updateMapMarker: function() {
+                const marker = document.getElementById('map-player-marker');
+                
+                switch(this.currentRoom) {
+                    case 'house':
+                        marker.style.top = '15%';
+                        marker.style.left = '25%';
+                        break;
+                    case 'town':
+                        marker.style.top = '15%';
+                        marker.style.left = '25%';
+                        break;
+                    case 'lab-ground':
+                        marker.style.top = '15%';
+                        marker.style.left = '25%';
+                        break;
+                    case 'lab-study':
+                        marker.style.top = '15%';
+                        marker.style.left = '25%';
+                        break;
+                }
+            },
+            
+            // Show menu
+            showMenu: function() {
+                document.getElementById('menu-overlay').classList.add('active');
+                this.canMove = false;
+            },
+            
+            // Hide menu
+            hideMenu: function() {
+                document.getElementById('menu-overlay').classList.remove('active');
+                this.canMove = true;
+            },
+            
+            // Show settings
+            showSettings: function() {
+                // Implementation for settings screen
+                alert('Settings screen would appear here in the full game.');
+            },
+            
+            // Save game
+            saveGame: function() {
+                const saveData = {
+                    player: this.player,
+                    flags: this.flags,
+                    storyProgress: this.storyProgress,
+                    selectedPokemon: this.selectedPokemon,
+                    playerPosition: this.playerPosition,
+                    currentRoom: this.currentRoom
+                };
+                
+                localStorage.setItem('pokemonAmberSave', JSON.stringify(saveData));
+                this.showDialogue('', 'Game saved successfully!');
+            },
+            
+            // Load game
+            loadGame: function() {
+                const saveData = localStorage.getItem('pokemonAmberSave');
+                if (saveData) {
+                    const data = JSON.parse(saveData);
+                    this.player = data.player;
+                    this.flags = data.flags;
+                    this.storyProgress = data.storyProgress;
+                    this.selectedPokemon = data.selectedPokemon;
+                    this.playerPosition = data.playerPosition;
+                    this.currentRoom = data.currentRoom;
+                    
+                    this.changeRoom(this.currentRoom);
+                    this.hideMenu();
+                    this.showDialogue('', 'Game loaded successfully!');
+                } else {
+                    this.showDialogue('', 'No save data found.');
+                }
+            },
+            
+            // Quit to title screen
+            quitToTitle: function() {
+                if (confirm('Are you sure you want to quit to the title screen? Any unsaved progress will be lost.')) {
+                    this.currentScreen = 'title';
+                    document.getElementById('menu-overlay').classList.remove('active');
+                    document.getElementById('game-screen').classList.remove('active');
+                    document.getElementById('title-screen').classList.add('active');
+                    
+                    // Reset game state
+                    this.resetGame();
+                }
+            },
+            
+            // Reset game state
+            resetGame: function() {
+                this.currentRoom = 'house';
+                this.playerPosition = { x: 50, y: 25 };
+                this.selectedPokemon = null;
+                this.storyProgress = 0;
+                this.dialogueQueue = [];
+                this.currentDialogue = null;
+                this.isTyping = false;
+                this.canMove = false;
+                this.gameStarted = false;
+                
+                // Reset flags
+                this.flags = {
+                    wokeUp: false,
+                    receivedLetter: false,
+                    leftHouse: false,
+                    enteredLab: false,
+                    metAssistant: false,
+                    teleportedToStudy: false,
+                    metProfessor: false,
+                    chosenStarter: false,
+                    rivalChosen: false,
+                    receivedPokedex: false,
+                    metMomOutside: false
+                };
+                
+                // Reset player data
+                this.player = {
+                    name: 'ASH',
+                    pokemon: [],
+                    items: [],
+                    pokedex: false,
+                    pokeballs: 0
+                };
+            }
+        };
+        
+        // Initialize the game when the page loads
+        window.addEventListener('load', () => {
+            GameState.init();
+        });
+        
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // Prevent zoom on double tap
+        let lastTap = 0;
+        document.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault();
+            }
+            lastTap = currentTime;
+        });
+    </script>
 </body>
 </html>
