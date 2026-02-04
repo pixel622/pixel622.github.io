@@ -1,1600 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pokémon Pixel Adventure</title>
-    <style>
-        /* ===== RESET & FULLSCREEN ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Starter Selection</title>
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-            font-family: 'Pokemon GB', monospace;
-        }
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        touch-action: none;
+        font-family: monospace;
+        color: white;
+    }
 
-        body {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    #gameContainer {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        /* ===== GBA SCREEN ===== */
-        .gba-screen {
-            width: 100vw;
-            height: 100vh;
-            max-width: 480px;
-            max-height: 320px;
-            background: #8bac0f;
-            position: relative;
-            overflow: hidden;
-            border: 16px solid #2a2a2a;
-            border-radius: 20px;
-            box-shadow: 
-                inset 0 0 40px rgba(0, 0, 0, 0.8),
-                0 0 60px rgba(139, 172, 15, 0.3),
-                0 20px 80px rgba(0, 0, 0, 0.9);
-        }
+    canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background: black;
+    }
 
-        /* ===== ALL SCREENS ===== */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
+    #uiOverlay {
+        position: absolute;
+        width: 320px;
+        height: 240px;
+        transform: scale(4);
+        pointer-events: none;
+    }
 
-        /* LOADING SCREEN */
-        #loading-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-            color: #8bac0f;
-            z-index: 1000;
-        }
+    .dialogue {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        width: 304px;
+        height: 56px;
+        background: rgba(0,0,0,0.75);
+        border: 2px solid gold;
+        padding: 4px;
+        font-size: 8px;
+        line-height: 10px;
+    }
 
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #306230;
-            border-top-color: #ffcc00;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        .loading-text {
-            font-size: 20px;
-            animation: pulse 1.5s infinite;
-        }
-
-        /* LOGO SCREEN */
-        #logo-screen {
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .pokemon-logo {
-            width: 300px;
-            height: 100px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100"><text x="150" y="60" font-family="Arial Black" font-size="48" fill="%23ffcc00" text-anchor="middle" stroke="%23306230" stroke-width="4">POKéMON</text></svg>') no-repeat center;
-            animation: logoGlow 2s infinite alternate;
-        }
-
-        /* INTRO SCREEN */
-        #intro-screen {
-            background: #000;
-        }
-
-        .professor-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 80%;
-        }
-
-        .professor-sprite {
-            width: 64px;
-            height: 64px;
-            background: #3060a8;
-            margin: 0 auto 20px;
-            border: 4px solid #0f380f;
-            position: relative;
-        }
-
-        .professor-sprite::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            height: 16px;
-            background: #ffcc00;
-            border: 2px solid #0f380f;
-        }
-
-        /* DIALOG BOX */
-        .dialog-box {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            background: #e8f8e0;
-            border: 8px solid #0f380f;
-            border-left: 0;
-            border-right: 0;
-            border-bottom: 0;
-            padding: 15px;
-            display: none;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .dialog-text {
-            font-size: 16px;
-            line-height: 20px;
-            color: #0f380f;
-            height: 40px;
-            overflow: hidden;
-            font-family: 'Pokemon GB', monospace;
-        }
-
-        .dialog-arrow {
-            position: absolute;
-            bottom: 15px;
-            right: 20px;
-            color: #306230;
-            font-size: 20px;
-            animation: blink 1s infinite;
-        }
-
-        /* NAME INPUT */
-        #name-input {
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .name-container {
-            background: #e8f8e0;
-            border: 10px solid #0f380f;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .name-title {
-            font-size: 24px;
-            color: #0f380f;
-            margin-bottom: 20px;
-        }
-
-        .name-display {
-            font-size: 36px;
-            color: #306230;
-            margin: 20px 0;
-            min-height: 50px;
-            letter-spacing: 6px;
-            font-weight: bold;
-            border-bottom: 4px solid #0f380f;
-            padding-bottom: 10px;
-        }
-
-        .name-keyboard {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            margin: 20px 0;
-        }
-
-        .name-key {
-            padding: 10px;
-            background: #306230;
-            color: #e8f8e0;
-            border: 3px solid #0f380f;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            border-radius: 5px;
-        }
-
-        .name-key:active {
-            background: #ffcc00;
-            color: #306230;
-        }
-
-        .name-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .name-btn {
-            padding: 12px 24px;
-            background: #306230;
-            color: #e8f8e0;
-            border: 4px solid #0f380f;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 8px;
-            min-width: 100px;
-        }
-
-        .name-btn.ok {
-            background: #4a752c;
-        }
-
-        .name-btn.cancel {
-            background: #d85050;
-        }
-
-        /* START BUTTON */
-        .start-button {
-            position: absolute;
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 40px;
-            background: #ffcc00;
-            color: #306230;
-            border: 6px solid #0f380f;
-            font-size: 24px;
-            cursor: pointer;
-            border-radius: 10px;
-            display: none;
-            animation: pulseButton 2s infinite;
-        }
-
-        /* GAME SCREEN */
-        #game-screen {
-            background: #8bac0f;
-        }
-
-        #game-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* POKEMON SELECTION */
-        #pokemon-select {
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .pokemon-select-container {
-            background: #e8f8e0;
-            border: 10px solid #0f380f;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .select-title {
-            font-size: 24px;
-            color: #0f380f;
-            margin-bottom: 30px;
-        }
-
-        .pokemon-options {
-            display: flex;
-            justify-content: space-around;
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .pokemon-option {
-            background: #306230;
-            border: 6px solid #0f380f;
-            padding: 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .pokemon-option:active {
-            background: #ffcc00;
-            transform: scale(0.95);
-        }
-
-        .pokemon-sprite {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 10px;
-            font-size: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pokemon-name {
-            font-size: 18px;
-            color: #e8f8e0;
-        }
-
-        /* MOBILE CONTROLS */
-        #mobile-controls {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100vw;
-            height: 200px;
-            z-index: 50;
-            display: none;
-            padding: 20px;
-            pointer-events: none;
-        }
-
-        .dpad-container {
-            position: absolute;
-            left: 30px;
-            bottom: 30px;
-            width: 140px;
-            height: 140px;
-            pointer-events: auto;
-        }
-
-        .dpad-btn {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: rgba(48, 98, 48, 0.95);
-            border: 6px solid #0f380f;
-            color: #e8f8e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: all 0.1s;
-        }
-
-        .dpad-btn:active {
-            background: #ffcc00;
-            color: #306230;
-            transform: scale(0.95);
-        }
-
-        .dpad-up { top: 0; left: 45px; }
-        .dpad-down { bottom: 0; left: 45px; }
-        .dpad-left { top: 45px; left: 0; }
-        .dpad-right { top: 45px; right: 0; }
-
-        .action-buttons {
-            position: absolute;
-            right: 30px;
-            bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-            pointer-events: auto;
-        }
-
-        .action-btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(139, 172, 15, 0.95);
-            border: 6px solid #306230;
-            border-radius: 50%;
-            color: #e8f8e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.1s;
-        }
-
-        .action-btn:active {
-            background: #ffcc00;
-            color: #306230;
-            transform: scale(0.95);
-        }
-
-        .action-btn.start {
-            width: 100px;
-            height: 40px;
-            border-radius: 20px;
-            font-size: 18px;
-            margin-top: 10px;
-        }
-
-        /* ORIENTATION WARNING */
-        #orientation-warning {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #ffcc00;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .rotate-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: rotate 2s infinite linear;
-        }
-
-        /* ANIMATIONS */
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(90deg); }
-        }
-
-        @keyframes logoGlow {
-            0% { filter: drop-shadow(0 0 5px #ffcc00); }
-            100% { filter: drop-shadow(0 0 20px #ffcc00); }
-        }
-
-        @keyframes pulseButton {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
-        }
-
-        /* SCREEN EFFECTS */
-        .screen-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        .crt-scanlines {
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 0, 0, 0.1) 50%
-            );
-            background-size: 100% 4px;
-            animation: scanlines 8s linear infinite;
-        }
-
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(4px); }
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .gba-screen {
-                width: 100vw;
-                height: 100vh;
-                max-width: 100%;
-                max-height: 100%;
-                border-width: 8px;
-                border-radius: 10px;
-            }
-            
-            .pokemon-logo {
-                width: 250px;
-                height: 80px;
-            }
-            
-            .dialog-text {
-                font-size: 14px;
-                line-height: 18px;
-            }
-            
-            .dpad-container {
-                width: 120px;
-                height: 120px;
-                left: 20px;
-                bottom: 20px;
-            }
-            
-            .dpad-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-            
-            .dpad-up, .dpad-down { left: 40px; }
-            .dpad-left, .dpad-right { top: 40px; }
-            
-            .action-buttons {
-                right: 20px;
-                bottom: 20px;
-            }
-            
-            .action-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-            }
-            
-            .action-btn.start {
-                width: 80px;
-                height: 35px;
-                font-size: 16px;
-            }
-        }
-
-        @media (orientation: portrait) {
-            #orientation-warning {
-                display: flex;
-            }
-            #mobile-controls {
-                display: none !important;
-            }
-        }
-
-        @media (orientation: landscape) {
-            #orientation-warning {
-                display: none;
-            }
-        }
-    </style>
+    .infoPanel {
+        position: absolute;
+        top: 16px;
+        right: 8px;
+        width: 120px;
+        height: 160px;
+        background: rgba(0,0,0,0.85);
+        border: 2px solid #aaa;
+        padding: 4px;
+        font-size: 8px;
+        display: none;
+    }
+</style>
 </head>
+
 <body>
-    <!-- GBA SCREEN -->
-    <div class="gba-screen">
-        <!-- SCREENS -->
-        <div id="loading-screen" class="screen">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">NOW LOADING...</div>
-        </div>
+<div id="gameContainer">
+    <canvas id="game" width="320" height="240"></canvas>
 
-        <div id="logo-screen" class="screen">
-            <div class="pokemon-logo"></div>
-        </div>
-
-        <div id="intro-screen" class="screen">
-            <div class="professor-container">
-                <div class="professor-sprite"></div>
-            </div>
-            <div id="intro-dialog" class="dialog-box">
-                <div class="dialog-text" id="dialog-text"></div>
-                <div class="dialog-arrow">▼</div>
-            </div>
-        </div>
-
-        <div id="name-input" class="screen">
-            <div class="name-container">
-                <div class="name-title">What is your name?</div>
-                <div class="name-display" id="name-display"></div>
-                <div class="name-keyboard" id="name-keyboard"></div>
-                <div class="name-controls">
-                    <div class="name-btn ok" id="ok-btn">OK</div>
-                    <div class="name-btn cancel" id="cancel-btn">CANCEL</div>
-                </div>
-            </div>
-        </div>
-
-        <div id="pokemon-select" class="screen">
-            <div class="pokemon-select-container">
-                <div class="select-title">Choose your Pokémon!</div>
-                <div class="pokemon-options">
-                    <div class="pokemon-option" data-pokemon="treecko">
-                        <div class="pokemon-sprite">🌱</div>
-                        <div class="pokemon-name">TREECKO</div>
-                    </div>
-                    <div class="pokemon-option" data-pokemon="froakie">
-                        <div class="pokemon-sprite">💧</div>
-                        <div class="pokemon-name">FROAKIE</div>
-                    </div>
-                    <div class="pokemon-option" data-pokemon="charmander">
-                        <div class="pokemon-sprite">🔥</div>
-                        <div class="pokemon-name">CHARMANDER</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="game-screen" class="screen">
-            <canvas id="game-canvas"></canvas>
-            <div id="game-dialog" class="dialog-box"></div>
-            <div class="start-button" id="start-button">START</div>
-        </div>
-
-        <!-- SCREEN EFFECTS -->
-        <div class="screen-overlay crt-scanlines"></div>
+    <div id="uiOverlay">
+        <div class="dialogue" id="dialogueBox"></div>
+        <div class="infoPanel" id="infoPanel"></div>
     </div>
+</div>
 
-    <!-- MOBILE CONTROLS -->
-    <div id="mobile-controls">
-        <div class="dpad-container">
-            <div class="dpad-btn dpad-up" data-direction="up">↑</div>
-            <div class="dpad-btn dpad-down" data-direction="down">↓</div>
-            <div class="dpad-btn dpad-left" data-direction="left">←</div>
-            <div class="dpad-btn dpad-right" data-direction="right">→</div>
-        </div>
-        
-        <div class="action-buttons">
-            <div class="action-btn" id="a-btn">A</div>
-            <div class="action-btn" id="b-btn">B</div>
-            <div class="action-btn start" id="start-btn">START</div>
-        </div>
-    </div>
+<script>
+/* ======================================================
+   CORE CONFIG
+====================================================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    <!-- ORIENTATION WARNING -->
-    <div id="orientation-warning">
-        <div class="rotate-icon">↻</div>
-        <h2 style="margin-bottom: 20px; color: #ffcc00;">PLEASE ROTATE YOUR DEVICE</h2>
-        <p style="color: #8bac0f; font-size: 18px; line-height: 1.5;">
-            Pokémon Pixel Adventure<br>
-            requires landscape mode
-        </p>
-    </div>
+const SCALE = 4;
+canvas.style.width = (320 * SCALE) + "px";
+canvas.style.height = (240 * SCALE) + "px";
 
-    <script>
-        // ============================================
-        // GAME CONFIGURATION
-        // ============================================
-        const CONFIG = {
-            CANVAS_WIDTH: 480,
-            CANVAS_HEIGHT: 320,
-            TILE_SIZE: 32,
-            PLAYER_SIZE: 16,
-            PLAYER_SPEED: 2,
-            VIEWPORT_WIDTH: 15,
-            VIEWPORT_HEIGHT: 10,
-            DIALOG_SPEED: 30
-        };
+const FPS = 60;
+const FRAME_TIME = 1000 / FPS;
 
-        // ============================================
-        // GAME STATE
-        // ============================================
-        const Game = {
-            screen: 'loading',
-            player: {
-                name: '',
-                pokemon: '',
-                x: 240,
-                y: 160,
-                direction: 'down',
-                inHouse: true
-            },
-            dialog: {
-                active: false,
-                text: '',
-                typing: false,
-                lines: [],
-                lineIndex: 0,
-                callback: null
-            },
-            map: {
-                width: 30,
-                height: 20,
-                tiles: [],
-                buildings: [],
-                npcs: []
-            }
-        };
+/* ======================================================
+   STATE MACHINE
+====================================================== */
+const ScenePhase = {
+    INTRO: 0,
+    REVEAL: 1,
+    SELECT: 2,
+    CONFIRM: 3
+};
 
-        // ============================================
-        // ELEMENTS
-        // ============================================
-        const Screens = {
-            loading: document.getElementById('loading-screen'),
-            logo: document.getElementById('logo-screen'),
-            intro: document.getElementById('intro-screen'),
-            nameInput: document.getElementById('name-input'),
-            pokemonSelect: document.getElementById('pokemon-select'),
-            game: document.getElementById('game-screen')
-        };
+let phase = ScenePhase.INTRO;
+let phaseTimer = 0;
 
-        const Canvas = {
-            element: document.getElementById('game-canvas'),
-            ctx: null
-        };
+/* ======================================================
+   WEATHER
+====================================================== */
+const weatherTypes = ["sunny", "rain", "night"];
+const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        function init() {
-            console.log('🎮 Starting Pokémon Pixel Adventure...');
-            
-            // Initialize canvas
-            Canvas.ctx = Canvas.element.getContext('2d');
-            resizeCanvas();
-            
-            // Setup event listeners
-            setupEvents();
-            
-            // Check orientation
-            checkOrientation();
-            
-            // Start game
-            setTimeout(() => {
-                Screens.loading.style.display = 'none';
-                showScreen('logo');
-            }, 2000);
-            
-            // Start game loop
-            requestAnimationFrame(gameLoop);
-            
-            console.log('✅ Game initialized!');
-        }
+/* ======================================================
+   STARTERS
+====================================================== */
+const starters = [
+    { name: "Charmander", type: "Fire", color: "#ff6633", stats: [3,4,3] },
+    { name: "Squirtle", type: "Water", color: "#3399ff", stats: [4,3,2] },
+    { name: "Bulbasaur", type: "Grass", color: "#33cc66", stats: [4,3,3] }
+];
 
-        function resizeCanvas() {
-            Canvas.element.width = CONFIG.CANVAS_WIDTH;
-            Canvas.element.height = CONFIG.CANVAS_HEIGHT;
-        }
+let selectedIndex = -1;
+let hoveredIndex = -1;
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        function setupEvents() {
-            // Window events
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('orientationchange', checkOrientation);
-            
-            // Logo screen click
-            Screens.logo.addEventListener('click', () => {
-                showScreen('intro');
-                startIntro();
-            });
-            
-            // Name input
-            document.getElementById('ok-btn').addEventListener('click', confirmName);
-            document.getElementById('cancel-btn').addEventListener('click', cancelName);
-            
-            // Pokémon selection
-            document.querySelectorAll('.pokemon-option').forEach(option => {
-                option.addEventListener('click', (e) => {
-                    const pokemon = e.currentTarget.getAttribute('data-pokemon');
-                    selectPokemon(pokemon);
-                });
-            });
-            
-            // Start button
-            document.getElementById('start-button').addEventListener('click', startGame);
-            
-            // Dialog box
-            document.getElementById('intro-dialog').addEventListener('click', handleDialogClick);
-            document.getElementById('game-dialog').addEventListener('click', handleDialogClick);
-            
-            // Mobile controls
-            setupMobileControls();
-            
-            // Keyboard support
-            document.addEventListener('keydown', handleKeyDown);
-            document.addEventListener('keyup', handleKeyUp);
-            
-            // Prevent unwanted behaviors
-            document.addEventListener('contextmenu', (e) => e.preventDefault());
-        }
+/* ======================================================
+   INPUT
+====================================================== */
+let touchStartTime = 0;
+let lastTapTime = 0;
 
-        function setupMobileControls() {
-            // D-pad buttons
-            document.querySelectorAll('.dpad-btn').forEach(btn => {
-                btn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const direction = btn.getAttribute('data-direction');
-                    startMoving(direction);
-                });
-                
-                btn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    stopMoving();
-                });
-                
-                btn.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    stopMoving();
-                });
-            });
-            
-            // Action buttons
-            document.getElementById('a-btn').addEventListener('click', handleAButton);
-            document.getElementById('b-btn').addEventListener('click', handleBButton);
-            document.getElementById('start-btn').addEventListener('click', handleStartButton);
-        }
+/* ======================================================
+   PARTICLES
+====================================================== */
+const particles = [];
 
-        // ============================================
-        // SCREEN MANAGEMENT
-        // ============================================
-        function showScreen(screenName) {
-            console.log(`🔄 Switching to screen: ${screenName}`);
-            
-            // Hide all screens
-            Object.values(Screens).forEach(screen => {
-                screen.style.display = 'none';
-            });
-            
-            // Show requested screen
-            Screens[screenName].style.display = 'block';
-            Game.screen = screenName;
-            
-            // Special handling
-            switch(screenName) {
-                case 'game':
-                    initGame();
-                    document.getElementById('mobile-controls').style.display = 'flex';
-                    break;
-                default:
-                    document.getElementById('mobile-controls').style.display = 'none';
-                    break;
-            }
-        }
+function spawnParticles(x, y, type) {
+    let count = type === "Fire" ? 3 : type === "Water" ? 2 : 2;
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: -Math.random() * 0.5,
+            life: 60 + Math.random() * 40,
+            type
+        });
+    }
+}
 
-        // ============================================
-        // INTRODUCTION SEQUENCE
-        // ============================================
-        function startIntro() {
-            const introDialog = [
-                "Hello there! Welcome to the world",
-                "of Pokémon! My name is Kyan!",
-                "...",
-                "People call me the Pokémon Prof!",
-                "This world is inhabited by creatures",
-                "called Pokémon!",
-                "...",
-                "For some people, Pokémon are pets.",
-                "Others use them for fights.",
-                "Myself… I study Pokémon as a",
-                "profession...",
-                "...",
-                "First, what is your name?"
-            ];
-            
-            showDialog(introDialog, () => {
-                setTimeout(() => {
-                    showScreen('nameInput');
-                    initNameInput();
-                }, 1000);
-            }, 'intro');
-        }
+/* ======================================================
+   DRAW HELPERS
+====================================================== */
+function drawPixelRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+}
 
-        // ============================================
-        // NAME INPUT
-        // ============================================
-        function initNameInput() {
-            Game.player.name = '';
-            createKeyboard();
-            updateNameDisplay();
-        }
+function drawText(text, x, y) {
+    ctx.fillStyle = "white";
+    ctx.font = "8px monospace";
+    ctx.fillText(text, x, y);
+}
 
-        function createKeyboard() {
-            const keyboard = document.getElementById('name-keyboard');
-            keyboard.innerHTML = '';
-            
-            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            
-            // Create letter keys
-            for (let i = 0; i < letters.length; i++) {
-                const key = document.createElement('div');
-                key.className = 'name-key';
-                key.textContent = letters[i];
-                key.addEventListener('click', () => {
-                    if (Game.player.name.length < 10) {
-                        Game.player.name += letters[i];
-                        updateNameDisplay();
-                    }
-                });
-                keyboard.appendChild(key);
-            }
-            
-            // Space button
-            const space = document.createElement('div');
-            space.className = 'name-key';
-            space.textContent = 'SPACE';
-            space.style.gridColumn = 'span 2';
-            space.addEventListener('click', () => {
-                if (Game.player.name.length < 10) {
-                    Game.player.name += ' ';
-                    updateNameDisplay();
-                }
-            });
-            keyboard.appendChild(space);
-            
-            // Delete button
-            const del = document.createElement('div');
-            del.className = 'name-key';
-            del.textContent = 'DEL';
-            del.style.gridColumn = 'span 2';
-            del.addEventListener('click', () => {
-                Game.player.name = Game.player.name.slice(0, -1);
-                updateNameDisplay();
-            });
-            keyboard.appendChild(del);
-        }
+/* ======================================================
+   BACKGROUND
+====================================================== */
+function drawBackground() {
+    // Far layer: window
+    ctx.globalAlpha = 0.5;
+    drawPixelRect(40, 16, 240, 80, "#223344");
 
-        function updateNameDisplay() {
-            document.getElementById('name-display').textContent = 
-                Game.player.name.padEnd(10, '_');
-        }
-
-        function confirmName() {
-            if (Game.player.name.trim().length > 0) {
-                Game.player.name = Game.player.name.trim().toUpperCase();
-                showScreen('pokemonSelect');
-            }
-        }
-
-        function cancelName() {
-            showScreen('intro');
-        }
-
-        // ============================================
-        // POKEMON SELECTION
-        // ============================================
-        function selectPokemon(pokemon) {
-            Game.player.pokemon = pokemon;
-            
-            const selectDialog = [
-                `Hello ${Game.player.name}!`,
-                "This is the beginning of your",
-                "legendary adventure in the",
-                "Pokémon World.",
-                "...",
-                "Before you start as a trainer",
-                `you will need to choose ${pokemon.toUpperCase()}.`,
-                "Your very own Pokémon legend",
-                "is about to unfold!",
-                "...",
-                "A world of dreams and adventures",
-                "with Pokémon awaits! Let's go!"
-            ];
-            
-            showDialog(selectDialog, () => {
-                setTimeout(() => {
-                    showScreen('game');
-                    document.getElementById('start-button').style.display = 'block';
-                }, 1000);
-            }, 'game');
-        }
-
-        // ============================================
-        // GAME INITIALIZATION
-        // ============================================
-        function initGame() {
-            // Generate map
-            generateMap();
-            
-            // Set player position
-            Game.player.x = CONFIG.CANVAS_WIDTH / 2;
-            Game.player.y = CONFIG.CANVAS_HEIGHT / 2;
-            
-            // Draw initial frame
-            drawGameWorld();
-        }
-
-        function generateMap() {
-            // Create grass tiles
-            Game.map.tiles = [];
-            for (let y = 0; y < Game.map.height; y++) {
-                for (let x = 0; x < Game.map.width; x++) {
-                    Game.map.tiles.push({
-                        x: x * CONFIG.TILE_SIZE,
-                        y: y * CONFIG.TILE_SIZE,
-                        type: 'grass'
-                    });
-                }
-            }
-            
-            // Create player's house
-            Game.map.buildings = [
-                {
-                    x: 5 * CONFIG.TILE_SIZE,
-                    y: 4 * CONFIG.TILE_SIZE,
-                    width: 5 * CONFIG.TILE_SIZE,
-                    height: 4 * CONFIG.TILE_SIZE,
-                    type: 'house',
-                    door: {
-                        x: 7 * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,
-                        y: 8 * CONFIG.TILE_SIZE
-                    }
-                }
-            ];
-            
-            // Create NPCs
-            Game.map.npcs = [
-                {
-                    x: 8 * CONFIG.TILE_SIZE,
-                    y: 6 * CONFIG.TILE_SIZE,
-                    name: 'PROF. KYAN',
-                    dialog: [
-                        `Hello ${Game.player.name}!`,
-                        "Take good care of your",
-                        `${Game.player.pokemon.toUpperCase()}!`,
-                        "The world of Pokémon awaits!"
-                    ]
-                }
-            ];
-        }
-
-        function startGame() {
-            document.getElementById('start-button').style.display = 'none';
-            Game.player.inHouse = false;
-            Game.player.x = 7 * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
-            Game.player.y = 9 * CONFIG.TILE_SIZE;
-        }
-
-        // ============================================
-        // MOVEMENT SYSTEM
-        // ============================================
-        let movementInterval = null;
-        let currentDirection = null;
-        let keysPressed = {};
-
-        function startMoving(direction) {
-            if (Game.screen !== 'game' || Game.dialog.active) return;
-            
-            currentDirection = direction;
-            Game.player.direction = direction;
-            
-            if (movementInterval) clearInterval(movementInterval);
-            
-            movementInterval = setInterval(() => {
-                movePlayer();
-            }, 16);
-        }
-
-        function stopMoving() {
-            if (movementInterval) {
-                clearInterval(movementInterval);
-                movementInterval = null;
-                currentDirection = null;
-            }
-        }
-
-        function movePlayer() {
-            if (!currentDirection) return;
-            
-            let newX = Game.player.x;
-            let newY = Game.player.y;
-            
-            switch(currentDirection) {
-                case 'up':
-                    newY -= CONFIG.PLAYER_SPEED;
-                    break;
-                case 'down':
-                    newY += CONFIG.PLAYER_SPEED;
-                    break;
-                case 'left':
-                    newX -= CONFIG.PLAYER_SPEED;
-                    break;
-                case 'right':
-                    newX += CONFIG.PLAYER_SPEED;
-                    break;
-            }
-            
-            // Check boundaries
-            const halfSize = CONFIG.PLAYER_SIZE / 2;
-            if (newX - halfSize >= 0 && 
-                newX + halfSize <= CONFIG.CANVAS_WIDTH &&
-                newY - halfSize >= 0 && 
-                newY + halfSize <= CONFIG.CANVAS_HEIGHT) {
-                
-                // Check building collision
-                if (!checkBuildingCollision(newX, newY)) {
-                    Game.player.x = newX;
-                    Game.player.y = newY;
-                    
-                    // Check for door interaction
-                    checkDoorInteraction();
-                    
-                    // Check for NPC interaction
-                    checkNPCInteraction();
-                }
-            }
-        }
-
-        function checkBuildingCollision(x, y) {
-            const halfSize = CONFIG.PLAYER_SIZE / 2;
-            
-            for (const building of Game.map.buildings) {
-                // Skip collision check if inside building
-                if (Game.player.inHouse) continue;
-                
-                const playerLeft = x - halfSize;
-                const playerRight = x + halfSize;
-                const playerTop = y - halfSize;
-                const playerBottom = y + halfSize;
-                
-                const buildingLeft = building.x;
-                const buildingRight = building.x + building.width;
-                const buildingTop = building.y;
-                const buildingBottom = building.y + building.height;
-                
-                // Check collision
-                if (playerRight > buildingLeft &&
-                    playerLeft < buildingRight &&
-                    playerBottom > buildingTop &&
-                    playerTop < buildingBottom) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        function checkDoorInteraction() {
-            if (Game.player.inHouse) {
-                // Check for exit
-                const houseCenterX = CONFIG.CANVAS_WIDTH / 2;
-                const houseExitY = CONFIG.CANVAS_HEIGHT - 50;
-                
-                if (Math.abs(Game.player.x - houseCenterX) < 20 &&
-                    Math.abs(Game.player.y - houseExitY) < 30 &&
-                    Game.player.direction === 'down') {
-                    
-                    exitHouse();
-                }
-            } else {
-                // Check for house entry
-                const house = Game.map.buildings[0];
-                const doorX = house.door.x;
-                const doorY = house.door.y;
-                
-                if (Math.abs(Game.player.x - doorX) < 20 &&
-                    Math.abs(Game.player.y - doorY) < 30 &&
-                    Game.player.direction === 'up') {
-                    
-                    enterHouse();
-                }
-            }
-        }
-
-        function enterHouse() {
-            Game.player.inHouse = true;
-            Game.player.x = CONFIG.CANVAS_WIDTH / 2;
-            Game.player.y = CONFIG.CANVAS_HEIGHT - 100;
-            
-            showDialog([
-                "You entered the house.",
-                "This is your home!"
-            ], null, 'game');
-        }
-
-        function exitHouse() {
-            Game.player.inHouse = false;
-            Game.player.x = Game.map.buildings[0].door.x;
-            Game.player.y = Game.map.buildings[0].door.y + 30;
-            
-            showDialog([
-                "You left the house.",
-                "The adventure begins!"
-            ], null, 'game');
-        }
-
-        function checkNPCInteraction() {
-            if (Game.dialog.active || Game.player.inHouse) return;
-            
-            for (const npc of Game.map.npcs) {
-                const distance = Math.sqrt(
-                    Math.pow(Game.player.x - npc.x, 2) + 
-                    Math.pow(Game.player.y - npc.y, 2)
-                );
-                
-                if (distance < 30) {
-                    // Check if facing NPC
-                    let facingNPC = false;
-                    switch(Game.player.direction) {
-                        case 'up':
-                            facingNPC = Game.player.y > npc.y && Math.abs(Game.player.x - npc.x) < 20;
-                            break;
-                        case 'down':
-                            facingNPC = Game.player.y < npc.y && Math.abs(Game.player.x - npc.x) < 20;
-                            break;
-                        case 'left':
-                            facingNPC = Game.player.x > npc.x && Math.abs(Game.player.y - npc.y) < 20;
-                            break;
-                        case 'right':
-                            facingNPC = Game.player.x < npc.x && Math.abs(Game.player.y - npc.y) < 20;
-                            break;
-                    }
-                    
-                    if (facingNPC) {
-                        showDialog(npc.dialog, null, 'game');
-                        return;
-                    }
-                }
-            }
-        }
-
-        // ============================================
-        // INPUT HANDLING
-        // ============================================
-        function handleKeyDown(e) {
-            switch(e.key) {
-                case 'ArrowUp':
-                case 'w':
-                    keysPressed.up = true;
-                    startMoving('up');
-                    break;
-                case 'ArrowDown':
-                case 's':
-                    keysPressed.down = true;
-                    startMoving('down');
-                    break;
-                case 'ArrowLeft':
-                case 'a':
-                    keysPressed.left = true;
-                    startMoving('left');
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                    keysPressed.right = true;
-                    startMoving('right');
-                    break;
-                case 'Enter':
-                case ' ':
-                    handleAButton();
-                    break;
-                case 'Escape':
-                case 'Backspace':
-                    handleBButton();
-                    break;
-                case 'Shift':
-                    handleStartButton();
-                    break;
-            }
-        }
-
-        function handleKeyUp(e) {
-            switch(e.key) {
-                case 'ArrowUp':
-                case 'w':
-                    keysPressed.up = false;
-                    if (!keysPressed.down && !keysPressed.left && !keysPressed.right) stopMoving();
-                    break;
-                case 'ArrowDown':
-                case 's':
-                    keysPressed.down = false;
-                    if (!keysPressed.up && !keysPressed.left && !keysPressed.right) stopMoving();
-                    break;
-                case 'ArrowLeft':
-                case 'a':
-                    keysPressed.left = false;
-                    if (!keysPressed.up && !keysPressed.down && !keysPressed.right) stopMoving();
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                    keysPressed.right = false;
-                    if (!keysPressed.up && !keysPressed.down && !keysPressed.left) stopMoving();
-                    break;
-            }
-        }
-
-        function handleAButton() {
-            if (Game.screen === 'game' && !Game.dialog.active) {
-                // Check for interactions
-                checkNPCInteraction();
-            } else if (Game.dialog.active) {
-                advanceDialog();
-            }
-        }
-
-        function handleBButton() {
-            if (Game.dialog.active) {
-                if (Game.dialog.typing) {
-                    Game.dialog.typing = false;
-                    document.getElementById('dialog-text').textContent = Game.dialog.text;
-                } else {
-                    advanceDialog();
-                }
-            }
-        }
-
-        function handleStartButton() {
-            // Can be used for menu later
-        }
-
-        // ============================================
-        // DIALOG SYSTEM
-        // ============================================
-        function showDialog(lines, callback = null, screen = 'intro') {
-            const dialogBox = screen === 'intro' ? 
-                document.getElementById('intro-dialog') : 
-                document.getElementById('game-dialog');
-            const dialogText = dialogBox.querySelector('.dialog-text');
-            
-            Game.dialog.active = true;
-            Game.dialog.typing = true;
-            Game.dialog.lines = lines;
-            Game.dialog.lineIndex = 0;
-            Game.dialog.callback = callback;
-            Game.dialog.text = '';
-            
-            dialogBox.style.display = 'block';
-            typeDialog(dialogText);
-        }
-
-        function typeDialog(dialogText) {
-            if (Game.dialog.lineIndex >= Game.dialog.lines.length) {
-                Game.dialog.typing = false;
-                if (Game.dialog.callback) {
-                    setTimeout(Game.dialog.callback, 500);
-                }
-                return;
-            }
-            
-            const line = Game.dialog.lines[Game.dialog.lineIndex];
-            Game.dialog.text = line;
-            dialogText.textContent = '';
-            Game.dialog.lineIndex++;
-            
-            let i = 0;
-            const typeNext = () => {
-                if (i < line.length && Game.dialog.typing) {
-                    dialogText.textContent += line.charAt(i);
-                    i++;
-                    setTimeout(typeNext, CONFIG.DIALOG_SPEED);
-                } else {
-                    Game.dialog.typing = false;
-                }
-            };
-            
-            typeNext();
-        }
-
-        function handleDialogClick() {
-            if (Game.dialog.active) {
-                if (Game.dialog.typing) {
-                    Game.dialog.typing = false;
-                    document.getElementById('dialog-text').textContent = Game.dialog.text;
-                } else {
-                    advanceDialog();
-                }
-            }
-        }
-
-        function advanceDialog() {
-            if (Game.dialog.typing) {
-                Game.dialog.typing = false;
-                document.getElementById('dialog-text').textContent = Game.dialog.text;
-            } else {
-                if (Game.dialog.lineIndex < Game.dialog.lines.length) {
-                    typeDialog(document.getElementById('dialog-text'));
-                } else {
-                    closeDialog();
-                }
-            }
-        }
-
-        function closeDialog() {
-            Game.dialog.active = false;
-            document.getElementById('intro-dialog').style.display = 'none';
-            document.getElementById('game-dialog').style.display = 'none';
-            if (Game.dialog.callback) {
-                Game.dialog.callback();
-            }
-        }
-
-        // ============================================
-        // RENDERING SYSTEM
-        // ============================================
-        function drawGameWorld() {
-            const ctx = Canvas.ctx;
-            
-            // Clear canvas
-            ctx.fillStyle = '#8bac0f';
-            ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
-            
-            if (Game.player.inHouse) {
-                drawHouseInterior(ctx);
-            } else {
-                drawTown(ctx);
-            }
-            
-            drawPlayer(ctx);
-        }
-
-        function drawTown(ctx) {
-            // Draw grass
-            for (let tile of Game.map.tiles) {
-                ctx.fillStyle = (tile.x + tile.y) % (CONFIG.TILE_SIZE * 2) === 0 ? '#5a853c' : '#4a752c';
-                ctx.fillRect(tile.x, tile.y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-                
-                ctx.strokeStyle = '#0f380f';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(tile.x, tile.y, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
-            }
-            
-            // Draw house
-            const house = Game.map.buildings[0];
-            ctx.fillStyle = '#d87070';
-            ctx.fillRect(house.x, house.y, house.width, house.height);
-            
-            // Roof
-            ctx.fillStyle = '#306230';
+    if (weather === "sunny") {
+        ctx.fillStyle = "rgba(255,255,200,0.2)";
+        ctx.fillRect(40, 16, 240, 80);
+    } else if (weather === "rain") {
+        ctx.strokeStyle = "#66aaff";
+        for (let i = 0; i < 40; i++) {
             ctx.beginPath();
-            ctx.moveTo(house.x - 10, house.y);
-            ctx.lineTo(house.x + house.width + 10, house.y);
-            ctx.lineTo(house.x + house.width / 2, house.y - 20);
-            ctx.closePath();
-            ctx.fill();
-            
-            // Door
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(house.door.x - 15, house.door.y - 20, 30, 20);
-            
-            // House border
-            ctx.strokeStyle = '#0f380f';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(house.x, house.y, house.width, house.height);
-            
-            // Draw NPCs
-            for (const npc of Game.map.npcs) {
-                drawNPC(ctx, npc);
-            }
+            ctx.moveTo(40 + Math.random()*240, 16 + Math.random()*80);
+            ctx.lineTo(42 + Math.random()*240, 24 + Math.random()*80);
+            ctx.stroke();
+        }
+    } else {
+        ctx.fillStyle = "white";
+        ctx.fillRect(200, 20, 6, 6);
+    }
+
+    ctx.globalAlpha = 1;
+
+    // Mid layer: shelves
+    drawPixelRect(16, 104, 288, 32, "#444");
+
+    // Near layer: desk
+    drawPixelRect(0, 160, 320, 80, "#333");
+}
+
+/* ======================================================
+   PROFESSOR
+====================================================== */
+function drawProfessor() {
+    let x = 32;
+    let y = 96;
+
+    drawPixelRect(x, y, 32, 48, "#cccccc");
+    drawPixelRect(x+8, y-16, 16, 16, "#ffeecc");
+
+    // Simple animation
+    if (phase === ScenePhase.INTRO) {
+        drawText("...", x+4, y-20);
+    }
+}
+
+/* ======================================================
+   POKEBALLS
+====================================================== */
+function drawPokeballs(dt) {
+    starters.forEach((s, i) => {
+        let px = 96 + i * 64;
+        let py = 144;
+
+        // pedestal
+        drawPixelRect(px-8, py+16, 32, 8, "#555");
+
+        // glow
+        if (i === selectedIndex) {
+            ctx.globalAlpha = 0.7 + Math.sin(Date.now()/200)*0.3;
+            drawPixelRect(px-10, py-10, 36, 36, "gold");
+            ctx.globalAlpha = 1;
         }
 
-        function drawHouseInterior(ctx) {
-            // Floor
-            ctx.fillStyle = '#a8a878';
-            ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
-            
-            // Walls
-            ctx.fillStyle = '#d87070';
-            ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, 40);
-            ctx.fillRect(0, CONFIG.CANVAS_HEIGHT - 40, CONFIG.CANVAS_WIDTH, 40);
-            ctx.fillRect(0, 0, 40, CONFIG.CANVAS_HEIGHT);
-            ctx.fillRect(CONFIG.CANVAS_WIDTH - 40, 0, 40, CONFIG.CANVAS_HEIGHT);
-            
-            // Door
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(CONFIG.CANVAS_WIDTH / 2 - 20, CONFIG.CANVAS_HEIGHT - 40, 40, 30);
-            
-            // Furniture
-            ctx.fillStyle = '#8b4513';
-            ctx.fillRect(100, 100, 80, 20); // Table
-            
-            ctx.fillStyle = '#3060a8';
-            ctx.fillRect(150, 150, 30, 60); // Bed
-            ctx.fillRect(250, 150, 30, 60); // Bed
-        }
+        // ball
+        drawPixelRect(px, py, 16, 16, s.color);
 
-        function drawNPC(ctx, npc) {
-            // NPC body
-            ctx.fillStyle = '#3060a8';
-            ctx.fillRect(npc.x - 12, npc.y - 12, 24, 24);
-            
-            // NPC face
-            ctx.fillStyle = '#ffcc00';
-            ctx.fillRect(npc.x - 6, npc.y - 12, 12, 6);
-            
-            // Name
-            ctx.fillStyle = '#0f380f';
-            ctx.font = '12px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText(npc.name, npc.x, npc.y - 20);
-        }
+        spawnParticles(px+8, py, s.type);
+    });
+}
 
-        function drawPlayer(ctx) {
-            const x = Game.player.x;
-            const y = Game.player.y;
-            const size = CONFIG.PLAYER_SIZE;
-            
-            // Body (red for Ash)
-            ctx.fillStyle = '#ff4444';
-            ctx.fillRect(x - size/2, y - size/2, size, size);
-            
-            // Head
-            ctx.fillStyle = '#f0c8a0';
-            ctx.fillRect(x - size/3, y - size/2 - 4, size * 2/3, 8);
-            
-            // Red hat
-            ctx.fillStyle = '#ff0000';
-            ctx.fillRect(x - size/2, y - size/2 - 8, size, 8);
-            ctx.fillRect(x - size/4, y - size/2 - 12, size/2, 4);
-            
-            // Direction indicator
-            ctx.fillStyle = '#ffcc00';
-            switch(Game.player.direction) {
-                case 'up':
-                    ctx.fillRect(x - size/4, y - size/2, size/2, 4);
-                    break;
-                case 'down':
-                    ctx.fillRect(x - size/4, y + size/2 - 4, size/2, 4);
-                    break;
-                case 'left':
-                    ctx.fillRect(x - size/2, y - size/4, 4, size/2);
-                    break;
-                case 'right':
-                    ctx.fillRect(x + size/2 - 4, y - size/4, 4, size/2);
-                    break;
-            }
-        }
+/* ======================================================
+   PARTICLES UPDATE
+====================================================== */
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
 
-        // ============================================
-        // UTILITY FUNCTIONS
-        // ============================================
-        function checkOrientation() {
-            const isPortrait = window.innerHeight > window.innerWidth;
-            
-            if (isPortrait) {
-                document.getElementById('orientation-warning').style.display = 'flex';
-                document.getElementById('mobile-controls').style.display = 'none';
+        let c = p.type === "Fire" ? "#ff9966" :
+                p.type === "Water" ? "#66ccff" : "#66ff99";
+
+        drawPixelRect(p.x, p.y, 2, 2, c);
+
+        if (p.life <= 0) particles.splice(i,1);
+    }
+}
+
+/* ======================================================
+   UI
+====================================================== */
+const dialogueBox = document.getElementById("dialogueBox");
+const infoPanel = document.getElementById("infoPanel");
+
+function updateDialogue() {
+    if (phase === ScenePhase.INTRO) {
+        dialogueBox.innerText =
+            "Ah! Welcome!\nCome closer...\nI have Pokémon for you.";
+    } else if (phase === ScenePhase.REVEAL) {
+        dialogueBox.innerText =
+            "These are Pokémon.\nChoose the one that will journey with you.";
+    } else if (phase === ScenePhase.SELECT && selectedIndex >= 0) {
+        dialogueBox.innerText =
+            "You seem interested in " + starters[selectedIndex].name + ".";
+    } else if (phase === ScenePhase.CONFIRM) {
+        dialogueBox.innerText =
+            "Excellent choice!\nYour adventure begins now!";
+    }
+}
+
+function showInfo(index) {
+    const s = starters[index];
+    infoPanel.style.display = "block";
+    infoPanel.innerHTML = `
+        <div>[Sprite]</div>
+        <div>NAME: ${s.name}</div>
+        <div>TYPE: ${s.type}</div>
+        <div>HP: ${"■".repeat(s.stats[0])}</div>
+        <div>ATK: ${"■".repeat(s.stats[1])}</div>
+        <div>SPD: ${"■".repeat(s.stats[2])}</div>
+    `;
+}
+
+function hideInfo() {
+    infoPanel.style.display = "none";
+}
+
+/* ======================================================
+   INPUT HANDLING
+====================================================== */
+canvas.addEventListener("touchstart", e => {
+    touchStartTime = performance.now();
+});
+
+canvas.addEventListener("touchend", e => {
+    const now = performance.now();
+    const duration = now - touchStartTime;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.changedTouches[0].clientX - rect.left) / SCALE;
+    const y = (e.changedTouches[0].clientY - rect.top) / SCALE;
+
+    starters.forEach((s, i) => {
+        let px = 96 + i * 64;
+        let py = 144;
+        if (x > px && x < px+16 && y > py && y < py+16) {
+            if (duration > 1000) {
+                showInfo(i);
             } else {
-                document.getElementById('orientation-warning').style.display = 'none';
-                if (Game.screen === 'game') {
-                    document.getElementById('mobile-controls').style.display = 'flex';
+                selectedIndex = i;
+                if (now - lastTapTime < 300) {
+                    phase = ScenePhase.CONFIRM;
                 }
+                lastTapTime = now;
             }
         }
+    });
+});
 
-        // ============================================
-        // GAME LOOP
-        // ============================================
-        function gameLoop() {
-            if (Game.screen === 'game' && !Game.dialog.active) {
-                drawGameWorld();
-            }
-            
-            requestAnimationFrame(gameLoop);
-        }
+/* ======================================================
+   MAIN LOOP
+====================================================== */
+let lastTime = 0;
 
-        // ============================================
-        // START THE GAME
-        // ============================================
-        window.addEventListener('load', init);
-        
-        // Prevent pull-to-refresh
-        document.addEventListener('touchmove', (e) => {
-            if (Game.screen === 'game') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        console.log('🚀 Pokémon Pixel Adventure ready!');
-    </script>
+function loop(time) {
+    if (time - lastTime < FRAME_TIME) {
+        requestAnimationFrame(loop);
+        return;
+    }
+    lastTime = time;
+    phaseTimer++;
+
+    ctx.clearRect(0,0,320,240);
+
+    drawBackground();
+    drawProfessor();
+
+    if (phase >= ScenePhase.REVEAL) {
+        drawPokeballs();
+    }
+
+    updateParticles();
+    updateDialogue();
+
+    if (phase === ScenePhase.INTRO && phaseTimer > FPS * 2) {
+        phase = ScenePhase.REVEAL;
+    }
+    if (phase === ScenePhase.REVEAL && phaseTimer > FPS * 5) {
+        phase = ScenePhase.SELECT;
+    }
+
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
