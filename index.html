@@ -1,314 +1,921 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Nova Genesis</title>
-    <style>
-        @font-face {
-            font-family: 'GBA';
-            src: url('https://fonts.cdnfonts.com/s/14891/PokemonGb-RAeo.woff') format('woff');
-        }
-        :root {
-            --gba-frame: #3a3a3a;
-            --text-blue: #102040;
-        }
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #111; overflow: hidden; font-family: 'GBA', monospace;
-            display: flex; justify-content: center; align-items: center;
-        }
-        #game-wrapper {
-            position: relative;
-            width: 100vw; height: 100vh;
-            max-width: 450px; /* Mobile width */
-            background: var(--gba-frame);
-            display: flex; flex-direction: column;
-            border: 8px solid #222; box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-        canvas {
-            image-rendering: pixelated;
-            width: 100%; height: auto;
-            background: #000;
-        }
-        /* Mobile Controls */
-        #ui-layer {
-            position: absolute; bottom: 0; width: 100%; height: 40%;
-            background: #444; border-top: 4px solid #222;
-            display: grid; grid-template-columns: 1fr 1fr;
-            padding: 20px; box-sizing: border-box;
-        }
-        .dpad {
-            display: grid; grid-template-columns: repeat(3, 45px);
-            grid-template-rows: repeat(3, 45px);
-        }
-        .btn {
-            background: #222; border: 2px solid #555; color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-size: 12px; touch-action: manipulation;
-        }
-        .btn:active { background: #666; }
-        .dir-btn { border-radius: 5px; }
-        .action-zone { display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
-        .circle-btn {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #800; border: 4px solid #400; font-weight: bold;
-        }
-        .btn-b { background: #990; border-color: #660; margin-top: 20px; }
-
-        /* Text Box Overlay */
-        #dialogue-container {
-            position: absolute; top: 45%; left: 5%; right: 5%;
-            height: 12%; background: #fff; border: 3px solid #102040;
-            border-radius: 5px; padding: 10px; display: none; z-index: 100;
-        }
-        #text-content { font-size: 10px; line-height: 1.4; color: var(--text-blue); }
-        #name-input {
-            position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
-            background: white; border: 3px solid #102040; padding: 15px;
-            display: none; text-align: center; z-index: 110;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Pokémon Nova Genesis</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+body {
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#000;
+  font-family: 'Press Start 2P', monospace;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+#gameContainer {
+  position: relative;
+  width: 240px;
+  height: 160px;
+  margin: 0 auto;
+  transform: scale(3);
+  transform-origin: top left;
+}
+#game {
+  display: block;
+  width: 240px;
+  height: 160px;
+}
+#ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 160px;
+  pointer-events: none;
+  font-size: 8px;
+}
+#dialogue-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #fff;
+  border: 4px solid #0040ff;
+  color: #000;
+  padding: 4px 8px;
+  line-height: 1.1;
+  overflow: hidden;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+}
+#dialogue-text {
+  flex: 1;
+}
+#advance-btn {
+  width: 24px;
+  height: 24px;
+  background: #0040ff;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+#name-entry, #keyboard {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  background: rgba(0,0,0,0.9);
+  border: 4px solid #0040ff;
+  color: #fff;
+  display: none;
+  flex-direction: column;
+  pointer-events: auto;
+}
+#name-display {
+  font-size: 12px;
+  text-align: center;
+  margin: 10px 0;
+}
+#virtual-keys {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px;
+  margin-top: 10px;
+}
+.key {
+  aspect-ratio: 1;
+  background: #666;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+.key:active { background: #fff; color: #000; }
+#confirm-key, #backspace-key {
+  grid-column: span 2;
+  font-size: 8px;
+}
+#confirmation {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  right: 20px;
+  background: #fff;
+  border: 4px solid #0040ff;
+  color: #000;
+  padding: 12px;
+  text-align: center;
+  display: none;
+  pointer-events: auto;
+}
+#yes-btn, #no-btn {
+  margin: 8px 4px 0;
+  padding: 6px 12px;
+  background: #0040ff;
+  color: #fff;
+  border: 2px solid #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 8px;
+}
+#menu-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,128,0.95);
+  border: 4px solid #0040ff;
+  color: #fff;
+  padding: 8px;
+  display: none;
+  pointer-events: auto;
+  font-size: 8px;
+}
+.menu-section {
+  margin-bottom: 12px;
+}
+.menu-item {
+  padding: 4px;
+  cursor: pointer;
+}
+.menu-item:active { background: #fff; color: #000; }
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  pointer-events: none;
+  scale: 1.2;
+}
+.dpad {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-right: 40px;
+}
+.dpad div {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.3);
+  border: 3px solid #fff;
+  color: #000;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  pointer-events: auto;
+  user-select: none;
+}
+#up-d { top: 0; left: 34px; }
+#down-d { bottom: 0; left: 34px; }
+#left-d { left: 0; top: 34px; }
+#right-d { right: 0; top: 34px; }
+.abtns {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.abtn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  user-select: none;
+}
+#a-btn { background: rgba(0,200,0,0.8); color: #fff; }
+#b-btn { background: rgba(200,0,0,0.8); color: #fff; }
+#menu-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(0,0,255,0.8);
+  border: 3px solid #fff;
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  scale: 1.2;
+}
+.hidden { display: none !important; }
+.fade { transition: opacity 0.5s; }
+</style>
 </head>
 <body>
 
-<div id="game-wrapper">
-    <canvas id="screen" width="240" height="240"></canvas>
-    
-    <div id="dialogue-container">
-        <div id="text-content"></div>
+<div id="gameContainer">
+  <canvas id="game" width="240" height="160"></canvas>
+  <div id="ui">
+    <div id="dialogue-box" class="hidden">
+      <span id="dialogue-text"></span>
+      <div id="advance-btn">▶</div>
     </div>
-
-    <div id="name-input">
-        <p style="font-size: 10px;">YOUR NAME?</p>
-        <input type="text" id="p-name" value="NOVA" maxlength="8" style="width: 80px; text-align: center;">
-        <button onclick="submitName()">OK</button>
+    <div id="name-entry">
+      <div id="name-display">NOVA</div>
     </div>
-
-    <div id="ui-layer">
-        <div class="dpad">
-            <div></div><div class="btn dir-btn" id="up">U</div><div></div>
-            <div class="btn dir-btn" id="left">L</div><div></div><div class="btn dir-btn" id="right">R</div>
-            <div></div><div class="btn dir-btn" id="down">D</div><div></div>
-        </div>
-        <div class="action-zone">
-            <div class="btn circle-btn btn-b" id="b">B</div>
-            <div class="btn circle-btn" id="a">A</div>
-        </div>
+    <div id="keyboard">
+      <div style="text-align:center; font-size:12px; margin-bottom:10px;">What is your name?</div>
+      <div id="virtual-keys"></div>
     </div>
+    <div id="confirmation">
+      <div id="confirm-text"></div>
+      <button id="yes-btn">Yes</button>
+      <button id="no-btn">No</button>
+    </div>
+    <div id="menu-overlay">
+      <div class="menu-section">POKÉMON</div>
+      <div class="menu-item" id="pokemon-menu">Pokémon</div>
+      <div class="menu-section">BAG</div>
+      <div class="menu-item" id="bag-menu">Potion x1</div>
+      <div class="menu-section">OTHER</div>
+      <div class="menu-item" id="save-menu">Save</div>
+      <div style="text-align:center; margin-top:20px;"><div id="close-menu">CLOSE</div></div>
+    </div>
+  </div>
 </div>
 
+<div id="controls" class="hidden">
+  <div style="display:flex; align-items:flex-end;">
+    <div class="dpad">
+      <div id="up-d">↑</div>
+      <div id="down-d">↓</div>
+      <div id="left-d">←</div>
+      <div id="right-d">→</div>
+    </div>
+    <div class="abtns">
+      <div class="abtn" id="b-btn">B</div>
+      <div class="abtn" id="a-btn">A</div>
+    </div>
+  </div>
+</div>
+<div id="menu-btn">MENU</div>
+
 <script>
-/**
- * POKEMON NOVA GENESIS - HIGH PRECISION GBA ENGINE
- */
+// Game constants
+const TILE_SIZE = 16;
+const SCREEN_W = 240;
+const SCREEN_H = 160;
+const TILE_W = SCREEN_W / TILE_SIZE; // 15
+const TILE_H = SCREEN_H / TILE_SIZE; // 10
 
-const canvas = document.getElementById('screen');
+// Canvas
+const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const textEl = document.getElementById('text-content');
-const diagContainer = document.getElementById('dialogue-container');
+ctx.imageSmoothingEnabled = false;
 
-// Game State Constants
-const STATES = { TITLE: 0, PROF_INTRO: 1, NAMING: 2, STARTER_SELECT: 3, WORLD: 4 };
-let currentState = STATES.TITLE;
+// Audio context for chiptune
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// Game Data
-let player = { x: 112, y: 120, dir: 'down', name: 'NOVA', starter: null, frame: 0 };
-let worldMap = { tiles: [], width: 15, height: 15 };
-let dialogueQueue = [];
-let currentText = "";
-let charIndex = 0;
+// Game state
+let gameState = 'title'; // title, lab-intro, name-input, pokemon-choose, home-fadein, playing, menu
+let playerName = 'NOVA';
+let chosenPokemon = null;
+let player = { x: 7, y: 3, dir: 2, frame: 0 }; // 0 up,1 left,2 down,3 right
+let follower = { x: 0, y: 0, dir: 2, frame: 0 };
+let camera = { x: 0, y: 0 };
+let currentMap = 'bedroom';
+let items = { potion: 1 };
+let dialogQueue = [];
+let currentDialog = '';
+let dialogIndex = 0;
+let typingTimer = 0;
+let stepTimer = 0;
+let animTimer = 0;
+let fadeAlpha = 0;
+let saveData = null;
 
-// Input Buffer
-const keys = { up: false, down: false, left: false, right: false, a: false, b: false };
+// Load save
+function loadSave() {
+  const saved = localStorage.getItem('pokemonNovaGenesis');
+  if (saved) {
+    saveData = JSON.parse(saved);
+    playerName = saveData.name || 'NOVA';
+    chosenPokemon = saveData.pokemon;
+    currentMap = saveData.map || 'bedroom';
+    player.x = saveData.px || 7;
+    player.y = saveData.py || 3;
+  }
+}
+loadSave();
 
-/**
- * ASSET GENERATION (Pre-rendering pixel art so you don't need external files)
- */
-const assets = {};
-function createSprites() {
-    // Player Sprite
-    const pCanvas = document.createElement('canvas');
-    pCanvas.width = 16; pCanvas.height = 16;
-    const pCtx = pCanvas.getContext('2d');
-    pCtx.fillStyle = '#f00'; pCtx.fillRect(4, 2, 8, 12); // Simple character
-    assets.player = pCanvas;
-
-    // Grass Tile
-    const gCanvas = document.createElement('canvas');
-    gCanvas.width = 16; gCanvas.height = 16;
-    const gCtx = gCanvas.getContext('2d');
-    gCtx.fillStyle = '#78c850'; gCtx.fillRect(0,0,16,16);
-    gCtx.fillStyle = '#68b840'; gCtx.fillRect(2,2,2,2); gCtx.fillRect(10,8,2,2);
-    assets.grass = gCanvas;
+// Save
+function autoSave() {
+  localStorage.setItem('pokemonNovaGenesis', JSON.stringify({
+    name: playerName,
+    pokemon: chosenPokemon,
+    map: currentMap,
+    px: player.x,
+    py: player.y
+  }));
 }
 
-/**
- * ENGINE CORE
- */
+// Maps (0 floor, 1 wall, 2 door/stairs, 3 npc, 4 obj)
+const maps = {
+  bedroom: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,4,4,0,0,0,0,0,0,0,1], // desk pc
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,4,4,4,0,0,0,0,0,0,1], // bed
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,2,2,2,0,0,0,0,1], // stairs
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  kitchen: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,4,4,0,0,0,5,5,5,5,0,0,6,6,1], // fridge, counter, table
+    [1,4,4,0,0,0,5,5,5,5,0,0,6,6,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,3,0,0,0,0,1], // mom
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,2,2,0,0,0,0,0,0,0,0,0,0,2,1], // doors
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  town: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,7,7,7,7,0,0,0,0,0,8,8,0,1], // grass, pc building
+    [1,0,7,7,7,7,0,0,0,0,0,8,8,0,1],
+    [1,0,7,7,7,7,2,2,2,0,0,8,8,0,1], // pc door
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,9,9,0,0,0,0,0,0,0,0,0,0,0,1], // player house
+    [1,9,9,2,0,0,0,0,0,0,0,0,10,10,1], // house door
+    [1,0,0,0,0,0,0,0,0,0,0,0,10,10,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,10,10,1], // mart door?
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ]
+};
 
-function update() {
-    if (currentState === STATES.WORLD) {
-        if (keys.up) { player.y -= 1; player.dir = 'up'; }
-        if (keys.down) { player.y += 1; player.dir = 'down'; }
-        if (keys.left) { player.x -= 1; player.dir = 'left'; }
-        if (keys.right) { player.x += 1; player.dir = 'right'; }
+// Tile colors (GBA palette)
+const tileColors = {
+  0: '#f8e0c8', // wood/pink floor
+  1: '#a8a8a8', // wall
+  2: '#c8a870', // door
+  3: '#f8d8a8', // npc
+  4: '#88a8c8', // obj desk/bed
+  5: '#d0b8a0', // table
+  6: '#90b0d0', // cabinet
+  7: '#90c890', // grass
+  8: '#c0a888', // pc building
+  9: '#d8c8b0', // house
+  10: '#b8a890' // mart
+};
+
+// Draw tile
+function drawTile(x, y, type) {
+  const px = x * TILE_SIZE + camera.x;
+  const py = y * TILE_SIZE + camera.y;
+  if (px + TILE_SIZE < 0 || px > SCREEN_W || py + TILE_SIZE < 0 || py > SCREEN_H) return;
+  ctx.fillStyle = tileColors[type] || '#000';
+  ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+}
+
+// Draw player sprite (GBA style 16x32)
+function drawSprite(px, py, type, dir, frame) {
+  px += camera.x;
+  py += camera.y;
+  // Simple pixel art
+  // Head
+  ctx.fillStyle = '#f8d8b8';
+  ctx.fillRect(px+4, py, 8, 8);
+  ctx.fillStyle = '#f0c8a0';
+  ctx.fillRect(px+2, py+2, 12, 6);
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.fillRect(px+3, py+2, 1, 1);
+  ctx.fillRect(px+9, py+2, 1, 1);
+  // Body
+  ctx.fillStyle = '#c8a8a0';
+  ctx.fillRect(px, py+8, 16, 16);
+  // Arms
+  ctx.fillStyle = '#d8b8a8';
+  if (dir === 0 || dir === 2) { // front
+    ctx.fillRect(px+2, py+12, 4, 8);
+    ctx.fillRect(px+10, py+12, 4, 8);
+  }
+  // Legs/walk anim
+  ctx.fillStyle = '#a89080';
+  const legOff = frame ? 0 : 2;
+  ctx.fillRect(px+4+legOff, py+20, 3, 8);
+  ctx.fillRect(px+9-legOff, py+20, 3, 8);
+  // Clothes color
+  ctx.fillStyle = '#4080ff'; // blue shirt
+  ctx.fillRect(px+2, py+10, 12, 10);
+}
+
+// Draw pokemon (simple)
+function drawPokemon(px, py, type) {
+  px += camera.x + 4;
+  py += camera.y + 4;
+  if (type === 'charmander') {
+    ctx.fillStyle = '#ff8800';
+    ctx.fillRect(px, py, 8, 8);
+    ctx.fillStyle = '#ff4400';
+    ctx.fillRect(px+2, py+2, 4, 4);
+    ctx.fillStyle = '#ffaa00';
+    ctx.fillRect(px+6, py, 2, 4); // tail
+  } else if (type === 'treecko') {
+    ctx.fillStyle = '#00aa44';
+    ctx.fillRect(px, py, 8, 8);
+    ctx.fillStyle = '#008822';
+    ctx.fillRect(px+2, py+2, 4, 4);
+    ctx.fillStyle = '#44cc66';
+    ctx.fillRect(px, py+6, 2, 2); // tail
+  } else if (type === 'froakie') {
+    ctx.fillStyle = '#4488cc';
+    ctx.fillRect(px, py, 8, 8);
+    ctx.fillStyle = '#2266aa';
+    ctx.fillRect(px+2, py+2, 4, 4);
+  }
+}
+
+// Draw NPCs
+function drawMom(px, py) {
+  px += camera.x;
+  py += camera.y;
+  // Similar to player but pink dress
+  ctx.fillStyle = '#ffb8d8';
+  ctx.fillRect(px, py+8, 16, 16);
+  ctx.fillStyle = '#f8d8b8';
+  ctx.fillRect(px+4, py, 8, 8);
+  // etc.
+}
+
+// Update camera
+function updateCamera() {
+  camera.x = -player.x * TILE_SIZE + (SCREEN_W / 2 - TILE_SIZE / 2);
+  camera.y = -player.y * TILE_SIZE + (SCREEN_H / 2 - TILE_SIZE);
+  camera.x = Math.max(-TILE_W * TILE_SIZE + SCREEN_W, Math.min(0, camera.x));
+  camera.y = Math.max(-TILE_H * TILE_SIZE + SCREEN_H, Math.min(0, camera.y));
+}
+
+// Draw map
+function drawMap() {
+  const map = maps[currentMap];
+  for (let y = 0; y < map.length; y++) {
+    for (let x = 0; x < map[y].length; x++) {
+      drawTile(x, y, map[y][x]);
     }
+  }
 }
 
+// Main render
 function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#081820';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
 
-    switch(currentState) {
-        case STATES.TITLE:
-            drawTitle();
-            break;
-        case STATES.PROF_INTRO:
-            drawLab();
-            drawNPC(112, 80, 'chen');
-            break;
-        case STATES.STARTER_SELECT:
-            drawLab();
-            drawStarters();
-            break;
-        case STATES.WORLD:
-            drawWorld();
-            break;
+  if (gameState === 'title') {
+    // Stars nebula bg
+    ctx.fillStyle = '#4060ff';
+    for (let i = 0; i < 50; i++) {
+      const x = (animTimer * 0.1 + i * 17) % SCREEN_W;
+      const y = (i * 23) % SCREEN_H;
+      ctx.fillRect(x, y, 1, 1);
+      ctx.fillRect(x + 2, y + 1, 1, 1);
     }
-}
-
-// Sub-renders
-function drawTitle() {
-    ctx.fillStyle = '#204080';
-    ctx.fillRect(0, 0, 240, 240);
-    ctx.fillStyle = '#fff';
+    ctx.font = '16px "Press Start 2P"';
+    ctx.fillStyle = '#ffeb3b';
     ctx.textAlign = 'center';
-    ctx.font = '14px Arial';
-    ctx.fillText('POKEMON NOVA GENESIS', 120, 80);
-    ctx.font = '8px Arial';
-    ctx.fillText('PRESS A TO START', 120, 180);
-}
-
-function drawLab() {
-    ctx.fillStyle = '#d0c8b0'; // Lab floor
-    ctx.fillRect(0, 0, 240, 240);
-}
-
-function drawStarters() {
-    const colors = ['#f08030', '#78c850', '#6890f0'];
-    colors.forEach((c, i) => {
-        ctx.fillStyle = c;
-        ctx.fillRect(50 + (i * 60), 100, 24, 24);
-    });
-}
-
-function drawWorld() {
-    // Draw tiles
-    for(let i=0; i<15; i++) {
-        for(let j=0; j<15; j++) {
-            ctx.drawImage(assets.grass, i*16, j*16);
-        }
-    }
-    // Draw Player
-    ctx.drawImage(assets.player, player.x, player.y);
-}
-
-function drawNPC(x, y, type) {
+    ctx.fillText('POKÉMON', 120, 50);
+    ctx.fillStyle = '#ff4444';
+    ctx.fillText('NOVA', 85, 75);
+    ctx.fillStyle = '#44ff44';
+    ctx.fillText('GENESIS', 155, 75);
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x, y, 16, 24); // Professor shape
-}
-
-/**
- * DIALOGUE SYSTEM
- */
-function playDialogue(lines) {
-    dialogueQueue = lines;
-    advanceDialogue();
-}
-
-function advanceDialogue() {
-    if (dialogueQueue.length > 0) {
-        diagContainer.style.display = 'block';
-        currentText = dialogueQueue.shift();
-        charIndex = 0;
-        textEl.innerText = "";
-        typeEffect();
-    } else {
-        diagContainer.style.display = 'none';
-        handleStateProgression();
+    ctx.font = '8px "Press Start 2P"';
+    ctx.fillText('Press START', 120, 130);
+  } else if (gameState === 'lab' || gameState === 'pokemon-choose') {
+    // Lab bg
+    ctx.fillStyle = '#c8e0ff';
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+    // Professor
+    drawSprite(80, 40, 'prof', 2, 0);
+    // Platforms
+    ctx.fillStyle = '#a8a8a8';
+    ctx.fillRect(20, 100, 48, 16);
+    ctx.fillRect(88, 100, 48, 16);
+    ctx.fillRect(156, 100, 48, 16);
+    if (gameState === 'pokemon-choose') {
+      // Pokeballs open to pokemon
+      drawPokemon(32, 96, 'charmander');
+      drawPokemon(100, 96, 'treecko');
+      drawPokemon(168, 96, 'froakie');
+      // Names
+      ctx.fillStyle = '#000';
+      ctx.font = '6px "Press Start 2P"';
+      ctx.textAlign = 'center';
+      ctx.fillText('CHARMANDER', 44, 140);
+      ctx.fillText('TREECKO', 112, 140);
+      ctx.fillText('FROAKIE', 180, 140);
     }
-}
-
-function typeEffect() {
-    if (charIndex < currentText.length) {
-        textEl.innerText += currentText[charIndex];
-        charIndex++;
-        setTimeout(typeEffect, 30); // Text speed
+  } else {
+    drawMap();
+    drawSprite(player.x * TILE_SIZE, player.y * TILE_SIZE, 'player', player.dir, player.frame);
+    if (chosenPokemon) drawPokemon(follower.x * TILE_SIZE, follower.y * TILE_SIZE, chosenPokemon);
+    // Draw mom if kitchen
+    if (currentMap === 'kitchen' && maps.kitchen[player.y][player.x] !== 3) {
+      drawMom(9 * TILE_SIZE, 5 * TILE_SIZE);
     }
+  }
+
+  // Fade
+  if (fadeAlpha > 0) {
+    ctx.fillStyle = `rgba(0,0,0,${fadeAlpha})`;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  }
 }
 
-function handleStateProgression() {
-    if (currentState === STATES.PROF_INTRO) {
-        document.getElementById('name-input').style.display = 'block';
-        currentState = STATES.NAMING;
+// Update logic
+function update() {
+  animTimer++;
+  stepTimer++;
+
+  if (gameState === 'playing') {
+    updateFollower();
+    if (stepTimer > 8) {
+      player.frame ^= 1;
+      stepTimer = 0;
     }
+  }
+
+  updateCamera();
+  typingTimer++;
 }
 
-function submitName() {
-    player.name = document.getElementById('p-name').value;
-    document.getElementById('name-input').style.display = 'none';
-    currentState = STATES.STARTER_SELECT;
-    playDialogue([`Perfect, ${player.name}! Now, for your partner.`, "Which of these three resonates with you?"]);
+// Follower logic
+function updateFollower() {
+  const dx = player.x - follower.x;
+  const dy = player.y - follower.y;
+  if (Math.abs(dx) + Math.abs(dy) > 1.5) {
+    follower.x += Math.sign(dx) * 0.1;
+    follower.y += Math.sign(dy) * 0.1;
+  } else {
+    // Offset based on dir
+    const offsets = [[0,1],[1,0],[0,-1],[-1,0]];
+    const off = offsets[player.dir];
+    follower.x = player.x + off[0];
+    follower.y = player.y + off[1];
+  }
 }
 
-/**
- * INPUTS
- */
-function setupControls() {
-    const bind = (id, key) => {
-        const el = document.getElementById(id);
-        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; handleInput(key); });
-        el.addEventListener('touchend', () => { keys[key] = false; });
+// Collision
+function isWalkable(x, y) {
+  const map = maps[currentMap];
+  if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) return false;
+  return map[y][x] === 0 || map[y][x] === 2;
+}
+
+// Move player
+function moveDir(dir) {
+  const dirs = [[0,-1],[ -1,0],[0,1],[1,0]]; // up left down right
+  const [dx, dy] = dirs[dir];
+  const nx = player.x + dx;
+  const ny = player.y + dy;
+  if (isWalkable(nx, ny)) {
+    player.x = nx;
+    player.y = ny;
+    player.dir = dir;
+    playSFX('step');
+    checkInteraction();
+  }
+}
+
+// Interaction
+function checkInteraction() {
+  const map = maps[currentMap];
+  const tile = map[player.y][player.x];
+  if (tile === 3 && currentMap === 'kitchen') {
+    showDialog([
+      "Mom: Oh, {playerName}! You got your first Pokémon!",
+      "Here's a Potion for your journey. Be safe out there!",
+      "Talk to people in town, challenge the Gyms, become Champion!"
+    ]);
+    map[player.y][player.x] = 0; // talked
+    items.potion++;
+  } else if (tile === 2) {
+    transitionMap();
+  }
+}
+
+// Transition
+function transitionMap() {
+  fadeToBlack(() => {
+    if (currentMap === 'bedroom') {
+      currentMap = 'kitchen';
+      player.x = 7;
+      player.y = 8;
+      player.dir = 2;
+    } else if (currentMap === 'kitchen') {
+      currentMap = 'town';
+      player.x = 2;
+      player.y = 7;
+      player.dir = 0;
+    } else if (currentMap === 'town') {
+      currentMap = 'kitchen';
+      player.x = 1;
+      player.y = 8;
+      player.dir = 0;
+    }
+    fadeIn();
+  });
+}
+
+function fadeToBlack(callback) {
+  let step = 0;
+  const fadeStep = () => {
+    fadeAlpha = step / 20;
+    step++;
+    if (step <= 20) requestAnimationFrame(fadeStep);
+    else if (callback) callback();
+  };
+  fadeStep();
+}
+
+function fadeIn() {
+  let step = 20;
+  const fadeStep = () => {
+    fadeAlpha = step / 20;
+    step--;
+    if (step >= 0) requestAnimationFrame(fadeStep);
+  };
+  fadeStep();
+}
+
+// Dialog system
+function showDialog(lines) {
+  dialogQueue = lines.map(line => line.replace('{playerName}', playerName));
+  dialogIndex = 0;
+  gameState = 'dialog';
+  startTyping();
+}
+
+function startTyping() {
+  currentDialog = dialogQueue[dialogIndex] || '';
+  dialogIndex = 0;
+  typingTimer = 0;
+}
+
+function updateDialog() {
+  if (typingTimer % 3 === 0 && dialogIndex < currentDialog.length) {
+    dialogIndex++;
+  }
+  if (dialogIndex >= currentDialog.length) {
+    // Full text shown
+  }
+}
+
+function advanceDialog() {
+  if (dialogIndex < currentDialog.length) {
+    dialogIndex = currentDialog.length; // skip
+  } else if (dialogQueue.length > 1) {
+    dialogQueue.shift();
+    startTyping();
+  } else {
+    dialogQueue = [];
+    gameState = 'playing';
+    document.getElementById('dialogue-box').classList.add('hidden');
+  }
+}
+
+// Audio
+function playSFX(type) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'square';
+  let freq = 800;
+  let dur = 0.1;
+  if (type === 'select') { freq = 600; dur = 0.05; }
+  else if (type === 'cry') { freq = 440; dur = 0.3; }
+  else if (type === 'step') { freq = 200; dur = 0.08; }
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+  osc.start(audioCtx.currentTime);
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+function playCry(poke) {
+  playSFX('cry');
+  // Specific freq per poke
+}
+
+// Virtual keyboard
+const keysRow1 = 'QWERTYUIOP'.split('');
+const keysRow2 = 'ASDFGHJKL'.split('');
+const keysRow3 = 'ZXCVBNM'.split('');
+const keyLayout = [...keysRow1, ...keysRow2, ...keysRow3, 'BKSP', 'OK'];
+function createKeyboard() {
+  const container = document.getElementById('virtual-keys');
+  container.innerHTML = '';
+  keyLayout.forEach((k, i) => {
+    const key = document.createElement('div');
+    key.className = 'key';
+    key.textContent = k;
+    key.onclick = () => {
+      if (k === 'OK') {
+        confirmName();
+      } else if (k === 'BKSP') {
+        playerName = playerName.slice(0, -1);
+        updateNameDisplay();
+      } else {
+        playerName += k;
+        if (playerName.length > 10) playerName = playerName.slice(0,10);
+        updateNameDisplay();
+      }
     };
-
-    bind('up', 'up'); bind('down', 'down'); bind('left', 'left'); 
-    bind('right', 'right'); bind('a', 'a'); bind('b', 'b');
+    container.appendChild(key);
+  });
 }
+function updateNameDisplay() {
+  document.getElementById('name-display').textContent = playerName || 'NOVA';
+}
+createKeyboard();
 
-function handleInput(key) {
-    if (key === 'a') {
-        if (currentState === STATES.TITLE) {
-            currentState = STATES.PROF_INTRO;
-            playDialogue([
-                "Ah! There you are!",
-                "Welcome to the world of Pokémon!",
-                "My name is Chen.",
-                "And you are...?"
-            ]);
-        } else if (diagContainer.style.display === 'block') {
-            if (charIndex < currentText.length) {
-                charIndex = currentText.length; // Skip typing
-                textEl.innerText = currentText;
-            } else {
-                advanceDialogue();
-            }
-        } else if (currentState === STATES.STARTER_SELECT) {
-            player.starter = "TREECKO";
-            currentState = STATES.WORLD;
-            playDialogue(["An excellent choice!", "Let's go meet Mom downstairs!"]);
-        }
+// Controls
+const inputDir = { up: false, down: false, left: false, right: false };
+['up-d','down-d','left-d','right-d'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('touchstart', () => inputDir[id.split('-')[0]] = true);
+  el.addEventListener('touchend', () => inputDir[id.split('-')[0]] = false);
+  el.addEventListener('mousedown', () => inputDir[id.split('-')[0]] = true);
+  el.addEventListener('mouseup', () => inputDir[id.split('-')[0]] = false);
+});
+
+document.getElementById('a-btn').addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (gameState === 'dialog') advanceDialog();
+  else if (gameState === 'playing') {
+    // Interact forward based on dir
+    const dirs = [[0,-1],[-1,0],[0,1],[1,0]];
+    const [dx, dy] = dirs[player.dir];
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+    if (maps[currentMap][ny] && maps[currentMap][ny][nx] === 3) {
+      checkInteraction();
     }
+  }
+});
+document.getElementById('a-btn').addEventListener('mousedown', e => e.preventDefault());
+
+document.getElementById('b-btn').addEventListener('touchstart', () => { /* cancel */ });
+document.getElementById('menu-btn').addEventListener('touchstart', toggleMenu);
+document.getElementById('menu-btn').addEventListener('click', toggleMenu);
+
+function toggleMenu() {
+  const overlay = document.getElementById('menu-overlay');
+  overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+  gameState = overlay.style.display === 'block' ? 'menu' : 'playing';
 }
 
-// Initialize
-createSprites();
-setupControls();
-function gameLoop() {
-    update();
-    render();
-    requestAnimationFrame(gameLoop);
+document.getElementById('save-menu').onclick = () => {
+  autoSave();
+  showDialog(['Game saved!']);
+  toggleMenu();
+};
+document.getElementById('close-menu').onclick = toggleMenu;
+
+// Movement input
+function handleInput() {
+  if (gameState !== 'playing') return;
+  if (inputDir.up) moveDir(0);
+  else if (inputDir.down) moveDir(2);
+  else if (inputDir.left) moveDir(1);
+  else if (inputDir.right) moveDir(3);
 }
+
+// Start screen
+canvas.addEventListener('click', () => {
+  if (gameState === 'title') {
+    gameState = 'lab';
+    showDialog([
+      "Ah! There you are! I've been expecting you.",
+      "Welcome to the world of Pokémon! My name is Chen.",
+      "I study the unique bond between humans and Pokémon here in the Aura Region.",
+      "And you are...?"
+    ]);
+    playSFX('select');
+  }
+}, { once: true });
+
+// Name confirm
+function confirmName() {
+  document.getElementById('name-entry').style.display = 'none';
+  document.getElementById('keyboard').style.display = 'none';
+  showDialog([
+    `Perfect, ${playerName}! Now, for your first partner.`,
+    "The Aura Region is home to Pokémon with powerful latent abilities.",
+    "Which of these three resonates with you?"
+  ]);
+  gameState = 'pokemon-choose';
+}
+
+// Show name input
+function showNameInput() {
+  document.getElementById('name-entry').style.display = 'flex';
+  document.getElementById('keyboard').style.display = 'flex';
+  playerName = '';
+  updateNameDisplay();
+}
+
+// Pokemon choose
+canvas.addEventListener('click', e => {
+  if (gameState !== 'pokemon-choose') return;
+  const rect = canvas.getBoundingClientRect();
+  const scale = 3;
+  const tx = (e.clientX - rect.left) / scale / 16 | 0;
+  const ty = (e.clientY - rect.top) / scale / 16 | 0;
+  let poke = null;
+  if (tx === 2 && ty === 6) poke = 'charmander';
+  else if (tx === 6 && ty === 6) poke = 'treecko';
+  else if (tx === 10 && ty === 6) poke = 'froakie';
+  if (poke) {
+    document.getElementById('confirm-text').textContent = `You chose ${poke.toUpperCase()}! Are you sure?`;
+    document.getElementById('confirmation').style.display = 'block';
+    document.getElementById('yes-btn').onclick = () => {
+      chosenPokemon = poke;
+      playCry(poke);
+      document.getElementById('confirmation').style.display = 'none';
+      showDialog([
+        "An excellent choice! This Pokémon is full of potential!"
+      ]);
+      autoSave();
+      setTimeout(() => {
+        fadeToBlack(() => {
+          currentMap = 'bedroom';
+          gameState = 'home-fadein';
+          document.getElementById('controls').classList.remove('hidden');
+          showDialog(["Alright, {playerName}! Let's go meet Mom downstairs, then start our journey!"]);
+          fadeIn();
+          gameState = 'playing';
+        });
+      }, 2000);
+    };
+  }
+});
+
+// Advance dialog on A or tap
+document.getElementById('advance-btn').onclick = advanceDialog;
+
+// Game loop
+function gameLoop() {
+  update();
+  if (gameState === 'dialog' || gameState === 'lab' || gameState === 'pokemon-choose') {
+    updateDialog();
+    document.getElementById('dialogue-text').textContent = currentDialog.slice(0, dialogIndex);
+    document.getElementById('dialogue-box').classList.remove('hidden');
+  }
+  handleInput();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// Advance after name
+const advanceAfterName = () => {
+  if (gameState === 'dialog' && dialogQueue.length === 0) {
+    showNameInput();
+  }
+};
+setTimeout(advanceAfterName, 100); // auto advance key
+
 gameLoop();
+
+// Initial dialog trigger
+setTimeout(() => {
+  if (saveData && chosenPokemon) {
+    gameState = 'playing';
+    document.getElementById('controls').classList.remove('hidden');
+  }
+}, 500);
 
 </script>
 </body>
