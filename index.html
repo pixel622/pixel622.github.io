@@ -77,7 +77,9 @@
     pointer-events:none;
     display:none;
   }
-  .dpad {
+  
+  /* Joystick Styles */
+  #joystickContainer {
     position:absolute;
     left:6%;
     bottom:12%;
@@ -86,24 +88,29 @@
     max-width:140px;
     max-height:140px;
   }
-  .dpad div {
+  #joystickBase {
     position:absolute;
-    width:38%;
-    height:38%;
-    background:rgba(255,255,255,0.35);
-    border:4px solid #fff;
-    color:#000;
-    font-weight:bold;
-    font-size:min(7vw,32px);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    pointer-events:auto;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,0.15);
+    border:4px solid rgba(255,255,255,0.8);
+    border-radius:50%;
+    pointer-events:none;
   }
-  #up    { top:0;    left:31%; }
-  #down  { bottom:0; left:31%; }
-  #left  { left:0;   top:31%;  }
-  #right { right:0;  top:31%;  }
+  #joystickHandle {
+    position:absolute;
+    width:50%;
+    height:50%;
+    background:rgba(255,255,255,0.8);
+    border:3px solid #0044cc;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    pointer-events:none;
+    transition:transform 0.1s;
+  }
+  
   .ab {
     position:absolute;
     right:8%;
@@ -163,6 +170,77 @@
     cursor:pointer;
   }
   .menuRow:active { background:rgba(255,255,255,0.2); }
+  
+  /* Pokémon Selection Screen */
+  #pokemonSelection {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    color:#fff;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    pointer-events:auto;
+    z-index:30;
+  }
+  .pokeballContainer {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    margin:20px;
+    max-width:90%;
+  }
+  .pokeballOption {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    cursor:pointer;
+    transition:transform 0.2s;
+    padding:10px;
+  }
+  .pokeballOption:hover {
+    transform:scale(1.1);
+  }
+  .pokeball {
+    width:80px;
+    height:80px;
+    position:relative;
+    background:linear-gradient(to bottom, #ff3333 45%, #fff 45%);
+    border-radius:50%;
+    border:4px solid #000;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .pokeball:before {
+    content:'';
+    position:absolute;
+    top:calc(45% - 2px);
+    left:0;
+    right:0;
+    height:4px;
+    background:#000;
+  }
+  .pokeball:after {
+    content:'';
+    position:absolute;
+    top:calc(50% - 12px);
+    left:calc(50% - 12px);
+    width:24px;
+    height:24px;
+    background:#fff;
+    border:4px solid #000;
+    border-radius:50%;
+  }
+  .pokemonName {
+    font-size:12px;
+    color:#fff;
+    text-align:center;
+    margin-top:5px;
+    text-shadow:2px 2px 0 #000;
+  }
+  
   #nameScreen, #confirmScreen {
     position:fixed;
     inset:0;
@@ -225,6 +303,30 @@
     <div id="kb"></div>
   </div>
 
+  <!-- Pokémon Selection Screen -->
+  <div id="pokemonSelection">
+    <div style="font-size:1.2em; margin-bottom:30px; text-align:center;">
+      Choose your first Pokémon partner!
+    </div>
+    <div class="pokeballContainer">
+      <div class="pokeballOption" data-pokemon="treecko">
+        <div class="pokeball"></div>
+        <div class="pokemonName">TREECKO</div>
+      </div>
+      <div class="pokeballOption" data-pokemon="froakie">
+        <div class="pokeball"></div>
+        <div class="pokemonName">FROAKIE</div>
+      </div>
+      <div class="pokeballOption" data-pokemon="charmander">
+        <div class="pokeball"></div>
+        <div class="pokemonName">CHARMANDER</div>
+      </div>
+    </div>
+    <div style="margin-top:30px; font-size:0.8em; color:#aaa;">
+      Tap a Pokéball to select your Pokémon
+    </div>
+  </div>
+
   <div id="confirmScreen">
     <div id="confirmMsg">You chose CHARMANDER! Are you sure?</div>
     <button id="yes">YES</button>
@@ -232,12 +334,12 @@
   </div>
 
   <div id="controls">
-    <div class="dpad">
-      <div id="up">↑</div>
-      <div id="down">↓</div>
-      <div id="left">←</div>
-      <div id="right">→</div>
+    <!-- Joystick -->
+    <div id="joystickContainer">
+      <div id="joystickBase"></div>
+      <div id="joystickHandle"></div>
     </div>
+    
     <div class="ab">
       <div id="b">B</div>
       <div id="a">A</div>
@@ -262,13 +364,13 @@ const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const TILE = 16;
-const W = 320, H = 240; // bigger internal resolution
+const W = 320, H = 240;
 
 let state = 'title';
 let name = 'NOVA';
 let starter = null;
-let px = 8, py = 7, pdir = 2; // 0↑ 1← 2↓ 3→
-let fx = 8, fy = 8; // follower
+let px = 8, py = 7, pdir = 2;
+let fx = 8, fy = 8;
 let camx = 0, camy = 0;
 let map = 'bed';
 let dialog = [];
@@ -277,17 +379,25 @@ let dpos = 0;
 let potion = 1;
 let talkedMom = false;
 
+// Joystick variables
+let joystickActive = false;
+let joystickX = 0;
+let joystickY = 0;
+const joystickContainer = document.getElementById('joystickContainer');
+const joystickHandle = document.getElementById('joystickHandle');
+const JOYSTICK_RADIUS = 70;
+
 const maps = {
-  bed: [ // bedroom - bed left, desk right, stairs bottom
+  bed: [ 
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // bed
+    [1,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,9,9,9,9,0,0,0,0,0,0,0,0,0,0,0,1], // desk/pc
+    [1,0,0,0,9,9,9,9,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,1], // stairs
+    [1,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -295,16 +405,16 @@ const maps = {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  kit: [ // kitchen - pink floor, fridge left, sink/counter, table right, mom center-bottom, window top
+  kit: [ 
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,1], // window line
-    [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1], // fridge + counter/sink
+    [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,1],
+    [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1],
     [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,1], // mom
+    [1,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,2,2,0,0,0,7,7,7,7,0,0,0,0,2,2,0,0,0,1], // table + doors
+    [1,2,2,0,0,0,7,7,7,7,0,0,0,0,2,2,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -312,14 +422,14 @@ const maps = {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  town: [ // town - grass, red roof center, blue mart, house gray/red door
+  town: [ 
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,1],
     [1,11,11,12,12,12,12,12,12,12,12,11,11,11,11,11,11,11,11,1],
-    [1,11,11,12,12,12,12,12,12,12,12,11,11,13,13,13,13,11,11,1], // center red roof
+    [1,11,11,12,12,12,12,12,12,12,12,11,11,13,13,13,13,11,11,1],
     [1,11,11,11,11,11,11,11,11,11,11,11,11,13,13,13,13,11,11,1],
     [1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,1],
-    [1,14,14,14,14,0,0,0,0,0,0,0,0,0,0,15,15,15,15,1], // house gray + red door
+    [1,14,14,14,14,0,0,0,0,0,0,0,0,0,0,15,15,15,15,1],
     [1,14,14,14,14,2,0,0,0,0,0,0,0,0,2,15,15,15,15,1],
     [1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -332,22 +442,22 @@ const maps = {
 };
 
 const colors = {
-  0: '#00000000', // transparent/walk
-  1: '#a87048',   // wall brown
-  2: '#c08030',   // door brown
-  3: '#909090',   // fridge gray
-  4: '#b07050',   // counter brown
-  5: '#60a0c0',   // sink blue
-  6: '#ff88cc',   // mom pink dress
-  7: '#ffdd99',   // table wood + food
-  8: '#ffcc88',   // bed orange
-  9: '#ddccaa',   // desk wood
-  10:'#88ccff',   // window blue
-  11:'#90d070',   // grass green
-  12:'#d02020',   // center red roof
-  13:'#f0f0f0',   // center white building
-  14:'#c0c0c0',   // house gray
-  15:'#a02020'    // house red door
+  0: '#00000000',
+  1: '#a87048',
+  2: '#c08030',
+  3: '#909090',
+  4: '#b07050',
+  5: '#60a0c0',
+  6: '#ff88cc',
+  7: '#ffdd99',
+  8: '#ffcc88',
+  9: '#ddccaa',
+  10:'#88ccff',
+  11:'#90d070',
+  12:'#d02020',
+  13:'#f0f0f0',
+  14:'#c0c0c0',
+  15:'#a02020'
 };
 
 function drawTile(tx, ty, type) {
@@ -387,6 +497,8 @@ function drawStarter(x, y) {
   const sx = x * TILE + camx + 2;
   const sy = y * TILE + camy + 2;
   if (!starter) return;
+  
+  // Draw Pokémon sprite
   if (starter === 'charmander') {
     ctx.fillStyle = '#ff8800';
     ctx.fillRect(sx, sy+4, 12, 10);
@@ -403,6 +515,18 @@ function drawStarter(x, y) {
     ctx.fillStyle = '#2266cc';
     ctx.fillRect(sx+3, sy+3, 6, 6);
   }
+  
+  // Draw a small Pokéball indicator
+  const pbx = sx - 4;
+  const pby = sy - 4;
+  ctx.fillStyle = '#ff3333';
+  ctx.beginPath();
+  ctx.arc(pbx + 6, pby + 6, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(pbx + 6, pby + 6, 2, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function updateCam() {
@@ -436,7 +560,9 @@ function render() {
   } else {
     drawMap();
     drawChar(px, py, pdir, (performance.now()/200|0)%2);
-    drawStarter(fx, fy);
+    if (starter) {
+      drawStarter(fx, fy);
+    }
     if (map === 'kit' && !talkedMom) drawChar(9,5,2); // mom
   }
 
@@ -473,6 +599,10 @@ function advance() {
   }
 }
 
+function showPokemonSelection() {
+  document.getElementById('pokemonSelection').style.display = 'flex';
+}
+
 function showConfirm(poke) {
   starter = poke;
   document.getElementById('confirmMsg').textContent = `You chose ${poke.toUpperCase()}! Are you sure?`;
@@ -481,6 +611,7 @@ function showConfirm(poke) {
 
 document.getElementById('yes').onclick = () => {
   document.getElementById('confirmScreen').style.display = 'none';
+  document.getElementById('pokemonSelection').style.display = 'none';
   queueDialog([
     'An excellent choice! This Pokémon is full of potential!',
     `Alright, ${starter.toUpperCase()}! Let's go meet Mom downstairs, then start our journey!`
@@ -488,11 +619,15 @@ document.getElementById('yes').onclick = () => {
   state = 'play';
   map = 'bed';
   document.getElementById('controls').style.display = 'block';
+  
+  // Position follower behind player
+  fx = px - 1;
+  fy = py;
 };
 
 document.getElementById('no').onclick = () => {
   document.getElementById('confirmScreen').style.display = 'none';
-  starter = null;
+  showPokemonSelection();
 };
 
 // touch/click start
@@ -507,6 +642,15 @@ c.onclick = () => {
     ]);
   }
 };
+
+// Setup Pokémon selection
+document.querySelectorAll('.pokeballOption').forEach(option => {
+  option.onclick = (e) => {
+    e.preventDefault();
+    const pokemon = option.dataset.pokemon;
+    showConfirm(pokemon);
+  };
+});
 
 // keyboard
 function buildKb() {
@@ -526,9 +670,10 @@ function buildKb() {
           document.getElementById('nameScreen').style.display = 'none';
           queueDialog([
             `Perfect, ${name}! Now, for your first partner.`,
-            'Which of these three resonates with you?'
+            'Which of these three resonates with you?',
+            '(Select a Pokéball below)'
           ]);
-          state = 'choose';
+          setTimeout(showPokemonSelection, 1000);
         }
       } else if (k==='DEL') {
         name = name.slice(0,-1);
@@ -543,12 +688,87 @@ function buildKb() {
 }
 buildKb();
 
-// controls
-const dirs = {up:false,down:false,left:false,right:false};
-['up','down','left','right'].forEach(d=>{
-  document.getElementById(d).ontouchstart = e=>{e.preventDefault(); dirs[d]=true;};
-  document.getElementById(d).ontouchend = ()=>dirs[d]=false;
+// Joystick Implementation
+function handleJoystickStart(e) {
+  e.preventDefault();
+  joystickActive = true;
+  updateJoystick(e);
+}
+
+function handleJoystickMove(e) {
+  if (!joystickActive) return;
+  e.preventDefault();
+  updateJoystick(e);
+}
+
+function handleJoystickEnd(e) {
+  joystickActive = false;
+  joystickX = 0;
+  joystickY = 0;
+  joystickHandle.style.transform = 'translate(-50%, -50%)';
+}
+
+function updateJoystick(e) {
+  const rect = joystickContainer.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  
+  let clientX, clientY;
+  
+  if (e.type.includes('touch')) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  
+  let dx = clientX - centerX;
+  let dy = clientY - centerY;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  
+  if (distance > JOYSTICK_RADIUS) {
+    dx = (dx / distance) * JOYSTICK_RADIUS;
+    dy = (dy / distance) * JOYSTICK_RADIUS;
+  }
+  
+  joystickX = dx / JOYSTICK_RADIUS;
+  joystickY = dy / JOYSTICK_RADIUS;
+  
+  joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
+}
+
+// Joystick event listeners
+joystickContainer.addEventListener('touchstart', handleJoystickStart, {passive: false});
+joystickContainer.addEventListener('touchmove', handleJoystickMove, {passive: false});
+joystickContainer.addEventListener('touchend', handleJoystickEnd);
+joystickContainer.addEventListener('touchcancel', handleJoystickEnd);
+
+// Mouse support for testing on desktop
+joystickContainer.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  joystickActive = true;
+  updateJoystick(e);
+  
+  const mouseMove = (e) => {
+    if (!joystickActive) return;
+    updateJoystick(e);
+  };
+  
+  const mouseUp = () => {
+    joystickActive = false;
+    joystickX = 0;
+    joystickY = 0;
+    joystickHandle.style.transform = 'translate(-50%, -50%)';
+    document.removeEventListener('mousemove', mouseMove);
+    document.removeEventListener('mouseup', mouseUp);
+  };
+  
+  document.addEventListener('mousemove', mouseMove);
+  document.addEventListener('mouseup', mouseUp);
 });
+
+// controls
 document.getElementById('a').ontouchstart = e=>{e.preventDefault(); if(state==='play') advance();};
 document.getElementById('advance').onclick = advance;
 document.getElementById('menuIcon').onclick = ()=>{
@@ -562,15 +782,30 @@ document.getElementById('saveBtn').onclick = ()=>{
 };
 
 // game loop
-function loop() {
+let lastTime = 0;
+const MOVE_COOLDOWN = 150; // ms between moves
+
+function loop(timestamp) {
   if (state==='play') {
-    let moved = false;
-    if (dirs.up)    { pdir=0; moved = tryMove(0,-1); }
-    if (dirs.down)  { pdir=2; moved = tryMove(0,1); }
-    if (dirs.left)  { pdir=1; moved = tryMove(-1,0); }
-    if (dirs.right) { pdir=3; moved = tryMove(1,0); }
-    if (moved) {
-      fx = px; fy = py; // simple follow for now
+    if (timestamp - lastTime > MOVE_COOLDOWN) {
+      let moved = false;
+      
+      // Joystick movement
+      if (joystickActive && (Math.abs(joystickX) > 0.3 || Math.abs(joystickY) > 0.3)) {
+        if (Math.abs(joystickX) > Math.abs(joystickY)) {
+          if (joystickX > 0) { pdir = 3; moved = tryMove(1, 0); }
+          else { pdir = 1; moved = tryMove(-1, 0); }
+        } else {
+          if (joystickY > 0) { pdir = 2; moved = tryMove(0, 1); }
+          else { pdir = 0; moved = tryMove(0, -1); }
+        }
+      }
+      
+      if (moved) {
+        lastTime = timestamp;
+        // Update follower position to follow player
+        updateFollower();
+      }
     }
     updateCam();
   }
@@ -579,6 +814,33 @@ function loop() {
 
   render();
   requestAnimationFrame(loop);
+}
+
+function updateFollower() {
+  // Simple follow algorithm - follower goes to player's previous position
+  // In a more complex system, you'd implement pathfinding
+  if (starter) {
+    // Move follower toward player
+    const dx = px - fx;
+    const dy = py - fy;
+    
+    // Only move if not too close
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+      // Try to move diagonally toward player
+      if (dx !== 0 && dy !== 0) {
+        // Try moving in x direction
+        if (Math.abs(dx) > Math.abs(dy)) {
+          fx += Math.sign(dx);
+        } else {
+          fy += Math.sign(dy);
+        }
+      } else if (dx !== 0) {
+        fx += Math.sign(dx);
+      } else if (dy !== 0) {
+        fy += Math.sign(dy);
+      }
+    }
+  }
 }
 
 function tryMove(dx,dy) {
@@ -592,7 +854,7 @@ function tryMove(dx,dy) {
   return false;
 }
 
-loop();
+loop(0);
 </script>
 </body>
 </html>
