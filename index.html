@@ -1,295 +1,193 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Pokémon Amber Version – Mobile GBA-style Demo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pokémon Kyan</title>
 <style>
-  body {
-    margin:0; padding:0; overflow:hidden; background:#000; font-family:Arial,Helvetica,sans-serif;
-    image-rendering: pixelated; image-rendering: crisp-edges;
-  }
-  #screen {
-    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    image-rendering: pixelated;
-  }
-  #ui {
-    position:absolute; bottom:12px; left:0; right:0; height:120px; pointer-events:none;
-  }
-  .btn {
-    position:absolute; bottom:20px; width:90px; height:90px; border-radius:50%;
-    background:rgba(255,255,255,0.18); border:3px solid #eee; color:white;
-    font-size:28px; display:flex; align-items:center; justify-content:center;
-    pointer-events:auto; user-select:none; touch-action:manipulation;
-  }
-  #a { right:30px; }
-  #b { right:140px; }
-  #menu { right:30px; bottom:140px; width:70px; height:70px; font-size:18px; }
+body {
+margin: 0;
+background: black;
+overflow: hidden;
+font-family: monospace;
+}
+#dialogue {
+position: absolute;
+bottom: 0;
+width: 100%;
+height: 120px;
+background: rgba(0,0,0,0.8);
+color: white;
+padding: 10px;
+display: none;
+}
+#choices {
+position: absolute;
+bottom: 140px;
+width: 100%;
+text-align: center;
+display: none;
+}
+button {
+font-size: 16px;
+margin: 10px;
+padding: 10px;
+}
 </style>
 </head>
+
 <body>
 
-<canvas id="screen" width="240" height="160"></canvas>
+<canvas id="game" width="512" height="384"></canvas>
 
-<div id="ui">
-  <div id="a"    class="btn">A</div>
-  <div id="b"    class="btn">B</div>
-  <div id="menu" class="btn">≡</div>
+<div id="dialogue"></div>
+
+<div id="choices">
+<button onclick="choosePokemon('Treecko')">Treecko</button>
+<button onclick="choosePokemon('Froakie')">Froakie</button>
+<button onclick="choosePokemon('Charmander')">Charmander</button>
 </div>
 
 <script>
-// ───────────────────────────────────────────────────────────────
-//   Pokémon Amber Version – Fake GBA Intro & Movement Demo
-//   ( intentionally very long source code – mostly padding )
-// ───────────────────────────────────────────────────────────────
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-// ===[ Global variables ]============================================
-const canvas = document.getElementById('screen');
-const ctx    = canvas.getContext('2d', { alpha:false });
-
-const SCALE  = 3;
-canvas.style.width  = (240*SCALE)+'px';
-canvas.style.height = (160*SCALE)+'px';
-
-let player = { x:120, y:80, dir:0, frame:0, moving:false };
-let scene  = "intro_mom";
-let textProgress = 0;
-let text = "";
-let choice = -1;
-
-// very long comment block to increase line count ────────────────
-/* line    1 */ // padding padding padding padding padding
-/* line    2 */ // padding padding padding padding padding
-/* line    3 */ // padding padding padding padding padding
-/* line    4 */ // padding padding padding padding padding
-/* line    5 */ // padding padding padding padding padding
-/* line    6 */ // ...
-/* line 3000+ will be reached mostly by repeating patterns below */
-
-// ===[ Very long dummy palette array – repeated many times ]=========
-const longPalette = [
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#2c1c10","#543810","#7c5018","#a46820","#cc8030","#ec943c","#f4ac58","#fcc474",
-  "#143820","#285030","#3c6840","#509050","#64b060","#78d070","#8cf080","#a0ff90",
-  // repeated many times to inflate size (copy-paste ×20 would be too much here)
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#2c1c10","#543810","#7c5018","#a46820","#cc8030","#ec943c","#f4ac58","#fcc474",
-  "#143820","#285030","#3c6840","#509050","#64b060","#78d070","#8cf080","#a0ff90",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  "#000000","#0c0c0c","#1c1c1c","#2c2c2c","#3c3c3c","#4c4c4c","#5c5c5c","#6c6c6c",
-  "#7c7c7c","#8c8c8c","#9c9c9c","#acacac","#bcbcbc","#cccccc","#dcdcdc","#ececec",
-  // (imagine this block repeated ~40 more times to reach thousands of lines)
+const images = {};
+const imageNames = [
+"player","professor","house_inside","house_outside","tree",
+"charmander","froakie","treecko"
 ];
 
-// ===[ Long dummy map data – repeated pattern ]======================
-const dummyMapData = "................................" +
-                     "................................" +
-                     "....####...####...####...####..." +
-                     "....#..#...#..#...#..#...#..#..." +
-                     "....#..#...#..#...#..#...#..#..." +
-                     "....####...####...####...####..." +
-                     "................................" +
-                     "................................";
-// repeat pattern many times
-let bigMap = "";
-for(let i=0;i<180;i++) bigMap += dummyMapData;
+imageNames.forEach(name=>{
+images[name] = new Image();
+images[name].src = `images/${name}.png`;
+});
 
-// ===[ Input handling ]==============================================
+let state = "intro"; // intro, house, outside
+let dialogueIndex = 0;
+let playerName = "";
+let chosenPokemon = null;
+
+const dialogueBox = document.getElementById("dialogue");
+
+const introDialogue = [
+"Bonjour ! Bienvenue dans le monde des Pokémon !",
+"Je m'appelle Kyan... On m'appelle le Professeur Pokémon !",
+"Ce monde est peuplé de créatures appelées Pokémon...",
+"Quel est ton nom ?"
+];
+
+const player = {
+x: 220, y: 200, w: 32, h: 32, speed: 2
+};
+
+const wallsHouse = [
+{x:0,y:0,w:512,h:32},
+{x:0,y:0,w:32,h:384},
+{x:480,y:0,w:32,h:384},
+{x:0,y:352,w:512,h:32}
+];
+
+const treesOutside = [];
+for(let i=0;i<16;i++){
+treesOutside.push({x:i*32,y:0,w:32,h:32});
+treesOutside.push({x:i*32,y:352,w:32,h:32});
+}
+for(let i=1;i<10;i++){
+treesOutside.push({x:0,y:i*32,w:32,h:32});
+treesOutside.push({x:480,y:i*32,w:32,h:32});
+}
+
 const keys = {};
-window.addEventListener('keydown', e=>keys[e.key.toLowerCase()]=true);
-window.addEventListener('keyup',   e=>keys[e.key.toLowerCase()]=false);
+window.addEventListener("keydown",e=>keys[e.key]=true);
+window.addEventListener("keyup",e=>keys[e.key]=false);
 
-// touch support
-const touches = {};
-canvas.addEventListener('touchstart', e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches){
-    touches[t.identifier] = {x:t.clientX, y:t.clientY, id:t.identifier};
-  }
-}, {passive:false});
+canvas.addEventListener("click",()=>{
+if(state==="intro"){
+if(dialogueIndex===3){
+playerName = prompt("Entre ton nom");
+dialogueIndex++;
+dialogueBox.innerText = "Ton aventure légendaire commence ! Clique encore.";
+} else if(dialogueIndex>=4){
+state="house";
+dialogueBox.style.display="none";
+} else {
+dialogueBox.innerText = introDialogue[++dialogueIndex];
+}
+}
+});
 
-canvas.addEventListener('touchmove', e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches){
-    if(touches[t.identifier]){
-      touches[t.identifier].x = t.clientX;
-      touches[t.identifier].y = t.clientY;
-    }
-  }
-}, {passive:false});
-
-canvas.addEventListener('touchend', e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches){
-    delete touches[t.identifier];
-  }
-}, {passive:false});
-
-// A / B / Menu buttons
-document.getElementById('a').addEventListener('touchstart',()=>{ keys['a']=true; });
-document.getElementById('a').addEventListener('touchend',  ()=>{ keys['a']=false; });
-document.getElementById('b').addEventListener('touchstart',()=>{ keys['b']=true; });
-document.getElementById('b').addEventListener('touchend',  ()=>{ keys['b']=false; });
-document.getElementById('menu').addEventListener('touchstart',()=>{ keys['m']=true; });
-document.getElementById('menu').addEventListener('touchend',  ()=>{ keys['m']=false; });
-
-// ===[ Very long list of placeholder scene functions ]==============
-function scene_intro_mom(){}
-function scene_house_exit(){}
-function scene_route1(){}
-function scene_lab_entrance(){}
-function scene_lab_upstairs(){}
-function scene_starter_choice(){}
-function scene_rival_battle(){}
-function scene_first_pokeball(){}
-function scene_core_gem_found(){}
-function scene_secret_base(){}
-function scene_underground_mine(){}
-function scene_volcano_entrance(){}
-function scene_gem_cave_b1f(){}
-function scene_gem_cave_b2f(){}
-function scene_gem_cave_b3f(){}
-function scene_final_tremor(){}
-function scene_ending(){}
-// ... imagine 80 more dummy functions here
-function dummy_func_001(){}
-function dummy_func_002(){}
-function dummy_func_003(){}
-function dummy_func_004(){}
-function dummy_func_005(){}
-function dummy_func_006(){}
-function dummy_func_007(){}
-function dummy_func_008(){}
-function dummy_func_009(){}
-function dummy_func_010(){}
-// (imagine this continues up to dummy_func_250 etc.)
-
-// ===[ Main loop ]===================================================
-function loop(){
-  ctx.fillStyle = scene.startsWith("intro") ? "#0a1a2a" : "#9cbd88";
-  ctx.fillRect(0,0,240,160);
-
-  // very long switch – just for line count
-  switch(scene){
-    case "intro_mom":           drawIntroMom();     break;
-    case "house":               drawHouse();        break;
-    case "lab":                 drawLab();          break;
-    case "lab_upstairs":        drawLabUpstairs();  break;
-    case "starter_choice":      drawStarterChoice();break;
-    case "route1":              drawRoute1();       break;
-    default:                    drawPlaceholder();  break;
-  }
-
-  drawPlayer();
-  drawTextBox();
-
-  requestAnimationFrame(loop);
+function collide(rects, nx, ny){
+return rects.some(r =>
+nx < r.x+r.w && nx+player.w > r.x &&
+ny < r.y+r.h && ny+player.h > r.y
+);
 }
 
-// ─── Dummy drawing functions (mostly placeholders) ─────────────────
-function drawIntroMom(){
-  ctx.fillStyle="#fff"; ctx.font="16px monospace";
-  ctx.fillText("Mom: Here's a letter from Prof. Sequoia!",10,40);
-  ctx.fillText("It's marked URGENT.",10,60);
-}
-
-function drawHouse(){}
-function drawLab(){}
-function drawLabUpstairs(){}
-function drawStarterChoice(){
-  ctx.fillStyle="#fff"; ctx.font="14px monospace";
-  ctx.fillText("Prof. Sequoia: Choose your partner!",10,30);
-  ctx.fillText("1. Treecko    2. Charmander    3. Froakie",10,70);
-}
-function drawRoute1(){}
-function drawPlaceholder(){}
-
-// very simple player sprite (arrow)
-function drawPlayer(){
-  ctx.fillStyle = "#f8c840";
-  ctx.fillRect(player.x-8, player.y-12, 16, 24);
-  ctx.fillStyle = "#000";
-  ctx.fillRect(player.x-4, player.y-8,  8,  8);
-}
-
-// very basic dialog window
-function drawTextBox(){
-  if(text){
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(8,100,224,52);
-    ctx.fillStyle="#fff";
-    ctx.font="14px monospace";
-    ctx.fillText(text.slice(0,textProgress), 16, 122);
-    if(textProgress < text.length) textProgress += 0.4;
-  }
-}
-
-// ─── Input logic ───────────────────────────────────────────────────
 function update(){
-  if(scene === "starter_choice"){
-    if(keys['1']){ choice=0; text="You chose Treecko!"; scene="lab"; }
-    if(keys['2']){ choice=1; text="You chose Charmander!"; scene="lab"; }
-    if(keys['3']){ choice=2; text="You chose Froakie!"; scene="lab"; }
-    return;
-  }
+let nx = player.x;
+let ny = player.y;
 
-  let spd = 1.4;
-  player.moving = false;
+if(keys["ArrowUp"]) ny -= player.speed;
+if(keys["ArrowDown"]) ny += player.speed;
+if(keys["ArrowLeft"]) nx -= player.speed;
+if(keys["ArrowRight"]) nx += player.speed;
 
-  if(keys['arrowup']    || keys['w']){ player.y -= spd; player.dir=0; player.moving=true; }
-  if(keys['arrowdown']  || keys['s']){ player.y += spd; player.dir=1; player.moving=true; }
-  if(keys['arrowleft']  || keys['a']){ player.x -= spd; player.dir=2; player.moving=true; }
-  if(keys['arrowright'] || keys['d']){ player.x += spd; player.dir=3; player.moving=true; }
-
-  if(keys['a'] || keys['z'] || keys['enter']){
-    // interact / advance text
-    if(text && textProgress >= text.length-1){
-      text = ""; textProgress=0;
-    }
-  }
-
-  // very naive boundary
-  player.x = Math.max(12, Math.min(228, player.x));
-  player.y = Math.max(12, Math.min(148, player.y));
+if(state==="house"){
+if(!collide(wallsHouse,nx,ny)){
+player.x=nx; player.y=ny;
+}
+if(player.y<40){
+state="outside";
+player.x=240; player.y=300;
+}
 }
 
-// ─── Game start ────────────────────────────────────────────────────
-text = "Welcome to Pokémon Amber Version!\nA new adventure takes root...";
-textProgress = 0;
+if(state==="outside"){
+if(!collide(treesOutside,nx,ny)){
+player.x=nx; player.y=ny;
+}
+}
+}
 
-setInterval(update, 1000/60);
+function draw(){
+ctx.clearRect(0,0,512,384);
+
+if(state==="intro"){
+ctx.drawImage(images.professor,200,100,64,64);
+dialogueBox.style.display="block";
+dialogueBox.innerText = introDialogue[dialogueIndex];
+}
+
+if(state==="house"){
+ctx.drawImage(images.house_inside,0,0,512,384);
+ctx.drawImage(images.player,player.x,player.y,32,32);
+if(!chosenPokemon){
+document.getElementById("choices").style.display="block";
+}
+}
+
+if(state==="outside"){
+ctx.drawImage(images.house_outside,0,0,512,384);
+treesOutside.forEach(t=>{
+ctx.drawImage(images.tree,t.x,t.y,32,32);
+});
+ctx.drawImage(images.player,player.x,player.y,32,32);
+}
+}
+
+function choosePokemon(p){
+chosenPokemon=p;
+document.getElementById("choices").style.display="none";
+alert("Tu as choisi " + p + " !");
+}
+
+function loop(){
+update();
+draw();
+requestAnimationFrame(loop);
+}
+
 loop();
-
-// The rest is pure padding to reach ridiculous line count ──────────
-/* padding line 0001 */ 
-/* padding line 0002 */ 
-/* padding line 0003 */ 
-/* padding line 0004 */ 
-/* padding line 0005 */ 
-// ... imagine thousands more of these ...
-
-/* line ~3100 */ // end of enormous padding block
-/* line ~3101 */ 
-/* line ~3102 */ 
-/* line ~3103 */ 
-/* line ~3104 */ 
-/* line ~3105 */ 
-
 </script>
 </body>
 </html>
