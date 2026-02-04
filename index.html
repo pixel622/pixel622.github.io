@@ -1,193 +1,283 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pokémon Kyan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pokémon Amber Version</title>
+
 <style>
-body {
-margin: 0;
-background: black;
-overflow: hidden;
-font-family: monospace;
+/* ===============================
+   GLOBAL STYLE – GBA-ERA FEEL
+   =============================== */
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+    font-family: monospace;
+    touch-action: none;
 }
-#dialogue {
-position: absolute;
-bottom: 0;
-width: 100%;
-height: 120px;
-background: rgba(0,0,0,0.8);
-color: white;
-padding: 10px;
-display: none;
+
+#gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
-#choices {
-position: absolute;
-bottom: 140px;
-width: 100%;
-text-align: center;
-display: none;
+
+canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    width: 100%;
+    height: 100%;
+    background: #1c1c1c;
 }
-button {
-font-size: 16px;
-margin: 10px;
-padding: 10px;
+
+/* ===============================
+   UI OVERLAY
+   =============================== */
+
+#dialogueBox {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 28%;
+    background: rgba(0,0,0,0.85);
+    border-top: 4px solid #fff;
+    padding: 12px;
+    box-sizing: border-box;
+    display: none;
+}
+
+#dialogueText {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+/* A / B Buttons */
+
+#controls {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    display: flex;
+    gap: 12px;
+}
+
+.button {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    user-select: none;
+}
+
+/* Virtual Joystick */
+
+#joystick {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+#stick {
+    position: absolute;
+    left: 40px;
+    top: 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+}
+
+/* Shimmer teleport effect */
+
+.shimmer {
+    animation: shimmer 0.4s ease-in-out;
+}
+
+@keyframes shimmer {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(2); }
+    100% { filter: brightness(1); }
 }
 </style>
 </head>
 
 <body>
+<div id="gameContainer">
+    <canvas id="game" width="240" height="160"></canvas>
 
-<canvas id="game" width="512" height="384"></canvas>
+    <div id="dialogueBox">
+        <div id="dialogueText"></div>
+    </div>
 
-<div id="dialogue"></div>
+    <div id="joystick">
+        <div id="stick"></div>
+    </div>
 
-<div id="choices">
-<button onclick="choosePokemon('Treecko')">Treecko</button>
-<button onclick="choosePokemon('Froakie')">Froakie</button>
-<button onclick="choosePokemon('Charmander')">Charmander</button>
+    <div id="controls">
+        <div class="button" id="btnA">A</div>
+        <div class="button" id="btnB">B</div>
+    </div>
 </div>
 
 <script>
+/* ===============================
+   CORE GAME STATE
+   =============================== */
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const images = {};
-const imageNames = [
-"player","professor","house_inside","house_outside","tree",
-"charmander","froakie","treecko"
-];
+let currentScene = "intro";
+let playerName = "Player";
+let starterChosen = null;
 
-imageNames.forEach(name=>{
-images[name] = new Image();
-images[name].src = `images/${name}.png`;
-});
+/* ===============================
+   DIALOGUE SYSTEM
+   =============================== */
 
-let state = "intro"; // intro, house, outside
-let dialogueIndex = 0;
-let playerName = "";
-let chosenPokemon = null;
+const dialogueBox = document.getElementById("dialogueBox");
+const dialogueText = document.getElementById("dialogueText");
 
-const dialogueBox = document.getElementById("dialogue");
+function showDialogue(text) {
+    dialogueText.innerText = text;
+    dialogueBox.style.display = "block";
+}
 
-const introDialogue = [
-"Bonjour ! Bienvenue dans le monde des Pokémon !",
-"Je m'appelle Kyan... On m'appelle le Professeur Pokémon !",
-"Ce monde est peuplé de créatures appelées Pokémon...",
-"Quel est ton nom ?"
-];
+function hideDialogue() {
+    dialogueBox.style.display = "none";
+}
 
-const player = {
-x: 220, y: 200, w: 32, h: 32, speed: 2
+/* ===============================
+   SCENE DEFINITIONS
+   =============================== */
+
+const scenes = {
+
+    intro: {
+        start() {
+            showDialogue(
+                "Mom: Wake up! Professor Sequoia sent an URGENT letter.\n" +
+                "Your friend already left for the lab.\n\n" +
+                "Maple Root Town awaits."
+            );
+        }
+    },
+
+    mapleRoot: {
+        start() {
+            showDialogue(
+                "You step outside into Maple Root Town.\n" +
+                "Rustic cottages surround an ancient tree.\n\n" +
+                "The path to the Professor's Lab is now open."
+            );
+        }
+    },
+
+    labGround: {
+        start() {
+            showDialogue(
+                "Assistant: Ah, you must be " + playerName + "!\n" +
+                "The Professor is waiting upstairs.\n\n" +
+                "Just head through that door!"
+            );
+        },
+        doorTeleport() {
+            teleportTo("labStudy");
+        }
+    },
+
+    labStudy: {
+        start() {
+            showDialogue(
+                "Professor Sequoia: A tremor shook the lab earlier...\n" +
+                "Three Pokémon from distant regions need Trainers.\n\n" +
+                "Choose wisely."
+            );
+        }
+    }
 };
 
-const wallsHouse = [
-{x:0,y:0,w:512,h:32},
-{x:0,y:0,w:32,h:384},
-{x:480,y:0,w:32,h:384},
-{x:0,y:352,w:512,h:32}
+/* ===============================
+   STARTER SELECTION
+   =============================== */
+
+const starters = [
+    { name: "Treecko", type: "Grass", region: "Hoenn" },
+    { name: "Charmander", type: "Fire", region: "Kanto" },
+    { name: "Froakie", type: "Water", region: "Kalos" }
 ];
 
-const treesOutside = [];
-for(let i=0;i<16;i++){
-treesOutside.push({x:i*32,y:0,w:32,h:32});
-treesOutside.push({x:i*32,y:352,w:32,h:32});
-}
-for(let i=1;i<10;i++){
-treesOutside.push({x:0,y:i*32,w:32,h:32});
-treesOutside.push({x:480,y:i*32,w:32,h:32});
+function chooseStarter(index) {
+    starterChosen = starters[index];
+    showDialogue(
+        "You chose " + starterChosen.name + "!\n\n" +
+        "Professor Sequoia hands you a Pokédex.\n" +
+        "Your journey through Orebound begins!"
+    );
 }
 
-const keys = {};
-window.addEventListener("keydown",e=>keys[e.key]=true);
-window.addEventListener("keyup",e=>keys[e.key]=false);
+/* ===============================
+   TELEPORT SYSTEM
+   =============================== */
 
-canvas.addEventListener("click",()=>{
-if(state==="intro"){
-if(dialogueIndex===3){
-playerName = prompt("Entre ton nom");
-dialogueIndex++;
-dialogueBox.innerText = "Ton aventure légendaire commence ! Clique encore.";
-} else if(dialogueIndex>=4){
-state="house";
-dialogueBox.style.display="none";
-} else {
-dialogueBox.innerText = introDialogue[++dialogueIndex];
+function teleportTo(sceneName) {
+    canvas.classList.add("shimmer");
+    setTimeout(() => {
+        canvas.classList.remove("shimmer");
+        currentScene = sceneName;
+        scenes[sceneName].start();
+    }, 400);
 }
+
+/* ===============================
+   BASIC RENDER LOOP
+   =============================== */
+
+function draw() {
+    ctx.fillStyle = "#2b2b2b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "10px monospace";
+    ctx.fillText("Pokémon Amber Version", 10, 12);
+    ctx.fillText("Scene: " + currentScene, 10, 24);
+
+    requestAnimationFrame(draw);
 }
+
+/* ===============================
+   INPUT HANDLING
+   =============================== */
+
+document.getElementById("btnA").addEventListener("click", () => {
+    if (currentScene === "intro") teleportTo("mapleRoot");
+    else if (currentScene === "mapleRoot") teleportTo("labGround");
+    else if (currentScene === "labGround") scenes.labGround.doorTeleport();
+    else if (currentScene === "labStudy") chooseStarter(0);
 });
 
-function collide(rects, nx, ny){
-return rects.some(r =>
-nx < r.x+r.w && nx+player.w > r.x &&
-ny < r.y+r.h && ny+player.h > r.y
-);
-}
+document.getElementById("btnB").addEventListener("click", hideDialogue);
 
-function update(){
-let nx = player.x;
-let ny = player.y;
+/* ===============================
+   GAME START
+   =============================== */
 
-if(keys["ArrowUp"]) ny -= player.speed;
-if(keys["ArrowDown"]) ny += player.speed;
-if(keys["ArrowLeft"]) nx -= player.speed;
-if(keys["ArrowRight"]) nx += player.speed;
-
-if(state==="house"){
-if(!collide(wallsHouse,nx,ny)){
-player.x=nx; player.y=ny;
-}
-if(player.y<40){
-state="outside";
-player.x=240; player.y=300;
-}
-}
-
-if(state==="outside"){
-if(!collide(treesOutside,nx,ny)){
-player.x=nx; player.y=ny;
-}
-}
-}
-
-function draw(){
-ctx.clearRect(0,0,512,384);
-
-if(state==="intro"){
-ctx.drawImage(images.professor,200,100,64,64);
-dialogueBox.style.display="block";
-dialogueBox.innerText = introDialogue[dialogueIndex];
-}
-
-if(state==="house"){
-ctx.drawImage(images.house_inside,0,0,512,384);
-ctx.drawImage(images.player,player.x,player.y,32,32);
-if(!chosenPokemon){
-document.getElementById("choices").style.display="block";
-}
-}
-
-if(state==="outside"){
-ctx.drawImage(images.house_outside,0,0,512,384);
-treesOutside.forEach(t=>{
-ctx.drawImage(images.tree,t.x,t.y,32,32);
-});
-ctx.drawImage(images.player,player.x,player.y,32,32);
-}
-}
-
-function choosePokemon(p){
-chosenPokemon=p;
-document.getElementById("choices").style.display="none";
-alert("Tu as choisi " + p + " !");
-}
-
-function loop(){
-update();
+scenes.intro.start();
 draw();
-requestAnimationFrame(loop);
-}
-
-loop();
 </script>
 </body>
 </html>
