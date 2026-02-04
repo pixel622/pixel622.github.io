@@ -1,537 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Pokémon Nova Genesis</title>
-<style>
-  body {
-    margin:0;
-    padding:0;
-    overflow:hidden;
-    background:#000;
-    font-family: 'Courier New', Courier, monospace;
-    image-rendering: pixelated;
-    touch-action: none;
-  }
-  #game {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-  }
-  #ui {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  #dialogue-box {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.75);
-    color: #def;
-    padding: 12px 16px;
-    border: 3px solid #6bd;
-    border-radius: 8px;
-    font-size: 18px;
-    line-height: 1.4;
-    max-height: 140px;
-    overflow-y: auto;
-    pointer-events: auto;
-  }
-  #name-entry {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 24px;
-    gap: 20px;
-    pointer-events: auto;
-  }
-  #name-input {
-    font-size: 28px;
-    padding: 12px 20px;
-    width: 280px;
-    text-align: center;
-  }
-  .btn {
-    padding: 14px 32px;
-    font-size: 22px;
-    background: #336;
-    color: white;
-    border: 3px solid #6bd;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  #controls {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  .dpad {
-    position: absolute;
-    left: 24px;
-    bottom: 24px;
-    width: 140px;
-    height: 140px;
-    pointer-events: auto;
-  }
-  .dpad div {
-    position: absolute;
-    width: 54px;
-    height: 54px;
-    background: rgba(255,255,255,0.18);
-    border: 3px solid rgba(255,255,255,0.5);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 28px;
-    user-select: none;
-  }
-  #up    { top:0;    left:43px; }
-  #down  { bottom:0; left:43px; }
-  #left  { left:0;   top:43px;  }
-  #right { right:0;  top:43px;  }
-  .abtns {
-    position: absolute;
-    right: 30px;
-    bottom: 40px;
-    display: flex;
-    gap: 30px;
-    pointer-events: auto;
-  }
-  .abtn {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: rgba(0,180,0,0.6);
-    border: 4px solid #0f0;
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #bBtn { background: rgba(180,0,0,0.6); border-color: #f00; }
-  #menuBtn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 54px;
-    height: 54px;
-    background: rgba(80,80,255,0.5);
-    border: 3px solid #88f;
-    border-radius: 12px;
-    color: white;
-    font-size: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-  }
-  .hidden { display:none !important; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pokémon Nova Genesis</title>
+    <style>
+        @font-face {
+            font-family: 'GBA';
+            src: url('https://fonts.cdnfonts.com/s/14891/PokemonGb-RAeo.woff') format('woff');
+        }
+        :root {
+            --gba-frame: #3a3a3a;
+            --text-blue: #102040;
+        }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: #111; overflow: hidden; font-family: 'GBA', monospace;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #game-wrapper {
+            position: relative;
+            width: 100vw; height: 100vh;
+            max-width: 450px; /* Mobile width */
+            background: var(--gba-frame);
+            display: flex; flex-direction: column;
+            border: 8px solid #222; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        canvas {
+            image-rendering: pixelated;
+            width: 100%; height: auto;
+            background: #000;
+        }
+        /* Mobile Controls */
+        #ui-layer {
+            position: absolute; bottom: 0; width: 100%; height: 40%;
+            background: #444; border-top: 4px solid #222;
+            display: grid; grid-template-columns: 1fr 1fr;
+            padding: 20px; box-sizing: border-box;
+        }
+        .dpad {
+            display: grid; grid-template-columns: repeat(3, 45px);
+            grid-template-rows: repeat(3, 45px);
+        }
+        .btn {
+            background: #222; border: 2px solid #555; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; font-size: 12px; touch-action: manipulation;
+        }
+        .btn:active { background: #666; }
+        .dir-btn { border-radius: 5px; }
+        .action-zone { display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
+        .circle-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: #800; border: 4px solid #400; font-weight: bold;
+        }
+        .btn-b { background: #990; border-color: #660; margin-top: 20px; }
+
+        /* Text Box Overlay */
+        #dialogue-container {
+            position: absolute; top: 45%; left: 5%; right: 5%;
+            height: 12%; background: #fff; border: 3px solid #102040;
+            border-radius: 5px; padding: 10px; display: none; z-index: 100;
+        }
+        #text-content { font-size: 10px; line-height: 1.4; color: var(--text-blue); }
+        #name-input {
+            position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+            background: white; border: 3px solid #102040; padding: 15px;
+            display: none; text-align: center; z-index: 110;
+        }
+    </style>
 </head>
 <body>
 
-<canvas id="game"></canvas>
-
-<div id="ui">
-  <div id="name-entry" class="hidden">
-    <div>What is your name?</div>
-    <input id="name-input" type="text" maxlength="12" value="NOVA" autocomplete="off"/>
-    <button class="btn" id="confirmName">Confirm</button>
-  </div>
-
-  <div id="dialogue-box" class="hidden"></div>
-
-  <div id="controls">
-    <div class="dpad">
-      <div id="up">↑</div>
-      <div id="down">↓</div>
-      <div id="left">←</div>
-      <div id="right">→</div>
+<div id="game-wrapper">
+    <canvas id="screen" width="240" height="240"></canvas>
+    
+    <div id="dialogue-container">
+        <div id="text-content"></div>
     </div>
-    <div class="abtns">
-      <div class="abtn" id="aBtn">A</div>
-      <div class="abtn" id="bBtn">B</div>
+
+    <div id="name-input">
+        <p style="font-size: 10px;">YOUR NAME?</p>
+        <input type="text" id="p-name" value="NOVA" maxlength="8" style="width: 80px; text-align: center;">
+        <button onclick="submitName()">OK</button>
     </div>
-    <div id="menuBtn">M</div>
-  </div>
+
+    <div id="ui-layer">
+        <div class="dpad">
+            <div></div><div class="btn dir-btn" id="up">U</div><div></div>
+            <div class="btn dir-btn" id="left">L</div><div></div><div class="btn dir-btn" id="right">R</div>
+            <div></div><div class="btn dir-btn" id="down">D</div><div></div>
+        </div>
+        <div class="action-zone">
+            <div class="btn circle-btn btn-b" id="b">B</div>
+            <div class="btn circle-btn" id="a">A</div>
+        </div>
+    </div>
 </div>
 
 <script>
-// ────────────────────────────────────────────────
-const canvas = document.getElementById('game');
+/**
+ * POKEMON NOVA GENESIS - HIGH PRECISION GBA ENGINE
+ */
+
+const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
-const dialogBox = document.getElementById('dialogue-box');
+const textEl = document.getElementById('text-content');
+const diagContainer = document.getElementById('dialogue-container');
 
-// Game state
-let state = "title"; // title → professor → choose → home → playing
-let playerName = "NOVA";
-let chosenPokemon = null;
-let player = { x: 0, y: 0, dir: "down", frame: 0, moving: false };
-let pokemonFollow = { x: 0, y: 0, dir: "down", frame: 0 };
-let mapOffset = { x: 0, y: 0 };
+// Game State Constants
+const STATES = { TITLE: 0, PROF_INTRO: 1, NAMING: 2, STARTER_SELECT: 3, WORLD: 4 };
+let currentState = STATES.TITLE;
 
-// Simple room (home bedroom + downstairs)
-const TILE = 32;
-const MAP_W = 20;
-const MAP_H = 18;
-const homeMap = [
-  // 0 = walkable, 1 = wall, 2 = door, 3 = mom (downstairs)
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1], // stairs / transition
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,1], // mom
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-];
+// Game Data
+let player = { x: 112, y: 120, dir: 'down', name: 'NOVA', starter: null, frame: 0 };
+let worldMap = { tiles: [], width: 15, height: 15 };
+let dialogueQueue = [];
+let currentText = "";
+let charIndex = 0;
 
-// Dialogue queue
-let dialogQueue = [];
-let dialogTyping = false;
-let dialogCharIndex = 0;
-let dialogSpeed = 40; // ms per char
-let lastCharTime = 0;
+// Input Buffer
+const keys = { up: false, down: false, left: false, right: false, a: false, b: false };
 
-// Audio (very basic beeps)
-function playCry(which) {
-  const audio = new AudioContext();
-  const osc = audio.createOscillator();
-  osc.type = 'square';
-  osc.frequency.value = which === "charmander" ? 680 : which === "treecko" ? 820 : 440;
-  osc.connect(audio.destination);
-  osc.start();
-  osc.stop(audio.currentTime + 0.18);
+/**
+ * ASSET GENERATION (Pre-rendering pixel art so you don't need external files)
+ */
+const assets = {};
+function createSprites() {
+    // Player Sprite
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = 16; pCanvas.height = 16;
+    const pCtx = pCanvas.getContext('2d');
+    pCtx.fillStyle = '#f00'; pCtx.fillRect(4, 2, 8, 12); // Simple character
+    assets.player = pCanvas;
+
+    // Grass Tile
+    const gCanvas = document.createElement('canvas');
+    gCanvas.width = 16; gCanvas.height = 16;
+    const gCtx = gCanvas.getContext('2d');
+    gCtx.fillStyle = '#78c850'; gCtx.fillRect(0,0,16,16);
+    gCtx.fillStyle = '#68b840'; gCtx.fillRect(2,2,2,2); gCtx.fillRect(10,8,2,2);
+    assets.grass = gCanvas;
 }
 
-// ────────────────────────────────────────────────
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
+/**
+ * ENGINE CORE
+ */
 
-// ──────────────────────────────────────────────── Title Screen
+function update() {
+    if (currentState === STATES.WORLD) {
+        if (keys.up) { player.y -= 1; player.dir = 'up'; }
+        if (keys.down) { player.y += 1; player.dir = 'down'; }
+        if (keys.left) { player.x -= 1; player.dir = 'left'; }
+        if (keys.right) { player.x += 1; player.dir = 'right'; }
+    }
+}
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    switch(currentState) {
+        case STATES.TITLE:
+            drawTitle();
+            break;
+        case STATES.PROF_INTRO:
+            drawLab();
+            drawNPC(112, 80, 'chen');
+            break;
+        case STATES.STARTER_SELECT:
+            drawLab();
+            drawStarters();
+            break;
+        case STATES.WORLD:
+            drawWorld();
+            break;
+    }
+}
+
+// Sub-renders
 function drawTitle() {
-  ctx.fillStyle = "#0a001a";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  // Fake stars
-  ctx.fillStyle = "white";
-  for(let i=0;i<80;i++){
-    let x = Math.random()*canvas.width;
-    let y = Math.random()*canvas.height*0.7;
-    ctx.fillRect(x,y,2,2);
-  }
-
-  ctx.font = "bold 72px Courier New";
-  ctx.fillStyle = "#6cf";
-  ctx.textAlign = "center";
-  ctx.fillText("Pokémon", canvas.width/2, canvas.height*0.38);
-  ctx.fillStyle = "#ffeb3b";
-  ctx.fillText("NOVA GENESIS", canvas.width/2, canvas.height*0.52);
-
-  ctx.font = "32px Courier New";
-  ctx.fillStyle = "white";
-  ctx.fillText("Tap to Start", canvas.width/2, canvas.height*0.72);
+    ctx.fillStyle = '#204080';
+    ctx.fillRect(0, 0, 240, 240);
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.font = '14px Arial';
+    ctx.fillText('POKEMON NOVA GENESIS', 120, 80);
+    ctx.font = '8px Arial';
+    ctx.fillText('PRESS A TO START', 120, 180);
 }
 
-// ──────────────────────────────────────────────── Professor Lab
 function drawLab() {
-  ctx.fillStyle = "#8ac";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#d0c8b0'; // Lab floor
+    ctx.fillRect(0, 0, 240, 240);
+}
 
-  // Table
-  ctx.fillStyle = "#642";
-  ctx.fillRect(canvas.width/2-120, canvas.height/2-40, 240, 80);
-
-  // Professor Chen (simple sprite placeholder)
-  ctx.fillStyle = "#ddd";
-  ctx.fillRect(canvas.width/2-32, canvas.height/2-100, 64, 96); // body
-  ctx.fillStyle = "#333";
-  ctx.fillRect(canvas.width/2-24, canvas.height/2-116, 48, 32); // hair
-  ctx.fillStyle = "white";
-  ctx.fillRect(canvas.width/2-20, canvas.height/2-80, 40, 16); // coat label
-
-  // Poké Balls (appear later)
-  if (state === "choose") {
-    ["charmander","treecko","froakie"].forEach((p,i) => {
-      let x = canvas.width/2 - 120 + i*120;
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(x, canvas.height/2-40, 36, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = "#f44";
-      ctx.fillRect(x-36, canvas.height/2-40-18, 72, 18);
-      ctx.fillStyle = "black";
-      ctx.beginPath();
-      ctx.arc(x, canvas.height/2-40, 12, 0, Math.PI*2);
-      ctx.fill();
+function drawStarters() {
+    const colors = ['#f08030', '#78c850', '#6890f0'];
+    colors.forEach((c, i) => {
+        ctx.fillStyle = c;
+        ctx.fillRect(50 + (i * 60), 100, 24, 24);
     });
-  }
 }
 
-// ──────────────────────────────────────────────── Home (simple top-down)
-function drawHome() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  const centerX = canvas.width/2;
-  const centerY = canvas.height/2 - 60;
-
-  // Draw map tiles
-  for(let y=0; y<MAP_H; y++){
-    for(let x=0; x<MAP_W; x++){
-      let tile = homeMap[y][x];
-      let px = centerX + (x-10)*TILE + mapOffset.x;
-      let py = centerY + (y-9)*TILE + mapOffset.y;
-
-      if (px+TILE<0 || px>canvas.width || py+TILE<0 || py>canvas.height) continue;
-
-      if (tile === 0) ctx.fillStyle = "#c9a";
-      else if (tile === 1) ctx.fillStyle = "#444";
-      else if (tile === 2) ctx.fillStyle = "#8c4";
-      else if (tile === 3) ctx.fillStyle = "#f8c";
-
-      ctx.fillRect(px, py, TILE, TILE);
+function drawWorld() {
+    // Draw tiles
+    for(let i=0; i<15; i++) {
+        for(let j=0; j<15; j++) {
+            ctx.drawImage(assets.grass, i*16, j*16);
+        }
     }
-  }
-
-  // Player
-  ctx.fillStyle = "#f88";
-  ctx.fillRect(centerX-16, centerY-32, 32, 48);
-
-  // Follow Pokémon
-  if (chosenPokemon) {
-    ctx.fillStyle = chosenPokemon === "charmander" ? "#f60" :
-                    chosenPokemon === "treecko"   ? "#0c4" :
-                    "#48f";
-    ctx.fillRect(centerX+12, centerY-20, 28, 36);
-  }
+    // Draw Player
+    ctx.drawImage(assets.player, player.x, player.y);
 }
 
-// ──────────────────────────────────────────────── Render loop
-function loop(ts) {
-  ctx.imageSmoothingEnabled = false;
-
-  if (state === "title") {
-    drawTitle();
-  }
-  else if (state === "professor" || state === "choose") {
-    drawLab();
-  }
-  else if (state === "home" || state === "playing") {
-    drawHome();
-  }
-
-  // Dialogue typing
-  if (dialogQueue.length > 0 && !dialogTyping) {
-    startTyping(dialogQueue.shift());
-  }
-
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
-
-// ──────────────────────────────────────────────── Dialogue system
-function showText(lines) {
-  dialogQueue.push(...lines);
-  dialogBox.classList.remove("hidden");
+function drawNPC(x, y, type) {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x, y, 16, 24); // Professor shape
 }
 
-function startTyping(text) {
-  dialogTyping = true;
-  dialogCharIndex = 0;
-  lastCharTime = performance.now();
-  dialogBox.textContent = "";
-  typeNextChar(text);
+/**
+ * DIALOGUE SYSTEM
+ */
+function playDialogue(lines) {
+    dialogueQueue = lines;
+    advanceDialogue();
 }
 
-function typeNextChar(fullText) {
-  const now = performance.now();
-  if (now - lastCharTime >= dialogSpeed) {
-    dialogCharIndex++;
-    lastCharTime = now;
-    dialogBox.textContent = fullText.slice(0, dialogCharIndex);
-  }
-  if (dialogCharIndex < fullText.length) {
-    requestAnimationFrame(() => typeNextChar(fullText));
-  } else {
-    dialogTyping = false;
-  }
-}
-
-function advanceDialog() {
-  if (dialogTyping) {
-    // Skip typing
-    dialogBox.textContent = dialogQueue[dialogQueue.length-1] || "";
-    dialogTyping = false;
-  } else if (dialogQueue.length === 0) {
-    // End of dialogue block
-    if (state === "professor") {
-      document.getElementById("name-entry").classList.remove("hidden");
-    }
-    else if (state === "choose") {
-      // Show pokemon already drawn
-    }
-  }
-}
-
-// ──────────────────────────────────────────────── Controls
-const keys = {};
-const touchMoves = {};
-
-function updateMovement() {
-  if (state !== "playing") return;
-
-  let dx=0, dy=0;
-  if (keys["ArrowUp"]    || keys["w"] || touchMoves.up)    dy -= 2;
-  if (keys["ArrowDown"]  || keys["s"] || touchMoves.down)  dy += 2;
-  if (keys["ArrowLeft"]  || keys["a"] || touchMoves.left)  dx -= 2;
-  if (keys["ArrowRight"] || keys["d"] || touchMoves.right) dx += 2;
-
-  if (dx || dy) {
-    player.moving = true;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      player.dir = dx > 0 ? "right" : "left";
+function advanceDialogue() {
+    if (dialogueQueue.length > 0) {
+        diagContainer.style.display = 'block';
+        currentText = dialogueQueue.shift();
+        charIndex = 0;
+        textEl.innerText = "";
+        typeEffect();
     } else {
-      player.dir = dy > 0 ? "down" : "up";
+        diagContainer.style.display = 'none';
+        handleStateProgression();
     }
-
-    // Very basic collision → prevent going too far left/up
-    if (player.x + dx > -200 && player.x + dx < 200) player.x += dx;
-    if (player.y + dy > -180 && player.y + dy < 180) player.y += dy;
-
-    mapOffset.x -= dx * 0.4;
-    mapOffset.y -= dy * 0.4;
-  } else {
-    player.moving = false;
-  }
 }
 
-window.addEventListener("keydown", e => { keys[e.key] = true; });
-window.addEventListener("keyup",   e => { keys[e.key] = false; });
+function typeEffect() {
+    if (charIndex < currentText.length) {
+        textEl.innerText += currentText[charIndex];
+        charIndex++;
+        setTimeout(typeEffect, 30); // Text speed
+    }
+}
 
-// Touch controls
-document.querySelectorAll(".dpad div").forEach(el => {
-  el.addEventListener("touchstart", e => {
-    e.preventDefault();
-    touchMoves[el.id] = true;
-  });
-  el.addEventListener("touchend", e => {
-    touchMoves[el.id] = false;
-  });
-});
+function handleStateProgression() {
+    if (currentState === STATES.PROF_INTRO) {
+        document.getElementById('name-input').style.display = 'block';
+        currentState = STATES.NAMING;
+    }
+}
 
-["aBtn","bBtn"].forEach(id => {
-  document.getElementById(id).addEventListener("touchstart", e => {
-    e.preventDefault();
-    if (id === "aBtn") advanceDialog();
-  });
-});
+function submitName() {
+    player.name = document.getElementById('p-name').value;
+    document.getElementById('name-input').style.display = 'none';
+    currentState = STATES.STARTER_SELECT;
+    playDialogue([`Perfect, ${player.name}! Now, for your partner.`, "Which of these three resonates with you?"]);
+}
 
-document.getElementById("menuBtn").addEventListener("touchstart", e => {
-  e.preventDefault();
-  alert("Menu: Pokémon / Bag / Save (not implemented yet)");
-});
-
-// ──────────────────────────────────────────────── Game flow
-document.body.addEventListener("click", function startGame(e) {
-  if (state !== "title") return;
-
-  state = "professor";
-  document.body.removeEventListener("click", startGame);
-
-  showText([
-    "Ah! There you are! I've been expecting you.",
-    "Welcome to the world of Pokémon!",
-    "My name is Chen. I study the unique bond between humans and Pokémon here in the Aura Region.",
-    "And you are...?"
-  ]);
-
-  // After name → auto continue
-  document.getElementById("confirmName").onclick = () => {
-    playerName = document.getElementById("name-input").value.trim() || "NOVA";
-    document.getElementById("name-entry").classList.add("hidden");
-
-    showText([
-      `Perfect, ${playerName}!`,
-      "Now, for your first partner.",
-      "The Aura Region is home to Pokémon with powerful latent abilities.",
-      "Which of these three resonates with you?"
-    ]);
-
-    state = "choose";
-
-    // Click on Pokémon (simple — whole screen zones for demo)
-    const chooseListener = e => {
-      const rect = canvas.getBoundingClientRect();
-      const tx = e.clientX - rect.left;
-      const ty = e.clientY - rect.top;
-
-      if (ty > canvas.height/2 - 100 && ty < canvas.height/2 + 40) {
-        if (tx < canvas.width/3) {
-          chosenPokemon = "charmander";
-          playCry("charmander");
-        } else if (tx < canvas.width*2/3) {
-          chosenPokemon = "treecko";
-          playCry("treecko");
-        } else {
-          chosenPokemon = "froakie";
-          playCry("froakie");
-        }
-
-        if (chosenPokemon) {
-          canvas.removeEventListener("click", chooseListener);
-          showText([
-            `You chose ${chosenPokemon.toUpperCase()}!`,
-            "An excellent choice! This Pokémon is full of potential!",
-            `Alright, ${chosenPokemon.toUpperCase()}! Let's go meet Mom downstairs, then start our journey!`
-          ]);
-
-          setTimeout(() => {
-            state = "home";
-            dialogBox.classList.add("hidden");
-            document.getElementById("controls").style.display = "block";
-            setTimeout(() => {
-              state = "playing";
-              showText(["Use the D-pad to move. Tap A to interact."]);
-            }, 1800);
-          }, 2800);
-        }
-      }
+/**
+ * INPUTS
+ */
+function setupControls() {
+    const bind = (id, key) => {
+        const el = document.getElementById(id);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; handleInput(key); });
+        el.addEventListener('touchend', () => { keys[key] = false; });
     };
 
-    canvas.addEventListener("click", chooseListener);
-    canvas.addEventListener("touchend", chooseListener);
-  };
-}, {once:true});
+    bind('up', 'up'); bind('down', 'down'); bind('left', 'left'); 
+    bind('right', 'right'); bind('a', 'a'); bind('b', 'b');
+}
 
-// Simple game loop logic
-setInterval(updateMovement, 1000/60);
+function handleInput(key) {
+    if (key === 'a') {
+        if (currentState === STATES.TITLE) {
+            currentState = STATES.PROF_INTRO;
+            playDialogue([
+                "Ah! There you are!",
+                "Welcome to the world of Pokémon!",
+                "My name is Chen.",
+                "And you are...?"
+            ]);
+        } else if (diagContainer.style.display === 'block') {
+            if (charIndex < currentText.length) {
+                charIndex = currentText.length; // Skip typing
+                textEl.innerText = currentText;
+            } else {
+                advanceDialogue();
+            }
+        } else if (currentState === STATES.STARTER_SELECT) {
+            player.starter = "TREECKO";
+            currentState = STATES.WORLD;
+            playDialogue(["An excellent choice!", "Let's go meet Mom downstairs!"]);
+        }
+    }
+}
+
+// Initialize
+createSprites();
+setupControls();
+function gameLoop() {
+    update();
+    render();
+    requestAnimationFrame(gameLoop);
+}
+gameLoop();
 
 </script>
 </body>
