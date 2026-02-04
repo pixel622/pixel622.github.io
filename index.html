@@ -5,111 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Kyan Monsters - Amber Version</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
         body {
             background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
             font-family: 'Courier New', monospace;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
-            touch-action: none;
         }
         #gameContainer {
-            position: relative;
-            width: 320px;
-            height: 240px;
-            border: 4px solid #fff;
-            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
         }
         #gameCanvas {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             display: block;
+            image-rendering: pixelated;
         }
         #ui {
-            position: absolute;
+            position: fixed;
             top: 10px;
             left: 10px;
             color: #fff;
-            font-size: 12px;
-            text-shadow: 1px 1px 0 #000;
+            font-size: 16px;
+            text-shadow: 2px 2px 0 #000;
+            font-family: 'Courier New', monospace;
             z-index: 10;
+            pointer-events: none;
         }
-        #dialog {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.9);
+        #gbaDialog {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(16,16,32,0.9));
+            border-top: 4px solid #fff;
             color: #fff;
-            padding: 15px 20px;
-            border: 3px solid #fff;
-            border-radius: 8px;
-            font-size: 14px;
-            max-width: 280px;
-            text-align: center;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            padding: 15px 25px;
+            box-sizing: border-box;
             display: none;
             z-index: 20;
+            text-shadow: 2px 2px 0 #000;
+            line-height: 1.3;
+            pointer-events: all;
+        }
+        #dialogText {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        #dialogPress {
+            position: absolute;
+            bottom: 8px;
+            right: 25px;
+            color: #ccc;
+            font-size: 14px;
         }
         #joystick {
-            position: absolute;
-            bottom: 60px;
-            left: 30px;
-            width: 80px;
-            height: 80px;
+            position: fixed;
+            bottom: 80px;
+            left: 40px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.15);
+            border: 3px solid rgba(255,255,255,0.4);
             display: none;
             z-index: 15;
         }
         #joystickKnob {
             position: absolute;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: #fff;
             border-radius: 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
         #actionBtn {
-            position: absolute;
-            bottom: 60px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
-            background: #4CAF50;
+            position: fixed;
+            bottom: 80px;
+            right: 40px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #4CAF50, #45a049);
             border: 4px solid #fff;
             border-radius: 50%;
             color: #fff;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            cursor: pointer;
             display: none;
             z-index: 15;
-            user-select: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
         }
         #actionBtn:active {
-            background: #45a049;
-            transform: scale(0.95);
+            background: linear-gradient(145deg, #45a049, #4CAF50);
+            transform: scale(0.92);
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <canvas id="gameCanvas" width="320" height="240"></canvas>
+        <canvas id="gameCanvas"></canvas>
         <div id="ui">
             <div>Location: <span id="location">Home</span></div>
             <div>Kyan Monster: <span id="monster">None</span></div>
         </div>
-        <div id="dialog"></div>
+        <div id="gbaDialog">
+            <div id="dialogText"></div>
+            <div id="dialogPress">Tap to continue</div>
+        </div>
         <div id="joystick">
             <div id="joystickKnob"></div>
         </div>
@@ -117,9 +141,6 @@
     </div>
 
     <script>
-        // Kyan Monsters Amber Version - Fully working mobile HTML5 game
-        // Implements exact game flow from concept with original content
-        
         class KyanGame {
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
@@ -128,48 +149,68 @@
                 
                 // Game state
                 this.currentScene = 'houseIntro';
-                this.player = { x: 152, y: 152, vx: 0, vy: 0, speed: 2, dir: 'down' };
+                this.player = { x: 152, y: 152, vx: 0, vy: 0, speed: 2.5, dir: 'down' };
                 this.playerName = 'TRAINER';
                 this.kyanMonster = null;
                 this.rivalMonster = null;
                 this.dialogActive = false;
+                this.dialogLines = [];
+                this.dialogIndex = 0;
                 this.joystickActive = false;
                 this.joystickCenter = { x: 0, y: 0 };
                 this.joystickPos = { x: 0, y: 0 };
-                
-                // Scenes
-                this.scenes = ['houseIntro', 'house', 'town', 'labGroundFloor', 'labUpperFloor', 
-                              'professorStudy', 'townExit'];
-                this.currentDialog = [];
-                this.dialogIndex = 0;
+                this.gameWidth = 320;
+                this.gameHeight = 240;
                 
                 this.init();
             }
             
             init() {
-                this.setupControls();
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // Full screen touch controls
+                document.addEventListener('touchstart', (e) => this.handleInput(e, 'start'), { passive: false });
+                document.addEventListener('touchmove', (e) => this.handleInput(e, 'move'), { passive: false });
+                document.addEventListener('touchend', (e) => this.handleInput(e, 'end'), { passive: false });
+                document.addEventListener('click', (e) => this.handleClick(e));
+                
+                document.getElementById('actionBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.interact();
+                });
+                
                 this.startIntro();
                 this.gameLoop();
             }
             
-            setupControls() {
-                // Touch controls for mobile
-                this.canvas.addEventListener('touchstart', (e) => this.handleTouch(e, 'start'), { passive: false });
-                this.canvas.addEventListener('touchmove', (e) => this.handleTouch(e, 'move'), { passive: false });
-                this.canvas.addEventListener('touchend', (e) => this.handleTouch(e, 'end'), { passive: false });
+            resizeCanvas() {
+                const aspect = this.gameWidth / this.gameHeight;
+                let width = window.innerWidth;
+                let height = window.innerHeight;
                 
-                document.getElementById('actionBtn').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    this.interact();
-                });
-                document.getElementById('actionBtn').addEventListener('click', () => this.interact());
+                if (width / height > aspect) {
+                    width = height * aspect;
+                } else {
+                    height = width / aspect;
+                }
+                
+                this.canvas.width = this.gameWidth;
+                this.canvas.height = this.gameHeight;
+                this.canvas.style.width = width + 'px';
+                this.canvas.style.height = height + 'px';
+                this.canvas.style.marginLeft = (window.innerWidth - width) / 2 + 'px';
+                this.canvas.style.marginTop = (window.innerHeight - height) / 2 + 'px';
             }
             
-            handleTouch(e, type) {
+            handleInput(e, type) {
                 e.preventDefault();
+                if (this.dialogActive) return;
+                
                 const rect = this.canvas.getBoundingClientRect();
-                const scaleX = 320 / rect.width;
-                const scaleY = 240 / rect.height;
+                const scaleX = this.gameWidth / rect.width;
+                const scaleY = this.gameHeight / rect.height;
                 
                 if (type === 'start' || type === 'move') {
                     const touch = e.touches[0];
@@ -177,9 +218,9 @@
                     const y = (touch.clientY - rect.top) * scaleY;
                     
                     // Joystick area (left bottom)
-                    if (x < 100 && y > 140) {
+                    if (x < rect.width * 0.4 && y > rect.height * 0.6) {
                         this.joystickActive = true;
-                        this.joystickCenter = { x: 60, y: 200 };
+                        this.joystickCenter = { x: 60, y: this.gameHeight - 60 };
                         document.getElementById('joystick').style.display = 'block';
                         document.getElementById('actionBtn').style.display = 'block';
                     }
@@ -187,7 +228,7 @@
                     if (this.joystickActive) {
                         const dx = x - this.joystickCenter.x;
                         const dy = y - this.joystickCenter.y;
-                        const dist = Math.min(30, Math.sqrt(dx*dx + dy*dy));
+                        const dist = Math.min(35, Math.sqrt(dx*dx + dy*dy));
                         const angle = Math.atan2(dy, dx);
                         
                         this.joystickPos = {
@@ -195,66 +236,77 @@
                             y: this.joystickCenter.y + Math.sin(angle) * dist
                         };
                         
-                        this.player.vx = Math.cos(angle) * this.player.speed * (dist / 30);
-                        this.player.vy = Math.sin(angle) * this.player.speed * (dist / 30);
+                        this.player.vx = Math.cos(angle) * this.player.speed * (dist / 35);
+                        this.player.vy = Math.sin(angle) * this.player.speed * (dist / 35);
                         
                         this.updateJoystickUI();
                     }
                 } else {
-                    this.joystickActive = false;
-                    this.player.vx = 0;
-                    this.player.vy = 0;
-                    this.joystickPos = { x: this.joystickCenter.x, y: this.joystickCenter.y };
-                    this.updateJoystickUI();
-                    setTimeout(() => {
-                        document.getElementById('joystick').style.display = 'none';
-                        document.getElementById('actionBtn').style.display = 'none';
-                    }, 100);
+                    this.resetJoystick();
                 }
+            }
+            
+            handleClick(e) {
+                if (this.dialogActive) {
+                    e.preventDefault();
+                    this.nextDialog();
+                }
+            }
+            
+            resetJoystick() {
+                this.joystickActive = false;
+                this.player.vx = 0;
+                this.player.vy = 0;
+                this.joystickPos = { x: this.joystickCenter.x, y: this.joystickCenter.y };
+                this.updateJoystickUI();
+                setTimeout(() => {
+                    document.getElementById('joystick').style.display = 'none';
+                    document.getElementById('actionBtn').style.display = 'none';
+                }, 150);
             }
             
             updateJoystickUI() {
                 const knob = document.getElementById('joystickKnob');
-                const rect = document.getElementById('joystick').getBoundingClientRect();
-                const scaleX = rect.width / 320;
-                const scaleY = rect.height / 240;
-                
-                knob.style.left = ((this.joystickPos.x - 16) * scaleX) + 'px';
-                knob.style.top = ((this.joystickPos.y - 16) * scaleY) + 'px';
+                knob.style.left = ((this.joystickPos.x - 18) / this.gameWidth * 100) + '%';
+                knob.style.top = ((this.joystickPos.y - 18) / this.gameHeight * 100) + '%';
             }
             
             startIntro() {
                 this.showDialog([
                     "MOM: Wake up! Urgent letter from Professor Sequoia!",
-                    "Your childhood friend already left for the lab.",
-                    "Head to Professor Sequoia's Habitat Research Lab!"
+                    "MOM: Your childhood friend already left for the lab.",
+                    "MOM: Head to Professor Sequoia's Habitat Research Lab!",
+                    "MAPLE ROOT TOWN awaits..."
                 ]);
             }
             
             showDialog(lines) {
-                this.currentDialog = lines;
+                this.dialogLines = lines;
                 this.dialogIndex = 0;
                 this.dialogActive = true;
-                this.showNextDialogLine();
+                this.showCurrentDialog();
             }
             
-            showNextDialogLine() {
-                if (this.dialogIndex < this.currentDialog.length) {
-                    const dialogEl = document.getElementById('dialog');
-                    dialogEl.textContent = this.currentDialog[this.dialogIndex];
-                    dialogEl.style.display = 'block';
+            showCurrentDialog() {
+                if (this.dialogIndex < this.dialogLines.length) {
+                    const dialogEl = document.getElementById('dialogText');
+                    dialogEl.textContent = this.dialogLines[this.dialogIndex];
+                    document.getElementById('gbaDialog').style.display = 'block';
+                }
+            }
+            
+            nextDialog() {
+                this.dialogIndex++;
+                if (this.dialogIndex < this.dialogLines.length) {
+                    this.showCurrentDialog();
+                } else {
+                    document.getElementById('gbaDialog').style.display = 'none';
+                    this.dialogActive = false;
                     
-                    setTimeout(() => {
-                        this.dialogIndex++;
-                        if (this.dialogIndex < this.currentDialog.length) {
-                            this.showNextDialogLine();
-                        } else {
-                            setTimeout(() => {
-                                document.getElementById('dialog').style.display = 'none';
-                                this.dialogActive = false;
-                            }, 1000);
-                        }
-                    }, 3000);
+                    if (this.currentScene === 'houseIntro') {
+                        this.currentScene = 'house';
+                        document.getElementById('location').textContent = 'House';
+                    }
                 }
             }
             
@@ -283,8 +335,8 @@
                             document.getElementById('location').textContent = 'Lab Ground Floor';
                             this.showDialog([
                                 "LAB ASSISTANT: Ah, you must be TRAINER!",
-                                "Professor Sequoia is waiting upstairs!",
-                                "Just head through that door at the back!"
+                                "PROFESSOR: Go upstairs through that door!",
+                                "DOOR TELEPORT ACTIVATED!"
                             ]);
                         }
                         break;
@@ -292,27 +344,25 @@
                     case 'labGroundFloor':
                         if (tileX === 12 && tileY === 8) {
                             this.teleportEffect();
-                            this.currentScene = 'labUpperFloor';
-                            this.player.x = 128;
-                            this.player.y = 64;
-                            document.getElementById('location').textContent = 'Lab Upper Floor';
+                            setTimeout(() => {
+                                this.currentScene = 'labUpperFloor';
+                                this.player.x = 128;
+                                this.player.y = 64;
+                                document.getElementById('location').textContent = 'Lab Upper Floor';
+                            }, 200);
                         }
                         break;
                         
                     case 'labUpperFloor':
                         if (tileX === 8 && tileY === 12) {
                             this.teleportEffect();
-                            this.currentScene = 'professorStudy';
-                            this.player.x = 128;
-                            this.player.y = 64;
-                            document.getElementById('location').textContent = 'Professor Study';
-                            this.professorScene();
-                        }
-                        break;
-                        
-                    case 'professorStudy':
-                        if (!this.kyanMonster) {
-                            this.professorScene();
+                            setTimeout(() => {
+                                this.currentScene = 'professorStudy';
+                                this.player.x = 128;
+                                this.player.y = 64;
+                                document.getElementById('location').textContent = 'Professor Study';
+                                this.professorScene();
+                            }, 200);
                         }
                         break;
                 }
@@ -322,38 +372,45 @@
                 if (!this.kyanMonster) {
                     this.showDialog([
                         "PROFESSOR SEQUOIA: Three Kyan Monsters from distant regions...",
-                        "A tremor shook the lab! We need trainers to study Orebound.",
-                        "RIVAL chooses FLAMEPUP (Fire) first!",
-                        "Choose your Kyan Monster:",
+                        "PROFESSOR: A tremor shook Orebound! We need trainers!",
+                        "RIVAL: I choose FLAMEPUP (Fire)!",
+                        "RIVAL: It beats whatever you pick!",
+                        "PROFESSOR: Choose your partner TRAINER:",
                         "1. Leaflet (Grass)  2. Bubbletoad (Water)"
                     ]);
-                    // Auto choose Leaflet for demo
                     setTimeout(() => {
                         this.kyanMonster = { name: 'Leaflet (Grass)', color: '#4CAF50' };
                         this.rivalMonster = { name: 'Flamepup (Fire)', color: '#f44336' };
                         document.getElementById('monster').textContent = this.kyanMonster.name;
-                        document.getElementById('location').textContent = 'Professor Study';
                         this.showDialog([
-                            "Professor: Here's your KyanDex!",
-                            "Find my assistant on Route 1 for Kyan Balls!",
-                            "Uncover the cause of Orebound's tremors!"
+                            "PROFESSOR: Here's your KYANDEX!",
+                            "MISSION: Find assistant on Route 1 for Kyan Balls!",
+                            "UNCOVER OREBOUND'S SEISMIC MYSTERY!",
+                            "A New Adventure Takes Root!"
                         ]);
-                    }, 8000);
+                    }, 12000);
                 }
             }
             
             teleportEffect() {
-                // Shimmer effect
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                this.ctx.fillRect(this.player.x - 8, this.player.y - 8, 32, 32);
+                const ctx = this.ctx;
+                const steps = 10;
+                let i = 0;
+                const shimmer = setInterval(() => {
+                    ctx.save();
+                    ctx.globalAlpha = 0.6;
+                    ctx.fillStyle = `hsl(60, 100%, ${50 + i*5}%)`;
+                    ctx.fillRect(this.player.x - 12, this.player.y - 12, 32, 32);
+                    ctx.restore();
+                    i++;
+                    if (i >= steps) clearInterval(shimmer);
+                }, 50);
             }
             
             update() {
                 if (!this.dialogActive && this.joystickActive) {
-                    this.player.x = Math.max(8, Math.min(312, this.player.x + this.player.vx));
-                    this.player.y = Math.max(8, Math.min(232, this.player.y + this.player.vy));
-                    
-                    // Scene transitions
+                    this.player.x = Math.max(8, Math.min(this.gameWidth - 24, this.player.x + this.player.vx));
+                    this.player.y = Math.max(8, Math.min(this.gameHeight - 32, this.player.y + this.player.vy));
                     this.checkSceneTransitions();
                 }
             }
@@ -364,16 +421,109 @@
                 
                 if (this.currentScene === 'professorStudy' && tileX === 8 && tileY === 14) {
                     this.teleportEffect();
-                    this.currentScene = 'labUpperFloor';
-                    this.player.x = 128;
-                    this.player.y = 64;
-                    document.getElementById('location').textContent = 'Lab Upper Floor';
+                    setTimeout(() => {
+                        this.currentScene = 'labUpperFloor';
+                        this.player.x = 128;
+                        this.player.y = 64;
+                        document.getElementById('location').textContent = 'Lab Upper Floor';
+                    }, 200);
                 }
+            }
+            
+            renderHouse() {
+                const ctx = this.ctx;
+                ctx.fillStyle = '#87CEEB'; // Sky
+                ctx.fillRect(0, 0, this.gameWidth, 80);
+                ctx.fillStyle = '#DEB887'; // Floor
+                ctx.fillRect(0, 160, this.gameWidth, 80);
+                ctx.fillStyle = '#8B4513'; // Walls
+                ctx.fillRect(80, 80, 160, 80);
+                ctx.fillStyle = '#A52A2A'; // Roof
+                ctx.fillRect(64, 64, 192, 32);
+                ctx.fillStyle = '#654321'; // Door
+                ctx.fillRect(144, 144, 32, 48);
+                ctx.fillStyle = '#D2691E'; // Bookshelf
+                ctx.fillRect(16, 120, 32, 80);
+            }
+            
+            renderTown() {
+                const ctx = this.ctx;
+                ctx.fillStyle = '#87CEEB'; // Sky
+                ctx.fillRect(0, 0, this.gameWidth, 96);
+                ctx.fillStyle = '#90EE90'; // Grass
+                ctx.fillRect(0, 160, this.gameWidth, 80);
+                ctx.fillStyle = '#8B4513'; // Tree trunk
+                ctx.fillRect(144, 112, 32, 80);
+                ctx.fillStyle = '#228B22'; // Tree leaves
+                ctx.fillRect(128, 64, 64, 64);
+                ctx.fillStyle = '#DEB887'; // Cottages
+                ctx.fillRect(32, 144, 64, 64);
+                ctx.fillRect(224, 144, 64, 64);
+                ctx.fillStyle = '#D2B48C'; // Path
+                ctx.fillRect(240, 112, 64, 32);
+                ctx.fillStyle = '#A9A9A9'; // Lab
+                ctx.fillRect(256, 144, 48, 48);
+            }
+            
+            renderLabGroundFloor() {
+                const ctx = this.ctx;
+                ctx.fillStyle = '#C0C0C0'; // Floor
+                ctx.fillRect(0, 0, this.gameWidth, this.gameHeight);
+                ctx.fillStyle = '#00BFFF'; // Tanks
+                ctx.fillRect(32, 48, 48, 48);
+                ctx.fillRect(96, 48, 48, 48);
+                ctx.fillStyle = '#FFFF00'; // Charts
+                ctx.fillRect(160, 32, 80, 32);
+                ctx.fillStyle = '#808080'; // Door
+                ctx.fillRect(208, 128, 32, 32);
+            }
+            
+            renderLabUpperFloor() {
+                const ctx = this.ctx;
+                ctx.fillStyle = '#F5DEB3'; // Wood floor
+                ctx.fillRect(0, 0, this.gameWidth, this.gameHeight);
+                ctx.fillStyle = '#8B4513'; // Bookshelves
+                ctx.fillRect(16, 48, 32, 128);
+                ctx.fillRect(272, 48, 32, 128);
+                ctx.fillStyle = '#808080'; // Door
+                ctx.fillRect(128, 208, 64, 32);
+            }
+            
+            renderProfessorStudy() {
+                this.renderLabUpperFloor();
+                const ctx = this.ctx;
+                ctx.fillStyle = '#D2691E'; // Desk
+                ctx.fillRect(112, 160, 96, 32);
+                ctx.fillStyle = '#FF4444'; // Kyan Balls
+                ctx.fillRect(128, 168, 12, 12);
+                ctx.fillRect(160, 168, 12, 12);
+                ctx.fillRect(192, 168, 12, 12);
+                ctx.fillStyle = '#FFF'; // Ball highlights
+                ctx.fillRect(132, 172, 4, 4);
+                ctx.fillRect(164, 172, 4, 4);
+                ctx.fillRect(196, 172, 4, 4);
+                ctx.fillStyle = '#4488FF'; // Professor
+                ctx.fillRect(96, 96, 16, 24);
+                ctx.fillStyle = '#FF4444'; // Rival
+                ctx.fillRect(208, 96, 16, 24);
+            }
+            
+            renderPlayer() {
+                const ctx = this.ctx;
+                ctx.fillStyle = '#FFDBAC'; // Skin
+                ctx.fillRect(this.player.x + 4, this.player.y + 4, 8, 8);
+                ctx.fillStyle = '#00008B'; // Pants
+                ctx.fillRect(this.player.x + 2, this.player.y + 12, 12, 8);
+                ctx.fillStyle = '#FFFF66'; // Shirt
+                ctx.fillRect(this.player.x, this.player.y + 8, 16, 8);
+                ctx.fillStyle = '#000'; // Hat/shoes
+                ctx.fillRect(this.player.x + 2, this.player.y, 12, 6);
+                ctx.fillRect(this.player.x + 4, this.player.y + 20, 8, 4);
             }
             
             renderScene() {
                 this.ctx.fillStyle = '#000';
-                this.ctx.fillRect(0, 0, 320, 240);
+                this.ctx.fillRect(0, 0, this.gameWidth, this.gameHeight);
                 
                 switch(this.currentScene) {
                     case 'houseIntro':
@@ -395,118 +545,14 @@
                 }
             }
             
-            renderHouse() {
-                // Sky
-                this.ctx.fillStyle = '#87CEEB';
-                this.ctx.fillRect(0, 0, 320, 80);
-                // Floor
-                this.ctx.fillStyle = '#DEB887';
-                this.ctx.fillRect(0, 160, 320, 80);
-                // Walls
-                this.ctx.fillStyle = '#8B4513';
-                this.ctx.fillRect(80, 80, 160, 80);
-                // Roof
-                this.ctx.fillStyle = '#A52A2A';
-                this.ctx.fillRect(64, 64, 192, 32);
-                // Door
-                this.ctx.fillStyle = '#654321';
-                this.ctx.fillRect(144, 144, 32, 48);
-                // Bookshelf
-                this.ctx.fillStyle = '#D2691E';
-                this.ctx.fillRect(16, 120, 32, 80);
-            }
-            
-            renderTown() {
-                // Sky
-                this.ctx.fillStyle = '#87CEEB';
-                this.ctx.fillRect(0, 0, 320, 96);
-                // Grass
-                this.ctx.fillStyle = '#90EE90';
-                this.ctx.fillRect(0, 160, 320, 80);
-                // Big tree
-                this.ctx.fillStyle = '#8B4513';
-                this.ctx.fillRect(144, 112, 32, 80);
-                this.ctx.fillStyle = '#228B22';
-                this.ctx.fillRect(128, 64, 64, 64);
-                // Cottages
-                this.ctx.fillStyle = '#DEB887';
-                this.ctx.fillRect(32, 144, 64, 64);
-                this.ctx.fillRect(224, 144, 64, 64);
-                // Lab path
-                this.ctx.fillStyle = '#D2B48C';
-                this.ctx.fillRect(240, 112, 64, 32);
-                // Lab entrance
-                this.ctx.fillStyle = '#A9A9A9';
-                this.ctx.fillRect(256, 144, 48, 48);
-            }
-            
-            renderLabGroundFloor() {
-                // Lab floor
-                this.ctx.fillStyle = '#C0C0C0';
-                this.ctx.fillRect(0, 0, 320, 240);
-                // Water tanks
-                this.ctx.fillStyle = '#00BFFF';
-                this.ctx.fillRect(32, 48, 48, 48);
-                this.ctx.fillRect(96, 48, 48, 48);
-                // Charts
-                this.ctx.fillStyle = '#FFFF00';
-                this.ctx.fillRect(160, 32, 80, 32);
-                // Door to upper floor
-                this.ctx.fillStyle = '#808080';
-                this.ctx.fillRect(208, 128, 32, 32);
-            }
-            
-            renderLabUpperFloor() {
-                // Wooden floor
-                this.ctx.fillStyle = '#F5DEB3';
-                this.ctx.fillRect(0, 0, 320, 240);
-                // Bookshelves
-                this.ctx.fillStyle = '#8B4513';
-                this.ctx.fillRect(16, 48, 32, 128);
-                this.ctx.fillRect(272, 48, 32, 128);
-                // Door
-                this.ctx.fillStyle = '#808080';
-                this.ctx.fillRect(128, 208, 64, 32);
-            }
-            
-            renderProfessorStudy() {
-                this.renderLabUpperFloor();
-                // Desk
-                this.ctx.fillStyle = '#D2691E';
-                this.ctx.fillRect(112, 160, 96, 32);
-                // Kyan Balls
-                this.ctx.fillStyle = '#FF4444';
-                this.ctx.fillRect(128, 168, 12, 12);
-                this.ctx.fillRect(160, 168, 12, 12);
-                this.ctx.fillRect(192, 168, 12, 12);
-                this.ctx.fillStyle = '#FFF';
-                this.ctx.fillRect(132, 172, 4, 4);
-                this.ctx.fillRect(164, 172, 4, 4);
-                this.ctx.fillRect(196, 172, 4, 4);
-                // Professor (blue)
-                this.ctx.fillStyle = '#4488FF';
-                this.ctx.fillRect(96, 96, 16, 24);
-                // Rival (red)
-                this.ctx.fillStyle = '#FF4444';
-                this.ctx.fillRect(208, 96, 16, 24);
-            }
-            
-            renderPlayer() {
-                // Simple pixel character
-                this.ctx.fillStyle = '#FFDBAC'; // Skin
-                this.ctx.fillRect(this.player.x + 4, this.player.y + 4, 8, 8);
-                this.ctx.fillStyle = '#00008B'; // Pants
-                this.ctx.fillRect(this.player.x + 2, this.player.y + 12, 12, 8);
-                this.ctx.fillStyle = '#FFFF66'; // Shirt
-                this.ctx.fillRect(this.player.x, this.player.y + 8, 16, 8);
-                this.ctx.fillStyle = '#000'; // Hat/shoes
-                this.ctx.fillRect(this.player.x + 2, this.player.y, 12, 6);
-                this.ctx.fillRect(this.player.x + 4, this.player.y + 20, 8, 4);
-            }
-            
             render() {
                 this.renderScene();
                 this.renderPlayer();
+            }
+            
+            update() {
+                this.update();
+                this.checkSceneTransitions();
             }
             
             gameLoop() {
@@ -516,7 +562,6 @@
             }
         }
         
-        // Start the game
         window.addEventListener('load', () => {
             new KyanGame();
         });
