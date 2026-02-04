@@ -2,466 +2,395 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pokémon Nova Genesis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#000; font-family:'Press Start 2P',cursive; overflow:hidden; touch-action:none; height:100vh; }
-  #container { position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(#001122,#000); }
-  #canvas { width:90vmin; height:calc(90vmin * 240/320); max-width:540px; max-height:405px; image-rendering:pixelated; image-rendering:crisp-edges; border:6px solid #222; box-shadow:0 0 30px rgba(0,255,255,0.3); }
-  #ui { position:absolute; inset:0; pointer-events:none; }
-  #dialogue { position:absolute; bottom:4%; left:4%; right:4%; height:18%; background:rgba(255,255,255,0.92); border:4px solid #0044cc; color:#000; padding:6px 10px; font-size:calc(10px + 0.8vw); line-height:1.3; display:flex; align-items:center; pointer-events:auto; overflow:hidden; }
-  #advance { min-width:32px; height:32px; margin-left:8px; background:#0044cc; color:#fff; border:3px solid #fff; font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  #controls { position:fixed; bottom:0; left:0; right:0; height:38vh; pointer-events:none; display:none; }
-  .dpad { position:absolute; left:6%; bottom:12%; width:28vw; height:28vw; max-width:140px; max-height:140px; }
-  .dpad div { position:absolute; width:38%; height:38%; background:rgba(255,255,255,0.35); border:4px solid #fff; color:#000; font-weight:bold; font-size:min(7vw,32px); display:flex; align-items:center; justify-content:center; pointer-events:auto; }
-  #up    { top:0;    left:31%; }
-  #down  { bottom:0; left:31%; }
-  #left  { left:0;   top:31%;  }
-  #right { right:0;  top:31%;  }
-  .ab { position:absolute; right:8%; bottom:14%; display:flex; flex-direction:column; gap:20%; }
-  .ab div { width:22vw; height:22vw; max-width:100px; max-height:100px; border-radius:50%; border:5px solid #fff; font-size:min(9vw,40px); font-weight:bold; display:flex; align-items:center; justify-content:center; pointer-events:auto; }
-  #a { background:rgba(0,220,0,0.85); color:#fff; }
-  #b { background:rgba(220,0,0,0.85); color:#fff; }
-  #menuIcon { position:fixed; top:4%; right:4%; width:60px; height:60px; background:rgba(0,120,255,0.8); border:4px solid #fff; border-radius:50%; color:#fff; font-size:28px; display:flex; align-items:center; justify-content:center; pointer-events:auto; z-index:10; }
-  #menuPanel { position:fixed; inset:0; background:rgba(0,0,120,0.96); color:#fff; padding:10%; display:none; flex-direction:column; font-size:calc(10px + 1vw); z-index:20; pointer-events:auto; }
-  .menuRow { padding:12px 0; border-bottom:1px solid #444; cursor:pointer; }
-  .menuRow:active { background:rgba(255,255,255,0.2); }
-  #nameScreen, #confirmScreen { position:fixed; inset:0; background:rgba(0,0,0,0.92); color:#fff; display:none; flex-direction:column; align-items:center; justify-content:center; font-size:calc(12px + 1.2vw); pointer-events:auto; z-index:30; }
-  #nameText { margin:20px 0; font-size:1.4em; }
-  #kb { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; max-width:90%; }
-  .kbKey { aspect-ratio:1; background:#555; border:3px solid #aaa; color:#fff; font-size:calc(10px + 0.8vw); display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .kbKey:active { background:#fff; color:#000; }
+  body {
+    margin:0; padding:0; overflow:hidden; background:#000; font-family:'Press Start 2P',cursive;
+    height:100vh; touch-action:none; user-select:none;
+  }
+  #c {
+    display:block; width:100vmin; height:calc(100vmin * 160/240);
+    max-width:480px; max-height:320px;
+    image-rendering:pixelated; image-rendering:crisp-edges;
+    margin:0 auto; border:4px solid #222;
+  }
+  #ui {
+    position:absolute; inset:0; pointer-events:none;
+  }
+  #dialog {
+    position:absolute; bottom:6px; left:6px; right:6px; height:54px;
+    background:#fff; border:4px solid #0040c0; color:#000;
+    padding:6px 10px; font-size:11px; line-height:1.3;
+    display:flex; align-items:center; overflow:hidden;
+    pointer-events:auto;
+  }
+  #next { width:32px; height:32px; margin-left:8px; background:#0040c0; color:#fff;
+          border:3px solid #fff; font-size:18px; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center; }
+  #dpad {
+    position:absolute; left:12px; bottom:12px; width:120px; height:120px;
+    pointer-events:auto;
+  }
+  .btn {
+    position:absolute; width:40px; height:40px; background:rgba(255,255,255,0.3);
+    border:3px solid #fff; color:#000; font-weight:bold; font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #u { top:0;    left:40px; }
+  #d { bottom:0; left:40px; }
+  #l { left:0;   top:40px; }
+  #r { right:0;  top:40px; }
+  #a, #b {
+    position:absolute; width:60px; height:60px; border-radius:50%;
+    border:4px solid #fff; font-size:32px; font-weight:bold;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:auto;
+  }
+  #a { right:20px; bottom:80px; background:rgba(0,180,0,0.7); color:#fff; }
+  #b { right:90px; bottom:30px; background:rgba(180,0,0,0.7); color:#fff; }
+  #name, #confirm {
+    position:absolute; inset:0; background:rgba(0,0,0,0.9);
+    color:#fff; display:none; flex-direction:column;
+    align-items:center; justify-content:center; z-index:10;
+    pointer-events:auto;
+  }
+  #kb {
+    display:grid; grid-template-columns:repeat(8,1fr); gap:4px;
+    width:90%; max-width:340px; margin-top:20px;
+  }
+  .key {
+    aspect-ratio:1; background:#555; border:2px solid #aaa; color:#fff;
+    font-size:12px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .key:active { background:#aaa; color:#000; }
   .wide { grid-column:span 2; }
-  #confirmScreen button { margin:15px 20px; padding:12px 32px; font-size:1.1em; background:#0044cc; color:#fff; border:3px solid #fff; cursor:pointer; }
-  .hidden { display:none !important; }
+  #confirm button {
+    margin:12px 24px; padding:10px 32px; font-size:14px;
+    background:#0040c0; color:#fff; border:3px solid #fff;
+  }
 </style>
 </head>
 <body>
 
-<div id="container">
-  <canvas id="canvas" width="320" height="240"></canvas>
-  <div id="ui">
-    <div id="dialogue" class="hidden"><span id="text"></span><div id="advance">▶</div></div>
-  </div>
+<canvas id="c" width="240" height="160"></canvas>
 
-  <div id="nameScreen">
-    <div id="nameText">NOVA</div>
-    <div id="kb"></div>
+<div id="ui">
+  <div id="dialog" class="hidden">
+    <span id="msg"></span>
+    <div id="next">A</div>
   </div>
+</div>
 
-  <div id="confirmScreen">
-    <div id="confirmMsg">You chose CHARMANDER! Are you sure?</div>
-    <button id="yes">YES</button>
-    <button id="no">NO</button>
-  </div>
+<div id="name">
+  <div style="font-size:14px;margin-bottom:12px;">What's your name?</div>
+  <div id="nametxt" style="font-size:18px;margin:16px 0;min-height:24px;">NOVA</div>
+  <div id="kb"></div>
+</div>
 
-  <div id="controls">
-    <div class="dpad">
-      <div id="up">↑</div><div id="down">↓</div><div id="left">←</div><div id="right">→</div>
-    </div>
-    <div class="ab">
-      <div id="b">B</div><div id="a">A</div>
-    </div>
-  </div>
-
-  <div id="menuIcon">M</div>
-
-  <div id="menuPanel">
-    <div class="menuRow">Pokémon</div>
-    <div class="menuRow">Bag → Potion x1</div>
-    <div class="menuRow" id="saveBtn">Save Game</div>
-    <div class="menuRow" id="closeMenu">Close</div>
-  </div>
+<div id="confirm">
+  <div id="cmsg" style="margin:20px 0; font-size:14px; text-align:center; max-width:80%;"></div>
+  <button id="cyes">YES</button>
+  <button id="cno">NO</button>
 </div>
 
 <script>
 // ────────────────────────────────────────────────
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const TILE = 16;
-const W = 320, H = 240;
+const COLS = 15;
+const ROWS = 10;
 
 let state = 'title';
 let playerName = 'NOVA';
 let starter = null;
-let px = 8, py = 7, pdir = 2;       // 0=up, 1=left, 2=down, 3=right
-let fx = 8, fy = 8;                 // follower
-let camx = 0, camy = 0;
-let currentMap = 'bed';
-let dialogQueue = [];
-let currentDialog = '';
-let dialogIndex = 0;
-let potionCount = 1;
-let talkedToMom = false;
-let showStarterChoice = false;
+let px = 7, py = 5, pdir = 2; // 0 up, 1 left, 2 down, 3 right
+let fx = 7, fy = 6;           // follower
+let dialogLines = [];
+let dialogText = '';
+let dialogChar = 0;
+let mapId = 'house';
 
 // ──────────────────────────────────────────────── Maps ────────────────────────────────────────────────
 const maps = {
-  bed: [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // bed
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,9,9,9,9,0,0,0,0,0,0,0,0,0,0,0,1], // desk + PC
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,1], // stairs/door
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  house: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,2,2,2,0,0,0,0,1], // door to outside
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  kit: [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,1],
-    [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1],
-    [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,1], // mom
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,2,2,0,0,0,7,7,7,7,0,0,0,0,2,2,0,0,0,1], // table + doors
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-  ],
-  overworld: Array(80).fill().map(() => Array(120).fill(11)) // very large grass field
+  outside: Array(40).fill().map(()=>Array(60).fill(11)) // big grass map
 };
 
-// Add features to overworld
-for (let y = 0; y < 80; y++) {
-  for (let x = 0; x < 120; x++) {
-    if (Math.random() < 0.15) maps.overworld[y][x] = 24;  // tall grass
-    if (Math.random() < 0.04) maps.overworld[y][x] = 25;  // tree
+// Add some features to outside
+for(let y=0;y<40;y++) for(let x=0;x<60;x++) {
+  if(Math.random()<0.18) maps.outside[y][x] = 12; // tall grass
+  if(Math.random()<0.03) maps.outside[y][x] = 13; // tree
+}
+// Gym building
+for(let dy=-2;dy<=3;dy++) for(let dx=-4;dx<=4;dx++) {
+  let tx=30+dx, ty=18+dy;
+  if(tx>=0&&tx<60&&ty>=0&&ty<40) {
+    maps.outside[ty][tx] = (dy===-2)?14:15; // roof / wall
   }
 }
+maps.outside[21][30] = 2; // gym door
 
-// Central Gym Arena
-const gymCenterX = 58, gymCenterY = 38;
-for (let dy = -3; dy <= 4; dy++) {
-  for (let dx = -5; dx <= 5; dx++) {
-    const tx = gymCenterX + dx;
-    const ty = gymCenterY + dy;
-    if (tx >= 0 && tx < 120 && ty >= 0 && ty < 80) {
-      if (dy === -3 && Math.abs(dx) <= 4) maps.overworld[ty][tx] = 12; // red roof
-      else if (Math.abs(dx) <= 4 && Math.abs(dy) <= 3) maps.overworld[ty][tx] = 13; // building
-    }
-  }
-}
-maps.overworld[gymCenterY+4][gymCenterX] = 2; // entrance door
-
-const tileColors = {
-  0:  '#00000000',
-  1:  '#a87048',   // wall brown
-  2:  '#c08030',   // door brown
-  3:  '#909090',   // fridge
-  4:  '#b07050',   // counter
-  5:  '#60a0c0',   // sink
-  6:  '#ff88cc',   // mom
-  7:  '#ffdd99',   // table
-  8:  '#ffcc88',   // bed
-  9:  '#ddccaa',   // desk
-  10: '#88ccff',   // window
-  11: '#90d070',   // grass
-  12: '#d02020',   // red roof
-  13: '#f0f0f0',   // white building
-  24: '#70b050',   // tall grass
-  25: '#307020'    // tree
+const colors = {
+  0:'#0000', 1:'#8c6840', 2:'#c09050', 11:'#88c070', 12:'#68a050',
+  13:'#307020', 14:'#d82820', 15:'#e0d8d0'
 };
 
-function drawTile(x, y, type) {
-  if (type === 0) return;
-  const sx = x * TILE + camx;
-  const sy = y * TILE + camy;
-  if (sx + TILE < 0 || sx > W || sy + TILE < 0 || sy > H) return;
-  ctx.fillStyle = tileColors[type] || '#444';
-  ctx.fillRect(sx, sy, TILE, TILE);
-  if (type === 24) {
-    ctx.fillStyle = 'rgba(0,100,0,0.35)';
-    ctx.fillRect(sx, sy, TILE, TILE);
+function drawTile(x,y,t){
+  if(!t) return;
+  ctx.fillStyle=colors[t]||'#444';
+  ctx.fillRect(x*TILE+camx,y*TILE+camy,TILE,TILE);
+}
+
+let camx=0, camy=0;
+function updateCam(){
+  camx = Math.floor(120 - (px+0.5)*TILE);
+  camy = Math.floor(80  - (py+0.5)*TILE);
+  if(mapId!=='outside'){
+    camx = Math.max(-(15*TILE-240), Math.min(0,camx));
+    camy = Math.max(-(10*TILE-160), Math.min(0,camy));
   }
 }
 
-function drawMap() {
-  const data = maps[currentMap] || maps.overworld;
-  const startY = Math.max(0, Math.floor(-camy / TILE) - 1);
-  const endY   = Math.min(data.length, Math.ceil((-camy + H) / TILE) + 1);
-  const startX = Math.max(0, Math.floor(-camx / TILE) - 1);
-  const endX   = Math.min(data[0].length, Math.ceil((-camx + W) / TILE) + 1);
+function drawPlayer(){
+  const sx = px*TILE + camx;
+  const sy = py*TILE + camy;
+  ctx.fillStyle='#f0d8a0'; ctx.fillRect(sx+4,sy,8,8);     // head
+  ctx.fillStyle='#3060c0'; ctx.fillRect(sx+2,sy+8,12,12); // shirt
+  ctx.fillStyle='#a84020'; ctx.fillRect(sx+4,sy+18,8,6);  // legs
+}
 
-  for (let y = startY; y < endY; y++) {
-    for (let x = startX; x < endX; x++) {
-      drawTile(x, y, data[y][x]);
+function drawStarter(){
+  if(!starter) return;
+  const sx = fx*TILE + camx + 2;
+  const sy = fy*TILE + camy + 2;
+  if(starter==='charmander'){
+    ctx.fillStyle='#ff8800'; ctx.fillRect(sx,sy+4,12,8);
+    ctx.fillStyle='#ff4400'; ctx.fillRect(sx+8,sy,6,4);
+  }else if(starter==='treecko'){
+    ctx.fillStyle='#00cc66'; ctx.fillRect(sx,sy+4,12,8);
+  }else{
+    ctx.fillStyle='#4488ff'; ctx.fillRect(sx,sy+4,12,8);
+  }
+}
+
+function render(){
+  ctx.fillStyle='#000814';
+  ctx.fillRect(0,0,240,160);
+
+  if(state==='title'){
+    ctx.fillStyle='#ffffff';
+    ctx.font='bold 20px "Press Start 2P"';
+    ctx.textAlign='center';
+    ctx.fillText('Pokémon',120,60);
+    ctx.fillStyle='#ff4444';
+    ctx.font='bold 16px "Press Start 2P"';
+    ctx.fillText('Nova Genesis',120,90);
+    ctx.fillStyle='#cccccc';
+    ctx.font='12px "Press Start 2P"';
+    ctx.fillText('Tap to start',120,130);
+  }
+  else if(state==='choose'){
+    ctx.fillStyle='#c8e0ff';
+    ctx.fillRect(0,0,240,160);
+    ctx.fillStyle='#888888';
+    ctx.fillRect(40,100,48,16);
+    ctx.fillRect(96,100,48,16);
+    ctx.fillRect(152,100,48,16);
+
+    [ {x:64,name:'CHARMANDER'}, {x:120,name:'TREECKO'}, {x:176,name:'FROAKIE'} ].forEach(p=>{
+      ctx.fillStyle='white';
+      ctx.beginPath(); ctx.arc(p.x,116,20,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='red'; ctx.fillRect(p.x-20,108,40,16);
+      ctx.fillStyle='black';
+      ctx.beginPath(); ctx.arc(p.x,116,8,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='white';
+      ctx.font='10px "Press Start 2P"';
+      ctx.textAlign='center';
+      ctx.fillText(p.name,p.x,150);
+    });
+  }
+  else {
+    const m = maps[mapId] || maps.outside;
+    for(let y=0;y<m.length;y++) for(let x=0;x<m[y].length;x++){
+      drawTile(x,y,m[y][x]);
     }
+    drawPlayer();
+    drawStarter();
   }
-}
 
-function drawPlayer(x, y, dir, frame) {
-  const sx = x * TILE + camx;
-  const sy = y * TILE + camy;
-  ctx.fillStyle = '#f8d8b0'; ctx.fillRect(sx+4, sy,   8,8);   // head
-  ctx.fillStyle = '#3060c0'; ctx.fillRect(sx+2, sy+8, 12,12); // body
-  ctx.fillStyle = '#a04020'; 
-  const off = frame ? 1 : -1;
-  ctx.fillRect(sx+4+off, sy+18, 4,6);
-  ctx.fillRect(sx+8-off, sy+18, 4,6);
-}
-
-function drawFollower(x, y) {
-  if (!starter) return;
-  const sx = x * TILE + camx + 2;
-  const sy = y * TILE + camy + 2;
-  if (starter === 'charmander') {
-    ctx.fillStyle = '#ff8800'; ctx.fillRect(sx, sy+4, 12,10);
-    ctx.fillStyle = '#ff4400'; ctx.fillRect(sx+8, sy, 6,6);
-  } else if (starter === 'treecko') {
-    ctx.fillStyle = '#00cc66'; ctx.fillRect(sx, sy+4, 12,10);
-    ctx.fillStyle = '#009944'; ctx.fillRect(sx+2, sy+2, 8,8);
-  } else if (starter === 'froakie') {
-    ctx.fillStyle = '#4488ff'; ctx.fillRect(sx, sy+4, 12,10);
-    ctx.fillStyle = '#2266cc'; ctx.fillRect(sx+3, sy+3, 6,6);
-  }
-}
-
-function updateCamera() {
-  camx = Math.floor(W/2 - (px + 0.5) * TILE);
-  camy = Math.floor(H/2 - (py + 0.5) * TILE);
-  if (currentMap !== 'overworld') {
-    camx = Math.max(-(maps[currentMap][0].length * TILE - W), Math.min(0, camx));
-    camy = Math.max(-(maps[currentMap].length * TILE - H), Math.min(0, camy));
-  }
-}
-
-function render() {
-  ctx.fillStyle = '#081820';
-  ctx.fillRect(0,0,W,H);
-
-  if (state === 'title') {
-    ctx.fillStyle = '#4060ff';
-    for (let i = 0; i < 80; i++) {
-      const x = (performance.now()/30 + i*13) % W;
-      const y = (i*17) % H;
-      ctx.fillRect(x, y, 2, 2);
-    }
-    ctx.fillStyle = '#ffeb3b';
-    ctx.font = 'bold 28px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText('POKÉMON', W/2, H*0.38);
-    ctx.fillStyle = '#ff4444';
-    ctx.font = 'bold 20px "Press Start 2P"';
-    ctx.fillText('NOVA GENESIS', W/2, H*0.52);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '14px "Press Start 2P"';
-    ctx.fillText('Tap to Start', W/2, H*0.75);
-  } else if (state === 'professor' || state === 'choose') {
-    ctx.fillStyle = '#c8e8ff';
-    ctx.fillRect(0,0,W,H);
-    drawPlayer(10, 4, 2, 0);
-    if (showStarterChoice) drawStarterSelection();
+  if(currentDialog){
+    document.getElementById('msg').textContent = currentDialog.slice(0,dialogChar);
+    document.getElementById('dialog').classList.remove('hidden');
   } else {
-    drawMap();
-    drawPlayer(px, py, pdir, (performance.now()/200|0)%2);
-    drawFollower(fx, fy);
-  }
-
-  if (currentDialog) {
-    document.getElementById('text').textContent = currentDialog.slice(0, dialogIndex);
-    document.getElementById('dialogue').classList.remove('hidden');
-  } else {
-    document.getElementById('dialogue').classList.add('hidden');
+    document.getElementById('dialog').classList.add('hidden');
   }
 }
 
-function drawStarterSelection() {
-  const positions = [
-    {x:60,  poke:'charmander', name:'CHARMANDER'},
-    {x:140, poke:'treecko',     name:'TREECKO'},
-    {x:220, poke:'froakie',     name:'FROAKIE'}
-  ];
-
-  positions.forEach(p => {
-    // Poké Ball
-    ctx.fillStyle = 'white';
-    ctx.beginPath();
-    ctx.arc(p.x+32, 110, 28, 0, Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle = '#ff4444';
-    ctx.fillRect(p.x+4, 98, 56, 24);
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(p.x+32, 110, 12, 0, Math.PI*2);
-    ctx.fill();
-
-    // Name below
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 11px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillText(p.name, p.x+32, 165);
-  });
+// ──────────────────────────────────────────────── Dialogue & Flow ────────────────────────────────────────────────
+function say(...lines){
+  dialogLines.push(...lines);
+  if(!currentDialog) nextLine();
 }
 
-// ──────────────────────────────────────────────── Dialogue System ────────────────────────────────────────────────
-function queueDialog(lines) {
-  dialogQueue.push(...lines.map(l => l.replace('{name}', playerName)));
-  if (!currentDialog) nextDialog();
-}
-
-function nextDialog() {
-  if (!dialogQueue.length) {
+function nextLine(){
+  if(!dialogLines.length){
     currentDialog = '';
-    dialogIndex = 0;
-    if (state === 'professor') {
-      document.getElementById('nameScreen').style.display = 'flex';
+    if(state==='professor'){
+      document.getElementById('name').style.display='flex';
     }
     return;
   }
-  currentDialog = dialogQueue.shift();
-  dialogIndex = 0;
+  currentDialog = dialogLines.shift().replace('{name}',playerName);
+  dialogChar = 0;
 }
 
-function advanceDialog() {
-  if (dialogIndex < currentDialog.length) {
-    dialogIndex = currentDialog.length;
+function advance(){
+  if(dialogChar < currentDialog.length){
+    dialogChar = currentDialog.length;
   } else {
-    nextDialog();
+    nextLine();
   }
 }
 
-// ──────────────────────────────────────────────── Input ────────────────────────────────────────────────
-const keys = {};
-window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-window.addEventListener('keyup',   e => keys[e.key.toLowerCase()] = false);
+document.getElementById('next').onclick = advance;
 
-function updateMovement() {
-  if (state !== 'play') return;
-  let moved = false;
+// ──────────────────────────────────────────────── Name input ────────────────────────────────────────────────
+function buildKeyboard(){
+  const keys = 'QWERTYUIOP ASDFGHJKL ZXCVBNM DEL OK'.split(' ');
+  const kb = document.getElementById('kb');
+  kb.innerHTML = '';
+  keys.forEach(k=>{
+    const b = document.createElement('div');
+    b.className = 'key' + (k.length>1?' wide':'');
+    b.textContent = k;
+    b.onclick = ()=>{
+      if(k==='OK'){
+        if(playerName.trim()){
+          document.getElementById('name').style.display='none';
+          state = 'choose';
+          say('Which Pokémon will you choose?');
+        }
+      }else if(k==='DEL'){
+        playerName = playerName.slice(0,-1)||'';
+      }else{
+        playerName += k;
+        if(playerName.length>10) playerName=playerName.slice(0,10);
+      }
+      document.getElementById('nametxt').textContent = playerName||'NOVA';
+    };
+    kb.appendChild(b);
+  });
+}
+buildKeyboard();
 
-  if (keys['arrowup']    || keys['w']) { pdir = 0; moved = tryMove(0, -1); }
-  if (keys['arrowdown']  || keys['s']) { pdir = 2; moved = tryMove(0,  1); }
-  if (keys['arrowleft']  || keys['a']) { pdir = 1; moved = tryMove(-1, 0); }
-  if (keys['arrowright'] || keys['d']) { pdir = 3; moved = tryMove(1,  0); }
+// ──────────────────────────────────────────────── Starter choice ────────────────────────────────────────────────
+c.onclick = e=>{
+  if(state!=='choose') return;
+  const r = c.getBoundingClientRect();
+  const x = (e.clientX-r.left)*240/r.width;
+  const y = (e.clientY-r.top)*160/r.height;
 
-  if (moved && starter) {
-    fx = px - (pdir === 1 ? -1 : pdir === 3 ? 1 : 0);
-    fy = py - (pdir === 0 ? -1 : pdir === 2 ? 1 : 0);
+  if(y>80&&y<140){
+    if(x<80) starter='charmander';
+    else if(x<160) starter='treecko';
+    else starter='froakie';
+
+    if(starter){
+      document.getElementById('cmsg').textContent = `You chose ${starter.toUpperCase()}!  Is that OK?`;
+      document.getElementById('confirm').style.display='flex';
+    }
+  }
+};
+
+document.getElementById('cyes').onclick=()=>{
+  document.getElementById('confirm').style.display='none';
+  say('Great choice! Your new partner is full of energy!');
+  say(`Come on ${starter.toUpperCase()}, let's go outside!`);
+  setTimeout(()=>{
+    mapId = 'outside';
+    px=30; py=30;
+    fx=30; fy=31;
+    state='play';
+    document.getElementById('controls').style.display='block';
+  },1200);
+};
+
+document.getElementById('cno').onclick=()=>{
+  document.getElementById('confirm').style.display='none';
+  starter=null;
+};
+
+// ──────────────────────────────────────────────── Movement ────────────────────────────────────────────────
+const input = {u:false,d:false,l:false,r:false};
+
+['u','d','l','r'].forEach(k=>{
+  const el = document.getElementById(k);
+  el.ontouchstart = e=>{e.preventDefault(); input[k]=true;};
+  el.ontouchend   = ()=>input[k]=false;
+});
+
+function move(){
+  if(state!=='play') return;
+  let dx=0, dy=0;
+  if(input.u) dy=-1;
+  if(input.d) dy=1;
+  if(input.l) dx=-1;
+  if(input.r) dx=1;
+
+  if(dx||dy){
+    const nx=px+dx, ny=py+dy;
+    const m = maps[mapId]||maps.outside;
+    if(nx>=0&&ny>=0&&ny<m.length&&nx<m[0].length){
+      const t = m[ny][nx];
+      if(t!==1 && t!==13 && t!==14 && t!==15 && t!==25){
+        px=nx; py=ny;
+        pdir = dy<0?0:dy>0?2:dx<0?1:3;
+        // follow
+        if(starter){
+          fx = px - dx;
+          fy = py - dy;
+        }
+      }
+    }
   }
 }
 
-function tryMove(dx, dy) {
-  const nx = px + dx;
-  const ny = py + dy;
-  const data = maps[currentMap] || maps.overworld;
-  if (nx < 0 || ny < 0 || ny >= data.length || nx >= data[0].length) return false;
-  const tile = data[ny][nx];
-  if ([1,3,4,5,8,9,12,13,25].includes(tile)) return false; // solid
-  px = nx;
-  py = ny;
+setInterval(move,120);
 
-  if (currentMap === 'overworld' && tile === 24 && Math.random() < 0.07) {
-    queueDialog(['A wild Pokémon appeared! (battle not implemented yet)']);
+// ──────────────────────────────────────────────── Game start ────────────────────────────────────────────────
+c.onclick = ()=>{
+  if(state==='title'){
+    state='professor';
+    say("Ah! There you are! I've been expecting you.",
+        "Welcome to the world of Pokémon!",
+        "My name is Chen.",
+        "And you are...?");
   }
+};
 
-  if (tile === 2 && currentMap === 'kit') {
-    currentMap = 'overworld';
-    px = 58;
-    py = 42;
-    queueDialog(['You step outside into the wide fields of Aura Region!']);
-  }
-
-  return true;
-}
-
-// ──────────────────────────────────────────────── Game Loop ────────────────────────────────────────────────
-function loop() {
-  updateMovement();
-  if (currentDialog) dialogIndex = Math.min(dialogIndex + 2, currentDialog.length);
-  updateCamera();
+function loop(){
+  move();
+  if(currentDialog) dialogChar = Math.min(dialogChar+1, currentDialog.length);
   render();
   requestAnimationFrame(loop);
 }
-
-// ──────────────────────────────────────────────── Start Sequence ────────────────────────────────────────────────
-canvas.addEventListener('click', function start() {
-  if (state !== 'title') return;
-  state = 'professor';
-  queueDialog([
-    "Ah! There you are! I've been expecting you.",
-    "Welcome to the world of Pokémon! My name is Chen.",
-    "I study the unique bond between humans and Pokémon here in the Aura Region.",
-    "And you are...?"
-  ]);
-}, {once: true});
-
-document.getElementById('advance').onclick = advanceDialog;
-
-// Virtual keyboard for name
-const kb = document.getElementById('kb');
-'QWERTYUIOP ASDFGHJKL ZXCVBNM DEL OK'.split(' ').forEach(k => {
-  const btn = document.createElement('div');
-  btn.className = 'kbKey' + (k.length > 1 ? ' wide' : '');
-  btn.textContent = k;
-  btn.onclick = () => {
-    if (k === 'OK') {
-      if (playerName.trim()) {
-        document.getElementById('nameScreen').style.display = 'none';
-        showStarterChoice = true;
-        state = 'choose';
-        queueDialog(['Which of these three resonates with you?']);
-      }
-    } else if (k === 'DEL') {
-      playerName = playerName.slice(0,-1);
-    } else {
-      playerName += k;
-      if (playerName.length > 10) playerName = playerName.slice(0,10);
-    }
-    document.getElementById('nameText').textContent = playerName || 'NOVA';
-  };
-  kb.appendChild(btn);
-});
-
-// Starter selection click
-canvas.addEventListener('click', e => {
-  if (state !== 'choose' || !showStarterChoice) return;
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = W / rect.width;
-  const scaleY = H / rect.height;
-  const mx = (e.clientX - rect.left) * scaleX;
-  const my = (e.clientY - rect.top) * scaleY;
-
-  if (my > 90 && my < 150) {
-    let chosen = null;
-    if (mx < 100) chosen = 'charmander';
-    else if (mx < 200) chosen = 'treecko';
-    else if (mx < 300) chosen = 'froakie';
-
-    if (chosen) {
-      document.getElementById('confirmMsg').textContent = `You chose ${chosen.toUpperCase()}! Are you sure?`;
-      document.getElementById('confirmScreen').style.display = 'flex';
-      starter = chosen;
-    }
-  }
-});
-
-document.getElementById('yes').onclick = () => {
-  document.getElementById('confirmScreen').style.display = 'none';
-  showStarterChoice = false;
-  queueDialog([
-    'An excellent choice! This Pokémon is full of potential!',
-    `Alright, ${starter.toUpperCase()}! Let's go explore the world!`
-  ]);
-  setTimeout(() => {
-    currentMap = 'overworld';
-    px = 58; py = 42;
-    pdir = 0;
-    fx = px; fy = py + 1;
-    state = 'play';
-    document.getElementById('controls').style.display = 'block';
-  }, 2200);
-};
-
-document.getElementById('no').onclick = () => {
-  document.getElementById('confirmScreen').style.display = 'none';
-};
 
 loop();
 </script>
