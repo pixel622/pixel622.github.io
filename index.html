@@ -3,1260 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon K&E Version</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+    <title>Pokémon Amber: K&E Version</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            touch-action: manipulation;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --pkm-blue: #3a86ff;
+            --gba-text: #424242;
+            --amber: #ffbf00;
         }
-        
         body {
-            font-family: 'Press Start 2P', monospace;
-            background-color: #0a0a1a;
-            color: #f0f0f0;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
+            margin: 0; background: #1a1a1a;
+            color: white; font-family: 'Courier New', Courier, monospace;
+            display: flex; flex-direction: column; align-items: center;
+            overflow: hidden; touch-action: none;
         }
-        
         #game-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            position: relative; width: 100vw; max-width: 500px; height: 60vh;
+            background: black; border: 4px solid #444; margin-top: 10px;
             overflow: hidden;
         }
+        canvas { width: 100%; height: 100%; image-rendering: pixelated; }
         
-        /* Game Screen - Where the player moves */
-        .game-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70%;
-            background-color: #2a7a4a;
-            background-image: 
-                repeating-linear-gradient(0deg, transparent, transparent 32px, rgba(0,0,0,0.1) 32px, rgba(0,0,0,0.1) 64px),
-                repeating-linear-gradient(90deg, transparent, transparent 32px, rgba(0,0,0,0.1) 32px, rgba(0,0,0,0.1) 64px);
-            overflow: hidden;
+        /* UI Elements */
+        #textbox {
+            position: absolute; bottom: 5px; left: 5px; right: 5px;
+            height: 30%; background: #fff; border: 3px solid var(--gba-text);
+            border-radius: 5px; padding: 10px; color: var(--gba-text);
+            font-weight: bold; font-size: 14px; display: none; z-index: 10;
         }
-        
-        .screen-title {
-            background: linear-gradient(to bottom, #0a3a6d, #0a0a1a);
+        #joystick-zone {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         }
-        
-        /* Dialogue Box */
-        .dialogue-box {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30%;
-            background-color: rgba(0, 0, 0, 0.95);
-            border-top: 4px solid #4af2ff;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            z-index: 100;
+        #starter-ui {
+            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+            display: none; flex-direction: column; gap: 10px; z-index: 20;
         }
-        
-        .dialogue-content {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .choice-btn {
+            background: var(--amber); border: 2px solid #fff; padding: 10px;
+            font-weight: bold; border-radius: 5px; cursor: pointer;
         }
-        
-        .character-name {
-            color: #ffcc00;
-            font-size: 14px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
+        #controls {
+            width: 100%; max-width: 500px; height: 35vh;
+            display: flex; justify-content: space-around; align-items: center;
         }
-        
-        .dialogue-text {
-            font-size: 12px;
-            line-height: 1.8;
-            margin-bottom: 20px;
-            min-height: 80px;
-        }
-        
-        .continue-indicator {
-            text-align: center;
-            color: #4af2ff;
-            font-size: 10px;
-            animation: blink 1s infinite;
-            margin-top: 10px;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-        
-        /* Game Objects */
-        .game-object {
-            position: absolute;
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        .player {
-            width: 32px;
-            height: 32px;
-            background-color: #4af2ff;
-            border-radius: 4px;
-            z-index: 50;
-            transition: left 0.3s, top 0.3s;
-            pointer-events: none;
-        }
-        
-        .npc {
-            width: 32px;
-            height: 32px;
-            background-color: #ff3366;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .door {
-            width: 40px;
-            height: 60px;
-            background-color: #8b4513;
-            border: 3px solid #5d2906;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffcc00;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 20;
-        }
-        
-        .door:hover {
-            background-color: #a0522d;
-        }
-        
-        .item {
-            width: 32px;
-            height: 32px;
-            background-color: #ffcc00;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .pokeball {
-            width: 32px;
-            height: 32px;
-            background: radial-gradient(circle at 30% 30%, #ff3333, #cc0000);
-            border-radius: 50%;
-            border: 2px solid #000;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .pokeball:after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background-color: #000;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-        }
-        
-        /* Room Styles */
-        .room {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-        
-        .room.active {
-            display: block;
-        }
-        
-        .wall {
-            position: absolute;
-            background-color: #8b7355;
-            border: 2px solid #5d4a32;
-        }
-        
-        .floor {
-            position: absolute;
-            background-color: #deb887;
-            border: 1px solid #b8860b;
-        }
-        
-        .carpet {
-            position: absolute;
-            background-color: #8b0000;
-            border: 2px solid #660000;
-        }
-        
-        .bed {
-            position: absolute;
-            background-color: #4169e1;
-            border: 3px solid #2a4a8f;
-            border-radius: 5px;
-        }
-        
-        .table {
-            position: absolute;
-            background-color: #8b4513;
-            border: 3px solid #5d2906;
-        }
-        
-        .computer {
-            position: absolute;
-            background-color: #333;
-            border: 3px solid #000;
-            border-radius: 5px;
-        }
-        
-        .bookcase {
-            position: absolute;
-            background-color: #5d2906;
-            border: 3px solid #3a1803;
-        }
-        
-        .lab-equipment {
-            position: absolute;
-            background-color: #2a4a8f;
-            border: 3px solid #1a2a4a;
-            border-radius: 5px;
-        }
-        
-        .tank {
-            position: absolute;
-            background-color: rgba(64, 164, 223, 0.3);
-            border: 3px solid #2a8fb8;
-            border-radius: 5px;
-        }
-        
-        /* Controls */
-        .controls {
-            position: absolute;
-            bottom: 30%;
-            left: 0;
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 90;
-            pointer-events: none;
-        }
-        
-        .d-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 50px);
-            grid-template-rows: repeat(3, 50px);
-            gap: 5px;
-            pointer-events: auto;
-        }
-        
-        .d-pad-btn {
-            background-color: rgba(51, 51, 51, 0.8);
-            border: 2px solid #222;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        .d-pad-btn:active {
-            background-color: rgba(85, 85, 85, 0.8);
-            transform: scale(0.95);
-        }
-        
-        .d-pad-btn.up { grid-column: 2; grid-row: 1; }
-        .d-pad-btn.left { grid-column: 1; grid-row: 2; }
-        .d-pad-btn.center { 
-            grid-column: 2; 
-            grid-row: 2; 
-            background-color: rgba(85, 85, 85, 0.8); 
-            pointer-events: none;
-        }
-        .d-pad-btn.right { grid-column: 3; grid-row: 2; }
-        .d-pad-btn.down { grid-column: 2; grid-row: 3; }
-        
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: auto;
-        }
-        
-        .action-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: none;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .a-btn {
-            background-color: #ff3333;
-            box-shadow: 0 6px 0 #cc0000;
-        }
-        
-        .b-btn {
-            background-color: #4a6baf;
-            box-shadow: 0 6px 0 #2a4a8f;
-        }
-        
-        /* Title Screen */
-        .title-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #0a3a6d, #0a0a1a);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-        
-        .title-screen.hidden {
-            display: none;
-        }
-        
-        .title {
-            font-size: 28px;
-            color: #ffcc00;
-            text-shadow: 4px 4px 0 #cc0000, 8px 8px 0 #000;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
-            text-align: center;
-        }
-        
-        .tagline {
-            color: #ffcc00;
-            font-size: 14px;
-            margin-bottom: 60px;
-            text-align: center;
-            animation: pulse 2s infinite;
-        }
-        
-        .start-btn {
-            background-color: #ff9900;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 20px 40px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 18px;
-            cursor: pointer;
-            margin: 20px;
-            transition: all 0.2s;
-            box-shadow: 0 8px 0 #cc7700;
-        }
-        
-        .start-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #cc7700;
-        }
-        
-        /* Pokémon Selection */
-        .selection-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 150;
-            padding: 20px;
-        }
-        
-        .selection-screen.active {
-            display: flex;
-        }
-        
-        .pokemon-choices {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
-            max-width: 800px;
-        }
-        
-        .pokemon-choice {
-            background-color: rgba(30, 30, 60, 0.9);
-            border: 4px solid #333;
-            border-radius: 15px;
-            padding: 20px;
-            width: 200px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-        
-        .pokemon-choice:hover {
-            transform: scale(1.05);
-            border-color: #ffcc00;
-        }
-        
-        .pokemon-choice.selected {
-            border-color: #4af2ff;
-            background-color: rgba(20, 60, 100, 0.9);
-        }
-        
-        .pokemon-sprite {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 15px;
-            background-color: #222;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 4px solid #444;
-        }
-        
-        .pokemon-sprite img {
-            width: 80px;
-            height: 80px;
-        }
-        
-        .pokemon-name {
-            font-size: 16px;
-            color: #ffcc00;
-            margin-bottom: 10px;
-        }
-        
-        .pokemon-type {
-            font-size: 12px;
-            color: #4af2ff;
-            margin-bottom: 10px;
-        }
-        
-        .pokemon-desc {
-            font-size: 10px;
-            color: #aaa;
-            line-height: 1.4;
-        }
-        
-        /* Text Animation */
-        .text-typing {
-            display: inline;
-        }
-        
-        .cursor {
-            display: inline;
-            animation: cursorBlink 1s infinite;
-        }
-        
-        @keyframes cursorBlink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-        
-        /* Teleport Effect */
-        .teleport-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(74,242,255,0.8) 0%, transparent 70%);
-            animation: teleport 0.5s forwards;
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-        }
-        
-        @keyframes teleport {
-            0% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { opacity: 0; transform: scale(1.5); }
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .title { font-size: 20px; }
-            .dialogue-text { font-size: 10px; }
-            .d-pad { transform: scale(0.9); }
-            .action-btn { width: 60px; height: 60px; font-size: 12px; }
-            .pokemon-choice { width: 160px; padding: 15px; }
+        .action-circle {
+            width: 70px; height: 70px; background: #cc0000;
+            border-radius: 50%; border: 5px solid #880000;
+            color: white; font-size: 24px; font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- Title Screen -->
-        <div class="title-screen" id="titleScreen">
-            <h1 class="title">POKÉMON AMBER VERSION</h1>
-            <div class="tagline">A New Adventure Takes Root!</div>
-            <button class="start-btn" id="startGame">PRESS START</button>
-            <div style="position: absolute; bottom: 20px; font-size: 10px; color: #aaa; text-align: center;">
-                <p>Platform: Mobile (iOS/Android) | Style: Faithful GBA-Era 2D Pixel Art</p>
-                <p>Tap anywhere to advance dialogue | Use controls to move</p>
-            </div>
-        </div>
-        
-        <!-- Game Screens -->
-        <div class="game-screen" id="gameScreen" style="display: none;">
-            <!-- Player's House -->
-            <div class="room active" id="room-house">
-                <!-- Walls -->
-                <div class="wall" style="top: 0; left: 0; width: 100%; height: 20%;"></div>
-                <div class="wall" style="top: 0; left: 0; width: 20%; height: 100%;"></div>
-                <div class="wall" style="top: 0; right: 0; width: 20%; height: 100%;"></div>
-                <div class="wall" style="bottom: 0; left: 0; width: 100%; height: 20%;"></div>
-                
-                <!-- Floor -->
-                <div class="floor" style="top: 20%; left: 20%; width: 60%; height: 60%;"></div>
-                
-                <!-- Carpet -->
-                <div class="carpet" style="top: 50%; left: 35%; width: 30%; height: 20%;"></div>
-                
-                <!-- Bed -->
-                <div class="bed" style="bottom: 25%; left: 25%; width: 30%; height: 20%;"></div>
-                
-                <!-- Table -->
-                <div class="table" style="top: 30%; left: 40%; width: 20%; height: 10%;"></div>
-                
-                <!-- Computer -->
-                <div class="computer" style="top: 25%; right: 30%; width: 15%; height: 15%;"></div>
-                
-                <!-- Door to outside -->
-                <div class="door game-object" id="door-house" style="bottom: 20%; left: 45%;">🚪</div>
-                
-                <!-- Mom NPC -->
-                <div class="npc game-object" id="mom" style="top: 40%; left: 30%;">👩</div>
-                
-                <!-- Player -->
-                <div class="player game-object" id="player" style="top: 50%; left: 50%;"></div>
-            </div>
-            
-            <!-- Town -->
-            <div class="room" id="room-town">
-                <!-- Large tree in center -->
-                <div style="position: absolute; top: 30%; left: 45%; width: 10%; height: 40%; background-color: #8b4513; border-radius: 10px;"></div>
-                <div style="position: absolute; top: 10%; left: 40%; width: 20%; height: 30%; background-color: #2a7a4a; border-radius: 50%;"></div>
-                
-                <!-- Lab Building -->
-                <div style="position: absolute; top: 30%; right: 20%; width: 25%; height: 40%; background-color: #4a8faf; border: 4px solid #2a6b8f; border-radius: 10px;">
-                    <div style="position: absolute; top: 10%; left: 10%; width: 80%; height: 20%; background-color: #2a4a8f; text-align: center; color: white; font-size: 8px; padding: 5px;">
-                        HABITAT RESEARCH LAB
-                    </div>
-                </div>
-                
-                <!-- Door to lab -->
-                <div class="door game-object" id="door-lab" style="bottom: 45%; right: 22%;">🚪</div>
-                
-                <!-- Door back to house -->
-                <div class="door game-object" id="door-house-exit" style="bottom: 30%; left: 20%;">🏠</div>
-            </div>
-            
-            <!-- Lab Ground Floor -->
-            <div class="room" id="room-lab-ground">
-                <!-- Lab walls -->
-                <div class="wall" style="top: 0; left: 0; width: 100%; height: 15%;"></div>
-                <div class="wall" style="top: 0; left: 0; width: 15%; height: 100%;"></div>
-                <div class="wall" style="top: 0; right: 0; width: 15%; height: 100%;"></div>
-                <div class="wall" style="bottom: 0; left: 0; width: 100%; height: 15%;"></div>
-                
-                <!-- Lab floor -->
-                <div class="floor" style="top: 15%; left: 15%; width: 70%; height: 70%;"></div>
-                
-                <!-- Equipment -->
-                <div class="lab-equipment" style="top: 20%; left: 20%; width: 25%; height: 30%;">
-                    <div style="position: absolute; top: 10%; left: 10%; width: 80%; height: 30%; background-color: #333; font-size: 8px; color: white; text-align: center; padding: 5px;">
-                        POKÉDEX DATABASE
-                    </div>
-                </div>
-                
-                <!-- Water Tank -->
-                <div class="tank" style="top: 20%; right: 20%; width: 25%; height: 30%;">
-                    <div style="position: absolute; bottom: 10%; left: 10%; width: 30%; height: 40%; background-color: #ff3333; border-radius: 50%;"></div>
-                </div>
-                
-                <!-- Assistant NPC -->
-                <div class="npc game-object" id="assistant" style="top: 60%; left: 40%;">👨‍🔬</div>
-                
-                <!-- Door to study -->
-                <div class="door game-object" id="door-lab-study" style="bottom: 15%; left: 45%;">📚</div>
-                
-                <!-- Door to town -->
-                <div class="door game-object" id="door-lab-exit" style="bottom: 15%; right: 20%;">🚪</div>
-            </div>
-            
-            <!-- Lab Study -->
-            <div class="room" id="room-lab-study">
-                <!-- Study walls -->
-                <div class="wall" style="top: 0; left: 0; width: 100%; height: 15%; background-color: #5d4a32;"></div>
-                <div class="wall" style="top: 0; left: 0; width: 15%; height: 100%; background-color: #5d4a32;"></div>
-                <div class="wall" style="top: 0; right: 0; width: 15%; height: 100%; background-color: #5d4a32;"></div>
-                <div class="wall" style="bottom: 0; left: 0; width: 100%; height: 15%; background-color: #5d4a32;"></div>
-                
-                <!-- Study floor -->
-                <div class="floor" style="top: 15%; left: 15%; width: 70%; height: 70%; background-color: #deb887;"></div>
-                
-                <!-- Bookcases -->
-                <div class="bookcase" style="top: 20%; left: 20%; width: 25%; height: 60%;"></div>
-                <div class="bookcase" style="top: 20%; right: 20%; width: 25%; height: 60%;"></div>
-                
-                <!-- Professor NPC -->
-                <div class="npc game-object" id="professor" style="top: 40%; left: 45%;">👴</div>
-                
-                <!-- Rival NPC -->
-                <div class="npc game-object" id="rival" style="top: 60%; right: 40%;">👦</div>
-                
-                <!-- Poké Balls -->
-                <div class="pokeball game-object" id="pokeball1" style="top: 30%; left: 45%;"></div>
-                <div class="pokeball game-object" id="pokeball2" style="top: 30%; left: 50%;"></div>
-                <div class="pokeball game-object" id="pokeball3" style="top: 30%; left: 55%;"></div>
-                
-                <!-- Door to lab ground -->
-                <div class="door game-object" id="door-study-lab" style="bottom: 15%; left: 45%;">🔬</div>
-            </div>
-            
-            <!-- Controls -->
-            <div class="controls">
-                <div class="d-pad">
-                    <div class="d-pad-btn up" id="upBtn">↑</div>
-                    <div class="d-pad-btn left" id="leftBtn">←</div>
-                    <div class="d-pad-btn center"></div>
-                    <div class="d-pad-btn right" id="rightBtn">→</div>
-                    <div class="d-pad-btn down" id="downBtn">↓</div>
-                </div>
-                
-                <div class="action-buttons">
-                    <div class="action-btn a-btn" id="aBtn">A</div>
-                    <div class="action-btn b-btn" id="bBtn">B</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Dialogue Box -->
-        <div class="dialogue-box" id="dialogueBox" style="display: none;">
-            <div class="dialogue-content">
-                <div class="character-name" id="dialogueName"></div>
-                <div class="dialogue-text" id="dialogueText"></div>
-                <div class="continue-indicator" id="continueIndicator">Tap to continue...</div>
-            </div>
-        </div>
-        
-        <!-- Pokémon Selection Screen -->
-        <div class="selection-screen" id="selectionScreen">
-            <h2 style="color: #ffcc00; margin-bottom: 20px; text-align: center;">CHOOSE YOUR FIRST POKÉMON</h2>
-            <div class="pokemon-choices">
-                <div class="pokemon-choice" data-pokemon="treecko">
-                    <div class="pokemon-sprite">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/252.png" alt="Treecko">
-                    </div>
-                    <div class="pokemon-name">TREECKO</div>
-                    <div class="pokemon-type">GRASS TYPE</div>
-                    <div class="pokemon-desc">The Wood Gecko Pokémon from the Hoenn region. It's cool and collected, making it a reliable partner.</div>
-                </div>
-                
-                <div class="pokemon-choice" data-pokemon="charmander">
-                    <div class="pokemon-sprite">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander">
-                    </div>
-                    <div class="pokemon-name">CHARMANDER</div>
-                    <div class="pokemon-type">FIRE TYPE</div>
-                    <div class="pokemon-desc">The Fire Lizard Pokémon from the Kanto region. The flame on its tail shows its strength and health.</div>
-                </div>
-                
-                <div class="pokemon-choice" data-pokemon="froakie">
-                    <div class="pokemon-sprite">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png" alt="Froakie">
-                    </div>
-                    <div class="pokemon-name">FROAKIE</div>
-                    <div class="pokemon-type">WATER TYPE</div>
-                    <div class="pokemon-desc">The Bubble Frog Pokémon from the Kalos region. It's swift and agile, with protective frubbles.</div>
-                </div>
-            </div>
-            <div style="color: #4af2ff; font-size: 12px; margin-top: 20px; text-align: center;">
-                Tap a Pokémon to select, then press A to confirm
-            </div>
-        </div>
-        
-        <!-- Teleport Effect -->
-        <div class="teleport-effect" id="teleportEffect"></div>
-    </div>
 
-    <script>
-        // Game State
-        const gameState = {
-            currentRoom: 'room-house',
-            player: { x: 50, y: 50 },
-            dialogue: [],
-            currentDialogueIndex: 0,
-            isDialogueActive: false,
-            selectedPokemon: null,
-            storyProgress: 0, // 0 = start, 1 = woke up, 2 = in town, 3 = in lab, 4 = in study, 5 = chosen pokemon
-            canMove: true
-        };
-        
-        // Dialogue Sequences
-        const dialogues = {
-            wakeUp: [
-                { name: "MOM", text: "Good morning, sweetie! You were sleeping so soundly." },
-                { name: "MOM", text: "Professor Sequoia sent this letter for you. It says 'URGENT' on the envelope." },
-                { name: "MOM", text: "Your friend already left for the lab earlier. You should hurry!" },
-                { name: "", text: "You quickly get dressed and ready for the day. The path to the Professor's Lab is now open." }
-            ],
-            town: [
-                { name: "", text: "You step outside into Maple Root Town. The morning sun filters through the leaves of the ancient tree at the town's center." },
-                { name: "", text: "The Habitat Research Lab stands out with its modern design among the rustic cottages." }
-            ],
-            labAssistant: [
-                { name: "LAB ASSISTANT", text: "Ah, you must be [PLAYER]! The Professor is waiting for you upstairs." },
-                { name: "LAB ASSISTANT", text: "Just head through that door—it'll take you right to his study!" },
-                { name: "", text: "The assistant gestures to a door at the back of the lab with a strange shimmering effect around it." }
-            ],
-            professorIntro: [
-                { name: "PROFESSOR SEQUOIA", text: "Ah, [PLAYER]! Thank you for coming on such short notice." },
-                { name: "PROFESSOR SEQUOIA", text: "These three Pokémon have been entrusted to me for a special habitat study in Orebound." },
-                { name: "PROFESSOR SEQUOIA", text: "However, we've been experiencing strange seismic activity recently." },
-                { name: "PROFESSOR SEQUOIA", text: "I need Trainers to help ensure these Pokémon are safe and well-understood in our region." },
-                { name: "PROFESSOR SEQUOIA", text: "Please, choose one as your partner on this journey." }
-            ],
-            rivalChoice: [
-                { name: "RIVAL", text: "I'll take this one! It has the type advantage over yours." },
-                { name: "RIVAL", text: "Let the competition begin! I'll see you on Route 1!" }
-            ],
-            professorAfterChoice: [
-                { name: "PROFESSOR SEQUOIA", text: "Excellent choice! Here, take this Pokédex." },
-                { name: "PROFESSOR SEQUOIA", text: "I want you to fill it while uncovering the cause of Orebound's strange seismic activity." },
-                { name: "PROFESSOR SEQUOIA", text: "Your first mission: find my assistant on Route 1 to receive Poké Balls." },
-                { name: "PROFESSOR SEQUOIA", text: "Good luck on your journey, [PLAYER]!" }
-            ],
-            momOutsideLab: [
-                { name: "MOM", text: "There you are! The Professor's assistant told me you'd be starting your journey." },
-                { name: "MOM", text: "Take this Town Map. I want you to be safe out there." },
-                { name: "MOM", text: "Remember to call home sometimes! I'll be cheering for you!" },
-                { name: "", text: "With your new Pokémon partner and your mother's blessing, your adventure in the Orebound region begins!" }
-            ]
-        };
-        
-        // DOM Elements
-        const titleScreen = document.getElementById('titleScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const dialogueBox = document.getElementById('dialogueBox');
-        const dialogueName = document.getElementById('dialogueName');
-        const dialogueText = document.getElementById('dialogueText');
-        const continueIndicator = document.getElementById('continueIndicator');
-        const selectionScreen = document.getElementById('selectionScreen');
-        const teleportEffect = document.getElementById('teleportEffect');
-        const player = document.getElementById('player');
-        const startBtn = document.getElementById('startGame');
-        
-        // Rooms
-        const rooms = {
-            'room-house': document.getElementById('room-house'),
-            'room-town': document.getElementById('room-town'),
-            'room-lab-ground': document.getElementById('room-lab-ground'),
-            'room-lab-study': document.getElementById('room-lab-study')
-        };
-        
-        // Initialize
-        function initGame() {
-            // Start button
-            startBtn.addEventListener('click', startGame);
-            
-            // Dialogue box click to continue
-            dialogueBox.addEventListener('click', advanceDialogue);
-            
-            // Game screen click to continue dialogue if active
-            gameScreen.addEventListener('click', function(e) {
-                if (gameState.isDialogueActive) {
-                    advanceDialogue();
-                }
-            });
-            
-            // Selection screen
-            document.querySelectorAll('.pokemon-choice').forEach(choice => {
-                choice.addEventListener('click', function() {
-                    document.querySelectorAll('.pokemon-choice').forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    gameState.selectedPokemon = this.dataset.pokemon;
-                });
-            });
-            
-            // Control buttons
-            setupControls();
-            
-            // Door interactions
-            setupDoors();
-            
-            // NPC interactions
-            setupNPCs();
-            
-            // Set initial player position
-            updatePlayerPosition();
-        }
-        
-        function startGame() {
-            titleScreen.classList.add('hidden');
-            gameScreen.style.display = 'block';
-            dialogueBox.style.display = 'block';
-            
-            // Start with wake up dialogue
-            startDialogue(dialogues.wakeUp);
-            gameState.storyProgress = 1;
-        }
-        
-        function startDialogue(dialogueArray) {
-            gameState.dialogue = dialogueArray;
-            gameState.currentDialogueIndex = 0;
-            gameState.isDialogueActive = true;
-            gameState.canMove = false;
-            continueIndicator.style.display = 'block';
-            showCurrentDialogue();
-        }
-        
-        function showCurrentDialogue() {
-            if (gameState.currentDialogueIndex < gameState.dialogue.length) {
-                const currentDialogue = gameState.dialogue[gameState.currentDialogueIndex];
-                dialogueName.textContent = currentDialogue.name;
-                
-                // Typewriter effect
-                typewriterEffect(currentDialogue.text);
-            } else {
-                // End of dialogue
-                endDialogue();
-            }
-        }
-        
-        function typewriterEffect(text) {
-            dialogueText.innerHTML = '';
-            continueIndicator.style.display = 'none';
-            
-            let i = 0;
-            const speed = 30; // typing speed in ms
-            
-            function typeWriter() {
-                if (i < text.length) {
-                    dialogueText.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, speed);
-                } else {
-                    // Show continue indicator when done typing
-                    continueIndicator.style.display = 'block';
-                }
-            }
-            
-            typeWriter();
-        }
-        
-        function advanceDialogue() {
-            // If text is still typing, skip to end
-            if (dialogueText.innerHTML.length < gameState.dialogue[gameState.currentDialogueIndex].text.length) {
-                dialogueText.innerHTML = gameState.dialogue[gameState.currentDialogueIndex].text;
-                continueIndicator.style.display = 'block';
-                return;
-            }
-            
-            gameState.currentDialogueIndex++;
-            showCurrentDialogue();
-        }
-        
-        function endDialogue() {
-            gameState.isDialogueActive = false;
-            gameState.canMove = true;
-            dialogueBox.style.display = 'none';
-            
-            // Special actions based on story progress
-            switch(gameState.storyProgress) {
-                case 1: // Just woke up
-                    // Mom moves away from door
-                    document.getElementById('mom').style.display = 'none';
-                    break;
-                case 3: // In lab, talked to assistant
-                    // Show teleport door
-                    break;
-                case 4: // In study, heard professor
-                    // Show pokeballs for selection
-                    document.getElementById('pokeball1').style.pointerEvents = 'auto';
-                    document.getElementById('pokeball2').style.pointerEvents = 'auto';
-                    document.getElementById('pokeball3').style.pointerEvents = 'auto';
-                    break;
-            }
-        }
-        
-        function setupControls() {
-            const upBtn = document.getElementById('upBtn');
-            const downBtn = document.getElementById('downBtn');
-            const leftBtn = document.getElementById('leftBtn');
-            const rightBtn = document.getElementById('rightBtn');
-            const aBtn = document.getElementById('aBtn');
-            const bBtn = document.getElementById('bBtn');
-            
-            // Movement controls
-            upBtn.addEventListener('touchstart', () => movePlayer(0, -10));
-            downBtn.addEventListener('touchstart', () => movePlayer(0, 10));
-            leftBtn.addEventListener('touchstart', () => movePlayer(-10, 0));
-            rightBtn.addEventListener('touchstart', () => movePlayer(10, 0));
-            
-            // Action button
-            aBtn.addEventListener('touchstart', () => {
-                if (gameState.selectedPokemon && selectionScreen.classList.contains('active')) {
-                    // Confirm Pokémon selection
-                    confirmPokemonSelection();
-                } else {
-                    // Normal A button action
-                    checkInteraction();
-                }
-            });
-            
-            // B button for cancel/back
-            bBtn.addEventListener('touchstart', () => {
-                if (selectionScreen.classList.contains('active')) {
-                    // Cancel selection
-                    selectionScreen.classList.remove('active');
-                    gameScreen.style.display = 'block';
-                }
-            });
-            
-            // Keyboard controls for desktop
-            document.addEventListener('keydown', (e) => {
-                if (!gameState.canMove) return;
-                
-                switch(e.key) {
-                    case 'ArrowUp': movePlayer(0, -10); break;
-                    case 'ArrowDown': movePlayer(0, 10); break;
-                    case 'ArrowLeft': movePlayer(-10, 0); break;
-                    case 'ArrowRight': movePlayer(10, 0); break;
-                    case 'Enter':
-                    case ' ': 
-                        if (gameState.selectedPokemon && selectionScreen.classList.contains('active')) {
-                            confirmPokemonSelection();
-                        } else {
-                            checkInteraction();
-                        }
-                        break;
-                    case 'Escape':
-                        if (selectionScreen.classList.contains('active')) {
-                            selectionScreen.classList.remove('active');
-                            gameScreen.style.display = 'block';
-                        }
-                        break;
-                }
-            });
-        }
-        
-        function movePlayer(dx, dy) {
-            if (!gameState.canMove) return;
-            
-            // Calculate new position
-            let newX = gameState.player.x + dx;
-            let newY = gameState.player.y + dy;
-            
-            // Boundary checking (keep within 5-95% of screen)
-            newX = Math.max(5, Math.min(newX, 95));
-            newY = Math.max(5, Math.min(newY, 95));
-            
-            // Update player position
-            gameState.player.x = newX;
-            gameState.player.y = newY;
-            updatePlayerPosition();
-        }
-        
-        function updatePlayerPosition() {
-            player.style.left = `${gameState.player.x}%`;
-            player.style.top = `${gameState.player.y}%`;
-        }
-        
-        function setupDoors() {
-            // House door to town
-            document.getElementById('door-house').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                if (gameState.storyProgress === 1) {
-                    // First time leaving house
-                    teleportToRoom('room-town');
-                    gameState.player.x = 30;
-                    gameState.player.y = 70;
-                    updatePlayerPosition();
-                    
-                    // Show town dialogue
-                    setTimeout(() => {
-                        dialogueBox.style.display = 'block';
-                        startDialogue(dialogues.town);
-                        gameState.storyProgress = 2;
-                    }, 500);
-                } else {
-                    // Return to house
-                    teleportToRoom('room-house');
-                    gameState.player.x = 50;
-                    gameState.player.y = 50;
-                    updatePlayerPosition();
-                }
-            });
-            
-            // Town to lab
-            document.getElementById('door-lab').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                teleportToRoom('room-lab-ground');
-                gameState.player.x = 30;
-                gameState.player.y = 70;
-                updatePlayerPosition();
-                
-                // Show lab assistant dialogue if first time
-                if (gameState.storyProgress === 2) {
-                    setTimeout(() => {
-                        dialogueBox.style.display = 'block';
-                        startDialogue(dialogues.labAssistant);
-                        gameState.storyProgress = 3;
-                    }, 500);
-                }
-            });
-            
-            // Lab to study
-            document.getElementById('door-lab-study').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                showTeleportEffect();
-                setTimeout(() => {
-                    teleportToRoom('room-lab-study');
-                    gameState.player.x = 50;
-                    gameState.player.y = 70;
-                    updatePlayerPosition();
-                    
-                    // Show professor dialogue if first time
-                    if (gameState.storyProgress === 3) {
-                        setTimeout(() => {
-                            dialogueBox.style.display = 'block';
-                            startDialogue(dialogues.professorIntro);
-                            gameState.storyProgress = 4;
-                        }, 500);
-                    }
-                }, 300);
-            });
-            
-            // Study to lab
-            document.getElementById('door-study-lab').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                showTeleportEffect();
-                setTimeout(() => {
-                    teleportToRoom('room-lab-ground');
-                    gameState.player.x = 45;
-                    gameState.player.y = 85;
-                    updatePlayerPosition();
-                    
-                    // If player has chosen pokemon, show mom outside
-                    if (gameState.storyProgress === 5) {
-                        setTimeout(() => {
-                            dialogueBox.style.display = 'block';
-                            startDialogue(dialogues.momOutsideLab);
-                            gameState.storyProgress = 6;
-                        }, 500);
-                    }
-                }, 300);
-            });
-            
-            // Lab to town
-            document.getElementById('door-lab-exit').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                teleportToRoom('room-town');
-                gameState.player.x = 78;
-                gameState.player.y = 45;
-                updatePlayerPosition();
-            });
-            
-            // Town to house
-            document.getElementById('door-house-exit').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                teleportToRoom('room-house');
-                gameState.player.x = 45;
-                gameState.player.y = 85;
-                updatePlayerPosition();
-            });
-        }
-        
-        function setupNPCs() {
-            // Mom in house
-            document.getElementById('mom').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                dialogueBox.style.display = 'block';
-                startDialogue([
-                    { name: "MOM", text: "Don't forget to visit the Professor! He's waiting for you." },
-                    { name: "MOM", text: "And be sure to say hello to your friend at the lab!" }
-                ]);
-            });
-            
-            // Lab assistant
-            document.getElementById('assistant').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                dialogueBox.style.display = 'block';
-                startDialogue([
-                    { name: "LAB ASSISTANT", text: "The Professor's study is through that shimmering door." },
-                    { name: "LAB ASSISTANT", text: "It uses new teleport technology for instant room transitions!" }
-                ]);
-            });
-            
-            // Professor
-            document.getElementById('professor').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                if (gameState.storyProgress < 4) {
-                    dialogueBox.style.display = 'block';
-                    startDialogue(dialogues.professorIntro.slice(0, 3));
-                } else if (gameState.storyProgress === 4) {
-                    dialogueBox.style.display = 'block';
-                    startDialogue([
-                        { name: "PROFESSOR SEQUOIA", text: "Go ahead, choose your Pokémon partner from the three Poké Balls." }
-                    ]);
-                } else {
-                    dialogueBox.style.display = 'block';
-                    startDialogue([
-                        { name: "PROFESSOR SEQUOIA", text: "Good luck on your journey! Remember to visit my assistant on Route 1 for Poké Balls." }
-                    ]);
-                }
-            });
-            
-            // Rival
-            document.getElementById('rival').addEventListener('click', () => {
-                if (!gameState.canMove) return;
-                
-                dialogueBox.style.display = 'block';
-                if (gameState.storyProgress < 5) {
-                    startDialogue([
-                        { name: "RIVAL", text: "Hey! I've been waiting for you. The Professor said we get to choose first Pokémon!" },
-                        { name: "RIVAL", text: "I'm picking the one with type advantage over yours, like always!" }
-                    ]);
-                } else {
-                    startDialogue([
-                        { name: "RIVAL", text: "I'm heading to Route 1 first! Try to keep up!" }
-                    ]);
-                }
-            });
-            
-            // Poké Balls
-            document.getElementById('pokeball1').addEventListener('click', () => selectPokeball(0));
-            document.getElementById('pokeball2').addEventListener('click', () => selectPokeball(1));
-            document.getElementById('pokeball3').addEventListener('click', () => selectPokeball(2));
-        }
-        
-        function selectPokeball(ballIndex) {
-            if (!gameState.canMove || gameState.storyProgress !== 4) return;
-            
-            // Show selection screen
-            gameScreen.style.display = 'none';
-            selectionScreen.classList.add('active');
-            gameState.canMove = false;
-        }
-        
-        function confirmPokemonSelection() {
-            if (!gameState.selectedPokemon) return;
-            
-            // Hide selection screen
-            selectionScreen.classList.remove('active');
-            gameScreen.style.display = 'block';
-            
-            // Show rival choice dialogue
-            dialogueBox.style.display = 'block';
-            startDialogue(dialogues.rivalChoice);
-            
-            // After rival dialogue, show professor's final instructions
-            setTimeout(() => {
-                if (!gameState.isDialogueActive) {
-                    dialogueBox.style.display = 'block';
-                    startDialogue(dialogues.professorAfterChoice);
-                    gameState.storyProgress = 5;
-                }
-            }, 100);
-        }
-        
-        function checkInteraction() {
-            if (!gameState.canMove) return;
-            
-            // Check if player is near any interactive object
-            // For simplicity, we'll just check if dialogue isn't active
-            if (!gameState.isDialogueActive) {
-                // In a real game, you would check coordinates of nearby objects
-                // For this demo, we'll just show a generic message if nothing specific
-                if (gameState.storyProgress === 4) {
-                    dialogueBox.style.display = 'block';
-                    startDialogue([
-                        { name: "", text: "Three Poké Balls sit on the desk. One contains Treecko, one Charmander, and one Froakie." },
-                        { name: "", text: "Approach and tap a Poké Ball to choose your partner." }
-                    ]);
-                }
-            }
-        }
-        
-        function teleportToRoom(roomId) {
-            // Hide all rooms
-            Object.values(rooms).forEach(room => room.classList.remove('active'));
-            
-            // Show target room
-            rooms[roomId].classList.add('active');
-            gameState.currentRoom = roomId;
-        }
-        
-        function showTeleportEffect() {
-            teleportEffect.style.display = 'block';
-            setTimeout(() => {
-                teleportEffect.style.display = 'none';
-            }, 500);
-        }
-        
-        // Initialize the game
-        initGame();
-        
-        // Add click anywhere to advance dialogue
-        document.addEventListener('click', function(e) {
-            if (gameState.isDialogueActive && e.target !== startBtn) {
-                advanceDialogue();
-            }
-        });
-    </script>
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="joystick-zone"></div>
+    <div id="textbox"></div>
+    <div id="starter-ui">
+        <button class="choice-btn" onclick="choosePokemon('Treecko')">TREECKO (Grass)</button>
+        <button class="choice-btn" onclick="choosePokemon('Charmander')">CHARMANDER (Fire)</button>
+        <button class="choice-btn" onclick="choosePokemon('Froakie')">FROAKIE (Water)</button>
+    </div>
+</div>
+
+<div id="controls">
+    <div id="stick-hint" style="color:#666; font-size: 12px;">TOUCH LEFT TO MOVE</div>
+    <button class="action-circle" id="btn-a">A</button>
+</div>
+
+<script>
+/** * GAME CONFIG & STATE
+ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const textbox = document.getElementById('textbox');
+const starterUI = document.getElementById('starter-ui');
+
+canvas.width = 240; // GBA Width
+canvas.height = 160; // GBA Height
+
+let state = 'MOM_HOUSE'; 
+let player = { x: 110, y: 100, dir: 'down', frame: 0 };
+let shimmer = 0;
+let dialogQueue = [];
+
+// Narrative Script
+const script = {
+    intro: [
+        "Mom: Wake up! You're finally awake.",
+        "A letter arrived from Professor Sequoia. It's marked 'URGENT'!",
+        "Your rival already left for the Lab... better hurry!",
+        "Go through the door to Maple Root Town."
+    ],
+    lab1: [
+        "Lab Assistant: Ah, you must be the other recruit!",
+        "The Professor is waiting for you upstairs.",
+        "Just head through that door—it'll take you right to his study!"
+    ],
+    sequoia: [
+        "Sequoia: Welcome! Orebound is experiencing strange seismic tremors.",
+        "I need you to help me study these three Pokémon.",
+        "Go on... pick your partner."
+    ]
+};
+
+/**
+ * CORE LOGIC
+ */
+function update() {
+    if (shimmer > 0) shimmer--;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Draw World
+    if (state === 'MOM_HOUSE') drawRoom('#d2b48c', "HOME");
+    else if (state === 'TOWN') drawTown();
+    else if (state === 'LAB_1F') drawLab1();
+    else if (state === 'LAB_2F') drawLab2();
+
+    // 2. Draw Player
+    ctx.fillStyle = (shimmer > 0 && shimmer % 2 === 0) ? 'white' : '#3a86ff';
+    ctx.fillRect(player.x, player.y, 14, 16);
+
+    // 3. Shimmer Overlay
+    if (shimmer > 0) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${shimmer/10})`;
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+    }
+
+    requestAnimationFrame(draw);
+}
+
+function drawRoom(color, label) {
+    ctx.fillStyle = color;
+    ctx.fillRect(10, 10, 220, 140);
+    ctx.fillStyle = "#5d4037"; // Back Door
+    ctx.fillRect(110, 10, 20, 5);
+    ctx.fillStyle = "black";
+    ctx.fillText(label, 20, 30);
+}
+
+function drawTown() {
+    ctx.fillStyle = '#7cfc00'; // Grass
+    ctx.fillRect(0,0, 240, 160);
+    // Ancient Tree
+    ctx.fillStyle = '#4b3621';
+    ctx.fillRect(160, 20, 40, 60);
+    // Lab Building
+    ctx.fillStyle = '#95a5a6';
+    ctx.fillRect(20, 20, 80, 50);
+    ctx.fillStyle = '#2c3e50'; // Lab Door
+    ctx.fillRect(50, 60, 20, 10);
+}
+
+function drawLab1() {
+    ctx.fillStyle = '#ecf0f1';
+    ctx.fillRect(0,0, 240, 160);
+    // Water Tanks
+    ctx.fillStyle = '#3498db';
+    ctx.fillRect(150, 30, 60, 40);
+    // Teleport Door
+    ctx.fillStyle = '#e67e22';
+    ctx.fillRect(110, 5, 20, 10);
+}
+
+function drawLab2() {
+    ctx.fillStyle = '#f3e5ab';
+    ctx.fillRect(0,0, 240, 160);
+    // Study Desk
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(80, 40, 80, 30);
+    // Pokeballs
+    ctx.fillStyle = 'red';
+    ctx.beginPath(); ctx.arc(95, 55, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(120, 55, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(145, 55, 4, 0, Math.PI*2); ctx.fill();
+}
+
+/**
+ * INTERACTION & NAVIGATION
+ */
+function handleInput() {
+    // Collision / Teleport Check
+    if (state === 'MOM_HOUSE' && player.y < 15) {
+        teleport('TOWN', 60, 80);
+    } else if (state === 'TOWN' && player.y < 70 && player.x < 100) {
+        teleport('LAB_1F', 110, 130);
+    } else if (state === 'LAB_1F' && player.y < 20) {
+        teleport('LAB_2F', 110, 130);
+    }
+}
+
+function teleport(newState, x, y) {
+    shimmer = 20; // Trigger "Shimmer" pixel effect
+    setTimeout(() => {
+        state = newState;
+        player.x = x;
+        player.y = y;
+        if(state === 'TOWN') triggerDialogue(script.intro);
+        if(state === 'LAB_1F') triggerDialogue(script.lab1);
+        if(state === 'LAB_2F') triggerDialogue(script.sequoia);
+    }, 200);
+}
+
+function triggerDialogue(lines) {
+    dialogQueue = [...lines];
+    showNextLine();
+}
+
+function showNextLine() {
+    if (dialogQueue.length > 0) {
+        textbox.style.display = 'block';
+        textbox.innerText = dialogQueue.shift();
+    } else {
+        textbox.style.display = 'none';
+        if (state === 'LAB_2F') starterUI.style.display = 'flex';
+    }
+}
+
+function choosePokemon(name) {
+    starterUI.style.display = 'none';
+    triggerDialogue([
+        `You chose ${name}!`,
+        "Rival: Then I'll take the other one! I won't lose!",
+        "Sequoia: Here is your Pokedex. Orebound's future depends on you!"
+    ]);
+}
+
+// Controls
+document.getElementById('btn-a').addEventListener('click', () => {
+    if (textbox.style.display === 'block') showNextLine();
+    else if (state === 'MOM_HOUSE') triggerDialogue(script.intro);
+});
+
+// Joystick Simulation
+let isMoving = false;
+document.getElementById('joystick-zone').addEventListener('touchstart', (e) => {
+    isMoving = true;
+});
+document.getElementById('joystick-zone').addEventListener('touchmove', (e) => {
+    if(!isMoving) return;
+    let touch = e.touches[0];
+    if (touch.clientX < window.innerWidth / 2) {
+        player.x += (touch.clientX - 100) * 0.05; // Simple dynamic float
+        player.y += (touch.clientY - 300) * 0.05;
+        handleInput();
+    }
+});
+// Keyboard Fallback
+window.onkeydown = (e) => {
+    if (e.key === 'ArrowUp') player.y -= 5;
+    if (e.key === 'ArrowDown') player.y += 5;
+    if (e.key === 'ArrowLeft') player.x -= 5;
+    if (e.key === 'ArrowRight') player.x += 5;
+    if (e.key === 'z') document.getElementById('btn-a').click();
+    handleInput();
+};
+
+setInterval(update, 1000/30);
+draw();
+</script>
 </body>
 </html>
