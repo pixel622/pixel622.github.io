@@ -87,6 +87,7 @@
     height:28vw;
     max-width:140px;
     max-height:140px;
+    pointer-events:auto;
   }
   #joystickBase {
     position:absolute;
@@ -95,7 +96,6 @@
     background:rgba(255,255,255,0.15);
     border:4px solid rgba(255,255,255,0.8);
     border-radius:50%;
-    pointer-events:none;
   }
   #joystickHandle {
     position:absolute;
@@ -107,7 +107,6 @@
     top:50%;
     left:50%;
     transform:translate(-50%, -50%);
-    pointer-events:none;
     transition:transform 0.1s;
   }
   
@@ -118,6 +117,7 @@
     display:flex;
     flex-direction:column;
     gap:20%;
+    pointer-events:auto;
   }
   .ab div {
     width:22vw;
@@ -304,7 +304,7 @@
   </div>
 
   <!-- Pokémon Selection Screen -->
-  <div id="pokemonSelection">
+  <div id="pokemonSelection" class="hidden">
     <div style="font-size:1.2em; margin-bottom:30px; text-align:center;">
       Choose your first Pokémon partner!
     </div>
@@ -327,7 +327,7 @@
     </div>
   </div>
 
-  <div id="confirmScreen">
+  <div id="confirmScreen" class="hidden">
     <div id="confirmMsg">You chose CHARMANDER! Are you sure?</div>
     <button id="yes">YES</button>
     <button id="no">NO</button>
@@ -348,7 +348,7 @@
 
   <div id="menuIcon">M</div>
 
-  <div id="menuPanel">
+  <div id="menuPanel" class="hidden">
     <div class="menuRow">Pokémon</div>
     <div class="menuRow">Bag → Potion x1</div>
     <div class="menuRow" id="saveBtn">Save Game</div>
@@ -358,37 +358,37 @@
 </div>
 
 <script>
-// ────────────────────────────────────────────────
-const c = document.getElementById('canvas');
-const ctx = c.getContext('2d');
+// Game variables
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const TILE = 16;
 const W = 320, H = 240;
 
+// Game state
 let state = 'title';
-let name = 'NOVA';
+let playerName = 'NOVA';
 let starter = null;
-let px = 8, py = 7, pdir = 2;
-let fx = 8, fy = 8;
-let camx = 0, camy = 0;
-let map = 'bed';
+let playerX = 8, playerY = 7, playerDir = 2;
+let followerX = 8, followerY = 8;
+let camX = 0, camY = 0;
+let currentMap = 'bed';
 let dialog = [];
-let dtext = '';
-let dpos = 0;
-let potion = 1;
-let talkedMom = false;
+let dialogText = '';
+let dialogPos = 0;
+let potionCount = 1;
+let talkedToMom = false;
 
 // Joystick variables
 let joystickActive = false;
 let joystickX = 0;
 let joystickY = 0;
-const joystickContainer = document.getElementById('joystickContainer');
-const joystickHandle = document.getElementById('joystickHandle');
-const JOYSTICK_RADIUS = 70;
+const JOYSTICK_RADIUS = 50;
 
+// Maps data
 const maps = {
-  bed: [ 
+  bed: [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -405,7 +405,7 @@ const maps = {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  kit: [ 
+  kit: [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,1],
     [1,3,3,4,4,4,5,5,5,5,0,0,0,0,0,0,0,0,0,1],
@@ -422,7 +422,7 @@ const maps = {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
-  town: [ 
+  town: [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,1],
     [1,11,11,12,12,12,12,12,12,12,12,11,11,11,11,11,11,11,11,1],
@@ -441,8 +441,9 @@ const maps = {
   ]
 };
 
+// Tile colors
 const colors = {
-  0: '#00000000',
+  0: 'transparent',
   1: '#a87048',
   2: '#c08030',
   3: '#909090',
@@ -452,186 +453,215 @@ const colors = {
   7: '#ffdd99',
   8: '#ffcc88',
   9: '#ddccaa',
-  10:'#88ccff',
-  11:'#90d070',
-  12:'#d02020',
-  13:'#f0f0f0',
-  14:'#c0c0c0',
-  15:'#a02020'
+  10: '#88ccff',
+  11: '#90d070',
+  12: '#d02020',
+  13: '#f0f0f0',
+  14: '#c0c0c0',
+  15: '#a02020'
 };
 
-function drawTile(tx, ty, type) {
+// Drawing functions
+function drawTile(x, y, type) {
   if (type === 0) return;
-  const sx = tx * TILE + camx;
-  const sy = ty * TILE + camy;
+  const screenX = x * TILE + camX;
+  const screenY = y * TILE + camY;
   ctx.fillStyle = colors[type] || '#333';
-  ctx.fillRect(sx, sy, TILE, TILE);
+  ctx.fillRect(screenX, screenY, TILE, TILE);
 }
 
 function drawMap() {
-  const data = maps[map];
-  for (let y = 0; y < data.length; y++) {
-    for (let x = 0; x < data[y].length; x++) {
-      drawTile(x, y, data[y][x]);
+  const mapData = maps[currentMap];
+  for (let y = 0; y < mapData.length; y++) {
+    for (let x = 0; x < mapData[y].length; x++) {
+      drawTile(x, y, mapData[y][x]);
     }
   }
 }
 
-function drawChar(x, y, dir, frame = 0) {
-  const sx = x * TILE + camx;
-  const sy = y * TILE + camy;
-  // head
+function drawPlayer(x, y, dir, frame = 0) {
+  const screenX = x * TILE + camX;
+  const screenY = y * TILE + camY;
+  
+  // Head
   ctx.fillStyle = '#f8d8b0';
-  ctx.fillRect(sx+4, sy, 8, 8);
-  // body
+  ctx.fillRect(screenX + 4, screenY, 8, 8);
+  
+  // Body
   ctx.fillStyle = '#3060c0';
-  ctx.fillRect(sx+2, sy+8, 12, 12);
-  // legs anim
+  ctx.fillRect(screenX + 2, screenY + 8, 12, 12);
+  
+  // Legs animation
   ctx.fillStyle = '#a04020';
-  const off = frame ? 1 : -1;
-  ctx.fillRect(sx+4+off, sy+18, 4, 6);
-  ctx.fillRect(sx+8-off, sy+18, 4, 6);
+  const offset = frame ? 1 : -1;
+  ctx.fillRect(screenX + 4 + offset, screenY + 18, 4, 6);
+  ctx.fillRect(screenX + 8 - offset, screenY + 18, 4, 6);
 }
 
-function drawStarter(x, y) {
-  const sx = x * TILE + camx + 2;
-  const sy = y * TILE + camy + 2;
+function drawPokemon(x, y) {
   if (!starter) return;
   
-  // Draw Pokémon sprite
+  const screenX = x * TILE + camX + 2;
+  const screenY = y * TILE + camY + 2;
+  
   if (starter === 'charmander') {
     ctx.fillStyle = '#ff8800';
-    ctx.fillRect(sx, sy+4, 12, 10);
+    ctx.fillRect(screenX, screenY + 4, 12, 10);
     ctx.fillStyle = '#ff4400';
-    ctx.fillRect(sx+8, sy, 6, 6); // tail
+    ctx.fillRect(screenX + 8, screenY, 6, 6); // Tail
   } else if (starter === 'treecko') {
     ctx.fillStyle = '#00cc66';
-    ctx.fillRect(sx, sy+4, 12, 10);
+    ctx.fillRect(screenX, screenY + 4, 12, 10);
     ctx.fillStyle = '#009944';
-    ctx.fillRect(sx+2, sy+2, 8, 8);
+    ctx.fillRect(screenX + 2, screenY + 2, 8, 8);
   } else if (starter === 'froakie') {
     ctx.fillStyle = '#4488ff';
-    ctx.fillRect(sx, sy+4, 12, 10);
+    ctx.fillRect(screenX, screenY + 4, 12, 10);
     ctx.fillStyle = '#2266cc';
-    ctx.fillRect(sx+3, sy+3, 6, 6);
+    ctx.fillRect(screenX + 3, screenY + 3, 6, 6);
   }
-  
-  // Draw a small Pokéball indicator
-  const pbx = sx - 4;
-  const pby = sy - 4;
-  ctx.fillStyle = '#ff3333';
-  ctx.beginPath();
-  ctx.arc(pbx + 6, pby + 6, 4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.beginPath();
-  ctx.arc(pbx + 6, pby + 6, 2, 0, Math.PI * 2);
-  ctx.fill();
 }
 
-function updateCam() {
-  camx = Math.floor(W/2 - (px + 0.5) * TILE);
-  camy = Math.floor(H/2 - (py + 0.5) * TILE);
-  camx = Math.max(-(maps[map][0].length * TILE - W), Math.min(0, camx));
-  camy = Math.max(-(maps[map].length * TILE - H), Math.min(0, camy));
+function updateCamera() {
+  camX = Math.floor(W / 2 - (playerX + 0.5) * TILE);
+  camY = Math.floor(H / 2 - (playerY + 0.5) * TILE);
+  
+  const mapWidth = maps[currentMap][0].length * TILE;
+  const mapHeight = maps[currentMap].length * TILE;
+  
+  camX = Math.max(-(mapWidth - W), Math.min(0, camX));
+  camY = Math.max(-(mapHeight - H), Math.min(0, camY));
 }
 
 function render() {
+  // Clear canvas
   ctx.fillStyle = '#081820';
-  ctx.fillRect(0,0,W,H);
-
+  ctx.fillRect(0, 0, W, H);
+  
   if (state === 'title') {
+    // Title screen
     ctx.fillStyle = '#4060ff';
-    for (let i=0;i<80;i++) {
-      const x = (performance.now()/30 + i*13) % W;
-      const y = (i*17) % H;
-      ctx.fillRect(x,y,2,2);
+    for (let i = 0; i < 80; i++) {
+      const x = (performance.now() / 30 + i * 13) % W;
+      const y = (i * 17) % H;
+      ctx.fillRect(x, y, 2, 2);
     }
     ctx.fillStyle = '#ffeb3b';
     ctx.font = 'bold 28px "Press Start 2P"';
     ctx.textAlign = 'center';
-    ctx.fillText('POKÉMON', W/2, H*0.4);
+    ctx.fillText('POKÉMON', W / 2, H * 0.4);
     ctx.fillStyle = '#ff4444';
     ctx.font = 'bold 20px "Press Start 2P"';
-    ctx.fillText('NOVA GENESIS', W/2, H*0.55);
+    ctx.fillText('NOVA GENESIS', W / 2, H * 0.55);
     ctx.fillStyle = '#fff';
     ctx.font = '14px "Press Start 2P"';
-    ctx.fillText('Tap screen to start', W/2, H*0.8);
+    ctx.fillText('Tap screen to start', W / 2, H * 0.8);
   } else {
+    // Game screen
     drawMap();
-    drawChar(px, py, pdir, (performance.now()/200|0)%2);
+    drawPlayer(playerX, playerY, playerDir, Math.floor(performance.now() / 200) % 2);
+    
     if (starter) {
-      drawStarter(fx, fy);
+      drawPokemon(followerX, followerY);
     }
-    if (map === 'kit' && !talkedMom) drawChar(9,5,2); // mom
+    
+    // Draw mom in kitchen
+    if (currentMap === 'kit' && !talkedToMom) {
+      const momX = 9, momY = 5;
+      const screenX = momX * TILE + camX;
+      const screenY = momY * TILE + camY;
+      ctx.fillStyle = '#ff88cc';
+      ctx.fillRect(screenX + 4, screenY, 8, 8);
+      ctx.fillRect(screenX + 2, screenY + 8, 12, 12);
+    }
   }
-
-  // dialog
-  if (dtext) {
-    document.getElementById('text').textContent = dtext.slice(0, dpos);
+  
+  // Update dialogue display
+  if (dialogText) {
+    document.getElementById('text').textContent = dialogText.slice(0, dialogPos);
     document.getElementById('dialogue').classList.remove('hidden');
   } else {
     document.getElementById('dialogue').classList.add('hidden');
   }
 }
 
+// Dialogue system
 function queueDialog(lines) {
-  dialog = dialog.concat(lines.map(l=>l.replace('{name}',name)));
-  if (!dtext) nextLine();
+  dialog = dialog.concat(lines.map(line => line.replace('{name}', playerName)));
+  if (!dialogText) {
+    nextLine();
+  }
 }
 
 function nextLine() {
-  if (!dialog.length) {
-    dtext = '';
-    dpos = 0;
-    if (state === 'prof') document.getElementById('nameScreen').style.display = 'flex';
+  if (dialog.length === 0) {
+    dialogText = '';
+    dialogPos = 0;
+    
+    if (state === 'prof') {
+      document.getElementById('nameScreen').style.display = 'flex';
+    } else if (state === 'choose') {
+      document.getElementById('pokemonSelection').classList.remove('hidden');
+    }
     return;
   }
-  dtext = dialog.shift();
-  dpos = 0;
+  
+  dialogText = dialog.shift();
+  dialogPos = 0;
 }
 
-function advance() {
-  if (dpos < dtext.length) {
-    dpos = dtext.length;
+function advanceDialog() {
+  if (dialogPos < dialogText.length) {
+    dialogPos = dialogText.length;
   } else {
     nextLine();
   }
 }
 
+// Pokémon selection
 function showPokemonSelection() {
-  document.getElementById('pokemonSelection').style.display = 'flex';
+  document.getElementById('pokemonSelection').classList.remove('hidden');
 }
 
-function showConfirm(poke) {
-  starter = poke;
-  document.getElementById('confirmMsg').textContent = `You chose ${poke.toUpperCase()}! Are you sure?`;
-  document.getElementById('confirmScreen').style.display = 'flex';
+function showConfirm(pokemon) {
+  starter = pokemon;
+  document.getElementById('confirmMsg').textContent = `You chose ${pokemon.toUpperCase()}! Are you sure?`;
+  document.getElementById('confirmScreen').classList.remove('hidden');
 }
 
-document.getElementById('yes').onclick = () => {
-  document.getElementById('confirmScreen').style.display = 'none';
-  document.getElementById('pokemonSelection').style.display = 'none';
+// Event listeners for Pokémon selection
+document.querySelectorAll('.pokeballOption').forEach(option => {
+  option.addEventListener('click', (e) => {
+    const pokemon = option.dataset.pokemon;
+    showConfirm(pokemon);
+  });
+});
+
+document.getElementById('yes').addEventListener('click', () => {
+  document.getElementById('confirmScreen').classList.add('hidden');
+  document.getElementById('pokemonSelection').classList.add('hidden');
+  
   queueDialog([
     'An excellent choice! This Pokémon is full of potential!',
     `Alright, ${starter.toUpperCase()}! Let's go meet Mom downstairs, then start our journey!`
   ]);
+  
   state = 'play';
-  map = 'bed';
+  currentMap = 'bed';
   document.getElementById('controls').style.display = 'block';
   
   // Position follower behind player
-  fx = px - 1;
-  fy = py;
-};
+  followerX = playerX - 1;
+  followerY = playerY;
+});
 
-document.getElementById('no').onclick = () => {
-  document.getElementById('confirmScreen').style.display = 'none';
+document.getElementById('no').addEventListener('click', () => {
+  document.getElementById('confirmScreen').classList.add('hidden');
   showPokemonSelection();
-};
+});
 
-// touch/click start
-c.onclick = () => {
+// Start game on click
+canvas.addEventListener('click', () => {
   if (state === 'title') {
     state = 'prof';
     queueDialog([
@@ -641,81 +671,72 @@ c.onclick = () => {
       "And you are...?"
     ]);
   }
-};
-
-// Setup Pokémon selection
-document.querySelectorAll('.pokeballOption').forEach(option => {
-  option.onclick = (e) => {
-    e.preventDefault();
-    const pokemon = option.dataset.pokemon;
-    showConfirm(pokemon);
-  };
 });
 
-// keyboard
-function buildKb() {
+// Keyboard for name entry
+function buildKeyboard() {
   const row1 = 'QWERTYUIOP'.split('');
   const row2 = 'ASDFGHJKL'.split('');
   const row3 = 'ZXCVBNM'.split('');
   const keys = [...row1, ...row2, ...row3, 'DEL', 'OK'];
-  const kb = document.getElementById('kb');
-  kb.innerHTML = '';
-  keys.forEach(k => {
-    const b = document.createElement('div');
-    b.className = 'kbKey' + (k.length>1?' wide':'');
-    b.textContent = k;
-    b.onclick = () => {
-      if (k==='OK') {
-        if (name) {
+  const keyboard = document.getElementById('kb');
+  keyboard.innerHTML = '';
+  
+  keys.forEach(key => {
+    const button = document.createElement('div');
+    button.className = 'kbKey' + (key.length > 1 ? ' wide' : '');
+    button.textContent = key;
+    
+    button.addEventListener('click', () => {
+      if (key === 'OK') {
+        if (playerName) {
           document.getElementById('nameScreen').style.display = 'none';
           queueDialog([
-            `Perfect, ${name}! Now, for your first partner.`,
-            'Which of these three resonates with you?',
-            '(Select a Pokéball below)'
+            `Perfect, ${playerName}! Now, for your first partner.`,
+            'Which of these three resonates with you?'
           ]);
-          setTimeout(showPokemonSelection, 1000);
+          state = 'choose';
         }
-      } else if (k==='DEL') {
-        name = name.slice(0,-1);
+      } else if (key === 'DEL') {
+        playerName = playerName.slice(0, -1);
       } else {
-        name += k;
-        if (name.length>10) name = name.slice(0,10);
+        playerName += key;
+        if (playerName.length > 10) {
+          playerName = playerName.slice(0, 10);
+        }
       }
-      document.getElementById('nameText').textContent = name || 'NOVA';
-    };
-    kb.appendChild(b);
+      document.getElementById('nameText').textContent = playerName || 'NOVA';
+    });
+    
+    keyboard.appendChild(button);
   });
 }
-buildKb();
+buildKeyboard();
 
-// Joystick Implementation
-function handleJoystickStart(e) {
+// Joystick implementation
+const joystickContainer = document.getElementById('joystickContainer');
+const joystickHandle = document.getElementById('joystickHandle');
+
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+let handleX = 0;
+let handleY = 0;
+
+function startDrag(e) {
   e.preventDefault();
-  joystickActive = true;
+  isDragging = true;
+  const rect = joystickContainer.getBoundingClientRect();
+  startX = rect.left + rect.width / 2;
+  startY = rect.top + rect.height / 2;
   updateJoystick(e);
-}
-
-function handleJoystickMove(e) {
-  if (!joystickActive) return;
-  e.preventDefault();
-  updateJoystick(e);
-}
-
-function handleJoystickEnd(e) {
-  joystickActive = false;
-  joystickX = 0;
-  joystickY = 0;
-  joystickHandle.style.transform = 'translate(-50%, -50%)';
 }
 
 function updateJoystick(e) {
-  const rect = joystickContainer.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
+  if (!isDragging) return;
   
   let clientX, clientY;
-  
-  if (e.type.includes('touch')) {
+  if (e.touches) {
     clientX = e.touches[0].clientX;
     clientY = e.touches[0].clientY;
   } else {
@@ -723,8 +744,8 @@ function updateJoystick(e) {
     clientY = e.clientY;
   }
   
-  let dx = clientX - centerX;
-  let dy = clientY - centerY;
+  let dx = clientX - startX;
+  let dy = clientY - startY;
   const distance = Math.sqrt(dx * dx + dy * dy);
   
   if (distance > JOYSTICK_RADIUS) {
@@ -732,34 +753,37 @@ function updateJoystick(e) {
     dy = (dy / distance) * JOYSTICK_RADIUS;
   }
   
+  handleX = dx;
+  handleY = dy;
+  joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
+  
+  // Calculate joystick direction
   joystickX = dx / JOYSTICK_RADIUS;
   joystickY = dy / JOYSTICK_RADIUS;
-  
-  joystickHandle.style.transform = `translate(${dx}px, ${dy}px)`;
 }
 
-// Joystick event listeners
-joystickContainer.addEventListener('touchstart', handleJoystickStart, {passive: false});
-joystickContainer.addEventListener('touchmove', handleJoystickMove, {passive: false});
-joystickContainer.addEventListener('touchend', handleJoystickEnd);
-joystickContainer.addEventListener('touchcancel', handleJoystickEnd);
+function stopDrag() {
+  isDragging = false;
+  handleX = 0;
+  handleY = 0;
+  joystickX = 0;
+  joystickY = 0;
+  joystickHandle.style.transform = 'translate(-50%, -50%)';
+}
 
-// Mouse support for testing on desktop
+// Touch events for joystick
+joystickContainer.addEventListener('touchstart', startDrag);
+joystickContainer.addEventListener('touchmove', updateJoystick);
+joystickContainer.addEventListener('touchend', stopDrag);
+joystickContainer.addEventListener('touchcancel', stopDrag);
+
+// Mouse events for joystick (for desktop testing)
 joystickContainer.addEventListener('mousedown', (e) => {
-  e.preventDefault();
-  joystickActive = true;
-  updateJoystick(e);
+  startDrag(e);
   
-  const mouseMove = (e) => {
-    if (!joystickActive) return;
-    updateJoystick(e);
-  };
-  
+  const mouseMove = (e) => updateJoystick(e);
   const mouseUp = () => {
-    joystickActive = false;
-    joystickX = 0;
-    joystickY = 0;
-    joystickHandle.style.transform = 'translate(-50%, -50%)';
+    stopDrag();
     document.removeEventListener('mousemove', mouseMove);
     document.removeEventListener('mouseup', mouseUp);
   };
@@ -768,93 +792,121 @@ joystickContainer.addEventListener('mousedown', (e) => {
   document.addEventListener('mouseup', mouseUp);
 });
 
-// controls
-document.getElementById('a').ontouchstart = e=>{e.preventDefault(); if(state==='play') advance();};
-document.getElementById('advance').onclick = advance;
-document.getElementById('menuIcon').onclick = ()=>{
-  const p = document.getElementById('menuPanel');
-  p.style.display = p.style.display==='flex'?'none':'flex';
-};
-document.getElementById('closeMenu').onclick = ()=>document.getElementById('menuPanel').style.display='none';
-document.getElementById('saveBtn').onclick = ()=>{
-  localStorage.setItem('nova',JSON.stringify({name,starter,px,py,map,potion,talkedMom}));
-  queueDialog(['Game saved!']);
-};
-
-// game loop
-let lastTime = 0;
-const MOVE_COOLDOWN = 150; // ms between moves
-
-function loop(timestamp) {
-  if (state==='play') {
-    if (timestamp - lastTime > MOVE_COOLDOWN) {
-      let moved = false;
-      
-      // Joystick movement
-      if (joystickActive && (Math.abs(joystickX) > 0.3 || Math.abs(joystickY) > 0.3)) {
-        if (Math.abs(joystickX) > Math.abs(joystickY)) {
-          if (joystickX > 0) { pdir = 3; moved = tryMove(1, 0); }
-          else { pdir = 1; moved = tryMove(-1, 0); }
-        } else {
-          if (joystickY > 0) { pdir = 2; moved = tryMove(0, 1); }
-          else { pdir = 0; moved = tryMove(0, -1); }
-        }
-      }
-      
-      if (moved) {
-        lastTime = timestamp;
-        // Update follower position to follow player
-        updateFollower();
-      }
-    }
-    updateCam();
+// Button controls
+document.getElementById('a').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (state === 'play') {
+    advanceDialog();
   }
+});
 
-  if (dtext) dpos = Math.min(dpos+2, dtext.length);
+document.getElementById('advance').addEventListener('click', advanceDialog);
 
-  render();
-  requestAnimationFrame(loop);
+// Menu controls
+document.getElementById('menuIcon').addEventListener('click', () => {
+  const menu = document.getElementById('menuPanel');
+  menu.classList.toggle('hidden');
+});
+
+document.getElementById('closeMenu').addEventListener('click', () => {
+  document.getElementById('menuPanel').classList.add('hidden');
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const saveData = {
+    name: playerName,
+    starter: starter,
+    px: playerX,
+    py: playerY,
+    map: currentMap,
+    potion: potionCount,
+    talkedMom: talkedToMom
+  };
+  localStorage.setItem('nova', JSON.stringify(saveData));
+  queueDialog(['Game saved!']);
+});
+
+// Movement system
+let lastMoveTime = 0;
+const MOVE_DELAY = 150; // ms between moves
+
+function updateMovement() {
+  const now = Date.now();
+  if (now - lastMoveTime < MOVE_DELAY) return;
+  
+  let moved = false;
+  let moveX = 0;
+  let moveY = 0;
+  
+  // Check joystick input
+  if (Math.abs(joystickX) > 0.3 || Math.abs(joystickY) > 0.3) {
+    if (Math.abs(joystickX) > Math.abs(joystickY)) {
+      moveX = joystickX > 0 ? 1 : -1;
+      playerDir = joystickX > 0 ? 3 : 1;
+    } else {
+      moveY = joystickY > 0 ? 1 : -1;
+      playerDir = joystickY > 0 ? 2 : 0;
+    }
+  }
+  
+  if (moveX !== 0 || moveY !== 0) {
+    if (tryMove(playerX + moveX, playerY + moveY)) {
+      playerX += moveX;
+      playerY += moveY;
+      moved = true;
+      lastMoveTime = now;
+    }
+  }
+  
+  // Update follower position
+  if (moved && starter) {
+    updateFollower();
+  }
+}
+
+function tryMove(newX, newY) {
+  const mapData = maps[currentMap];
+  if (newY < 0 || newY >= mapData.length || newX < 0 || newX >= mapData[0].length) {
+    return false;
+  }
+  return mapData[newY][newX] !== 1;
 }
 
 function updateFollower() {
-  // Simple follow algorithm - follower goes to player's previous position
-  // In a more complex system, you'd implement pathfinding
-  if (starter) {
-    // Move follower toward player
-    const dx = px - fx;
-    const dy = py - fy;
-    
-    // Only move if not too close
-    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-      // Try to move diagonally toward player
-      if (dx !== 0 && dy !== 0) {
-        // Try moving in x direction
-        if (Math.abs(dx) > Math.abs(dy)) {
-          fx += Math.sign(dx);
-        } else {
-          fy += Math.sign(dy);
-        }
-      } else if (dx !== 0) {
-        fx += Math.sign(dx);
-      } else if (dy !== 0) {
-        fy += Math.sign(dy);
-      }
+  if (!starter) return;
+  
+  // Simple follow: follower goes to player's previous position
+  // In a real game, you'd implement pathfinding
+  const dx = playerX - followerX;
+  const dy = playerY - followerY;
+  
+  if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+    if (Math.abs(dx) > Math.abs(dy)) {
+      followerX += Math.sign(dx);
+    } else {
+      followerY += Math.sign(dy);
     }
   }
 }
 
-function tryMove(dx,dy) {
-  const nx = px + dx, ny = py + dy;
-  const m = maps[map];
-  if (nx<0 || ny<0 || ny>=m.length || nx>=m[0].length) return false;
-  if (m[ny][nx] !== 1) {
-    px = nx; py = ny;
-    return true;
+// Main game loop
+function gameLoop() {
+  if (state === 'play') {
+    updateMovement();
+    updateCamera();
   }
-  return false;
+  
+  // Update dialog typing effect
+  if (dialogText && dialogPos < dialogText.length) {
+    dialogPos = Math.min(dialogPos + 2, dialogText.length);
+  }
+  
+  render();
+  requestAnimationFrame(gameLoop);
 }
 
-loop(0);
+// Start the game loop
+gameLoop();
 </script>
 </body>
 </html>
