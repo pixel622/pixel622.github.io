@@ -100,15 +100,6 @@
             display: flex; align-items: center; margin-bottom: 10px;
             font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;
         }
-
-        /* BATTLE UI */
-        #battle-screen {
-            display: none;
-            position: absolute; inset: 0;
-            background: #fff; z-index: 500;
-            flex-direction: column; justify-content: space-around; align-items: center;
-            font-family: var(--font-main);
-        }
     </style>
 </head>
 <body>
@@ -121,16 +112,8 @@
     
     <div id="bag-menu">
         <h3 style="margin-top:0; color:var(--gba-blue)">ITEMS</h3>
-        <div id="bag-count" class="bag-item">🔴 Poké Ball x5</div>
+        <div class="bag-item">🔴 Poké Ball x5</div>
         <button onclick="toggleBag()" style="width:100%; margin-top:10px; cursor:pointer;">CLOSE</button>
-    </div>
-
-    <div id="battle-screen">
-        <h2 id="battle-msg">A Wild Pokémon appeared!</h2>
-        <div style="width: 80%; background: #eee; height: 20px; border: 2px solid #000;">
-            <div id="hp-bar" style="width: 100%; height: 100%; background: green; transition: 0.3s;"></div>
-        </div>
-        <button onclick="attack()" style="padding: 20px; font-size: 20px; background: #e06060; color: white; border: none; border-radius: 10px;">ATTACK!</button>
     </div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
@@ -151,7 +134,6 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
     const bagMenu = document.getElementById('bag-menu');
-    const battleScreen = document.getElementById('battle-screen');
 
     const script = [
         "Welcome to the Habitat Research Lab!",
@@ -163,8 +145,7 @@
     let currentMap = 'LAB';
     let choosingState = false;
     let bagOpen = false;
-    let holdingPokeball = false;
-    let bagBalls = 5;
+    let holdingPokeball = false; // NEW: Track if player is holding ball
 
     let width, height;
     function resize() {
@@ -176,35 +157,22 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const player = { x: width/2, y: height/2 + 50, speed: 5, history: [] };
+    const player = {
+        x: width/2, y: height/2 + 50,
+        speed: 5, history: []
+    };
+
     const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
+
     const pokeballs = [
         { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
         { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    // --- NEW SPAWN SYSTEM ---
-    let wildPokemons = [];
-    function spawnWild() {
-        wildPokemons = [];
-        for(let i=0; i<25; i++) {
-            wildPokemons.push({
-                x: Math.random() * (width - 40) + 20,
-                y: Math.random() * (height - 40) + 20,
-                color: `hsl(${Math.random() * 360}, 70%, 50%)`,
-                hp: 100,
-                active: true
-            });
-        }
-    }
-    spawnWild();
-
-    let inBattle = false;
-    let activeEnemy = null;
+    let stickX = 0, stickY = 0, isTouching = false;
 
     function toggleBag() {
-        if(inBattle) return;
         bagOpen = !bagOpen;
         bagMenu.style.display = bagOpen ? 'block' : 'none';
     }
@@ -235,14 +203,13 @@
                 follower.x = ball.realX;
                 follower.y = ball.realY;
                 ball.active = false;
-                holdingPokeball = true;
+                holdingPokeball = true; // NEW: Player now holds the ball
                 uiLayer.style.display = 'block';
-                dialogueBox.innerText = "Professor Sequoia: Step on the blue mat to explore! Catch wild Pokémon by touching them!";
+                dialogueBox.innerText = "Professor Sequoia: Your amazing adventure is about to start! Step on the blue mat and explore!";
             }
         });
     }
 
-    let stickX = 0, stickY = 0, isTouching = false;
     wrapper.addEventListener('touchstart', () => isTouching = true);
     window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
@@ -258,55 +225,26 @@
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
+    // NEW: Collision Checking Function
     function checkCollision(nx, ny) {
         if (currentMap === 'LAB') {
+            // Lab Table
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
+            // Bookshelves
             if (ny < 130) return true;
         } else {
+            // House
             const hX = width/2 - 110, hY = height/2 - 150;
             if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
+                // Allow entering through the door area
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
+            // Fence
             if (ny > height/2 + 100 && ny < height/2 + 130) return true;
         }
         return false;
-    }
-
-    // --- BATTLE MECHANICS ---
-    function startBattle(enemy) {
-        inBattle = true;
-        activeEnemy = enemy;
-        activeEnemy.hp = 100;
-        document.getElementById('hp-bar').style.width = '100%';
-        document.getElementById('hp-bar').style.background = 'green';
-        document.getElementById('battle-msg').innerText = "A Wild Pokémon appeared!";
-        battleScreen.style.display = 'flex';
-    }
-
-    function attack() {
-        activeEnemy.hp -= 34;
-        const hpBar = document.getElementById('hp-bar');
-        hpBar.style.width = activeEnemy.hp + '%';
-        if(activeEnemy.hp < 50) hpBar.style.background = 'orange';
-        
-        if (activeEnemy.hp <= 0) {
-            hpBar.style.width = '0%';
-            if(bagBalls > 0) {
-                bagBalls--;
-                document.getElementById('bag-count').innerText = `🔴 Poké Ball x${bagBalls}`;
-                document.getElementById('battle-msg').innerText = "Pokémon Fainted! You caught it!";
-                setTimeout(() => {
-                    activeEnemy.active = false;
-                    inBattle = false;
-                    battleScreen.style.display = 'none';
-                }, 1500);
-            } else {
-                document.getElementById('battle-msg').innerText = "Out of balls! It escaped!";
-                setTimeout(() => { inBattle = false; battleScreen.style.display = 'none'; }, 1500);
-            }
-        }
     }
 
     let isTeleporting = false;
@@ -315,23 +253,24 @@
         isTeleporting = true;
         const shim = document.getElementById('shimmer');
         shim.style.opacity = '1';
+        
         setTimeout(() => {
             currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
             player.x = width/2;
             player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
             player.history = [];
-            spawnWild(); // Respawn when changing maps
             shim.style.opacity = '0';
             setTimeout(() => { isTeleporting = false; }, 500);
         }, 400);
     }
 
     function update() {
-        if (bagOpen || inBattle) return;
+        if (bagOpen) return;
 
         if (isTouching) {
             let nextX = player.x + stickX * player.speed;
             let nextY = player.y + stickY * player.speed;
+
             if (!checkCollision(nextX, nextY)) {
                 player.history.push({x: player.x, y: player.y});
                 if (player.history.length > 60) player.history.shift();
@@ -340,18 +279,11 @@
             }
         }
 
-        // Check Wild Encounter
-        if(currentMap === 'OUTSIDE') {
-            wildPokemons.forEach(p => {
-                if(p.active && Math.abs(player.x - p.x) < 30 && Math.abs(player.y - p.y) < 30) {
-                    startBattle(p);
-                }
-            });
-        }
-
         const matX = width / 2;
         const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
-        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) {
+            teleport();
+        }
 
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
@@ -368,41 +300,69 @@
         if (currentMap === 'LAB') {
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
             ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
+
             ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
+            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
                 ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
-            // Draw Wild Pokemon
-            wildPokemons.forEach(p => {
-                if(!p.active) return;
-                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.fillRect(p.x-4, p.y-4, 2, 2); ctx.fillRect(p.x+2, p.y-4, 2, 2);
+            ctx.fillStyle = '#567d56';
+            for(let row=0; row<3; row++) {
+                for(let col=0; col<5; col++) {
+                    ctx.fillRect(50 + col*40, height - 200 + row*40, 35, 35);
+                    ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35);
+                }
+            }
+            ctx.fillStyle = '#4d88ff';
+            ctx.beginPath(); ctx.ellipse(width - 120, height/2, 80, 50, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#2d4d2d';
+            const treePositions = [[40, 40], [100, 60], [40, 120], [width-60, height-60], [width-120, height-100]];
+            treePositions.forEach(pos => {
+                ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill();
             });
-            // Draw House/Trees
+            ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
+            for(let x=0; x<width; x+=40) { ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); }
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
+            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 25);
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40);
         }
 
         if (follower.active) {
             ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
+        // PLAYER DRAWING
+        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+
+        // NEW: Draw Pokeball in hand
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
+            ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
         }
 
         update();
