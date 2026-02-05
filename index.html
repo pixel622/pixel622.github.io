@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Sequoia's Lab</title>
+    <title>Pokémon Amber: Final Lab & World</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -31,12 +31,10 @@
             image-rendering: pixelated;
         }
 
-        /* UI LAYER */
         #ui-layer {
             position: absolute; bottom: 20px; left: 50%;
             transform: translateX(-50%); width: 90%;
             z-index: 100; cursor: pointer;
-            display: block;
         }
 
         #dialogue-box {
@@ -105,7 +103,6 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
 
-    // Dialogue Script
     const script = [
         "Welcome to the Habitat Research Lab!",
         "Look around! This facility is dedicated to studying Orebound's ecology.",
@@ -127,7 +124,7 @@
     resize();
 
     const player = {
-        x: width/2, y: height - 150,
+        x: width/2, y: height/2 + 50,
         speed: 5, history: []
     };
 
@@ -146,7 +143,6 @@
             scriptIndex++;
             dialogueBox.innerText = script[scriptIndex];
         } else {
-            // Dialogue ends - hide UI to show the door
             uiLayer.style.display = 'none';
             choosingState = true;
         }
@@ -168,15 +164,12 @@
                 follower.x = ball.realX;
                 follower.y = ball.realY;
                 ball.active = false;
-                
-                // Show the specific adventure quote
                 uiLayer.style.display = 'block';
                 dialogueBox.innerText = "Professor Sequoia: Your amazing adventure is about to start! Go to the door and explore!";
             }
         });
     }
 
-    // Joystick logic
     wrapper.addEventListener('touchstart', () => isTouching = true);
     window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
@@ -198,7 +191,7 @@
         setTimeout(() => {
             currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
             player.x = width/2;
-            player.y = (currentMap === 'OUTSIDE') ? height/2 + 50 : height - 120;
+            player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
             player.history = [];
             shim.style.opacity = '0';
         }, 400);
@@ -212,12 +205,11 @@
             player.y += stickY * player.speed;
         }
 
-        // DOOR SENSOR (The Blue Mat)
+        // TELEPORT SENSOR (The Blue Mat)
         const doorX = width/2;
-        const doorY = (currentMap === 'LAB') ? height - 30 : height/2;
+        const doorY = (currentMap === 'LAB') ? height - 30 : height/2 + 15;
         if (Math.abs(player.x - doorX) < 50 && Math.abs(player.y - doorY) < 20) {
             teleport();
-            player.y += (currentMap === 'LAB') ? -80 : 80; 
         }
 
         if (follower.active && player.history.length > 12) {
@@ -233,26 +225,22 @@
         ctx.clearRect(0, 0, width, height);
 
         if (currentMap === 'LAB') {
-            // Lab Floor
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            
+            // Decorations
+            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
+            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
 
-            // DECORATIONS RESTORED
-            ctx.fillStyle = '#5d3a1a'; // Bookshelves
-            for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; // Plant Pots
-            ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; // Leaves
-            ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60); // Computer Desk
-
-            // Center Desk
+            // Lab Desk
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
 
-            // THE DOOR (Blue Exit Mat)
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 20, 100, 20);
+            // BLUE MAT (INSIDE)
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 30, 100, 30);
+            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 50, height - 30, 100, 30);
 
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
@@ -263,21 +251,23 @@
                 ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // OUTSIDE MAP RESTORED
+            // OUTSIDE MAP
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150); // House
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill(); // Roof
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40); // Door Entry
+            
+            // BLUE MAT (OUTSIDE - ENTRANCE)
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 20);
+            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 20);
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40); // Dark Door
         }
 
-        // Follower
+        // Follower & Character
         if (follower.active) {
             ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
-
-        // Character
         ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
