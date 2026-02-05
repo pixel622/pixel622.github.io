@@ -67,14 +67,15 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
+        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
-            position: absolute; bottom: 40px; left: 40px;
-            width: 140px; height: 140px;
+            position: absolute; bottom: 80px; left: 40px;
+            width: 130px; height: 130px;
             background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center; z-index: 200;
         }
 
-        #joystick-knob { width: 60px; height: 60px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -82,12 +83,14 @@
             transition: opacity 0.3s; z-index: 999;
         }
 
+        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
-            position: absolute; top: 20px; right: 20px;
+            position: absolute; bottom: 80px; right: 40px;
             background: var(--gba-blue); color: white;
-            padding: 10px 25px; border-radius: 8px;
+            padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
+            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
         }
     </style>
 </head>
@@ -101,7 +104,7 @@
 
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="toggleBag()">BAG</div>
+    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
@@ -196,9 +199,9 @@
         const touch = e.touches[0];
         let dx = touch.clientX - (rect.left + rect.width/2);
         let dy = touch.clientY - (rect.top + rect.height/2);
-        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 45);
+        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
         const angle = Math.atan2(dy, dx);
-        stickX = Math.cos(angle) * (dist/45); stickY = Math.sin(angle) * (dist/45);
+        stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
@@ -213,7 +216,7 @@
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            if (ny > height/2 + 100 && ny < height/2 + 130) {
+            if (ny > height/2 + 120 && ny < height/2 + 130) {
                 if (Math.abs(nx - width/2) > 40) return true;
             }
         }
@@ -266,7 +269,6 @@
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
             ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
-            
             ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
             ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
             ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
@@ -282,34 +284,50 @@
                 ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
             
-            // YELLOW ROCKY TERRAIN (Zero grass dots)
-            ctx.fillStyle = '#f0e68c'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#bdb76b'; 
-            for(let i=0; i<width; i+=140) { ctx.fillRect(i + 40, height/2 + 160, 30, 15); ctx.fillRect(i + 90, height/2 + 190, 20, 10); }
+            // GRASS DESIGN
+            ctx.fillStyle = '#567d56'; 
+            for(let row=0; row<8; row++) {
+                for(let col=0; col<12; col++) {
+                    let gx = width - 450 + col*40, gy = 50 + row*40;
+                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
+                }
+            }
 
-            // BIGGER WATER - MOVED MORE LEFT
-            ctx.fillStyle = '#4d88ff'; ctx.beginPath(); ctx.ellipse(width/2 - 350, height/2 - 50, 140, 90, 0, 0, Math.PI*2); ctx.fill();
+            // YELLOW ROCKY TERRAIN
+            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
 
-            // GRASS (Only in upper green area)
-            ctx.fillStyle = '#567d56';
-            for(let row=0; row<2; row++) { for(let col=0; col<5; col++) { ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35); } }
+            // POND (Left)
+            const wX = width/2 - 350, wY = height/2 - 50;
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
 
-            ctx.fillStyle = '#2d4d2d'; 
-            [[40, 40], [width-60, height-60], [width-120, 40]].forEach(pos => { ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill(); });
+            // TREE PERIMETER (Only outer edge, skipping fence area)
+            ctx.fillStyle = '#1a331a';
+            const fenceY = height/2 + 120;
+            for(let x = 40; x < width; x += 80) {
+                // Top edge
+                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
+                // Left & Right edges down to fence
+                if (x < 100 || x > width - 100) {
+                    for(let y = 120; y < fenceY - 40; y += 80) {
+                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            }
             
-            ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 40, height/2 + 120); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width/2 + 40, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
-            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); } }
+            // FENCE
+            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
+            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
 
+            // HOUSE
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
-            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 25);
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40);
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
 
         if (follower.active) {
@@ -317,15 +335,16 @@
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
+        // PLAYER
         ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
         ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
         ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
-            ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
         }
 
         update();
