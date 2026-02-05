@@ -3,212 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Sequoia Edition</title>
+    <title>Pokémon Amber: Sequoia's Lab</title>
     <style>
         :root {
-            --gba-blue-bg: #4a80b8;
-            --gba-blue-border: #184068;
-            --wood-floor: #d89060;
-            --ui-font: 'Courier New', Courier, monospace;
+            --gba-blue: #285088;
+            --gba-light-blue: #5888c8;
+            --font-main: 'Courier New', Courier, monospace;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background: #222; overflow: hidden; touch-action: none;
+            background: #111; overflow: hidden; touch-action: none;
             display: flex; justify-content: center; align-items: center;
         }
 
-        #game-screen {
+        #canvas-container {
             position: relative;
-            width: 100vw; height: 100vh;
-            max-width: 800px; max-height: 600px;
-            background: var(--wood-floor);
-            border: 8px solid #333;
-            overflow: hidden;
-            background-image: 
-                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
-            background-size: 40px 40px; /* Floor Plank Effect */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 4px solid #333;
+            background: #4a7a4a; /* Grass color from your image */
         }
 
-        /* --- THE SCENE: SEQUOIA'S STUDY --- */
-        .bookshelf {
-            position: absolute; top: 20px;
-            width: 120px; height: 180px;
-            background: #804020; border: 4px solid #402010;
-        }
-        #shelf-left { left: 40px; }
-        #shelf-right { right: 40px; }
-
-        .fireplace {
-            position: absolute; top: 10px; left: 50%;
-            transform: translateX(-50%);
-            width: 100px; height: 120px;
-            background: #603010; border-top: 20px solid #a05020;
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+            background-color: #8dbd8d;
         }
 
-        .desk {
-            position: absolute; top: 200px; left: 50%;
-            transform: translateX(-50%);
-            width: 220px; height: 80px;
-            background: #a06030; border: 4px solid #503010;
-            box-shadow: 0 10px rgba(0,0,0,0.2);
-            z-index: 5;
+        /* --- UI DIALOGUE --- */
+        #ui-layer {
+            position: absolute; bottom: 10px; left: 50%;
+            transform: translateX(-50%); width: 95%;
+            pointer-events: none;
         }
 
-        /* --- UI: DIALOGUE BOX (EXACTLY LIKE IMAGE) --- */
-        #dialogue-container {
-            position: absolute; bottom: 20px; left: 50%;
-            transform: translateX(-50%);
-            width: 90%; height: 140px;
+        #dialogue-box {
             background: white;
-            border: 6px solid var(--gba-blue-border);
-            border-radius: 20px;
-            z-index: 100;
-            box-sizing: border-box;
-            padding: 20px;
+            border: 5px solid var(--gba-blue);
+            border-radius: 15px;
+            padding: 15px;
+            font-family: var(--font-main);
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: inset 0 0 0 2px var(--gba-light-blue);
+            display: block;
+            min-height: 60px;
         }
 
-        #speaker-tag {
-            position: absolute; top: -25px; left: 30px;
-            background: var(--gba-blue-bg);
-            color: white; padding: 5px 20px;
-            border-radius: 10px 10px 0 0;
-            border: 4px solid var(--gba-blue-border);
-            font-family: var(--ui-font); font-weight: bold;
+        #speaker-name {
+            position: absolute; top: -20px; left: 20px;
+            background: var(--gba-blue); color: white;
+            padding: 2px 15px; border-radius: 8px 8px 0 0;
+            font-size: 14px;
         }
 
-        #dialogue-text {
-            font-family: var(--ui-font); font-size: 1.2rem;
-            line-height: 1.4; color: #333;
-        }
-
-        /* --- TOUCH CONTROLS --- */
-        #joystick-container {
+        /* --- JOYSTICK --- */
+        #joystick-wrapper {
             position: absolute; bottom: 40px; left: 40px;
             width: 120px; height: 120px;
             background: rgba(255,255,255,0.2);
-            border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%; touch-action: none;
             display: flex; justify-content: center; align-items: center;
         }
 
-        #joystick-stick {
+        #joystick-knob {
             width: 50px; height: 50px;
-            background: rgba(0,0,0,0.4); border-radius: 50%;
-            box-shadow: 0 4px #000;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%; box-shadow: 0 4px 0 rgba(0,0,0,0.3);
         }
 
-        #action-group {
-            position: absolute; bottom: 40px; right: 40px;
-            width: 150px; height: 150px;
-        }
-
-        .btn-gba {
-            position: absolute; width: 60px; height: 60px;
-            border-radius: 50%; color: white;
-            font-family: var(--ui-font); font-weight: bold;
-            display: flex; justify-content: center; align-items: center;
-            border: 4px solid rgba(0,0,0,0.3); cursor: pointer;
-        }
-        #btn-a { background: #e04040; right: 0; top: 0; }
-        #btn-b { background: #f0c040; right: 70px; top: 40px; }
-
-        /* --- SPRITES --- */
-        .sprite { position: absolute; image-rendering: pixelated; }
-        #player { width: 40px; height: 60px; background: red; bottom: 180px; left: 50%; margin-left: -20px; z-index: 10; }
-        #sequoia { width: 40px; height: 60px; background: #eee; top: 150px; left: 45%; border: 1px solid #ccc; }
-        #rival { width: 40px; height: 60px; background: #555; top: 150px; left: 55%; }
-
-        .starter-ball {
-            width: 20px; height: 20px; background: white;
-            border-radius: 50%; border-top: 10px solid red;
-            position: absolute; top: -30px; cursor: pointer;
-            border-bottom: 2px solid black;
+        /* --- POKEMON LABELS --- */
+        .poke-label {
+            position: absolute; background: rgba(0,0,0,0.7);
+            color: white; padding: 2px 8px; border-radius: 4px;
+            font-family: var(--font-main); font-size: 12px;
+            pointer-events: none; transform: translate(-50%, -100%);
+            display: none;
         }
     </style>
 </head>
 <body>
 
-<div id="game-screen">
-    <div class="bookshelf" id="shelf-left"></div>
-    <div class="bookshelf" id="shelf-right"></div>
-    <div class="fireplace"></div>
+<div id="canvas-container">
+    <canvas id="gameCanvas"></canvas>
     
-    <div class="desk">
-        <div id="ball-treecko" class="starter-ball" style="left: 30px;" onclick="pick('Treecko')"></div>
-        <div id="ball-froakie" class="starter-ball" style="left: 100px;" onclick="pick('Froakie')"></div>
-        <div id="ball-charmander" class="starter-ball" style="left: 170px;" onclick="pick('Charmander')"></div>
+    <div id="label-treecko" class="poke-label">TREECKO</div>
+    <div id="label-froakie" class="poke-label">FROAKIE</div>
+    <div id="label-charmander" class="poke-label">CHARMANDER</div>
+
+    <div id="ui-layer">
+        <div id="speaker-name">Professor Sequoia</div>
+        <div id="dialogue-box">Welcome! Use the joystick to walk over and choose your Pokémon partner.</div>
     </div>
 
-    <div id="sequoia" class="sprite"></div>
-    <div id="rival" class="sprite"></div>
-    <div id="player" class="sprite"></div>
-
-    <div id="dialogue-container" onclick="nextLine()">
-        <div id="speaker-tag">Professor Sequoia</div>
-        <div id="dialogue-text">Welcome, young Trainer! These three Pokémon were sent here for study...</div>
-    </div>
-
-    <div id="joystick-container">
-        <div id="joystick-stick"></div>
-    </div>
-
-    <div id="action-group">
-        <div id="btn-a" class="btn-gba" onclick="nextLine()">A</div>
-        <div id="btn-b" class="btn-gba">B</div>
+    <div id="joystick-wrapper">
+        <div id="joystick-knob"></div>
     </div>
 </div>
 
 <script>
-    const dialogue = [
-        "Professor Sequoia: Earlier, a mysterious tremor shook the Orebound region.",
-        "We need Trainers to help us understand how these Pokémon react.",
-        "Professor Sequoia: Choose your partner carefully!",
-        "Rival: Hey! I get to pick right after you, don't forget!"
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const knob = document.getElementById('joystick-knob');
+    const wrapper = document.getElementById('joystick-wrapper');
+
+    // Resolution & Scaling
+    const WIDTH = 480;
+    const HEIGHT = 320;
+    const SCALE = 2;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+
+    // Game State
+    const player = {
+        x: WIDTH/2 - 16,
+        y: HEIGHT - 100,
+        speed: 2.5,
+        width: 32,
+        height: 32,
+        moving: false
+    };
+
+    const pokeballs = [
+        { name: 'Treecko', x: 140, y: 120, id: 'label-treecko' },
+        { name: 'Froakie', x: 240, y: 120, id: 'label-froakie' },
+        { name: 'Charmander', x: 340, y: 120, id: 'label-charmander' }
     ];
-    let currentLine = 0;
 
-    function nextLine() {
-        if(currentLine < dialogue.length) {
-            document.getElementById('dialogue-text').innerText = dialogue[currentLine];
-            currentLine++;
-        } else {
-            document.getElementById('dialogue-container').style.opacity = "0.5";
-            document.getElementById('dialogue-text').innerText = "(Choose a Poké Ball from the desk!)";
+    // Joystick Logic
+    let stickX = 0;
+    let stickY = 0;
+    let isTouching = false;
+
+    wrapper.addEventListener('touchstart', (e) => isTouching = true);
+    window.addEventListener('touchend', () => {
+        isTouching = false;
+        stickX = 0; stickY = 0;
+        knob.style.transform = `translate(0px, 0px)`;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        if (!isTouching) return;
+        const rect = wrapper.getBoundingClientRect();
+        const touch = e.touches[0];
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        let dx = touch.clientX - centerX;
+        let dy = touch.clientY - centerY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const maxDist = 40;
+
+        if (dist > maxDist) {
+            dx *= maxDist / dist;
+            dy *= maxDist / dist;
         }
-    }
 
-    function pick(name) {
-        document.getElementById('dialogue-container').style.opacity = "1";
-        document.getElementById('dialogue-text').innerText = "Professor Sequoia: So, you've chosen " + name + "! A wonderful choice for the Orebound terrain.";
-        
-        // Hide the other balls for effect
-        document.querySelectorAll('.starter-ball').forEach(b => b.style.display = 'none');
-        
-        setTimeout(() => {
-            alert("Adventure Start! You received " + name + " and the Pokédex!");
-        }, 1000);
-    }
-
-    // Basic Joystick Visual Feedback
-    document.getElementById('joystick-container').addEventListener('touchmove', function(e) {
-        let touch = e.touches[0];
-        let stick = document.getElementById('joystick-stick');
-        let rect = this.getBoundingClientRect();
-        let x = touch.clientX - rect.left - 60;
-        let y = touch.clientY - rect.top - 60;
-        
-        // Constrain movement
-        let dist = Math.sqrt(x*x + y*y);
-        if(dist > 30) { x *= 30/dist; y *= 30/dist; }
-        
-        stick.style.transform = `translate(${x}px, ${y}px)`;
+        stickX = dx / maxDist;
+        stickY = dy / maxDist;
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
     });
 
-    document.getElementById('joystick-container').addEventListener('touchend', function() {
-        document.getElementById('joystick-stick').style.transform = `translate(0px, 0px)`;
-    });
+    function update() {
+        // Character Movement via Joystick
+        if (Math.abs(stickX) > 0.1 || Math.abs(stickY) > 0.1) {
+            player.x += stickX * player.speed;
+            player.y += stickY * player.speed;
+            player.moving = true;
+        } else {
+            player.moving = false;
+        }
+
+        // Screen Boundaries
+        player.x = Math.max(0, Math.min(WIDTH - player.width, player.x));
+        player.y = Math.max(80, Math.min(HEIGHT - player.height, player.y));
+
+        // Interaction Check (Proximity to Pokeballs)
+        pokeballs.forEach(ball => {
+            const dist = Math.sqrt(Math.pow(player.x - ball.x, 2) + Math.pow(player.y - ball.y, 2));
+            const label = document.getElementById(ball.id);
+            if (dist < 40) {
+                label.style.display = 'block';
+                label.style.left = (ball.x + 10) + 'px';
+                label.style.top = (ball.y - 10) + 'px';
+            } else {
+                label.style.display = 'none';
+            }
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        // Draw Floor (GBA Planks)
+        ctx.fillStyle = '#d89060';
+        ctx.fillRect(0, 80, WIDTH, HEIGHT - 80);
+        for(let i=0; i<WIDTH; i+=40) {
+            ctx.strokeStyle = '#b87040';
+            ctx.strokeRect(i, 80, 40, HEIGHT-80);
+        }
+
+        // Draw Desk (Based on your image)
+        ctx.fillStyle = '#804020';
+        ctx.fillRect(100, 110, 280, 60);
+        ctx.strokeStyle = '#402010';
+        ctx.strokeRect(100, 110, 280, 60);
+
+        // Draw Pokeballs
+        pokeballs.forEach(ball => {
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, 8, 0, Math.PI, true);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, 8, 0, Math.PI, false);
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.strokeRect(ball.x - 8, ball.y - 1, 16, 2);
+        });
+
+        // Draw Character (Inspired by the Sprite in IMG_0609)
+        ctx.fillStyle = '#333'; // Boots
+        ctx.fillRect(player.x + 4, player.y + 24, 8, 8);
+        ctx.fillRect(player.x + 20, player.y + 24, 8, 8);
+        
+        ctx.fillStyle = '#a03030'; // Red Tunic/Shirt
+        ctx.fillRect(player.x + 4, player.y + 12, 24, 14);
+        
+        ctx.fillStyle = '#ffdbac'; // Skin
+        ctx.fillRect(player.x + 8, player.y + 4, 16, 12);
+        
+        ctx.fillStyle = 'white'; // Bandana/Hat
+        ctx.fillRect(player.x + 6, player.y, 20, 6);
+        ctx.fillStyle = '#222'; // Eyes
+        ctx.fillRect(player.x + 10, player.y + 8, 3, 3);
+        ctx.fillRect(player.x + 19, player.y + 8, 3, 3);
+
+        requestAnimationFrame(() => {
+            update();
+            draw();
+        });
+    }
+
+    draw();
 </script>
-
 </body>
 </html>
