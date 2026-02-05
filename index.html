@@ -25,7 +25,7 @@
             display: block;
             width: 100% !important;
             height: 100% !important;
-            image-rendering: pixelated;
+            image-rendering: pixelated; /* Essential for mini-pixel look */
         }
 
         #title-screen {
@@ -98,7 +98,7 @@
 
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
+    <div id="bag-btn" onclick="alert('Bag: 1x Pokédex, 5x Pokéballs')">BAG</div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
@@ -129,6 +129,7 @@
     let currentMap = 'LAB';
     let choosingState = false;
     let width, height;
+    let isTeleporting = false;
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
@@ -137,7 +138,7 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const player = { x: width/2, y: height - 120, speed: 5, history: [] };
+    const player = { x: width/2, y: height - 120, speed: 4.5, history: [] };
     const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
 
     const pokemons = [
@@ -163,8 +164,8 @@
         }
     }
 
-    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
+    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
 
     function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
@@ -221,28 +222,43 @@
             player.history = []; shim.style.opacity = '0'; isTeleporting = false;
         }, 300);
     }
-    let isTeleporting = false;
 
-    function drawPokemonSprite(x, y, name) {
+    // PIXEL DRAWING FUNCTIONS
+    function drawMiniPlayer(x, y) {
+        // Feet
+        ctx.fillStyle = '#333'; ctx.fillRect(x-8, y+15, 6, 4); ctx.fillRect(x+2, y+15, 6, 4);
+        // Body (Jacket)
+        ctx.fillStyle = '#a03030'; ctx.fillRect(x-10, y-5, 20, 20);
+        // Hands
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(x-14, y+5, 4, 4); ctx.fillRect(x+10, y+5, 4, 4);
+        // Head
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(x-7, y-18, 14, 14);
+        // Hat
+        ctx.fillStyle = '#fff'; ctx.fillRect(x-9, y-22, 18, 6);
+        // Eyes
+        ctx.fillStyle = '#000'; ctx.fillRect(x-4, y-13, 2, 2); ctx.fillRect(x+2, y-13, 2, 2);
+    }
+
+    function drawMiniPokemon(x, y, name) {
         if (name === 'Treecko') {
-            ctx.fillStyle = '#32CD32'; ctx.fillRect(x-10, y-15, 20, 25);
-            ctx.fillStyle = '#228B22'; ctx.fillRect(x-5, y-5, 10, 5);
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-6, y-10, 4, 4); ctx.fillRect(x+2, y-10, 4, 4);
+            ctx.fillStyle = '#32CD32'; ctx.fillRect(x-8, y-5, 16, 16); // Body
+            ctx.fillStyle = '#228B22'; ctx.fillRect(x+4, y+5, 8, 4); // Tail
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-4, y-2, 3, 3); ctx.fillRect(x+1, y-2, 3, 3); // Eyes
         } else if (name === 'Froakie') {
-            ctx.fillStyle = '#1E90FF'; ctx.fillRect(x-12, y-10, 24, 18);
-            ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y-12, 10, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-8, y-8, 5, 5); ctx.fillRect(x+3, y-8, 5, 5);
+            ctx.fillStyle = '#1E90FF'; ctx.fillRect(x-10, y-5, 20, 15);
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x-8, y-10, 16, 6); // Bubbles
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-5, y-2, 3, 3); ctx.fillRect(x+2, y-2, 3, 3);
         } else if (name === 'Charmander') {
-            ctx.fillStyle = '#FF4500'; ctx.fillRect(x-10, y-15, 20, 25);
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-4, y+5, 8, 5);
-            ctx.fillStyle = '#FFFF00'; ctx.beginPath(); ctx.arc(x+12, y+5, 5, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#FF4500'; ctx.fillRect(x-8, y-8, 16, 18);
+            ctx.fillStyle = '#FFFF00'; ctx.fillRect(x-3, y+2, 6, 6); // Belly
+            ctx.fillStyle = '#FF0000'; ctx.fillRect(x+6, y+5, 4, 4); // Tail fire
         }
     }
 
-    function drawBush(x, y) {
-        ctx.fillStyle = '#1e3d1e'; ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#3a6b3a'; ctx.beginPath(); ctx.arc(x-5, y-5, 25, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#6ab06a'; ctx.beginPath(); ctx.arc(x-10, y-10, 10, 0, Math.PI*2); ctx.fill();
+    function drawMiniBush(x, y) {
+        ctx.fillStyle = '#1e3d1e'; ctx.fillRect(x-30, y-15, 60, 45); // Outline
+        ctx.fillStyle = '#3a6b3a'; ctx.fillRect(x-25, y-10, 50, 35); // Main
+        ctx.fillStyle = '#6ab06a'; ctx.fillRect(x-15, y-5, 15, 5); // Highlight
     }
 
     function update() {
@@ -268,53 +284,66 @@
         ctx.clearRect(0, 0, width, height);
 
         if (currentMap === 'LAB') {
+            // Lab Floor & Rug
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
-            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
+            ctx.fillStyle = '#b87040'; for(let i=0; i<width; i+=40) ctx.fillRect(i, 0, 2, height);
+            
+            // Lab Decorations (Mini Pixel Style)
+            ctx.fillStyle = '#444'; ctx.fillRect(50, 50, 80, 40); // Computer desk
+            ctx.fillStyle = '#0ff'; ctx.fillRect(60, 55, 20, 10); // Screen
+            ctx.fillStyle = '#5d3a1a'; ctx.fillRect(width-130, 50, 80, 120); // Bookshelf
+            ctx.fillStyle = '#a63d3d'; ctx.fillRect(width-125, 60, 70, 5); // Books row
+            
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+            
             pokemons.forEach((p, i) => {
                 if (!p.active) return;
                 p.realX = dX + 60 + (i * 110); p.realY = dY + 40;
-                drawPokemonSprite(p.realX, p.realY, p.name);
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                drawMiniPokemon(p.realX, p.realY, p.name);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 10px Courier'; ctx.textAlign = 'center';
                 ctx.fillText(p.name.toUpperCase(), p.realX, p.realY - 30);
             });
         } else {
-            // OUTSIDE - FULL GRAPHICS RESTORED
-            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height);
+            // OUTSIDE - FULL MINI PIXEL DECORATIONS
+            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height); // Grass
+            
+            // Path with dithered edge
             ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#c5b76b'; for(let i=0; i<width; i+=20) { ctx.fillRect(i, height/2 + 115, 15, 10); }
+            ctx.fillStyle = '#c5b76b'; for(let i=0; i<width; i+=10) { if(i%20==0) ctx.fillRect(i, height/2+118, 5, 5); }
 
+            // Pond (Pixelated Edge)
             const wX = width/2 - 350, wY = height/2 - 50;
             ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX - 150, wY - 100, 300, 200);
             ctx.fillStyle = '#b7e4f7'; ctx.fillRect(wX - 130, wY - 80, 260, 160);
 
-            [[wX+200, wY], [wX+230, wY+30]].forEach(p => {
-                ctx.fillStyle = '#f78db7'; ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2); ctx.fill();
-            });
-
+            // Perimeter Trees (Bushes)
             const fenceY = height/2 + 120;
             for(let x = 40; x < width; x += 80) {
-                drawBush(x, 40);
-                if (x < 120 || x > width - 120) { for(let y = 120; y < fenceY - 40; y += 80) { drawBush(x, y); } }
+                drawMiniBush(x, 40);
+                if (x < 120 || x > width - 120) { for(let y = 120; y < fenceY - 40; y += 80) { drawMiniBush(x, y); } }
             }
 
-            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=35) { if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 15, 30); }
+            // Wooden Fence Posts
+            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=35) { if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 10, 30); }
 
+            // HOUSE - IMPROVED MINI PIXEL DESIGN
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150);
-            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-60, 240, 70);
-            ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40);
-            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
+            ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150); // Walls
+            ctx.fillStyle = '#9e623d'; for(let i=hY; i<hY+150; i+=15) ctx.fillRect(hX, i, 220, 2); // Wood Grain
+            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-50, 240, 60); // Roof
+            ctx.fillStyle = '#7a2d2d'; for(let i=hX-10; i<hX+230; i+=15) ctx.fillRect(i, hY-50, 2, 60); // Roof detail
+            ctx.fillStyle = '#333'; ctx.fillRect(hX+180, hY-70, 20, 30); // Chimney
+            
+            ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40); // Windows
+            ctx.fillStyle = '#add8e6'; ctx.fillRect(hX+35, hY+25, 30, 30); ctx.fillRect(hX+155, hY+25, 30, 30); // Glass
+            
+            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
+            ctx.fillStyle = '#ffcb05'; ctx.fillRect(width/2 + 15, height/2 - 25, 5, 5); // Doorknob
         }
 
-        if (follower.active) drawPokemonSprite(follower.x, follower.y, follower.name);
-
-        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        if (follower.active) drawMiniPokemon(follower.x, follower.y, follower.name);
+        drawMiniPlayer(player.x, player.y);
         
         update();
         requestAnimationFrame(draw);
