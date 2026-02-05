@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Route 1</title>
+    <title>Pokémon K&E Version</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -236,7 +236,6 @@
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            // FENCE COLLISION WITH PASSAGE
             if (ny > height/2 + 100 && ny < height/2 + 130) {
                 if (Math.abs(nx - width/2) > 40) return true;
             }
@@ -263,11 +262,9 @@
 
     function update() {
         if (bagOpen) return;
-
         if (isTouching) {
             let nextX = player.x + stickX * player.speed;
             let nextY = player.y + stickY * player.speed;
-
             if (!checkCollision(nextX, nextY)) {
                 player.history.push({x: player.x, y: player.y});
                 if (player.history.length > 60) player.history.shift();
@@ -275,13 +272,9 @@
                 player.y = nextY;
             }
         }
-
         const matX = width / 2;
         const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
-        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) {
-            teleport();
-        }
-
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15;
@@ -315,14 +308,16 @@
             });
         } else {
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
-
+            
             // YELLOW ROCKY TERRAIN
             ctx.fillStyle = '#f0e68c'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#bdb76b'; // Simple rocks
+            ctx.fillStyle = '#bdb76b'; // Simple rock texture
             for(let i=0; i<width; i+=100) { ctx.fillRect(i + 20, height/2 + 150, 25, 15); ctx.fillRect(i + 60, height/2 + 180, 20, 10); }
 
+            // TOP GRASS (ONLY)
             ctx.fillStyle = '#567d56';
-            for(let row=0; row<3; row++) { for(let col=0; col<5; col++) { ctx.fillRect(50 + col*40, height - 200 + row*40, 35, 35); ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35); } }
+            for(let row=0; row<3; row++) { for(let col=0; col<5; col++) { ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35); } }
+
             ctx.fillStyle = '#4d88ff'; ctx.beginPath(); ctx.ellipse(width - 120, height/2, 80, 50, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#2d4d2d'; const treePositions = [[40, 40], [100, 60], [40, 120], [width-60, height-60], [width-120, height-100]];
             treePositions.forEach(pos => { ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill(); });
