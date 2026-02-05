@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon K&E Version</title>
+    <title>Pokémon K&E Version - Enhanced</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -14,7 +14,7 @@
         body, html {
             margin: 0; padding: 0; 
             width: 100vw; height: 100vh;
-            background: #000; overflow: hidden; 
+            background: #222; overflow: hidden; 
             touch-action: none;
             display: flex; justify-content: center; align-items: center;
         }
@@ -22,30 +22,34 @@
         #game-wrapper {
             position: relative;
             width: 100%; height: 100%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         canvas {
             display: block;
             width: 100% !important;
             height: 100% !important;
-            /* Added for pixel look */
             image-rendering: pixelated;
         }
 
         #title-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff;
+            background: linear-gradient(#2a75bb, #3a8fb7); color: #fff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 2000; transition: opacity 0.5s ease-out;
             font-family: var(--font-main);
         }
 
-        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+        #title-screen h1 { 
+            font-size: 48px; margin-bottom: 20px; text-align: center; 
+            color: #ffcb05; text-shadow: 4px 4px #2a75bb, -2px -2px 0 #000; 
+        }
 
         #start-btn {
             padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
-            background: var(--gba-blue); color: white; border: 4px solid white;
-            cursor: pointer; border-radius: 10px; font-weight: bold;
+            background: #e4000f; color: white; border: 4px solid white;
+            cursor: pointer; border-radius: 50px; font-weight: bold;
+            box-shadow: 0 5px #a00000;
         }
 
         #ui-layer {
@@ -55,27 +59,31 @@
         }
 
         #dialogue-box {
-            background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
+            background: #f8f8f8; border: 6px solid #484848; border-radius: 10px;
             padding: 20px; font-family: var(--font-main); font-weight: bold;
-            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
-            min-height: 80px; user-select: none;
+            font-size: 20px; box-shadow: inset -4px -4px 0 #ccc, 0 4px 10px rgba(0,0,0,0.5);
+            min-height: 80px; user-select: none; color: #333;
         }
 
         #speaker-tag {
             position: absolute; top: -25px; left: 30px;
-            background: var(--gba-blue); color: white;
-            padding: 5px 20px; border-radius: 10px 10px 0 0;
-            font-size: 16px; border: 3px solid var(--gba-blue);
+            background: #484848; color: white;
+            padding: 5px 20px; border-radius: 8px 8px 0 0;
+            font-size: 16px;
         }
 
         #joystick-wrapper {
             position: absolute; bottom: 80px; left: 40px;
-            width: 130px; height: 130px;
-            background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            width: 120px; height: 120px;
+            background: rgba(0,0,0,0.2); border-radius: 50%; border: 4px solid rgba(255,255,255,0.2);
             display: flex; justify-content: center; align-items: center; z-index: 200;
         }
 
-        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+        #joystick-knob { 
+            width: 50px; height: 50px; 
+            background: radial-gradient(circle, #fff, #888); 
+            border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
 
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -85,11 +93,11 @@
 
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
-            background: var(--gba-blue); color: white;
+            background: #f08030; color: white;
             padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
-            box-shadow: 0 4px #183058;
+            box-shadow: 0 4px #a05010;
         }
     </style>
 </head>
@@ -97,16 +105,16 @@
 
 <div id="game-wrapper">
     <div id="title-screen">
-        <h1>Pokémon K&E Version</h1>
-        <button id="start-btn" onclick="startGame()">START GAME</button>
+        <h1>Pokémon K&E</h1>
+        <button id="start-btn" onclick="startGame()">PRESS START</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
+    <div id="bag-btn" onclick="alert('Bag: Potion x1, Pokéball x3')">BAG</div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
-        <div id="speaker-tag">Professor Sequoia</div>
+        <div id="speaker-tag">Prof. Sequoia</div>
         <div id="dialogue-box">Welcome to the Habitat Research Lab!</div>
     </div>
 
@@ -126,9 +134,9 @@
 
     const script = [
         "Welcome to the Habitat Research Lab!",
-        "Look around! This facility is dedicated to studying Orebound's ecology.",
+        "Look around! This facility is dedicated to studying ecology.",
         "The tremor earlier was quite strong. We must act quickly.",
-        "Go ahead and click on the Pokémon you want to partner with!"
+        "Go ahead and choose your first Pokémon!"
     ];
     let scriptIndex = 0;
     let currentMap = 'LAB';
@@ -260,81 +268,121 @@
         player.y = Math.max(20, Math.min(height-20, player.y));
     }
 
+    function drawPokeBall(x, y, scale=1) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath(); ctx.ellipse(0, 15, 12, 5, 0, 0, Math.PI*2); ctx.fill();
+        // Red Top
+        const gradTop = ctx.createRadialGradient(-5, -5, 2, 0, 0, 15);
+        gradTop.addColorStop(0, '#ff5555'); gradTop.addColorStop(1, '#aa0000');
+        ctx.fillStyle = gradTop;
+        ctx.beginPath(); ctx.arc(0, 0, 15, Math.PI, 0); ctx.fill();
+        // White Bottom
+        const gradBot = ctx.createRadialGradient(-5, 5, 2, 0, 0, 15);
+        gradBot.addColorStop(0, '#ffffff'); gradBot.addColorStop(1, '#bbbbbb');
+        ctx.fillStyle = gradBot;
+        ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI); ctx.fill();
+        // Middle Line
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(15, 0); ctx.stroke();
+        // Center Button
+        ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+    }
+
     function draw() {
         ctx.clearRect(0, 0, width, height);
-        ctx.imageSmoothingEnabled = false;
 
         if (currentMap === 'LAB') {
+            // Shiny Wooden Floor
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
-            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
-            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
+            ctx.strokeStyle = '#b87040'; ctx.lineWidth = 1;
+            for(let i=0; i<width; i+=40) ctx.strokeRect(i, 0, 40, height);
+            
+            // Lab Entrance Mat
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 60, height - 40, 120, 40);
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 60, height - 40, 120, 40);
 
+            // Tech Desks
+            ctx.fillStyle = '#444'; 
+            for(let i=50; i<width-100; i+=150) {
+                ctx.fillRect(i, 20, 110, 80);
+                ctx.fillStyle = '#5fb6d9'; ctx.fillRect(i+10, 30, 90, 50); // Screens
+                ctx.fillStyle = '#444';
+            }
+
+            // The Pokéball Table
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-            ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+            ctx.fillStyle = '#63422b'; ctx.fillRect(dX-5, dY-5, dW+10, dH+10);
+            ctx.fillStyle = '#8b5a2b'; ctx.fillRect(dX, dY, dW, dH);
+            
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
-                // Pixel Pokéball
-                ctx.fillStyle = 'red'; ctx.fillRect(ball.realX-12, ball.realY-12, 24, 12);
-                ctx.fillStyle = 'white'; ctx.fillRect(ball.realX-12, ball.realY, 24, 12);
-                ctx.fillStyle = 'black'; ctx.fillRect(ball.realX-4, ball.realY-4, 8, 8);
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px var(--font-main)'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
+                drawPokeBall(ball.realX, ball.realY, 1.2);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 14px var(--font-main)'; ctx.textAlign = 'center'; 
+                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // COLORS FROM YOUR IMAGE
-            ctx.fillStyle = '#91c1a1'; ctx.fillRect(0, 0, width, height); // Grass Base
+            // Grass and Outside
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height);
             
-            // GRASS PATCHES
-            ctx.fillStyle = '#78b08d'; 
-            for(let row=0; row<height; row+=40) {
-                for(let col=0; col<width; col+=40) {
-                    if((row+col)%80===0) ctx.fillRect(col, row, 30, 30);
+            // Grass Tufts
+            ctx.fillStyle = '#5d8a5d';
+            for(let row=0; row<10; row++) {
+                for(let col=0; col<15; col++) {
+                    let gx = (width/2) + col*45, gy = 50 + row*45;
+                    if (gy < height/2 + 100) {
+                        ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx+5, gy-10); ctx.lineTo(gx+10, gy); ctx.fill();
+                    }
                 }
             }
 
-            // YELLOW PATH
-            ctx.fillStyle = '#eadd9a'; ctx.fillRect(0, height/2 + 120, width, height);
+            // Path
+            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
 
-            // POND
+            // Pond with Water Ripples
             const wX = width/2 - 350, wY = height/2 - 50;
-            ctx.fillStyle = '#5187ba'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 150, 100, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 135, 85, 0, 0, Math.PI*2); ctx.fill();
 
-            // TREES (Blocky)
-            ctx.fillStyle = '#3c6e4b';
-            for(let x = 40; x < width; x += 80) {
-                ctx.fillRect(x-30, 20, 60, 60);
-                if (x < 100 || x > width - 100) {
-                    for(let y = 120; y < height/2+80; y += 80) ctx.fillRect(x-30, y, 60, 60);
-                }
-            }
-            
-            // PIXEL HOUSE (Pokemon Center look)
+            // House Graphics
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#d15341'; ctx.fillRect(hX-20, hY-20, 260, 60); // Red Roof
-            ctx.fillStyle = '#f0f0f0'; ctx.fillRect(hX, hY+40, 220, 110); // White Walls
-            ctx.fillStyle = '#4b7eb1'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
+            ctx.fillStyle = '#eee'; ctx.fillRect(hX, hY, 220, 150); // Walls
+            ctx.fillStyle = '#e4000f'; ctx.beginPath(); ctx.moveTo(hX-30, hY); ctx.lineTo(width/2, hY-70); ctx.lineTo(hX+250, hY); ctx.fill(); // Roof
+            ctx.fillStyle = '#484848'; ctx.fillRect(width/2 - 35, height/2 - 50, 70, 50); // Door
         }
 
+        // DRAW FOLLOWER
         if (follower.active) {
-            ctx.fillStyle = follower.color; ctx.fillRect(follower.x-14, follower.y-14, 28, 28);
+            ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.arc(follower.x, follower.y+10, 10, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
-        // PLAYER PIXEL MODEL
-        ctx.fillStyle = '#000'; ctx.fillRect(player.x-15, player.y+15, 10, 5); ctx.fillRect(player.x+5, player.y+15, 10, 5); // Shoes
-        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25); // Vest
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18); // Face
-        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-32, 24, 10); // Hat
+        // DRAW PLAYER (More Detailed)
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(0, 18, 15, 6, 0, 0, Math.PI*2); ctx.fill();
+        // Legs/Shoes
+        ctx.fillStyle = '#333'; ctx.fillRect(-12, 12, 8, 8); ctx.fillRect(4, 12, 8, 8);
+        // Body (Shirt)
+        ctx.fillStyle = '#e4000f'; ctx.fillRect(-12, -8, 24, 20);
+        // Head
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(-10, -25, 20, 18);
+        // Cap
+        ctx.fillStyle = '#e4000f'; ctx.fillRect(-12, -28, 24, 8);
+        ctx.fillStyle = '#fff'; ctx.fillRect(-4, -26, 8, 4);
+        // Eyes
+        ctx.fillStyle = '#000'; ctx.fillRect(-5, -18, 3, 4); ctx.fillRect(2, -18, 3, 4);
         
-        if (holdingPokeball) {
-            ctx.fillStyle = 'red'; ctx.fillRect(player.x + 15, player.y-5, 12, 6);
-            ctx.fillStyle = 'white'; ctx.fillRect(player.x + 15, player.y, 12, 6);
-        }
+        if (holdingPokeball) drawPokeBall(18, 0, 0.5);
+        ctx.restore();
 
         update();
         requestAnimationFrame(draw);
