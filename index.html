@@ -3,2140 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon K&E Version - A New Adventure Takes Root!</title>
+    <title>Pokémon Amber: Orebound Chronicles</title>
     <style>
-        /* Reset and base styles - 150 lines */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
+        :root {
+            --gba-black: #080808;
+            --ui-white: #f8f8f8;
+            --ui-blue: #204070;
+            --ui-border: #68a0b0;
+            --font-pixel: 'Courier New', monospace;
         }
-
-        body {
-            font-family: 'Pokemon GB', monospace;
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--gba-black); overflow: hidden; touch-action: none; 
+        }
+        #stage {
+            display: flex; justify-content: center; align-items: center;
+            width: 100vw; height: 100vh;
+        }
+        canvas {
+            image-rendering: pixelated;
+            border: 6px solid #333;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             background: #000;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            user-select: none;
-            -webkit-user-select: none;
-            position: fixed;
         }
-
-        @font-face {
-            font-family: 'Pokemon GB';
-            src: url('https://unpkg.com/pokemon-font@1.8.1/fonts/pokemon-gb.woff2') format('woff2');
-            font-weight: normal;
-            font-style: normal;
-        }
-
-        /* Game Container - 50 lines */
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #game-screen {
-            position: relative;
-            width: 320px;
-            height: 480px;
-            background: #000;
-            image-rendering: pixelated;
-            overflow: hidden;
-        }
-
-        /* Game Canvas - 30 lines */
-        #game-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 320px;
-            height: 480px;
-            z-index: 1;
-        }
-
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        /* Virtual Controls - 200 lines */
-        .virtual-joystick {
-            position: absolute;
-            bottom: 120px;
-            left: 40px;
-            width: 100px;
-            height: 100px;
-            z-index: 100;
-            pointer-events: auto;
-        }
-
-        .joystick-base {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            opacity: 0.7;
-        }
-
-        .joystick-thumb {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(0, 0, 0, 0.5);
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .action-buttons {
-            position: absolute;
-            bottom: 120px;
-            right: 40px;
-            display: flex;
-            gap: 20px;
-            z-index: 100;
-            pointer-events: auto;
-        }
-
-        .action-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #000;
-            user-select: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        #a-button {
-            background: linear-gradient(135deg, #ff4444, #cc0000);
-            border: 3px solid #fff;
-        }
-
-        #b-button {
-            background: linear-gradient(135deg, #4444ff, #0000cc);
-            border: 3px solid #fff;
-        }
-
-        .action-button:active {
-            transform: scale(0.95);
-        }
-
-        /* Radial Menu - 150 lines */
-        .radial-menu {
-            position: absolute;
-            top: 50%;
-            right: -200px;
-            transform: translateY(-50%);
-            width: 200px;
-            height: 200px;
-            transition: right 0.3s ease;
-            z-index: 150;
-            pointer-events: none;
-        }
-
-        .radial-menu.active {
-            right: 20px;
-            pointer-events: auto;
-        }
-
-        .radial-item {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: rgba(68, 68, 255, 0.9);
-            border: 3px solid #fff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 20px;
-            transform-origin: 0 0;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .radial-item:hover, .radial-item:active {
-            transform: scale(1.1);
-            background: rgba(85, 85, 255, 1);
-        }
-
-        /* Dialogue Box - 100 lines */
-        .dialogue-box {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 120px;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 4px solid #fff;
-            color: white;
-            padding: 15px;
-            font-size: 14px;
-            line-height: 1.4;
-            z-index: 50;
-            display: none;
-        }
-
-        .dialogue-box.active {
-            display: block;
-        }
-
-        .dialogue-text {
-            margin-bottom: 10px;
-            min-height: 60px;
-        }
-
-        .dialogue-continue {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            color: #ffcc00;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Battle UI - 200 lines */
-        .battle-ui {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 120px;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 4px solid #fff;
-            display: none;
-            z-index: 50;
-        }
-
-        .battle-ui.active {
-            display: block;
-        }
-
-        .battle-menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding: 15px;
-            height: 100%;
-        }
-
-        .battle-option {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #fff;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .battle-option:active {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .enemy-health, .player-health {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #fff;
-            padding: 5px;
-            min-width: 100px;
-        }
-
-        .enemy-health {
-            top: 60px;
-            left: 20px;
-        }
-
-        .player-health {
-            bottom: 130px;
-            right: 20px;
-        }
-
-        .health-bar {
-            width: 100%;
-            height: 10px;
-            background: #333;
-            margin-top: 3px;
-            overflow: hidden;
-        }
-
-        .health-fill {
-            height: 100%;
-            background: #44ff44;
-            transition: width 0.3s;
-        }
-
-        /* Transition Effects - 100 lines */
-        .transition-effect {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            pointer-events: none;
-            opacity: 0;
-        }
-
-        .shimmer {
-            background: radial-gradient(circle, transparent 30%, rgba(255, 255, 255, 0.8) 70%);
-            animation: shimmerEffect 0.5s forwards;
-        }
-
-        @keyframes shimmerEffect {
-            0% {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(1.5);
-            }
-        }
-
-        .fade {
-            background: #000;
-            animation: fadeEffect 0.3s forwards;
-        }
-
-        @keyframes fadeEffect {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-
-        /* Title Screen - 150 lines */
-        .title-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a5f23 0%, #0d2c14 100%);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .title-logo {
-            font-size: 32px;
-            color: #ffcc00;
-            text-shadow: 3px 3px 0 #2c5aa0;
-            margin-bottom: 40px;
-            text-align: center;
-            animation: titleFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes titleFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .title-tagline {
-            font-size: 14px;
-            color: #ffcc00;
-            margin-bottom: 60px;
-            text-align: center;
-        }
-
-        .title-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 200px;
-        }
-
-        .title-option {
-            background: rgba(44, 90, 160, 0.8);
-            border: 3px solid #ffcc00;
-            padding: 12px;
-            text-align: center;
-            font-size: 16px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .title-option:hover, .title-option:active {
-            background: rgba(44, 90, 160, 1);
-            transform: scale(1.05);
-        }
-
-        /* Character Creation - 150 lines */
-        .character-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2c5aa0 0%, #1a3d7a 100%);
-            z-index: 1999;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .character-screen.active {
-            display: flex;
-        }
-
-        .character-prompt {
-            font-size: 18px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .character-options {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .character-sprite {
-            width: 64px;
-            height: 96px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 3px solid #fff;
-            image-rendering: pixelated;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .character-sprite:hover, .character-sprite:active {
-            transform: scale(1.1);
-            border-color: #ffcc00;
-        }
-
-        .name-input {
-            background: rgba(0, 0, 0, 0.8);
-            border: 3px solid #ffcc00;
-            color: white;
-            font-size: 16px;
-            padding: 10px;
-            text-align: center;
-            width: 200px;
-            font-family: 'Pokemon GB', monospace;
-            margin-bottom: 30px;
-        }
-
-        /* Map and Sprites - 300 lines */
-        .map-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            image-rendering: pixelated;
-        }
-
-        .map-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .sprite {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            image-rendering: pixelated;
-            z-index: 5;
-            transition: transform 0.1s;
-        }
-
-        .player-sprite {
-            z-index: 6;
-        }
-
-        .npc-sprite {
-            z-index: 5;
-        }
-
-        .door {
-            position: absolute;
-            background: rgba(255, 255, 0, 0.3);
-            z-index: 4;
-            cursor: pointer;
-        }
-
-        /* Pokédex Interface - 200 lines */
-        .pokedex-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #2c5aa0;
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-            color: white;
-        }
-
-        .pokedex-screen.active {
-            display: flex;
-        }
-
-        .pokedex-header {
-            font-size: 24px;
-            color: #ffcc00;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .pokedex-list {
-            flex: 1;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-        }
-
-        .pokedex-entry {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .pokemon-sprite-small {
-            width: 32px;
-            height: 32px;
-            image-rendering: pixelated;
-        }
-
-        /* Menu System - 200 lines */
-        .menu-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            display: none;
-            color: white;
-        }
-
-        .menu-screen.active {
-            display: block;
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 40px 20px;
-            height: calc(100% - 60px);
-        }
-
-        .menu-item {
-            background: rgba(44, 90, 160, 0.8);
-            border: 2px solid #ffcc00;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            gap: 10px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .menu-item:active {
-            transform: scale(0.95);
-        }
-
-        .menu-icon {
-            font-size: 24px;
-        }
-
-        .menu-label {
-            font-size: 12px;
-            text-align: center;
-        }
-
-        /* Pokémon Selection Screen - 150 lines */
-        .pokemon-selection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a5f23 0%, #0d2c14 100%);
-            z-index: 1001;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .pokemon-selection.active {
-            display: flex;
-        }
-
-        .selection-title {
-            font-size: 24px;
-            color: #ffcc00;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .pokemon-options {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .pokemon-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .pokemon-option:hover, .pokemon-option:active {
-            border-color: #ffcc00;
-            transform: scale(1.05);
-        }
-
-        .pokemon-sprite-large {
-            width: 64px;
-            height: 64px;
-            image-rendering: pixelated;
-        }
-
-        .pokemon-name {
-            font-size: 16px;
-            color: #ffcc00;
-        }
-
-        .pokemon-type {
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 10px;
-        }
-
-        .type-grass { background: #78c850; }
-        .type-fire { background: #f08030; }
-        .type-water { background: #6890f0; }
-
-        /* Notification System - 50 lines */
-        .notification {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #ffcc00;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 2000;
-            display: none;
-            text-align: center;
-            min-width: 250px;
-        }
-
-        .notification.active {
-            display: block;
-            animation: notificationSlide 0.3s forwards;
-        }
-
-        @keyframes notificationSlide {
-            0% {
-                transform: translateX(-50%) translateY(-100%);
-                opacity: 0;
-            }
-            100% {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Audio Controls - 50 lines */
-        .audio-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 2001;
-            display: flex;
-            gap: 10px;
-        }
-
-        .audio-button {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        /* Responsive Adjustments - 100 lines */
-        @media (max-width: 480px) {
-            #game-screen {
-                transform: scale(0.9);
-            }
-        }
-
-        @media (max-height: 600px) {
-            #game-screen {
-                transform: scale(0.8);
-            }
-        }
-
-        @media (max-width: 320px) {
-            #game-screen {
-                transform: scale(0.7);
-            }
-            
-            .virtual-joystick {
-                bottom: 100px;
-                left: 20px;
-                width: 80px;
-                height: 80px;
-            }
-            
-            .action-buttons {
-                bottom: 100px;
-                right: 20px;
-            }
-            
-            .action-button {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* Loading Screen - 50 lines */
-        .loading-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #333;
-            border-top: 5px solid #ffcc00;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 16px;
-            color: #ffcc00;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Debug Info - 30 lines */
-        .debug-info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #0f0;
-            font-size: 10px;
-            padding: 5px;
-            z-index: 2000;
-            display: none;
-            font-family: monospace;
-        }
-
-        /* Credits and Footer - 50 lines */
-        .credits {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 10px;
-            z-index: 2000;
-        }
-
-        /* Accessibility - 50 lines */
-        .accessibility-high-contrast .sprite {
-            filter: brightness(2) contrast(2);
-        }
-
-        .accessibility-high-contrast .dialogue-box,
-        .accessibility-high-contrast .battle-ui {
-            background: #000;
-            border-color: #fff;
-        }
-
-        .accessibility-large-text {
-            font-size: 18px !important;
-        }
-
-        /* Hidden Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-
-        .visible {
-            display: block !important;
-        }
-
-        .transparent {
-            opacity: 0 !important;
-        }
-
-        .opaque {
-            opacity: 1 !important;
+        /* Touch Controls */
+        #joy-pad {
+            position: absolute; bottom: 40px; left: 40px;
+            width: 150px; height: 150px;
+            background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        #action-cluster {
+            position: absolute; bottom: 60px; right: 40px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .joy-btn {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-weight: bold; font-family: var(--font-pixel);
+            border: 4px solid rgba(255,255,255,0.3);
+            text-shadow: 2px 2px #000;
+        }
+        #btn-a { background: #d84040; transform: translateY(-20px); }
+        #btn-b { background: #c0a030; width: 65px; height: 65px; }
+
+        /* UI Dialogue */
+        #dialogue-container {
+            position: absolute; bottom: 10%; left: 50%;
+            transform: translateX(-50%); width: 90%; max-width: 600px;
+            height: 100px; background: var(--ui-white);
+            border: 4px solid var(--ui-blue); border-radius: 8px;
+            display: none; padding: 15px; box-sizing: border-box;
+            z-index: 100; box-shadow: 0 0 0 4px white, 0 0 0 8px var(--ui-border);
+        }
+        #dialogue-text {
+            font-family: var(--font-pixel); font-size: 1.2rem;
+            color: #333; line-height: 1.4;
+        }
+        #shimmer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s; z-index: 999;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="game-screen">
-            <!-- Loading Screen -->
-            <div class="loading-screen" id="loading-screen">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">Loading Pokémon K&E Version...</div>
-                <div class="credits">© 2024 Pokémon K&E Fan Game. Pokémon is © Nintendo/Creatures Inc./GAME FREAK inc.</div>
-            </div>
 
-            <!-- Title Screen -->
-            <div class="title-screen" id="title-screen">
-                <div class="title-logo">POKÉMON<br>K&E VERSION</div>
-                <div class="title-tagline">"A New Adventure Takes Root!"</div>
-                <div class="title-menu">
-                    <div class="title-option" onclick="startNewGame()">NEW GAME</div>
-                    <div class="title-option" onclick="continueGame()">CONTINUE</div>
-                    <div class="title-option" onclick="showOptions()">OPTIONS</div>
-                </div>
-                <div class="credits">Press START to begin your journey!</div>
-            </div>
+<div id="stage">
+    <canvas id="gameCanvas"></canvas>
+    <div id="shimmer"></div>
 
-            <!-- Character Creation -->
-            <div class="character-screen" id="character-screen">
-                <div class="character-prompt">What is your name?</div>
-                <div class="character-options">
-                    <div class="character-sprite" data-gender="male" onclick="selectCharacter('male')"></div>
-                    <div class="character-sprite" data-gender="female" onclick="selectCharacter('female')"></div>
-                </div>
-                <input type="text" class="name-input" id="player-name" maxlength="10" placeholder="Enter your name">
-                <div class="title-option" onclick="confirmCharacter()">START ADVENTURE</div>
-            </div>
-
-            <!-- Game Canvas -->
-            <canvas id="game-canvas" width="320" height="480"></canvas>
-
-            <!-- UI Layer -->
-            <div id="ui-layer">
-                <!-- Virtual Controls -->
-                <div class="virtual-joystick" id="joystick">
-                    <div class="joystick-base"></div>
-                    <div class="joystick-thumb" id="joystick-thumb"></div>
-                </div>
-
-                <div class="action-buttons">
-                    <div class="action-button" id="b-button">B</div>
-                    <div class="action-button" id="a-button">A</div>
-                </div>
-
-                <!-- Radial Menu -->
-                <div class="radial-menu" id="radial-menu">
-                    <div class="radial-item" style="transform: rotate(45deg) translate(100px) rotate(-45deg);" onclick="useItem('bike')">🚲</div>
-                    <div class="radial-item" style="transform: rotate(90deg) translate(100px) rotate(-90deg);" onclick="useItem('fishing')">🎣</div>
-                    <div class="radial-item" style="transform: rotate(135deg) translate(100px) rotate(-135deg);" onclick="openMenu('bag')">🎒</div>
-                    <div class="radial-item" style="transform: rotate(180deg) translate(100px) rotate(-180deg);" onclick="openMenu('pokemon')">⚡</div>
-                </div>
-
-                <!-- Dialogue Box -->
-                <div class="dialogue-box" id="dialogue-box">
-                    <div class="dialogue-text" id="dialogue-text"></div>
-                    <div class="dialogue-continue">▼</div>
-                </div>
-
-                <!-- Battle UI -->
-                <div class="battle-ui" id="battle-ui">
-                    <div class="battle-menu">
-                        <div class="battle-option" onclick="battleAction('fight')">FIGHT</div>
-                        <div class="battle-option" onclick="battleAction('pokemon')">POKÉMON</div>
-                        <div class="battle-option" onclick="battleAction('bag')">BAG</div>
-                        <div class="battle-option" onclick="battleAction('run')">RUN</div>
-                    </div>
-                </div>
-
-                <div class="enemy-health" id="enemy-health">
-                    <div>RIVAL'S PIKACHU</div>
-                    <div class="health-bar">
-                        <div class="health-fill" id="enemy-health-fill" style="width: 100%"></div>
-                    </div>
-                </div>
-
-                <div class="player-health" id="player-health">
-                    <div>CHARMANDER</div>
-                    <div class="health-bar">
-                        <div class="health-fill" id="player-health-fill" style="width: 100%"></div>
-                    </div>
-                </div>
-
-                <!-- Transition Effects -->
-                <div class="transition-effect" id="transition-effect"></div>
-
-                <!-- Pokédex -->
-                <div class="pokedex-screen" id="pokedex-screen">
-                    <div class="pokedex-header">POKÉDEX</div>
-                    <div class="pokedex-list" id="pokedex-list"></div>
-                    <div class="title-option" onclick="closePokedex()">CLOSE</div>
-                </div>
-
-                <!-- Menu -->
-                <div class="menu-screen" id="menu-screen">
-                    <div class="menu-grid">
-                        <div class="menu-item" onclick="openPokedex()">
-                            <div class="menu-icon">📱</div>
-                            <div class="menu-label">POKÉDEX</div>
-                        </div>
-                        <div class="menu-item" onclick="openMenu('pokemon')">
-                            <div class="menu-icon">⚡</div>
-                            <div class="menu-label">POKÉMON</div>
-                        </div>
-                        <div class="menu-item" onclick="openMenu('bag')">
-                            <div class="menu-icon">🎒</div>
-                            <div class="menu-label">BAG</div>
-                        </div>
-                        <div class="menu-item" onclick="openMenu('save')">
-                            <div class="menu-icon">💾</div>
-                            <div class="menu-label">SAVE</div>
-                        </div>
-                        <div class="menu-item" onclick="openMenu('options')">
-                            <div class="menu-icon">⚙️</div>
-                            <div class="menu-label">OPTIONS</div>
-                        </div>
-                        <div class="menu-item" onclick="closeMenu()">
-                            <div class="menu-icon">✕</div>
-                            <div class="menu-label">CLOSE</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pokémon Selection -->
-                <div class="pokemon-selection" id="pokemon-selection">
-                    <div class="selection-title">Choose your Pokémon!</div>
-                    <div class="pokemon-options">
-                        <div class="pokemon-option" onclick="choosePokemon('treecko')">
-                            <div class="pokemon-sprite-large" id="sprite-treecko"></div>
-                            <div class="pokemon-name">TREECKO</div>
-                            <div class="pokemon-type type-grass">GRASS</div>
-                        </div>
-                        <div class="pokemon-option" onclick="choosePokemon('charmander')">
-                            <div class="pokemon-sprite-large" id="sprite-charmander"></div>
-                            <div class="pokemon-name">CHARMANDER</div>
-                            <div class="pokemon-type type-fire">FIRE</div>
-                        </div>
-                        <div class="pokemon-option" onclick="choosePokemon('froakie')">
-                            <div class="pokemon-sprite-large" id="sprite-froakie"></div>
-                            <div class="pokemon-name">FROAKIE</div>
-                            <div class="pokemon-type type-water">WATER</div>
-                        </div>
-                    </div>
-                    <div class="character-prompt">Professor: "These Pokémon need your help!"</div>
-                </div>
-
-                <!-- Notifications -->
-                <div class="notification" id="notification"></div>
-
-                <!-- Audio Controls -->
-                <div class="audio-controls">
-                    <div class="audio-button" id="music-toggle" onclick="toggleMusic()">♪</div>
-                    <div class="audio-button" id="sfx-toggle" onclick="toggleSFX()">🔊</div>
-                </div>
-
-                <!-- Debug -->
-                <div class="debug-info" id="debug-info"></div>
-            </div>
-        </div>
+    <div id="dialogue-container">
+        <div id="dialogue-text"></div>
     </div>
 
-    <script>
-        // Pokémon K&E Version - Game Engine
-        // Total lines: ~1500 lines of JavaScript + 1500 lines CSS = 3000+ lines total
+    <div id="joy-pad"></div>
+    <div id="action-cluster">
+        <div id="btn-a" class="joy-btn">A</div>
+        <div id="btn-b" class="joy-btn">B</div>
+    </div>
+</div>
 
-        // Game State Management - 100 lines
-        class GameState {
-            constructor() {
-                this.player = {
-                    name: '',
-                    gender: 'male',
-                    sprite: 'player_male',
-                    x: 0,
-                    y: 0,
-                    direction: 'down',
-                    pokemon: [],
-                    items: [],
-                    badges: 0,
-                    money: 3000,
-                    pokedex: []
-                };
-                
-                this.currentScene = 'title';
-                this.currentMap = null;
-                this.npcs = [];
-                this.doors = [];
-                this.gameTime = {
-                    hours: 10,
-                    minutes: 0,
-                    day: 1
-                };
-                
-                this.settings = {
-                    music: true,
-                    sfx: true,
-                    volume: 0.7,
-                    controls: 'dynamic',
-                    textSpeed: 'normal'
-                };
-                
-                this.battle = {
-                    active: false,
-                    enemy: null,
-                    playerPokemon: null,
-                    turn: 'player'
-                };
-            }
-            
-            save() {
-                localStorage.setItem('pkmn_ke_save', JSON.stringify(this));
-                this.showNotification('Game saved!');
-            }
-            
-            load() {
-                const save = localStorage.getItem('pkmn_ke_save');
-                if (save) {
-                    Object.assign(this, JSON.parse(save));
-                    return true;
-                }
-                return false;
-            }
-            
-            showNotification(text) {
-                const notification = document.getElementById('notification');
-                notification.textContent = text;
-                notification.classList.add('active');
-                setTimeout(() => notification.classList.remove('active'), 2000);
-            }
+<script>
+/** * POKEMON AMBER CORE ENGINE 
+ * Author: Gemini
+ * Concept: Orebound Region
+ */
+
+const CONFIG = {
+    TILE_SIZE: 16,
+    SCALE: 4,
+    WIDTH: 240,
+    HEIGHT: 160,
+    FPS: 60
+};
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = CONFIG.WIDTH * CONFIG.SCALE;
+canvas.height = CONFIG.HEIGHT * CONFIG.SCALE;
+
+// --- GAME DATA: MAPS & ENTITIES ---
+const WORLD = {
+    player: {
+        x: 5, y: 5, 
+        gridX: 5, gridY: 5,
+        dir: 'down', 
+        animFrame: 0,
+        isMoving: false,
+        moveSpeed: 0.1,
+        inventory: ["Town Map"],
+        pokemon: []
+    },
+    maps: {
+        'MAPLE_HOUSE': {
+            tiles: [
+                [1,1,1,1,1,1,1,1,1,1],
+                [1,4,4,4,4,4,4,4,4,1],
+                [1,0,0,0,0,0,0,3,0,1], // 3 = Mom
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,2,2,1,1,1,1]  // 2 = Exit
+            ],
+            color: '#a08060'
+        },
+        'MAPLE_ROOT_TOWN': {
+            tiles: Array(15).fill(0).map(() => Array(20).fill(0)),
+            color: '#70a040'
+        },
+        'SEQUOIA_LAB_F1': {
+            tiles: [
+                [1,1,1,1,1,1,1,1],
+                [1,0,0,0,0,0,0,1],
+                [1,0,3,0,0,0,0,1], // Assistant
+                [1,1,1,1,1,5,1,1], // 5 = Shimmer Door
+                [1,0,0,0,0,0,0,1],
+                [1,1,1,2,2,1,1,1]
+            ],
+            color: '#90a0b0'
         }
+    }
+};
 
-        // Game Engine Core - 200 lines
-        class GameEngine {
-            constructor() {
-                this.canvas = document.getElementById('game-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.state = new GameState();
-                this.keys = {};
-                this.touch = {
-                    active: false,
-                    x: 0,
-                    y: 0
-                };
-                
-                // Camera
-                this.camera = {
-                    x: 0,
-                    y: 0,
-                    targetX: 0,
-                    targetY: 0
-                };
-                
-                // Animation
-                this.animationFrame = 0;
-                this.lastTime = 0;
-                this.fps = 60;
-                
-                // Resources
-                this.images = {};
-                this.audio = {};
-                this.maps = {};
-                
-                // Mobile controls
-                this.joystickActive = false;
-                this.joystickOrigin = {x: 0, y: 0};
-                this.joystickPosition = {x: 0, y: 0};
-                
-                this.init();
-            }
-            
-            init() {
-                this.setupCanvas();
-                this.setupControls();
-                this.loadResources();
-                this.setupAudio();
-                this.gameLoop();
-                
-                // Hide loading screen after 2 seconds
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('title-screen').style.display = 'flex';
-                }, 2000);
-            }
-            
-            setupCanvas() {
-                this.ctx.imageSmoothingEnabled = false;
-                this.canvas.width = 320;
-                this.canvas.height = 480;
-            }
-            
-            setupControls() {
-                // Touch controls
-                document.getElementById('joystick').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    this.joystickOrigin = {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2
-                    };
-                    this.joystickActive = true;
-                    this.updateJoystick(touch.clientX, touch.clientY);
-                });
-                
-                document.addEventListener('touchmove', (e) => {
-                    if (this.joystickActive && e.touches[0]) {
-                        e.preventDefault();
-                        this.updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
-                    }
-                    
-                    // Swipe menu activation
-                    if (e.touches[0] && e.touches[0].clientX > window.innerWidth - 50) {
-                        document.getElementById('radial-menu').classList.add('active');
-                    }
-                });
-                
-                document.addEventListener('touchend', (e) => {
-                    this.joystickActive = false;
-                    document.getElementById('joystick-thumb').style.transform = 'translate(-50%, -50%)';
-                    document.getElementById('radial-menu').classList.remove('active');
-                });
-                
-                // Button controls
-                document.getElementById('a-button').addEventListener('click', () => this.handleAction());
-                document.getElementById('b-button').addEventListener('click', () => this.handleCancel());
-                
-                // Keyboard fallback
-                document.addEventListener('keydown', (e) => {
-                    this.keys[e.key.toLowerCase()] = true;
-                    
-                    if (e.key === 'Escape') {
-                        this.toggleMenu();
-                    }
-                });
-                
-                document.addEventListener('keyup', (e) => {
-                    this.keys[e.key.toLowerCase()] = false;
-                });
-                
-                // Prevent context menu on long press
-                document.addEventListener('contextmenu', (e) => e.preventDefault());
-            }
-            
-            updateJoystick(clientX, clientY) {
-                const dx = clientX - this.joystickOrigin.x;
-                const dy = clientY - this.joystickOrigin.y;
-                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 40);
-                const angle = Math.atan2(dy, dx);
-                
-                const thumbX = Math.cos(angle) * distance;
-                const thumbY = Math.sin(angle) * distance;
-                
-                document.getElementById('joystick-thumb').style.transform = 
-                    `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px))`;
-                
-                // Update player movement based on joystick
-                if (distance > 10) {
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        this.state.player.direction = dx > 0 ? 'right' : 'left';
-                    } else {
-                        this.state.player.direction = dy > 0 ? 'down' : 'up';
-                    }
-                    
-                    // Move player
-                    const speed = 2;
-                    const moveX = Math.cos(angle) * speed * (distance / 40);
-                    const moveY = Math.sin(angle) * speed * (distance / 40);
-                    
-                    this.state.player.x += moveX;
-                    this.state.player.y += moveY;
-                    
-                    // Check for collisions
-                    this.checkCollisions();
-                    
-                    // Check for door teleports
-                    this.checkDoors();
-                    
-                    // Update camera
-                    this.updateCamera();
-                }
-            }
-            
-            loadResources() {
-                // Load sprites and tiles
-                this.loadImage('tileset', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
-                this.loadImage('player_male', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVR42mNgGAWjYBSQCRgYGBj+x96+/R+RjYePHTv2nzQNSEJkNWgacDVQbADVBgC5mwX+E0QZ/gAAAABJRU5ErkJggg==');
-                this.loadImage('player_female', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVR42mNgGAWjYBSQCRgYGBj+x96+/R+RjYePHTv2nzQNSEJkNWgacDVQbADVBgC5mwX+E0QZ/gAAAABJRU5ErkJggg==');
-                
-                // Load Pokémon sprites
-                this.loadImage('treecko', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVR42mNgGAWjYBSQCRgYGBj+x96+/R+RjYePHTv2nzQNSEJkNWgacDVQbADVBgC5mwX+E0QZ/gAAAABJRU5ErkJggg==');
-                this.loadImage('charmander', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVR42mNgGAWjYBSQCRgYGBj+x96+/R+RjYePHTv2nzQNSEJkNWgacDVQbADVBgC5mwX+E0QZ/gAAAABJRU5ErkJggg==');
-                this.loadImage('froakie', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVR42mNgGAWjYBSQCRj+A8F/EFYAAAAASUVORK5CYII=');
-                
-                // Create test maps
-                this.createMaps();
-            }
-            
-            loadImage(name, src) {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => {
-                    this.images[name] = img;
-                };
-            }
-            
-            setupAudio() {
-                // Create audio context for GBA-style sound
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Create oscillators for sound effects
-                    this.sfx = {
-                        select: () => this.playTone(800, 0.1),
-                        confirm: () => this.playTone(1200, 0.1),
-                        cancel: () => this.playTone(400, 0.1),
-                        teleport: () => this.playTone(1500, 0.3, 'sine'),
-                        battleStart: () => this.playTone(600, 0.5, 'sawtooth')
-                    };
-                } catch (e) {
-                    console.log('Audio not supported');
-                }
-            }
-            
-            playTone(freq, duration, type = 'square') {
-                if (!this.state.settings.sfx) return;
-                
-                try {
-                    const oscillator = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    
-                    oscillator.frequency.value = freq;
-                    oscillator.type = type;
-                    
-                    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
-                    
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + duration);
-                } catch (e) {}
-            }
-            
-            createMaps() {
-                // House interior
-                this.maps.house = {
-                    name: 'Your House',
-                    width: 10,
-                    height: 8,
-                    tiles: Array(80).fill(1),
-                    collisions: Array(80).fill(0),
-                    npcs: [
-                        {
-                            id: 'mom',
-                            x: 4,
-                            y: 3,
-                            sprite: 'npc_female',
-                            dialogue: [
-                                "Good morning, sleepyhead!",
-                                "Professor Sequoia sent you an urgent letter.",
-                                "Your friend already left for the lab.",
-                                "Hurry along now!"
-                            ]
-                        }
-                    ],
-                    doors: [
-                        {
-                            x: 4,
-                            y: 7,
-                            width: 2,
-                            height: 1,
-                            target: 'maple_root_town',
-                            targetX: 5,
-                            targetY: 1
-                        }
-                    ]
-                };
-                
-                // Maple Root Town
-                this.maps.maple_root_town = {
-                    name: 'Maple Root Town',
-                    width: 20,
-                    height: 15,
-                    tiles: Array(300).fill(2),
-                    collisions: [],
-                    npcs: [],
-                    doors: [
-                        {
-                            x: 5,
-                            y: 0,
-                            width: 2,
-                            height: 1,
-                            target: 'house',
-                            targetX: 4,
-                            targetY: 6
-                        },
-                        {
-                            x: 10,
-                            y: 7,
-                            width: 3,
-                            height: 2,
-                            target: 'lab_ground',
-                            targetX: 3,
-                            targetY: 8
-                        }
-                    ]
-                };
-                
-                // Lab Ground Floor
-                this.maps.lab_ground = {
-                    name: 'Habitat Research Lab',
-                    width: 15,
-                    height: 12,
-                    tiles: Array(180).fill(3),
-                    collisions: [],
-                    npcs: [
-                        {
-                            id: 'assistant',
-                            x: 3,
-                            y: 6,
-                            sprite: 'npc_scientist',
-                            dialogue: [
-                                "Ah, you must be [PLAYER]!",
-                                "The Professor is waiting for you upstairs.",
-                                "Just head through that door—it'll take you right to his study!"
-                            ]
-                        }
-                    ],
-                    doors: [
-                        {
-                            x: 7,
-                            y: 11,
-                            width: 2,
-                            height: 1,
-                            target: 'maple_root_town',
-                            targetX: 11,
-                            targetY: 8
-                        },
-                        {
-                            x: 7,
-                            y: 0,
-                            width: 2,
-                            height: 1,
-                            target: 'lab_study',
-                            targetX: 4,
-                            targetY: 8,
-                            effect: 'shimmer'
-                        }
-                    ]
-                };
-                
-                // Lab Study (Upstairs)
-                this.maps.lab_study = {
-                    name: 'Professor\'s Study',
-                    width: 12,
-                    height: 10,
-                    tiles: Array(120).fill(4),
-                    collisions: [],
-                    npcs: [
-                        {
-                            id: 'professor',
-                            x: 5,
-                            y: 4,
-                            sprite: 'npc_professor',
-                            dialogue: [
-                                "Ah, [PLAYER]! Perfect timing.",
-                                "Three Pokémon from distant regions need trainers.",
-                                "There have been strange tremors in Orebound.",
-                                "Please, choose a Pokémon and help with our research!"
-                            ]
-                        },
-                        {
-                            id: 'rival',
-                            x: 7,
-                            y: 4,
-                            sprite: 'rival',
-                            dialogue: [
-                                "Took you long enough!",
-                                "I already chose my Pokémon.",
-                                "Let's battle sometime!"
-                            ]
-                        }
-                    ],
-                    doors: [
-                        {
-                            x: 4,
-                            y: 9,
-                            width: 2,
-                            height: 1,
-                            target: 'lab_ground',
-                            targetX: 7,
-                            targetY: 1,
-                            effect: 'shimmer'
-                        }
-                    ]
-                };
-            }
-            
-            checkCollisions() {
-                // Simple collision detection
-                const map = this.maps[this.state.currentMap];
-                if (!map || !map.collisions) return;
-                
-                const tileX = Math.floor(this.state.player.x / 16);
-                const tileY = Math.floor(this.state.player.y / 16);
-                const tileIndex = tileY * map.width + tileX;
-                
-                if (map.collisions[tileIndex]) {
-                    // Move player back
-                    this.state.player.x -= Math.cos(Math.atan2(this.joystickPosition.y, this.joystickPosition.x)) * 2;
-                    this.state.player.y -= Math.sin(Math.atan2(this.joystickPosition.y, this.joystickPosition.x)) * 2;
-                }
-            }
-            
-            checkDoors() {
-                const map = this.maps[this.state.currentMap];
-                if (!map || !map.doors) return;
-                
-                const playerX = this.state.player.x;
-                const playerY = this.state.player.y;
-                
-                for (const door of map.doors) {
-                    if (playerX >= door.x * 16 && 
-                        playerX <= (door.x + door.width) * 16 &&
-                        playerY >= door.y * 16 && 
-                        playerY <= (door.y + door.height) * 16) {
-                        
-                        this.teleport(door.target, door.targetX, door.targetY, door.effect);
-                        break;
-                    }
-                }
-            }
-            
-            teleport(mapName, x, y, effect = 'fade') {
-                // Play teleport sound
-                if (this.sfx.teleport) this.sfx.teleport();
-                
-                // Show transition effect
-                const transition = document.getElementById('transition-effect');
-                transition.className = 'transition-effect ' + effect;
-                transition.style.opacity = '1';
-                
-                setTimeout(() => {
-                    // Change map
-                    this.state.currentMap = mapName;
-                    this.state.player.x = x * 16;
-                    this.state.player.y = y * 16;
-                    
-                    // Update camera
-                    this.updateCamera();
-                    
-                    // Hide transition
-                    setTimeout(() => {
-                        transition.style.opacity = '0';
-                    }, 300);
-                    
-                    // Show map name
-                    this.state.showNotification(this.maps[mapName].name);
-                    
-                    // Check for special events
-                    this.checkMapEvents(mapName);
-                }, 300);
-            }
-            
-            checkMapEvents(mapName) {
-                switch(mapName) {
-                    case 'lab_study':
-                        if (!this.state.player.pokemon.length) {
-                            setTimeout(() => {
-                                this.showPokemonSelection();
-                            }, 1000);
-                        }
-                        break;
-                }
-            }
-            
-            updateCamera() {
-                // Center camera on player
-                this.camera.targetX = this.state.player.x - this.canvas.width / 2;
-                this.camera.targetY = this.state.player.y - this.canvas.height / 2;
-                
-                // Smooth camera movement
-                this.camera.x += (this.camera.targetX - this.camera.x) * 0.1;
-                this.camera.y += (this.camera.targetY - this.camera.y) * 0.1;
-                
-                // Clamp camera to map bounds
-                const map = this.maps[this.state.currentMap];
-                if (map) {
-                    const maxX = Math.max(0, map.width * 16 - this.canvas.width);
-                    const maxY = Math.max(0, map.height * 16 - this.canvas.height);
-                    this.camera.x = Math.max(0, Math.min(this.camera.x, maxX));
-                    this.camera.y = Math.max(0, Math.min(this.camera.y, maxY));
-                }
-            }
-            
-            handleAction() {
-                if (this.state.currentScene === 'game') {
-                    // Check for NPC interaction
-                    const map = this.maps[this.state.currentMap];
-                    if (map && map.npcs) {
-                        const playerX = Math.floor(this.state.player.x / 16);
-                        const playerY = Math.floor(this.state.player.y / 16);
-                        
-                        for (const npc of map.npcs) {
-                            const distX = Math.abs(playerX - npc.x);
-                            const distY = Math.abs(playerY - npc.y);
-                            
-                            if (distX + distY <= 1) {
-                                this.showDialogue(npc.dialogue, npc.id);
-                                return;
-                            }
-                        }
-                    }
-                    
-                    // Check for item interaction
-                    this.checkInteraction();
-                }
-            }
-            
-            handleCancel() {
-                if (document.getElementById('dialogue-box').classList.contains('active')) {
-                    this.hideDialogue();
-                } else if (document.getElementById('menu-screen').classList.contains('active')) {
-                    this.closeMenu();
-                } else if (document.getElementById('pokedex-screen').classList.contains('active')) {
-                    this.closePokedex();
-                } else {
-                    this.toggleMenu();
-                }
-            }
-            
-            showDialogue(lines, speaker = '') {
-                const dialogueBox = document.getElementById('dialogue-box');
-                const dialogueText = document.getElementById('dialogue-text');
-                
-                let dialogue = lines.join(' ');
-                dialogue = dialogue.replace(/\[PLAYER\]/g, this.state.player.name);
-                
-                dialogueText.textContent = (speaker ? speaker + ': ' : '') + dialogue;
-                dialogueBox.classList.add('active');
-                
-                if (this.sfx.select) this.sfx.select();
-            }
-            
-            hideDialogue() {
-                document.getElementById('dialogue-box').classList.remove('active');
-                if (this.sfx.cancel) this.sfx.cancel();
-            }
-            
-            checkInteraction() {
-                // Check for interactive tiles
-                const map = this.maps[this.state.currentMap];
-                if (!map) return;
-                
-                const tileX = Math.floor(this.state.player.x / 16);
-                const tileY = Math.floor(this.state.player.y / 16);
-                
-                // Check for Pokémon in tall grass
-                if (this.isTallGrass(tileX, tileY)) {
-                    this.startWildBattle();
-                }
-            }
-            
-            isTallGrass(x, y) {
-                // Simplified tall grass check
-                return Math.random() < 0.01; // 1% chance per step
-            }
-            
-            startWildBattle() {
-                this.state.battle.active = true;
-                this.state.battle.enemy = {
-                    name: 'PIDGEY',
-                    level: 3,
-                    hp: 20,
-                    maxHp: 20,
-                    type: 'normal'
-                };
-                
-                if (this.state.player.pokemon.length > 0) {
-                    this.state.battle.playerPokemon = {...this.state.player.pokemon[0]};
-                }
-                
-                // Show battle UI
-                document.getElementById('battle-ui').classList.add('active');
-                document.getElementById('enemy-health').style.display = 'block';
-                document.getElementById('player-health').style.display = 'block';
-                
-                if (this.sfx.battleStart) this.sfx.battleStart();
-                
-                // Update health bars
-                this.updateHealthBars();
-            }
-            
-            updateHealthBars() {
-                if (this.state.battle.enemy) {
-                    const percent = (this.state.battle.enemy.hp / this.state.battle.enemy.maxHp) * 100;
-                    document.getElementById('enemy-health-fill').style.width = percent + '%';
-                }
-                
-                if (this.state.battle.playerPokemon) {
-                    const percent = (this.state.battle.playerPokemon.hp / this.state.battle.playerPokemon.maxHp) * 100;
-                    document.getElementById('player-health-fill').style.width = percent + '%';
-                }
-            }
-            
-            battleAction(action) {
-                if (!this.state.battle.active) return;
-                
-                switch(action) {
-                    case 'fight':
-                        this.attackEnemy();
-                        break;
-                    case 'run':
-                        if (Math.random() > 0.3) {
-                            this.state.showNotification('Got away safely!');
-                            this.endBattle();
-                        } else {
-                            this.state.showNotification('Couldn\'t escape!');
-                            this.enemyTurn();
-                        }
-                        break;
-                    case 'pokemon':
-                        this.state.showNotification('Pokémon menu would open here');
-                        break;
-                    case 'bag':
-                        this.state.showNotification('Bag would open here');
-                        break;
-                }
-            }
-            
-            attackEnemy() {
-                if (!this.state.battle.enemy || !this.state.battle.playerPokemon) return;
-                
-                // Player attacks
-                const damage = 5 + Math.floor(Math.random() * 5);
-                this.state.battle.enemy.hp = Math.max(0, this.state.battle.enemy.hp - damage);
-                this.state.showNotification(`${this.state.battle.playerPokemon.name} attacked for ${damage} damage!`);
-                this.updateHealthBars();
-                
-                if (this.state.battle.enemy.hp <= 0) {
-                    setTimeout(() => {
-                        this.state.showNotification('Enemy fainted!');
-                        this.endBattle();
-                    }, 1000);
-                } else {
-                    // Enemy attacks back
-                    setTimeout(() => this.enemyTurn(), 1000);
-                }
-            }
-            
-            enemyTurn() {
-                if (!this.state.battle.enemy || !this.state.battle.playerPokemon) return;
-                
-                const damage = 3 + Math.floor(Math.random() * 4);
-                this.state.battle.playerPokemon.hp = Math.max(0, this.state.battle.playerPokemon.hp - damage);
-                this.state.showNotification(`Enemy attacked for ${damage} damage!`);
-                this.updateHealthBars();
-                
-                if (this.state.battle.playerPokemon.hp <= 0) {
-                    setTimeout(() => {
-                        this.state.showNotification('Your Pokémon fainted!');
-                        this.endBattle();
-                    }, 1000);
-                }
-            }
-            
-            endBattle() {
-                this.state.battle.active = false;
-                document.getElementById('battle-ui').classList.remove('active');
-                document.getElementById('enemy-health').style.display = 'none';
-                document.getElementById('player-health').style.display = 'none';
-            }
-            
-            showPokemonSelection() {
-                document.getElementById('pokemon-selection').classList.add('active');
-            }
-            
-            choosePokemon(pokemon) {
-                let chosenPokemon;
-                
-                switch(pokemon) {
-                    case 'treecko':
-                        chosenPokemon = {
-                            name: 'TREECKO',
-                            type: 'grass',
-                            level: 5,
-                            hp: 20,
-                            maxHp: 20,
-                            moves: ['Tackle', 'Growl']
-                        };
-                        break;
-                    case 'charmander':
-                        chosenPokemon = {
-                            name: 'CHARMANDER',
-                            type: 'fire',
-                            level: 5,
-                            hp: 19,
-                            maxHp: 19,
-                            moves: ['Scratch', 'Growl']
-                        };
-                        break;
-                    case 'froakie':
-                        chosenPokemon = {
-                            name: 'FROAKIE',
-                            type: 'water',
-                            level: 5,
-                            hp: 21,
-                            maxHp: 21,
-                            moves: ['Pound', 'Growl']
-                        };
-                        break;
-                }
-                
-                this.state.player.pokemon.push(chosenPokemon);
-                this.state.pokedex.push({
-                    number: 1,
-                    name: chosenPokemon.name,
-                    seen: true,
-                    caught: true
-                });
-                
-                document.getElementById('pokemon-selection').classList.remove('active');
-                
-                // Rival chooses advantage
-                let rivalPokemon;
-                if (pokemon === 'treecko') rivalPokemon = 'charmander';
-                else if (pokemon === 'charmander') rivalPokemon = 'froakie';
-                else rivalPokemon = 'treecko';
-                
-                this.showDialogue([
-                    `Your rival chose ${rivalPokemon.toUpperCase()}!`,
-                    "Good luck on your journey!"
-                ], 'Professor');
-                
-                // Give Pokédex
-                setTimeout(() => {
-                    this.state.showNotification('Received a Pokédex!');
-                }, 2000);
-            }
-            
-            render() {
-                // Clear canvas
-                this.ctx.fillStyle = '#000';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                if (this.state.currentScene === 'game' && this.state.currentMap) {
-                    this.renderMap();
-                    this.renderNPCs();
-                    this.renderPlayer();
-                }
-            }
-            
-            renderMap() {
-                const map = this.maps[this.state.currentMap];
-                if (!map) return;
-                
-                // Draw background (simplified)
-                this.ctx.fillStyle = '#8bac0f';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Draw grid
-                this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-                this.ctx.lineWidth = 1;
-                
-                for (let x = 0; x < map.width; x++) {
-                    for (let y = 0; y < map.height; y++) {
-                        const screenX = x * 16 - this.camera.x;
-                        const screenY = y * 16 - this.camera.y;
-                        
-                        if (screenX >= -16 && screenX <= this.canvas.width &&
-                            screenY >= -16 && screenY <= this.canvas.height) {
-                            
-                            // Draw grass tile
-                            this.ctx.fillStyle = '#78c850';
-                            this.ctx.fillRect(screenX, screenY, 16, 16);
-                            
-                            // Draw grid
-                            this.ctx.strokeRect(screenX, screenY, 16, 16);
-                        }
-                    }
-                }
-            }
-            
-            renderNPCs() {
-                const map = this.maps[this.state.currentMap];
-                if (!map || !map.npcs) return;
-                
-                this.ctx.fillStyle = '#306850'; // NPC color
-                
-                for (const npc of map.npcs) {
-                    const screenX = npc.x * 16 - this.camera.x;
-                    const screenY = npc.y * 16 - this.camera.y;
-                    
-                    if (screenX >= -16 && screenX <= this.canvas.width &&
-                        screenY >= -16 && screenY <= this.canvas.height) {
-                        
-                        // Draw NPC
-                        this.ctx.fillStyle = '#306850';
-                        this.ctx.fillRect(screenX + 4, screenY, 8, 16);
-                        
-                        // Draw NPC face
-                        this.ctx.fillStyle = '#000';
-                        this.ctx.fillRect(screenX + 6, screenY + 4, 2, 2);
-                    }
-                }
-            }
-            
-            renderPlayer() {
-                const screenX = this.state.player.x - this.camera.x;
-                const screenY = this.state.player.y - this.camera.y;
-                
-                // Draw player
-                this.ctx.fillStyle = this.state.player.gender === 'male' ? '#306850' : '#b86db8';
-                this.ctx.fillRect(screenX, screenY, 16, 16);
-                
-                // Draw player face based on direction
-                this.ctx.fillStyle = '#000';
-                switch(this.state.player.direction) {
-                    case 'down':
-                        this.ctx.fillRect(screenX + 6, screenY + 8, 2, 2);
-                        break;
-                    case 'up':
-                        this.ctx.fillRect(screenX + 6, screenY + 4, 2, 2);
-                        break;
-                    case 'left':
-                        this.ctx.fillRect(screenX + 4, screenY + 6, 2, 2);
-                        break;
-                    case 'right':
-                        this.ctx.fillRect(screenX + 8, screenY + 6, 2, 2);
-                        break;
-                }
-                
-                // Draw player shadow
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                this.ctx.fillRect(screenX + 2, screenY + 14, 12, 2);
-            }
-            
-            gameLoop(timestamp) {
-                requestAnimationFrame((ts) => this.gameLoop(ts));
-                
-                // Limit FPS
-                const delta = timestamp - this.lastTime;
-                if (delta < 1000 / this.fps) return;
-                this.lastTime = timestamp;
-                
-                // Update game state
-                this.update(delta);
-                
-                // Render
-                this.render();
-                
-                // Update debug info
-                this.updateDebugInfo();
-            }
-            
-            update(delta) {
-                // Update game time
-                this.state.gameTime.minutes += delta / 1000;
-                if (this.state.gameTime.minutes >= 60) {
-                    this.state.gameTime.minutes = 0;
-                    this.state.gameTime.hours++;
-                    if (this.state.gameTime.hours >= 24) {
-                        this.state.gameTime.hours = 0;
-                        this.state.gameTime.day++;
-                    }
-                }
-            }
-            
-            updateDebugInfo() {
-                const debug = document.getElementById('debug-info');
-                debug.innerHTML = `
-                    Map: ${this.state.currentMap || 'none'}<br>
-                    Position: ${Math.floor(this.state.player.x/16)},${Math.floor(this.state.player.y/16)}<br>
-                    Time: ${this.state.gameTime.hours}:${Math.floor(this.state.gameTime.minutes)}<br>
-                    Pokémon: ${this.state.player.pokemon.length}
-                `;
-            }
-            
-            toggleMenu() {
-                const menu = document.getElementById('menu-screen');
-                if (menu.classList.contains('active')) {
-                    this.closeMenu();
-                } else {
-                    this.openMenu();
-                }
-            }
-            
-            openMenu() {
-                document.getElementById('menu-screen').classList.add('active');
-                if (this.sfx.select) this.sfx.select();
-            }
-            
-            closeMenu() {
-                document.getElementById('menu-screen').classList.remove('active');
-                if (this.sfx.cancel) this.sfx.cancel();
-            }
-            
-            openPokedex() {
-                const pokedexList = document.getElementById('pokedex-list');
-                pokedexList.innerHTML = '';
-                
-                this.state.pokedex.forEach(pokemon => {
-                    const entry = document.createElement('div');
-                    entry.className = 'pokedex-entry';
-                    entry.innerHTML = `
-                        <div>#${pokemon.number.toString().padStart(3, '0')}</div>
-                        <div class="pokemon-sprite-small"></div>
-                        <div>${pokemon.name}</div>
-                        <div>${pokemon.caught ? '✓' : '...'}</div>
-                    `;
-                    pokedexList.appendChild(entry);
-                });
-                
-                document.getElementById('pokedex-screen').classList.add('active');
-                this.closeMenu();
-            }
-            
-            closePokedex() {
-                document.getElementById('pokedex-screen').classList.remove('active');
-            }
-        }
+// --- CORE SYSTEMS ---
+const Game = {
+    state: 'OVERWORLD', // OVERWORLD, DIALOGUE, MENU, BATTLE
+    currentMap: 'MAPLE_HOUSE',
+    
+    init() {
+        this.bindControls();
+        this.loop();
+        this.triggerDialogue([
+            "Mom: Wake up, sleepyhead!",
+            "A letter arrived from Professor Sequoia.",
+            "He says it's URGENT. You should go to the Lab!"
+        ]);
+    },
 
-        // Global Functions - 100 lines
-        function startNewGame() {
-            document.getElementById('title-screen').style.display = 'none';
-            document.getElementById('character-screen').classList.add('active');
-        }
-
-        function selectCharacter(gender) {
-            const game = window.gameEngine;
-            game.state.player.gender = gender;
-            game.state.player.sprite = 'player_' + gender;
-            
-            const sprites = document.querySelectorAll('.character-sprite');
-            sprites.forEach(sprite => {
-                sprite.style.borderColor = sprite.dataset.gender === gender ? '#ffcc00' : 'transparent';
-            });
-            
-            if (game.sfx.select) game.sfx.select();
-        }
-
-        function confirmCharacter() {
-            const nameInput = document.getElementById('player-name');
-            const name = nameInput.value.trim() || 'ASH';
-            
-            if (name.length > 0) {
-                const game = window.gameEngine;
-                game.state.player.name = name.toUpperCase();
-                game.state.currentScene = 'game';
-                game.state.currentMap = 'house';
-                game.state.player.x = 5 * 16;
-                game.state.player.y = 5 * 16;
-                
-                document.getElementById('character-screen').classList.remove('active');
-                
-                // Show opening dialogue
-                setTimeout(() => {
-                    game.showDialogue([
-                        "Wake up, sleepyhead!",
-                        "Professor Sequoia sent you an urgent letter.",
-                        "Your friend already left for the lab.",
-                        "You should hurry!"
-                    ], 'Mom');
-                }, 500);
-                
-                if (game.sfx.confirm) game.sfx.confirm();
+    bindControls() {
+        window.addEventListener('keydown', (e) => {
+            if(this.state === 'DIALOGUE') {
+                if(e.key === 'z' || e.key === 'Enter') this.advanceDialogue();
+                return;
             }
-        }
-
-        function continueGame() {
-            const game = window.gameEngine;
-            if (game.state.load()) {
-                document.getElementById('title-screen').style.display = 'none';
-                game.state.currentScene = 'game';
-                game.state.showNotification('Game loaded!');
-            } else {
-                game.state.showNotification('No save file found!');
-            }
-        }
-
-        function showOptions() {
-            const game = window.gameEngine;
-            game.showDialogue([
-                "Options Menu",
-                "Music: " + (game.state.settings.music ? "ON" : "OFF"),
-                "SFX: " + (game.state.settings.sfx ? "ON" : "OFF"),
-                "Text Speed: " + game.state.settings.textSpeed.toUpperCase()
-            ]);
-        }
-
-        function useItem(item) {
-            const game = window.gameEngine;
-            switch(item) {
-                case 'bike':
-                    game.state.showNotification('You got on the Bicycle!');
-                    break;
-                case 'fishing':
-                    game.state.showNotification('You cast your Fishing Rod!');
-                    break;
-            }
-        }
-
-        function openMenu(section) {
-            const game = window.gameEngine;
-            switch(section) {
-                case 'bag':
-                    game.state.showNotification('Bag would open here');
-                    break;
-                case 'pokemon':
-                    game.state.showNotification('Pokémon menu would open here');
-                    break;
-                case 'save':
-                    game.state.save();
-                    break;
-                case 'options':
-                    showOptions();
-                    break;
-            }
-        }
-
-        function toggleMusic() {
-            const game = window.gameEngine;
-            game.state.settings.music = !game.state.settings.music;
-            const button = document.getElementById('music-toggle');
-            button.textContent = game.state.settings.music ? '♪' : '🔇';
-            game.state.showNotification('Music: ' + (game.state.settings.music ? 'ON' : 'OFF'));
-        }
-
-        function toggleSFX() {
-            const game = window.gameEngine;
-            game.state.settings.sfx = !game.state.settings.sfx;
-            const button = document.getElementById('sfx-toggle');
-            button.textContent = game.state.settings.sfx ? '🔊' : '🔇';
-            game.state.showNotification('SFX: ' + (game.state.settings.sfx ? 'ON' : 'OFF'));
-        }
-
-        // Initialize game when page loads
-        window.addEventListener('load', () => {
-            window.gameEngine = new GameEngine();
+            if(e.key === 'ArrowUp') this.move('up');
+            if(e.key === 'ArrowDown') this.move('down');
+            if(e.key === 'ArrowLeft') this.move('left');
+            if(e.key === 'ArrowRight') this.move('right');
         });
 
-        // Prevent scrolling on mobile
-        document.addEventListener('touchmove', (e) => {
-            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Handle orientation changes
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 100);
+        document.getElementById('btn-a').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if(this.state === 'DIALOGUE') this.advanceDialogue();
+            else this.interact();
         });
+    },
 
-        // Prevent pinch zoom
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
-        document.addEventListener('gesturechange', (e) => e.preventDefault());
-        document.addEventListener('gestureend', (e) => e.preventDefault());
+    move(dir) {
+        if(WORLD.player.isMoving) return;
+        
+        let targetX = WORLD.player.gridX;
+        let targetY = WORLD.player.gridY;
 
-        // Service Worker for PWA (optional)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
+        if(dir === 'up') targetY--;
+        if(dir === 'down') targetY++;
+        if(dir === 'left') targetX--;
+        if(dir === 'right') targetX++;
+
+        const map = WORLD.maps[this.currentMap];
+        if(this.isWalkable(targetX, targetY, map)) {
+            WORLD.player.gridX = targetX;
+            WORLD.player.gridY = targetY;
+            this.checkTileTrigger(targetX, targetY);
         }
-    </script>
+    },
+
+    isWalkable(x, y, map) {
+        if(y < 0 || y >= map.tiles.length || x < 0 || x >= map.tiles[0].length) return false;
+        return map.tiles[y][x] !== 1;
+    },
+
+    checkTileTrigger(x, y) {
+        const tile = WORLD.maps[this.currentMap].tiles[y][x];
+        if(tile === 2) this.transition('MAPLE_ROOT_TOWN', 10, 8);
+        if(tile === 5) this.shimmerTransition('SEQUOIA_LAB_F2', 5, 5);
+    },
+
+    shimmerTransition(newMap, x, y) {
+        const shim = document.getElementById('shimmer');
+        shim.style.opacity = '1';
+        setTimeout(() => {
+            this.currentMap = newMap;
+            WORLD.player.gridX = x;
+            WORLD.player.gridY = y;
+            shim.style.opacity = '0';
+        }, 400);
+    },
+
+    triggerDialogue(lines) {
+        this.state = 'DIALOGUE';
+        this.dialogueQueue = lines;
+        document.getElementById('dialogue-container').style.display = 'block';
+        this.advanceDialogue();
+    },
+
+    advanceDialogue() {
+        if(this.dialogueQueue.length > 0) {
+            document.getElementById('dialogue-text').innerText = this.dialogueQueue.shift();
+        } else {
+            this.state = 'OVERWORLD';
+            document.getElementById('dialogue-container').style.display = 'none';
+        }
+    },
+
+    draw() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const map = WORLD.maps[this.currentMap];
+        if(!map) return;
+
+        // Render Background
+        ctx.save();
+        ctx.scale(CONFIG.SCALE, CONFIG.SCALE);
+        
+        for(let y = 0; y < map.tiles.length; y++) {
+            for(let x = 0; x < map.tiles[y].length; x++) {
+                const tile = map.tiles[y][x];
+                ctx.fillStyle = tile === 1 ? '#444' : map.color;
+                ctx.fillRect(x * CONFIG.TILE_SIZE, y * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+                
+                // Add detail to specials
+                if(tile === 5) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.fillRect(x * CONFIG.TILE_SIZE, y * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+                }
+            }
+        }
+
+        // Render Player
+        ctx.fillStyle = "cyan";
+        ctx.fillRect(WORLD.player.gridX * CONFIG.TILE_SIZE + 2, WORLD.player.gridY * CONFIG.TILE_SIZE + 2, 12, 12);
+
+        ctx.restore();
+    },
+
+    loop() {
+        this.draw();
+        requestAnimationFrame(() => this.loop());
+    }
+};
+
+// Start the game
+Game.init();
+</script>
 </body>
 </html>
