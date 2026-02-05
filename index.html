@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Exploration</title>
+    <title>Pokémon Amber: The Open World</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -31,10 +31,12 @@
             image-rendering: pixelated;
         }
 
+        /* UI LAYER - Now toggles visibility */
         #ui-layer {
-            position: absolute; bottom: 20px; left: 50%;
+            position: absolute; bottom: 40px; left: 50%;
             transform: translateX(-50%); width: 90%;
             z-index: 100; cursor: pointer;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
 
         #dialogue-box {
@@ -47,7 +49,6 @@
             font-size: 20px;
             box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
             min-height: 80px;
-            user-select: none;
         }
 
         #speaker-tag {
@@ -87,7 +88,7 @@
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
-        <div id="dialogue-box">Welcome to the Research Lab!</div>
+        <div id="dialogue-box">Welcome! Your amazing adventure is about to start! Choose a partner on the desk.</div>
     </div>
 
     <div id="joystick-wrapper">
@@ -100,19 +101,13 @@
     const ctx = canvas.getContext('2d');
     const knob = document.getElementById('joystick-knob');
     const wrapper = document.getElementById('joystick-wrapper');
+    const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
 
-    // Game States
-    let currentMap = 'LAB'; // LAB or OUTSIDE
-    let scriptIndex = 0;
-    let choosingState = false;
-    const script = [
-        "Welcome to the Habitat Research Lab!",
-        "Look around! This facility is dedicated to studying Orebound's ecology.",
-        "Choose a partner and let's begin our investigation!"
-    ];
-
+    let currentMap = 'LAB'; 
+    let choosingState = true;
     let width, height;
+
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
@@ -123,9 +118,8 @@
     resize();
 
     const player = {
-        x: width/2, y: height - 120,
-        speed: 5, width: 40, height: 40,
-        history: []
+        x: width/2, y: height/2 + 50,
+        speed: 5, history: []
     };
 
     const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
@@ -139,43 +133,39 @@
     let stickX = 0, stickY = 0, isTouching = false;
 
     function handleDialogueClick() {
-        if (scriptIndex < script.length - 1) {
-            scriptIndex++;
-            dialogueBox.innerText = script[scriptIndex];
-        } else if (!choosingState) {
-            choosingState = true;
-            dialogueBox.innerText = "Click a Pokéball on the center desk!";
-        }
+        // Hide UI when clicked
+        uiLayer.style.opacity = "0";
+        setTimeout(() => { uiLayer.style.visibility = "hidden"; }, 300);
     }
 
-    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
     function checkPokeClick(clickX, clickY) {
-        if (!choosingState || follower.active || currentMap !== 'LAB') return;
+        if (follower.active || currentMap !== 'LAB') return;
         pokeballs.forEach(ball => {
             if(!ball.active) return;
             const dx = clickX - ball.realX;
             const dy = clickY - ball.realY;
-            if (Math.sqrt(dx*dx + dy*dy) < 35) {
+            if (Math.sqrt(dx*dx + dy*dy) < 40) {
                 follower.active = true;
                 follower.name = ball.name;
                 follower.color = ball.color;
                 follower.x = ball.realX;
                 follower.y = ball.realY;
                 ball.active = false;
+                
+                // Show message then hide it
+                uiLayer.style.visibility = "visible";
+                uiLayer.style.opacity = "1";
                 dialogueBox.innerText = "Professor Sequoia: Your amazing adventure is about to start! Go to the door and explore!";
             }
         });
     }
 
-    // Joystick Engine
+    // Joystick
     wrapper.addEventListener('touchstart', () => isTouching = true);
-    window.addEventListener('touchend', () => {
-        isTouching = false; stickX = 0; stickY = 0;
-        knob.style.transform = `translate(0px, 0px)`;
-    });
-
+    window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
         if (!isTouching) return;
         const rect = wrapper.getBoundingClientRect();
@@ -193,14 +183,10 @@
         const shim = document.getElementById('shimmer');
         shim.style.opacity = '1';
         setTimeout(() => {
-            if (currentMap === 'LAB') {
-                currentMap = 'OUTSIDE';
-                player.y = height / 2 + 50; // Place player in front of house
-            } else {
-                currentMap = 'LAB';
-                player.y = height - 100; // Place player inside by door
-            }
-            player.history = []; // Reset history to prevent follower snapping
+            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
+            player.x = width/2;
+            player.y = (currentMap === 'OUTSIDE') ? height/2 + 20 : height - 120;
+            player.history = [];
             shim.style.opacity = '0';
         }, 400);
     }
@@ -208,102 +194,71 @@
     function update() {
         if (isTouching) {
             player.history.push({x: player.x, y: player.y});
-            if (player.history.length > 80) player.history.shift();
+            if (player.history.length > 60) player.history.shift();
             player.x += stickX * player.speed;
             player.y += stickY * player.speed;
         }
 
-        // TELEPORT LOGIC (DOOR SENSOR)
-        const doorY = (currentMap === 'LAB') ? height - 20 : height / 2;
-        const doorX = width / 2;
-        if (Math.abs(player.x - doorX) < 50 && Math.abs(player.y - doorY) < 20) {
+        // DOOR SENSOR
+        const doorX = width/2;
+        const doorY = (currentMap === 'LAB') ? height - 30 : height/2 - 30;
+        if (Math.abs(player.x - doorX) < 40 && Math.abs(player.y - doorY) < 20) {
             teleport();
-            player.y += (currentMap === 'LAB') ? -60 : 60; // Nudge away from door
         }
 
-        if (follower.active && player.history.length > 12) {
-            const fp = player.history[player.history.length - 12];
-            follower.x += (fp.x - follower.x) * 0.15;
-            follower.y += (fp.y - follower.y) * 0.15;
+        if (follower.active && player.history.length > 10) {
+            const fp = player.history[player.history.length - 10];
+            follower.x += (fp.x - follower.x) * 0.2;
+            follower.y += (fp.y - follower.y) * 0.2;
         }
-        player.x = Math.max(20, Math.min(width - 20, player.x));
-        player.y = Math.max(20, Math.min(height - 20, player.y));
+        player.x = Math.max(20, Math.min(width-20, player.x));
+        player.y = Math.max(20, Math.min(height-20, player.y));
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
         if (currentMap === 'LAB') {
-            // Lab Floor
-            ctx.fillStyle = '#d89060';
-            ctx.fillRect(0, 0, width, height);
-            ctx.strokeStyle = '#b87040';
-            for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
-
-            // Lab Decorations
-            ctx.fillStyle = '#5d3a1a'; // Shelves
-            for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 80);
+            ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height); // Floor
+            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             
-            // Lab Desk
-            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-            ctx.fillStyle = '#804020';
-            ctx.fillRect(dX, dY, dW, dH);
+            // The Door (Glowing Blue Mat)
+            ctx.fillStyle = '#3a8fb7';
+            ctx.fillRect(width/2 - 50, height - 40, 100, 40);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 40, 100, 40);
 
-            // Door Mat (Exit)
-            ctx.fillStyle = '#285088';
-            ctx.fillRect(width/2 - 40, height - 20, 80, 20);
+            // Desk
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/3;
+            ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
 
-            // Pokéballs
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
-                ball.realX = dX + 60 + (i * 110);
-                ball.realY = dY + 40;
-                ctx.fillStyle = 'red';
-                ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
-                ctx.fillStyle = 'white';
-                ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-                if (choosingState) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                    ctx.fillRect(ball.realX - 45, ball.realY - 50, 90, 24);
-                    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
-                    ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 33);
-                }
+                ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
+                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // OUTSIDE MAP
-            ctx.fillStyle = '#8dbd8d'; // Grass Territory
-            ctx.fillRect(0, 0, width, height);
-
-            // Draw House Exterior (Based on IMG_0616)
-            const hW = 220, hH = 160, hX = width/2 - hW/2, hY = height/2 - hH;
-            ctx.fillStyle = '#a0c0d8'; // Light blue siding
-            ctx.fillRect(hX, hY, hW, hH);
-            ctx.fillStyle = '#e06060'; // Red Roof
-            ctx.beginPath();
-            ctx.moveTo(hX - 20, hY); ctx.lineTo(hX + hW/2, hY - 60); ctx.lineTo(hX + hW + 20, hY);
-            ctx.fill();
-
-            // House Door (Back into lab)
-            ctx.fillStyle = '#c04040';
-            ctx.fillRect(width/2 - 25, height/2 - 50, 50, 50);
-            ctx.fillStyle = '#285088'; // Door Mat
-            ctx.fillRect(width/2 - 30, height/2 - 10, 60, 15);
+            ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height); // Grass
+            // House
+            const hX = width/2 - 100, hY = height/2 - 140;
+            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 200, 140); // Body
+            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+220, hY); ctx.fill(); // Roof
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40); // Entrance
         }
 
-        // Follower
         if (follower.active) {
-            ctx.fillStyle = follower.color;
-            ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x - 6, follower.y - 5, 4, 4); ctx.fillRect(follower.x + 2, follower.y - 5, 4, 4);
+            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
         // Character
-        const p = player;
-        ctx.fillStyle = '#333'; ctx.fillRect(p.x - 15, p.y + 15, 10, 10); ctx.fillRect(p.x + 5, p.y + 15, 10, 10);
-        ctx.fillStyle = '#a03030'; ctx.fillRect(p.x - 15, p.y - 10, 30, 25);
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(p.x - 10, p.y - 25, 20, 18);
-        ctx.fillStyle = '#fff'; ctx.fillRect(p.x - 12, p.y - 30, 24, 8);
-        ctx.fillStyle = '#000'; ctx.fillRect(p.x - 6, p.y - 18, 3, 3); ctx.fillRect(p.x + 3, p.y - 18, 3, 3);
+        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
 
         update();
         requestAnimationFrame(draw);
