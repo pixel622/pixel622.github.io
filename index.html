@@ -67,14 +67,15 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
+        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
-            position: absolute; bottom: 40px; left: 40px;
-            width: 140px; height: 140px;
+            position: absolute; bottom: 80px; left: 40px;
+            width: 130px; height: 130px;
             background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center; z-index: 200;
         }
 
-        #joystick-knob { width: 60px; height: 60px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -82,12 +83,14 @@
             transition: opacity 0.3s; z-index: 999;
         }
 
+        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
-            position: absolute; top: 20px; right: 20px;
+            position: absolute; bottom: 80px; right: 40px;
             background: var(--gba-blue); color: white;
-            padding: 10px 25px; border-radius: 8px;
+            padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
+            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
         }
     </style>
 </head>
@@ -101,7 +104,7 @@
 
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="toggleBag()">BAG</div>
+    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
@@ -196,9 +199,9 @@
         const touch = e.touches[0];
         let dx = touch.clientX - (rect.left + rect.width/2);
         let dy = touch.clientY - (rect.top + rect.height/2);
-        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 45);
+        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
         const angle = Math.atan2(dy, dx);
-        stickX = Math.cos(angle) * (dist/45); stickY = Math.sin(angle) * (dist/45);
+        stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
@@ -281,41 +284,35 @@
                 ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // OUTSIDE MAP
             ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
             
-            // EXPANDED GRASSY TERRAIN
+            // GRASS DESIGN
             ctx.fillStyle = '#567d56'; 
             for(let row=0; row<8; row++) {
                 for(let col=0; col<12; col++) {
                     let gx = width - 450 + col*40, gy = 50 + row*40;
-                    if (gy < height/2 + 100) { // Don't go past the fence line
-                        ctx.fillRect(gx, gy, 35, 35);
-                        ctx.fillStyle = '#4a704a'; ctx.fillRect(gx+5, gy+5, 10, 2); ctx.fillStyle = '#567d56';
-                    }
+                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
                 }
             }
 
             // YELLOW ROCKY TERRAIN
             ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#c5b15c'; 
-            for(let i=0; i<width; i+=140) { ctx.fillRect(i + 40, height/2 + 160, 40, 20); }
 
             // POND (Left)
             const wX = width/2 - 350, wY = height/2 - 50;
             ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
 
-            // TREE PERIMETER (All around upper part, stop at fence)
+            // TREE PERIMETER (Only outer edge, skipping fence area)
+            ctx.fillStyle = '#1a331a';
             const fenceY = height/2 + 120;
-            for(let x=20; x < width; x+=60) {
-                for(let y=20; y < fenceY - 40; y+=80) {
-                    // Only draw trees if they are far enough from the house
-                    const hX = width/2, hY = height/2 - 75;
-                    const distToHouse = Math.sqrt((x-hX)**2 + (y-hY)**2);
-                    if (distToHouse > 180) {
-                        ctx.fillStyle = '#1a331a'; ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-                        ctx.fillStyle = '#2d4d2d'; ctx.beginPath(); ctx.arc(x-5, y-5, 25, 0, Math.PI*2); ctx.fill();
+            for(let x = 40; x < width; x += 80) {
+                // Top edge
+                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
+                // Left & Right edges down to fence
+                if (x < 100 || x > width - 100) {
+                    for(let y = 120; y < fenceY - 40; y += 80) {
+                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
                     }
                 }
             }
@@ -328,11 +325,8 @@
 
             // HOUSE
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#7a9caf'; ctx.fillRect(hX, hY, 220, 150);
-            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX+5, hY, 210, 145);
-            ctx.fillStyle = '#9e3d3d'; ctx.beginPath(); ctx.moveTo(hX-25, hY); ctx.lineTo(width/2, hY-65); ctx.lineTo(hX+245, hY); ctx.fill();
+            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#1e5aab'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
             ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
 
@@ -351,7 +345,6 @@
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
-            ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
         }
 
         update();
