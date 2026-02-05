@@ -145,7 +145,7 @@
     let currentMap = 'LAB';
     let choosingState = false;
     let bagOpen = false;
-    let holdingPokeball = false; // NEW: Track if player is holding ball
+    let holdingPokeball = false; 
 
     let width, height;
     function resize() {
@@ -203,7 +203,7 @@
                 follower.x = ball.realX;
                 follower.y = ball.realY;
                 ball.active = false;
-                holdingPokeball = true; // NEW: Player now holds the ball
+                holdingPokeball = true; 
                 uiLayer.style.display = 'block';
                 dialogueBox.innerText = "Professor Sequoia: Your amazing adventure is about to start! Step on the blue mat and explore!";
             }
@@ -225,24 +225,22 @@
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
-    // NEW: Collision Checking Function
     function checkCollision(nx, ny) {
         if (currentMap === 'LAB') {
-            // Lab Table
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
-            // Bookshelves
             if (ny < 130) return true;
         } else {
-            // House
             const hX = width/2 - 110, hY = height/2 - 150;
             if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
-                // Allow entering through the door area
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            // Fence
-            if (ny > height/2 + 100 && ny < height/2 + 130) return true;
+            // FENCE COLLISION WITH PASSAGE
+            if (ny > height/2 + 100 && ny < height/2 + 130) {
+                // Allows passage if player X is within a 60px wide gap in the center
+                if (Math.abs(nx - width/2) > 40) return true;
+            }
         }
         return false;
     }
@@ -320,24 +318,68 @@
                 ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
+            // OUTSIDE MAP UPDATES
+            // 1. Grass Base with subtle pattern
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#82af82';
+            for(let i=0; i<width; i+=40) {
+                for(let j=0; j<height; j+=40) {
+                    if((i+j)%80===0) ctx.fillRect(i,j,2,2);
+                }
+            }
+
+            // 2. Rocky Terrain (Bottom Side)
+            ctx.fillStyle = '#9e9e9e'; ctx.fillRect(0, height/2 + 130, width, height);
+            ctx.fillStyle = '#7d7d7d';
+            for(let r=0; r<15; r++) {
+                ctx.fillRect(Math.random()*width, height/2 + 140 + Math.random()*(height/2), 15, 8);
+            }
+
+            // 3. Prettier Tall Grass
             ctx.fillStyle = '#567d56';
             for(let row=0; row<3; row++) {
                 for(let col=0; col<5; col++) {
-                    ctx.fillRect(50 + col*40, height - 200 + row*40, 35, 35);
-                    ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35);
+                    let gx = 50 + col*40; let gy = height - 200 + row*40;
+                    ctx.fillRect(gx, gy, 35, 35);
+                    ctx.fillStyle = '#4a6d4a'; ctx.fillRect(gx+5, gy+5, 4, 10); ctx.fillRect(gx+25, gy+15, 4, 10);
+                    ctx.fillStyle = '#567d56';
+                    
+                    let gx2 = width - 250 + col*40; let gy2 = 100 + row*40;
+                    ctx.fillRect(gx2, gy2, 35, 35);
+                    ctx.fillStyle = '#4a6d4a'; ctx.fillRect(gx2+10, gy2+5, 4, 10);
+                    ctx.fillStyle = '#567d56';
                 }
             }
+
+            // 4. Prettier Water
             ctx.fillStyle = '#4d88ff';
             ctx.beginPath(); ctx.ellipse(width - 120, height/2, 80, 50, 0, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#8bb4ff'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(width-160, height/2-10); ctx.lineTo(width-100, height/2-10); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width-140, height/2+10); ctx.lineTo(width-80, height/2+10); ctx.stroke();
+
+            // 5. Trees and Objects
             ctx.fillStyle = '#2d4d2d';
             const treePositions = [[40, 40], [100, 60], [40, 120], [width-60, height-60], [width-120, height-100]];
             treePositions.forEach(pos => {
                 ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#243e24'; ctx.beginPath(); ctx.arc(pos[0]-5, pos[1]-5, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#2d4d2d';
             });
+
+            // 6. Fence with PASSAGE
             ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
-            for(let x=0; x<width; x+=40) { ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); }
+            // Draw Fence Left Side
+            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 40, height/2 + 120); ctx.stroke();
+            // Draw Fence Right Side
+            ctx.beginPath(); ctx.moveTo(width/2 + 40, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
+            // Fence Posts
+            for(let x=0; x<width; x+=40) { 
+                if(Math.abs(x - width/2) > 40) {
+                   ctx.beginPath(); ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); 
+                }
+            }
+
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
@@ -358,7 +400,6 @@
         ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
         ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
 
-        // NEW: Draw Pokeball in hand
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
