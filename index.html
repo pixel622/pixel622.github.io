@@ -19,7 +19,10 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        #game-wrapper { position: relative; width: 100%; height: 100%; }
+        #game-wrapper {
+            position: relative;
+            width: 100%; height: 100%;
+        }
 
         canvas {
             display: block;
@@ -28,25 +31,20 @@
             image-rendering: pixelated;
         }
 
-        #title-screen, #battle-screen {
+        #title-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2000; font-family: var(--font-main);
+            z-index: 2000; transition: opacity 0.5s ease-out;
+            font-family: var(--font-main);
         }
 
-        #title-screen { background: #000; color: #fff; transition: opacity 0.5s; }
-        #title-screen h1 { font-size: 40px; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
 
-        #battle-screen { 
-            background: rgba(0,0,0,0.85); 
-            display: none; z-index: 2500; color: white;
-            border: 10px double white;
-        }
-
-        #start-btn, .battle-btn {
+        #start-btn {
             padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
             background: var(--gba-blue); color: white; border: 4px solid white;
-            cursor: pointer; border-radius: 10px; font-weight: bold; margin: 10px;
+            cursor: pointer; border-radius: 10px; font-weight: bold;
         }
 
         #ui-layer {
@@ -58,13 +56,15 @@
         #dialogue-box {
             background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
             padding: 20px; font-family: var(--font-main); font-weight: bold;
-            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue);
-            min-height: 80px;
+            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
+            min-height: 80px; user-select: none;
         }
 
         #speaker-tag {
             position: absolute; top: -25px; left: 30px;
-            background: var(--gba-blue); color: white; padding: 5px 20px; border-radius: 10px 10px 0 0;
+            background: var(--gba-blue); color: white;
+            padding: 5px 20px; border-radius: 10px 10px 0 0;
+            font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
         #joystick-wrapper {
@@ -76,20 +76,57 @@
 
         #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
+        #shimmer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; z-index: 999;
+        }
+
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
-            background: var(--gba-blue); color: white; padding: 15px 30px; border-radius: 8px;
-            font-family: var(--font-main); font-weight: bold; border: 3px solid white; z-index: 300;
+            background: var(--gba-blue); color: white;
+            padding: 15px 30px; border-radius: 8px;
+            font-family: var(--font-main); font-weight: bold;
+            border: 3px solid white; cursor: pointer; z-index: 300;
+            box-shadow: 0 4px #183058;
+        }
+        #bag-btn:active { transform: translateY(2px); box-shadow: 0 2px #183058; }
+
+        /* BATTLE UI STYLES */
+        #battle-ui {
+            display: none; position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; background: #000; z-index: 4000;
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: var(--font-main); color: white;
+        }
+        #battle-screen {
+            width: 90%; max-width: 500px; background: #2a75bb;
+            border: 8px solid #ffcb05; border-radius: 20px; padding: 20px;
+            position: relative;
+        }
+        .battle-hp-bar { height: 20px; background: #cc0000; border: 3px solid #000; border-radius: 10px; }
+        .battle-hp-fill { height: 100%; background: #00cc00; transition: width 0.5s; }
+        .battle-btn { 
+            padding: 15px 25px; margin: 10px; 
+            background: #285088; color: white; border: 4px solid white;
+            border-radius: 10px; cursor: pointer; font-weight: bold;
+        }
+        #battle-text {
+            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;
+            margin-top: 20px; min-height: 80px;
         }
 
+        /* BAG MODAL STYLES */
         #bag-menu {
             display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 70%; background: white;
-            border: 6px solid var(--gba-blue); border-radius: 15px; padding: 20px; z-index: 3000;
-            font-family: var(--font-main);
+            transform: translate(-50%, -50%); width: 80%; max-width: 400px;
+            background: #f8f8f8; border: 6px solid var(--gba-blue); border-radius: 15px;
+            z-index: 3000; font-family: var(--font-main); padding: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
-
-        #shimmer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999; }
+        #bag-menu h2 { margin: 0 0 15px 0; color: var(--gba-blue); border-bottom: 2px solid #ccc; }
+        .bag-item { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        #close-bag { margin-top: 15px; width: 100%; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -100,22 +137,57 @@
         <button id="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
-    <div id="battle-screen">
-        <h2 id="battle-text">A Wild Pokémon appeared!</h2>
-        <div style="display:flex;">
-            <button class="battle-btn" onclick="battleAction('ATTACK')">ATTACK</button>
-            <button class="battle-btn" onclick="battleAction('CATCH')">THROW BALL</button>
+    <canvas id="gameCanvas"></canvas>
+    <div id="shimmer"></div>
+    <div id="bag-btn" onclick="toggleBag(true)">BAG</div>
+
+    <!-- Battle UI -->
+    <div id="battle-ui">
+        <div id="battle-screen">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 id="battle-title">WILD BATTLE!</h2>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0;">
+                <div>
+                    <div id="player-pokemon"></div>
+                    <div style="margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span id="player-name">Partner</span>
+                            <span id="player-hp">100/100</span>
+                        </div>
+                        <div class="battle-hp-bar">
+                            <div id="player-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div id="wild-pokemon"></div>
+                    <div style="margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span id="wild-name">Wild</span>
+                            <span id="wild-hp">100/100</span>
+                        </div>
+                        <div class="battle-hp-bar">
+                            <div id="wild-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="battle-text">A wild Pokémon appeared!</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <button class="battle-btn" onclick="battleAction('attack')">ATTACK</button>
+                <button class="battle-btn" onclick="battleAction('bag')">BAG</button>
+                <button class="battle-btn" onclick="battleAction('pokemon')">POKÉMON</button>
+                <button class="battle-btn" onclick="battleAction('run')">RUN</button>
+            </div>
         </div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
-    <div id="shimmer"></div>
-    <div id="bag-btn" onclick="openBag()">BAG</div>
-
+    <!-- Bag Modal -->
     <div id="bag-menu">
-        <h2 style="color:var(--gba-blue)">POKÉMON BAG</h2>
-        <div id="bag-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
-        <button class="battle-btn" onclick="closeBag()">CLOSE</button>
+        <h2>ADVENTURE BAG</h2>
+        <div id="bag-content"></div>
+        <button id="close-bag" onclick="toggleBag(false)">CLOSE</button>
     </div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
@@ -136,47 +208,318 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
-    const battleScreen = document.getElementById('battle-screen');
+    const bagMenu = document.getElementById('bag-menu');
+    const battleUI = document.getElementById('battle-ui');
 
+    // Game state variables
     const script = [
         "Welcome to the Habitat Research Lab!",
         "Look around! This facility is dedicated to studying Orebound's ecology.",
         "The tremor earlier was quite strong. We must act quickly.",
         "Go ahead and click on the Pokémon you want to partner with!"
     ];
-
-    const encounters = {
-        GRASS: ['Shroomish', 'Ralts', 'Lillipup', 'Venipede', 'Skwovet'],
-        WATER: ['Lotad', 'Magikarp', 'Slowpoke', 'Buizel', 'Chewtle'],
-        ROCKY: ['Onix', 'Larvitar', 'Cubone', 'Rockruff', 'Aron']
-    };
-
     let scriptIndex = 0;
     let currentMap = 'LAB';
     let choosingState = false;
     let holdingPokeball = false; 
-    let isBattle = false;
-    let currentWild = "";
-    let caughtPokemon = [];
+    let isBagOpen = false;
+    let inBattle = false;
     let width, height;
-    let walkCounter = 0;
 
+    // Player inventory
+    const playerInventory = {
+        pokeballs: 5,
+        potions: 3,
+        capturedPokemon: []
+    };
+
+    // Pokémon data with sprites (encoded as base64 pixel art)
+    const pokemonSprites = {
+        'bulbasaur': {
+            terrain: 'GRASS',
+            color: '#74C874',
+            sprite: [
+                '  ████████  ',
+                ' ████░░████ ',
+                ' ██░░░░░░██ ',
+                ' ██░░██░░██ ',
+                '  ████████  ',
+                '    ████    ',
+                '   ████    '
+            ],
+            hp: 45,
+            attack: 49,
+            level: 5
+        },
+        'caterpie': {
+            terrain: 'GRASS',
+            color: '#98D898',
+            sprite: [
+                '    ████    ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ████████  ',
+                '   ██████   '
+            ],
+            hp: 45,
+            attack: 30,
+            level: 3
+        },
+        'weedle': {
+            terrain: 'GRASS',
+            color: '#D8B850',
+            sprite: [
+                '    ██      ',
+                '  ██░░██    ',
+                ' ██░░░░██   ',
+                '  ██████    ',
+                '   ████     '
+            ],
+            hp: 40,
+            attack: 35,
+            level: 3
+        },
+        'oddish': {
+            terrain: 'GRASS',
+            color: '#A890F0',
+            sprite: [
+                '   ██████   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ██░░░░██  ',
+                '   ██████   ',
+                '    ████    '
+            ],
+            hp: 45,
+            attack: 50,
+            level: 5
+        },
+        'bellsprout': {
+            terrain: 'GRASS',
+            color: '#78C850',
+            sprite: [
+                '    ████    ',
+                '   ██░░██   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ████████  '
+            ],
+            hp: 50,
+            attack: 75,
+            level: 5
+        },
+        'geodude': {
+            terrain: 'ROCKY',
+            color: '#B8A038',
+            sprite: [
+                '  ████████  ',
+                ' ██░░░░░░██ ',
+                '██░░░░░░░░██',
+                '██░░░░░░░░██',
+                ' ██████████ '
+            ],
+            hp: 40,
+            attack: 80,
+            level: 7
+        },
+        'onix': {
+            terrain: 'ROCKY',
+            color: '#A8A878',
+            sprite: [
+                '██          ',
+                '██████      ',
+                '  ████████  ',
+                '    ████████',
+                '      ██████'
+            ],
+            hp: 35,
+            attack: 45,
+            level: 8
+        },
+        'rhyhorn': {
+            terrain: 'ROCKY',
+            color: '#C0C0C0',
+            sprite: [
+                '    ████    ',
+                '  ████████  ',
+                ' ██░░░░░░██ ',
+                '████████████',
+                '  ████████  '
+            ],
+            hp: 80,
+            attack: 85,
+            level: 10
+        },
+        'nosepass': {
+            terrain: 'ROCKY',
+            color: '#786848',
+            sprite: [
+                '  ██████    ',
+                ' ██░░░░██   ',
+                '██░░░░░░██  ',
+                ' ████████   ',
+                '  ██████    '
+            ],
+            hp: 30,
+            attack: 45,
+            level: 6
+        },
+        'aron': {
+            terrain: 'ROCKY',
+            color: '#8898A8',
+            sprite: [
+                '    ████    ',
+                '  ████████  ',
+                ' ██░░░░░░██ ',
+                '  ████████  ',
+                '   ██████   '
+            ],
+            hp: 50,
+            attack: 70,
+            level: 9
+        },
+        'magikarp': {
+            terrain: 'WATER',
+            color: '#F08030',
+            sprite: [
+                '  ██████    ',
+                ' ██░░░░██   ',
+                '██░░░░░░██  ',
+                ' ██░░░░██   ',
+                '  ██████    '
+            ],
+            hp: 20,
+            attack: 10,
+            level: 2
+        },
+        'psyduck': {
+            terrain: 'WATER',
+            color: '#F8D030',
+            sprite: [
+                '   ██████   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ████████  ',
+                '    ████    '
+            ],
+            hp: 50,
+            attack: 52,
+            level: 6
+        },
+        'poliwag': {
+            terrain: 'WATER',
+            color: '#6890F0',
+            sprite: [
+                '  ████████  ',
+                ' ██░░░░░░██ ',
+                '  ████████  ',
+                '   ██████   '
+            ],
+            hp: 40,
+            attack: 50,
+            level: 5
+        },
+        'wooper': {
+            terrain: 'WATER',
+            color: '#98D8D8',
+            sprite: [
+                '  ██████    ',
+                ' ██░░░░██   ',
+                '██░░░░░░██  ',
+                ' ████████   '
+            ],
+            hp: 55,
+            attack: 45,
+            level: 4
+        },
+        'lotad': {
+            terrain: 'WATER',
+            color: '#6890F0',
+            sprite: [
+                '   ██████   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ██░░░░██  ',
+                '   ██████   '
+            ],
+            hp: 40,
+            attack: 30,
+            level: 3
+        },
+        'treecko': {
+            terrain: 'LAB',
+            color: '#32CD32',
+            sprite: [
+                '   ██████   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ██░░░░██  ',
+                '   ██████   ',
+                '    ████    '
+            ],
+            hp: 40,
+            attack: 45,
+            level: 5
+        },
+        'froakie': {
+            terrain: 'LAB',
+            color: '#1E90FF',
+            sprite: [
+                '  ████████  ',
+                ' ██░░░░░░██ ',
+                '██░░░░░░░░██',
+                ' ██████████ '
+            ],
+            hp: 41,
+            attack: 56,
+            level: 5
+        },
+        'charmander': {
+            terrain: 'LAB',
+            color: '#FF4500',
+            sprite: [
+                '    ████    ',
+                '   ██░░██   ',
+                '  ██░░░░██  ',
+                ' ██░░░░░░██ ',
+                '  ████████  '
+            ],
+            hp: 39,
+            attack: 52,
+            level: 5
+        }
+    };
+
+    // Wild Pokémon array
+    let wildPokemon = [];
+    let activeWildPokemon = null;
+    let battleState = null;
+
+    // Rock positions
     const rocks = [];
-    function genRocks() {
+    function generateRocks() {
         rocks.length = 0;
-        for(let i=0; i<25; i++) rocks.push({x: Math.random()*2000, y: Math.random()*400, s: 15+Math.random()*20});
+        for(let i=0; i<30; i++) {
+            rocks.push({
+                x: Math.random() * 2000, 
+                y: 500 + Math.random() * 500,
+                size: 15 + Math.random() * 25,
+                color: Math.random() > 0.5 ? '#c5b16c' : '#b5a15c'
+            });
+        }
     }
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
         canvas.width = width; canvas.height = height;
-        genRocks();
+        generateRocks();
+        spawnWildPokemon();
     }
     window.addEventListener('resize', resize);
     resize();
 
     const player = { x: width/2, y: height - 120, speed: 5, history: [] };
-    const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
+    const follower = { active: false, name: '', x: 0, y: 0, color: '#000', hp: 100, maxHp: 100, level: 5 };
 
     const pokeballs = [
         { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
@@ -184,60 +527,146 @@
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
+    // Spawn wild Pokémon based on terrain
+    function spawnWildPokemon() {
+        wildPokemon = [];
+        if (currentMap === 'OUTSIDE') {
+            // Spawn grass Pokémon
+            for (let i = 0; i < 3; i++) {
+                const grassPokemon = Object.entries(pokemonSprites)
+                    .filter(([name, data]) => data.terrain === 'GRASS');
+                const randomPoke = grassPokemon[Math.floor(Math.random() * grassPokemon.length)];
+                wildPokemon.push({
+                    name: randomPoke[0],
+                    ...randomPoke[1],
+                    x: Math.random() * (width - 200) + 100,
+                    y: Math.random() * 200 + 50,
+                    active: true
+                });
+            }
+            
+            // Spawn rocky Pokémon
+            for (let i = 0; i < 3; i++) {
+                const rockyPokemon = Object.entries(pokemonSprites)
+                    .filter(([name, data]) => data.terrain === 'ROCKY');
+                const randomPoke = rockyPokemon[Math.floor(Math.random() * rockyPokemon.length)];
+                wildPokemon.push({
+                    name: randomPoke[0],
+                    ...randomPoke[1],
+                    x: Math.random() * (width - 200) + 100,
+                    y: Math.random() * 200 + height/2 + 150,
+                    active: true
+                });
+            }
+            
+            // Spawn water Pokémon near pond
+            for (let i = 0; i < 2; i++) {
+                const waterPokemon = Object.entries(pokemonSprites)
+                    .filter(([name, data]) => data.terrain === 'WATER');
+                const randomPoke = waterPokemon[Math.floor(Math.random() * waterPokemon.length)];
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 80 + Math.random() * 40;
+                wildPokemon.push({
+                    name: randomPoke[0],
+                    ...randomPoke[1],
+                    x: width/2 - 350 + Math.cos(angle) * radius,
+                    y: height/2 - 50 + Math.sin(angle) * radius * 0.6,
+                    active: true
+                });
+            }
+        }
+    }
+
+    // Draw Pokémon sprite
+    function drawPokemonSprite(pokemon, x, y, size = 1) {
+        const sprite = pokemon.sprite || pokemonSprites[pokemon.name].sprite;
+        const color = pokemon.color || pokemonSprites[pokemon.name].color;
+        
+        ctx.fillStyle = color;
+        for (let row = 0; row < sprite.length; row++) {
+            for (let col = 0; col < sprite[row].length; col++) {
+                if (sprite[row][col] === '█') {
+                    ctx.fillRect(x + col * size, y + row * size, size, size);
+                } else if (sprite[row][col] === '░') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(x + col * size, y + row * size, size, size);
+                    ctx.fillStyle = color;
+                }
+            }
+        }
+    }
+
+    function toggleBag(open) {
+        isBagOpen = open;
+        bagMenu.style.display = open ? 'block' : 'none';
+        if (open) {
+            const content = document.getElementById('bag-content');
+            content.innerHTML = `
+                <div class="bag-item"><span>Partner:</span> <strong>${follower.active ? follower.name : 'None'}</strong></div>
+                <div class="bag-item"><span>Potions:</span> <strong>x${playerInventory.potions}</strong></div>
+                <div class="bag-item"><span>Pokéballs:</span> <strong>x${playerInventory.pokeballs}</strong></div>
+                <div class="bag-item"><span>Captured:</span> <strong>${playerInventory.capturedPokemon.length} Pokémon</strong></div>
+                ${playerInventory.capturedPokemon.map(poke => `
+                    <div class="bag-item"><span>${poke}</span> <span>✓</span></div>
+                `).join('')}
+            `;
+        }
+    }
+
     function startGame() {
         titleScreen.style.opacity = '0';
-        setTimeout(() => { titleScreen.style.display = 'none'; uiLayer.style.display = 'block'; }, 500);
-    }
-
-    function openBag() {
-        const list = document.getElementById('bag-list');
-        list.innerHTML = caughtPokemon.length ? caughtPokemon.map(p => `• ${p}`).join('<br>') : "No Pokémon caught.";
-        document.getElementById('bag-menu').style.display = 'block';
-    }
-    function closeBag() { document.getElementById('bag-menu').style.display = 'none'; }
-
-    function triggerBattle(terrain) {
-        if (!follower.active || isBattle) return;
-        isBattle = true;
-        const pool = encounters[terrain];
-        currentWild = pool[Math.floor(Math.random()*pool.length)];
-        document.getElementById('battle-text').innerText = `A wild ${currentWild} appeared!`;
-        battleScreen.style.display = 'flex';
-        isTouching = false;
-    }
-
-    function battleAction(act) {
-        if (act === 'ATTACK') {
-            document.getElementById('battle-text').innerText = `${follower.name} used Tackle!`;
-        } else {
-            caughtPokemon.push(currentWild);
-            document.getElementById('battle-text').innerText = `Gotcha! ${currentWild} was caught!`;
-            setTimeout(() => { battleScreen.style.display = 'none'; isBattle = false; }, 1200);
-        }
+        setTimeout(() => {
+            titleScreen.style.display = 'none';
+            uiLayer.style.display = 'block';
+        }, 500);
     }
 
     let stickX = 0, stickY = 0, isTouching = false;
 
     function handleDialogueClick() {
         if (scriptIndex < script.length - 1) {
-            scriptIndex++; dialogueBox.innerText = script[scriptIndex];
-        } else { uiLayer.style.display = 'none'; choosingState = true; }
+            scriptIndex++;
+            dialogueBox.innerText = script[scriptIndex];
+        } else {
+            uiLayer.style.display = 'none';
+            choosingState = true;
+        }
     }
 
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
     function checkPokeClick(clickX, clickY) {
-        if (!choosingState || follower.active || currentMap !== 'LAB') return;
+        if (inBattle || isBagOpen) return;
+        
+        if (!choosingState || follower.active || currentMap !== 'LAB') {
+            // Check for wild Pokémon encounters
+            wildPokemon.forEach(poke => {
+                if (!poke.active) return;
+                const dx = clickX - poke.x;
+                const dy = clickY - poke.y;
+                if (Math.sqrt(dx*dx + dy*dy) < 40 && !inBattle) {
+                    startBattle(poke);
+                }
+            });
+            return;
+        }
+        
         pokeballs.forEach(ball => {
             if(!ball.active) return;
-            const dx = clickX - ball.realX, dy = clickY - ball.realY;
+            const dx = clickX - ball.realX;
+            const dy = clickY - ball.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
-                follower.active = true; follower.name = ball.name;
-                follower.color = ball.color; follower.x = ball.realX;
-                follower.y = ball.realY; ball.active = false;
+                follower.active = true; 
+                follower.name = ball.name;
+                follower.color = pokemonSprites[ball.name.toLowerCase()].color;
+                follower.x = ball.realX;
+                follower.y = ball.realY; 
+                follower.hp = pokemonSprites[ball.name.toLowerCase()].hp;
+                follower.maxHp = pokemonSprites[ball.name.toLowerCase()].hp;
+                follower.level = pokemonSprites[ball.name.toLowerCase()].level;
+                ball.active = false;
                 holdingPokeball = true;
-                caughtPokemon.push(ball.name);
             }
         });
     }
@@ -245,53 +674,282 @@
     wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
     window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
-        if (!isTouching || isBattle) return;
+        if (!isTouching) return;
         const rect = wrapper.getBoundingClientRect();
         const touch = e.touches[0];
-        let dx = touch.clientX - (rect.left + rect.width/2), dy = touch.clientY - (rect.top + rect.height/2);
+        let dx = touch.clientX - (rect.left + rect.width/2);
+        let dy = touch.clientY - (rect.top + rect.height/2);
         const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
         const angle = Math.atan2(dy, dx);
         stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
-    function update() {
-        if (isBattle) return;
-        if (isTouching) {
-            let nx = player.x + stickX * player.speed, ny = player.y + stickY * player.speed;
-            player.history.push({x: player.x, y: player.y});
-            if (player.history.length > 60) player.history.shift();
-            player.x = nx; player.y = ny;
+    function checkCollision(nx, ny) {
+        if (currentMap === 'LAB') {
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
+            if (ny < 130) return true;
+        } else {
+            const hX = width/2 - 110, hY = height/2 - 150;
+            if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
+                if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
+                return true;
+            }
+            if (ny > height/2 + 120 && ny < height/2 + 130) {
+                if (Math.abs(nx - width/2) > 40) return true;
+            }
+        }
+        return false;
+    }
 
-            // ENCOUNTER CHECK
-            if (currentMap === 'OUTSIDE') {
-                walkCounter++;
-                if (walkCounter > 120) {
-                    walkCounter = 0;
-                    if (ny > height/2 + 120) triggerBattle('ROCKY');
-                    else if (nx > width - 450 && ny < height/2 + 100) triggerBattle('GRASS');
-                    else if (Math.hypot(nx - (width/2 - 350), ny - (height/2 - 50)) < 100) triggerBattle('WATER');
+    let isTeleporting = false;
+    function teleport() {
+        if (isTeleporting) return;
+        isTeleporting = true;
+        const shim = document.getElementById('shimmer');
+        shim.style.opacity = '1';
+        setTimeout(() => {
+            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
+            player.x = width/2;
+            player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
+            player.history = [];
+            spawnWildPokemon();
+            shim.style.opacity = '0';
+            isTeleporting = false;
+        }, 300);
+    }
+
+    // Battle System
+    function startBattle(wildPoke) {
+        inBattle = true;
+        activeWildPokemon = wildPoke;
+        battleState = {
+            wildHp: wildPoke.hp,
+            wildMaxHp: wildPoke.hp,
+            playerHp: follower.hp,
+            playerMaxHp: follower.maxHp,
+            playerTurn: true
+        };
+        
+        // Update battle UI
+        document.getElementById('battle-title').textContent = `Wild ${wildPoke.name.toUpperCase()} appeared!`;
+        document.getElementById('player-name').textContent = follower.name;
+        document.getElementById('wild-name').textContent = wildPoke.name;
+        updateBattleHP();
+        
+        // Draw sprites in battle
+        const playerSprite = document.getElementById('player-pokemon');
+        const wildSprite = document.getElementById('wild-pokemon');
+        
+        // Create canvas for player Pokémon
+        const playerCanvas = document.createElement('canvas');
+        playerCanvas.width = 80;
+        playerCanvas.height = 80;
+        const playerCtx = playerCanvas.getContext('2d');
+        playerCtx.clearRect(0, 0, 80, 80);
+        playerCtx.imageSmoothingEnabled = false;
+        const playerPokeData = pokemonSprites[follower.name.toLowerCase()];
+        if (playerPokeData) {
+            const tempCtx = playerCanvas.getContext('2d');
+            tempCtx.fillStyle = playerPokeData.color;
+            playerPokeData.sprite.forEach((row, y) => {
+                row.split('').forEach((char, x) => {
+                    if (char === '█') {
+                        tempCtx.fillRect(x * 4, y * 4, 4, 4);
+                    } else if (char === '░') {
+                        tempCtx.fillStyle = '#FFFFFF';
+                        tempCtx.fillRect(x * 4, y * 4, 4, 4);
+                        tempCtx.fillStyle = playerPokeData.color;
+                    }
+                });
+            });
+        }
+        playerSprite.innerHTML = '';
+        playerSprite.appendChild(playerCanvas);
+        
+        // Create canvas for wild Pokémon
+        const wildCanvas = document.createElement('canvas');
+        wildCanvas.width = 80;
+        wildCanvas.height = 80;
+        const wildCtx = wildCanvas.getContext('2d');
+        wildCtx.clearRect(0, 0, 80, 80);
+        wildCtx.imageSmoothingEnabled = false;
+        const wildPokeData = pokemonSprites[wildPoke.name];
+        if (wildPokeData) {
+            const tempCtx = wildCanvas.getContext('2d');
+            tempCtx.fillStyle = wildPokeData.color;
+            wildPokeData.sprite.forEach((row, y) => {
+                row.split('').forEach((char, x) => {
+                    if (char === '█') {
+                        tempCtx.fillRect(x * 4, y * 4, 4, 4);
+                    } else if (char === '░') {
+                        tempCtx.fillStyle = '#FFFFFF';
+                        tempCtx.fillRect(x * 4, y * 4, 4, 4);
+                        tempCtx.fillStyle = wildPokeData.color;
+                    }
+                });
+            });
+        }
+        wildSprite.innerHTML = '';
+        wildSprite.appendChild(wildCanvas);
+        
+        battleUI.style.display = 'flex';
+        document.getElementById('battle-text').textContent = `What will ${follower.name} do?`;
+    }
+
+    function updateBattleHP() {
+        const playerPercent = (battleState.playerHp / battleState.playerMaxHp) * 100;
+        const wildPercent = (battleState.wildHp / battleState.wildMaxHp) * 100;
+        
+        document.getElementById('player-hp').textContent = `${battleState.playerHp}/${battleState.playerMaxHp}`;
+        document.getElementById('wild-hp').textContent = `${battleState.wildHp}/${battleState.wildMaxHp}`;
+        document.getElementById('player-hp-fill').style.width = `${playerPercent}%`;
+        document.getElementById('wild-hp-fill').style.width = `${wildPercent}%`;
+    }
+
+    function battleAction(action) {
+        if (!battleState.playerTurn && action !== 'run') return;
+        
+        const battleText = document.getElementById('battle-text');
+        
+        switch(action) {
+            case 'attack':
+                // Player attacks
+                const playerAttack = pokemonSprites[follower.name.toLowerCase()].attack || 50;
+                const wildDefense = 20;
+                const damage = Math.max(5, Math.floor(playerAttack * (0.8 + Math.random() * 0.4)) - wildDefense);
+                battleState.wildHp = Math.max(0, battleState.wildHp - damage);
+                battleText.textContent = `${follower.name} attacks for ${damage} damage!`;
+                battleState.playerTurn = false;
+                
+                updateBattleHP();
+                
+                if (battleState.wildHp <= 0) {
+                    setTimeout(() => {
+                        battleText.textContent = `Wild ${activeWildPokemon.name} fainted!`;
+                        setTimeout(() => {
+                            attemptCapture();
+                        }, 1500);
+                    }, 1000);
+                } else {
+                    setTimeout(() => wildAttack(), 1000);
+                }
+                break;
+                
+            case 'bag':
+                if (playerInventory.pokeballs > 0) {
+                    battleText.textContent = `Used a Pokéball!`;
+                    playerInventory.pokeballs--;
+                    attemptCapture();
+                } else {
+                    battleText.textContent = `No Pokéballs left!`;
+                }
+                break;
+                
+            case 'run':
+                battleText.textContent = `Got away safely!`;
+                setTimeout(endBattle, 1000);
+                break;
+        }
+    }
+
+    function wildAttack() {
+        if (battleState.wildHp <= 0) return;
+        
+        const battleText = document.getElementById('battle-text');
+        const wildAttack = pokemonSprites[activeWildPokemon.name].attack || 40;
+        const playerDefense = 20;
+        const damage = Math.max(3, Math.floor(wildAttack * (0.7 + Math.random() * 0.3)) - playerDefense);
+        battleState.playerHp = Math.max(0, battleState.playerHp - damage);
+        follower.hp = battleState.playerHp;
+        
+        battleText.textContent = `Wild ${activeWildPokemon.name} attacks for ${damage} damage!`;
+        battleState.playerTurn = true;
+        
+        updateBattleHP();
+        
+        if (battleState.playerHp <= 0) {
+            setTimeout(() => {
+                battleText.textContent = `${follower.name} fainted!`;
+                setTimeout(endBattle, 1500);
+            }, 1000);
+        }
+    }
+
+    function attemptCapture() {
+        const battleText = document.getElementById('battle-text');
+        const captureChance = (battleState.wildHp / battleState.wildMaxHp) < 0.5 ? 0.7 : 0.3;
+        
+        if (Math.random() < captureChance) {
+            battleText.textContent = `Gotcha! ${activeWildPokemon.name} was caught!`;
+            playerInventory.capturedPokemon.push(activeWildPokemon.name);
+            
+            // Remove from wild encounters
+            wildPokemon = wildPokemon.filter(poke => poke !== activeWildPokemon);
+        } else {
+            battleText.textContent = `Oh no! The Pokémon broke free!`;
+        }
+        
+        setTimeout(endBattle, 1500);
+    }
+
+    function endBattle() {
+        inBattle = false;
+        activeWildPokemon = null;
+        battleState = null;
+        battleUI.style.display = 'none';
+    }
+
+    function update() {
+        if (isBagOpen || inBattle) return;
+        if (isTouching) {
+            let nextX = player.x + stickX * player.speed;
+            let nextY = player.y + stickY * player.speed;
+            if (!checkCollision(nextX, nextY)) {
+                player.history.push({x: player.x, y: player.y});
+                if (player.history.length > 60) player.history.shift();
+                player.x = nextX; player.y = nextY;
+            }
+            
+            // Random encounter chance in grass
+            if (currentMap === 'OUTSIDE' && Math.random() < 0.003) {
+                const grassPokemon = wildPokemon.filter(poke => 
+                    poke.terrain === 'GRASS' && 
+                    poke.active && 
+                    Math.abs(poke.x - player.x) < 300 && 
+                    Math.abs(poke.y - player.y) < 300
+                );
+                if (grassPokemon.length > 0 && !inBattle) {
+                    startBattle(grassPokemon[Math.floor(Math.random() * grassPokemon.length)]);
                 }
             }
         }
-        const matX = width/2, matY = (currentMap === 'LAB') ? height-30 : height/2+10;
-        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) {
-            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
-            player.x = width/2; player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
-            player.history = [];
-        }
+        const matX = width / 2;
+        const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
+        
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
         }
+        player.x = Math.max(20, Math.min(width-20, player.x));
+        player.y = Math.max(20, Math.min(height-20, player.y));
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
+
         if (currentMap === 'LAB') {
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
+            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
+            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
+
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
             pokeballs.forEach((ball, i) => {
@@ -299,21 +957,94 @@
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
                 ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#567d56'; for(let r=0; r<8; r++) for(let c=0; c<12; c++) ctx.fillRect(width - 450 + c*40, 50 + r*40, 35, 35);
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); 
+            
+            // Draw wild Pokémon
+            wildPokemon.forEach(poke => {
+                if (poke.active) {
+                    drawPokemonSprite(poke, poke.x - 15, poke.y - 15, 2);
+                    // Draw detection radius (hidden)
+                    // ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                    // ctx.beginPath();
+                    // ctx.arc(poke.x, poke.y, 40, 0, Math.PI*2);
+                    // ctx.stroke();
+                }
+            });
+            
+            // GRASS
+            ctx.fillStyle = '#567d56'; 
+            for(let row=0; row<8; row++) {
+                for(let col=0; col<12; col++) {
+                    let gx = width - 450 + col*40, gy = 50 + row*40;
+                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
+                }
+            }
+
+            // ROCKY TERRAIN
             ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
-            rocks.forEach(r => { ctx.fillStyle = '#c5b16c'; ctx.beginPath(); ctx.moveTo(r.x%width, height/2+120+(r.y%200)); ctx.lineTo(r.x%width+r.s, height/2+120+(r.y%200)); ctx.lineTo(r.x%width+r.s/2, height/2+120+(r.y%200)-r.s); ctx.fill(); });
-            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(width/2-350, height/2-50, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            rocks.forEach(rock => {
+                ctx.fillStyle = rock.color;
+                ctx.beginPath();
+                ctx.moveTo(rock.x % width, (rock.y % (height/2)) + height/2 + 120);
+                ctx.lineTo((rock.x + rock.size) % width, (rock.y % (height/2)) + height/2 + 120);
+                ctx.lineTo((rock.x + rock.size/2) % width, (rock.y % (height/2)) + height/2 + 120 - rock.size);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(rock.x % width + 5, (rock.y % (height/2)) + height/2 + 120 - 5);
+                ctx.lineTo(rock.x % width + 15, (rock.y % (height/2)) + height/2 + 120 - 15); ctx.stroke();
+            });
+
+            // POND
+            const wX = width/2 - 350, wY = height/2 - 50;
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
+
+            // TREES
+            ctx.fillStyle = '#1a331a';
+            const fenceY = height/2 + 120;
+            for(let x = 40; x < width; x += 80) {
+                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
+                if (x < 100 || x > width - 100) {
+                    for(let y = 120; y < fenceY - 40; y += 80) {
+                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            }
+            
+            // FENCE
+            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
+            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
+
+            // HOUSE
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
-        if (follower.active) { ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI*2); ctx.fill(); }
+
+        if (follower.active) {
+            drawPokemonSprite(pokemonSprites[follower.name.toLowerCase()], follower.x - 15, follower.y - 15, 2);
+        }
+
+        // PLAYER
+        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        update(); requestAnimationFrame(draw);
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        
+        if (holdingPokeball) {
+            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
+        }
+
+        update();
+        requestAnimationFrame(draw);
     }
     draw();
 </script>
