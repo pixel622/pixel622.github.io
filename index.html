@@ -213,7 +213,7 @@
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            if (ny > height/2 + 100 && ny < height/2 + 130) {
+            if (ny > height/2 + 120 && ny < height/2 + 130) {
                 if (Math.abs(nx - width/2) > 40) return true;
             }
         }
@@ -282,36 +282,55 @@
                 ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
+            // OUTSIDE MAP - GBA PIXEL STYLE
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Darker grass base
             
-            // YELLOW ROCKY TERRAIN (Zero grass dots)
-            ctx.fillStyle = '#f0e68c'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#bdb76b'; 
-            for(let i=0; i<width; i+=140) { ctx.fillRect(i + 40, height/2 + 160, 30, 15); ctx.fillRect(i + 90, height/2 + 190, 20, 10); }
+            // YELLOW ROCKY TERRAIN
+            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
+            ctx.fillStyle = '#c5b15c'; 
+            for(let i=0; i<width; i+=140) { 
+                ctx.fillRect(i + 40, height/2 + 160, 40, 20); 
+                ctx.fillStyle = '#a5913c'; ctx.fillRect(i + 45, height/2 + 165, 10, 5); ctx.fillStyle = '#c5b15c';
+            }
 
-            // BIGGER WATER - MOVED MORE LEFT
-            ctx.fillStyle = '#4d88ff'; ctx.beginPath(); ctx.ellipse(width/2 - 350, height/2 - 50, 140, 90, 0, 0, Math.PI*2); ctx.fill();
+            // PIXELATED WATER (Left side)
+            const wX = width/2 - 350, wY = height/2 - 50;
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.3; ctx.fillRect(wX - 40, wY - 20, 30, 4); ctx.globalAlpha = 1.0;
 
-            // GRASS (Only in upper green area)
+            // PIXELATED GRASS BUNCHES (Upper Green)
             ctx.fillStyle = '#567d56';
-            for(let row=0; row<2; row++) { for(let col=0; col<5; col++) { ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35); } }
+            for(let row=0; row<2; row++) { for(let col=0; col<5; col++) { 
+                let gx = width - 250 + col*40, gy = 100 + row*40;
+                ctx.fillRect(gx, gy, 35, 35);
+                ctx.fillStyle = '#3e5d3e'; ctx.fillRect(gx+5, gy+5, 10, 2); ctx.fillStyle = '#567d56';
+            } }
 
-            ctx.fillStyle = '#2d4d2d'; 
-            [[40, 40], [width-60, height-60], [width-120, 40]].forEach(pos => { ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill(); });
+            // PIXELATED TREES (Nested circles for depth)
+            [[40, 40], [width-60, height-60], [width-120, 40]].forEach(pos => { 
+                ctx.fillStyle = '#1a331a'; ctx.beginPath(); ctx.arc(pos[0], pos[1], 35, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#2d4d2d'; ctx.beginPath(); ctx.arc(pos[0]-5, pos[1]-5, 25, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#4a704a'; ctx.beginPath(); ctx.arc(pos[0]-10, pos[1]-10, 10, 0, Math.PI*2); ctx.fill();
+            });
             
-            ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 40, height/2 + 120); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width/2 + 40, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
-            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); } }
+            // FENCE
+            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 45, height/2 + 120); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
+            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+135); ctx.stroke(); } }
 
+            // PIXELATED HOUSE (GBA Shading)
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
-            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
-            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 25);
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40);
+            ctx.fillStyle = '#7a9caf'; ctx.fillRect(hX, hY, 220, 150); // Body shadow
+            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX+5, hY, 210, 145); // Body main
+            ctx.fillStyle = '#9e3d3d'; ctx.beginPath(); ctx.moveTo(hX-25, hY); ctx.lineTo(width/2, hY-65); ctx.lineTo(hX+245, hY); ctx.fill(); // Roof shadow
+            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill(); // Roof main
+            ctx.fillStyle = '#1e5aab'; ctx.fillRect(width/2 - 40, height/2, 80, 25); // Doorway mat
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
         }
 
+        // PLAYER/FOLLOWER (No changes as requested)
         if (follower.active) {
             ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
@@ -322,6 +341,7 @@
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
         ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
         ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
