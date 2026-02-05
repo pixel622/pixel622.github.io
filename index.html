@@ -19,10 +19,7 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        #game-wrapper {
-            position: relative;
-            width: 100%; height: 100%;
-        }
+        #game-wrapper { position: relative; width: 100%; height: 100%; }
 
         canvas {
             display: block;
@@ -39,7 +36,7 @@
             font-family: var(--font-main);
         }
 
-        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+        #title-screen h1 { font-size: 40px; margin-bottom: 20px; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
 
         #start-btn {
             padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
@@ -57,7 +54,7 @@
             background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
             padding: 20px; font-family: var(--font-main); font-weight: bold;
             font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
-            min-height: 80px; user-select: none;
+            min-height: 80px;
         }
 
         #speaker-tag {
@@ -67,7 +64,6 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
-        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
             position: absolute; bottom: 80px; left: 40px;
             width: 130px; height: 130px;
@@ -77,20 +73,18 @@
 
         #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
-        #shimmer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s; z-index: 999;
-        }
-
-        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
             background: var(--gba-blue); color: white;
             padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
-            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
+        }
+
+        #shimmer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; z-index: 999;
         }
     </style>
 </head>
@@ -155,10 +149,7 @@
 
     function startGame() {
         titleScreen.style.opacity = '0';
-        setTimeout(() => {
-            titleScreen.style.display = 'none';
-            uiLayer.style.display = 'block';
-        }, 500);
+        setTimeout(() => { titleScreen.style.display = 'none'; uiLayer.style.display = 'block'; }, 500);
     }
 
     let stickX = 0, stickY = 0, isTouching = false;
@@ -180,8 +171,7 @@
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
         pokeballs.forEach(ball => {
             if(!ball.active) return;
-            const dx = clickX - ball.realX;
-            const dy = clickY - ball.realY;
+            const dx = clickX - ball.realX; const dy = clickY - ball.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
                 follower.active = true; follower.name = ball.name;
                 follower.color = ball.color; follower.x = ball.realX;
@@ -216,9 +206,7 @@
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            if (ny > height/2 + 120 && ny < height/2 + 130) {
-                if (Math.abs(nx - width/2) > 40) return true;
-            }
+            if (ny > height/2 + 120 && ny < height/2 + 130) { if (Math.abs(nx - width/2) > 40) return true; }
         }
         return false;
     }
@@ -233,10 +221,14 @@
             currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
             player.x = width/2;
             player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
-            player.history = []; 
-            shim.style.opacity = '0';
-            isTeleporting = false;
+            player.history = []; shim.style.opacity = '0'; isTeleporting = false;
         }, 300);
+    }
+
+    function drawBush(x, y) {
+        ctx.fillStyle = '#1e3d1e'; ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#3a6b3a'; ctx.beginPath(); ctx.arc(x-5, y-5, 25, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#6ab06a'; ctx.beginPath(); ctx.arc(x-10, y-10, 10, 0, Math.PI*2); ctx.fill();
     }
 
     function update() {
@@ -252,7 +244,6 @@
         const matX = width / 2;
         const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
         if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
-        
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
@@ -268,12 +259,7 @@
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
             ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
-
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
             pokeballs.forEach((ball, i) => {
@@ -281,53 +267,50 @@
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
                 ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
-            
-            // GRASS DESIGN
-            ctx.fillStyle = '#567d56'; 
-            for(let row=0; row<8; row++) {
-                for(let col=0; col<12; col++) {
-                    let gx = width - 450 + col*40, gy = 50 + row*40;
-                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
-                }
-            }
+            // MATCHING IMAGE DESIGN
+            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height); // Grass
 
-            // YELLOW ROCKY TERRAIN
-            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
+            // THE PATH (Rocky terrain) - JAGGER DITHERED EDGE
+            ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2 + 120, width, height);
+            ctx.fillStyle = '#c5b76b';
+            for(let i=0; i<width; i+=20) { ctx.fillRect(i, height/2 + 115, 15, 10); } // Dithering
 
-            // POND (Left)
+            // POND (Left Side - Jagged Edge)
             const wX = width/2 - 350, wY = height/2 - 50;
-            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX - 150, wY - 100, 300, 200); // Jagged effect
+            ctx.fillStyle = '#b7e4f7'; ctx.fillRect(wX - 130, wY - 80, 260, 160);
 
-            // TREE PERIMETER (Only outer edge, skipping fence area)
-            ctx.fillStyle = '#1a331a';
+            // FLOWERS
+            [[wX+200, wY], [wX+230, wY+30]].forEach(p => {
+                ctx.fillStyle = '#f78db7'; ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2); ctx.fill();
+            });
+
+            // TREE PERIMETER (Cones like image)
             const fenceY = height/2 + 120;
             for(let x = 40; x < width; x += 80) {
-                // Top edge
-                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
-                // Left & Right edges down to fence
-                if (x < 100 || x > width - 100) {
-                    for(let y = 120; y < fenceY - 40; y += 80) {
-                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-                    }
+                drawBush(x, 40);
+                if (x < 120 || x > width - 120) {
+                    for(let y = 120; y < fenceY - 40; y += 80) { drawBush(x, y); }
                 }
             }
             
-            // FENCE
-            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
-            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
+            // FENCE (Round Posts)
+            ctx.fillStyle = '#c28d63';
+            for(let x=0; x<width; x+=35) {
+                if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 15, 30);
+            }
 
-            // HOUSE
+            // HOUSE (Wooden GBA Style)
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
-            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
+            ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150); // Planks
+            ctx.fillStyle = '#9e623d'; for(let i=hY; i<hY+150; i+=20) ctx.fillRect(hX, i, 220, 2); // Lines
+            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-30, 240, 40); // Roof Base
+            ctx.fillStyle = '#c65353'; ctx.fillRect(hX-10, hY-60, 240, 30); // Roof Top
+            ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40); // Windows
+            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
         }
 
         if (follower.active) {
@@ -335,18 +318,13 @@
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
-        // PLAYER
+        // PLAYER MODEL
         ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
         ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
         ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
         
-        if (holdingPokeball) {
-            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
-        }
-
         update();
         requestAnimationFrame(draw);
     }
