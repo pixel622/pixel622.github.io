@@ -77,6 +77,30 @@
             background: white; opacity: 0; pointer-events: none;
             transition: opacity 0.4s; z-index: 999;
         }
+
+        /* --- NEW STYLES FOR BAG --- */
+        #bag-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--gba-blue); color: white;
+            padding: 10px 25px; border-radius: 8px;
+            font-family: var(--font-main); font-weight: bold;
+            border: 3px solid white; cursor: pointer; z-index: 300;
+        }
+
+        #bag-menu {
+            display: none;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px; background: white;
+            border: 6px solid var(--gba-blue); border-radius: 15px;
+            padding: 20px; z-index: 1000; font-family: var(--font-main);
+            box-shadow: 0 0 0 500px rgba(0,0,0,0.5);
+        }
+
+        .bag-item {
+            display: flex; align-items: center; margin-bottom: 10px;
+            font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +108,14 @@
 <div id="game-wrapper">
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
+
+    <div id="bag-btn" onclick="toggleBag()">BAG</div>
+    
+    <div id="bag-menu">
+        <h3 style="margin-top:0; color:var(--gba-blue)">ITEMS</h3>
+        <div class="bag-item">🔴 Poké Ball x5</div>
+        <button onclick="toggleBag()" style="width:100%; margin-top:10px; cursor:pointer;">CLOSE</button>
+    </div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
@@ -102,6 +134,7 @@
     const wrapper = document.getElementById('joystick-wrapper');
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
+    const bagMenu = document.getElementById('bag-menu');
 
     const script = [
         "Welcome to the Habitat Research Lab!",
@@ -112,6 +145,7 @@
     let scriptIndex = 0;
     let currentMap = 'LAB';
     let choosingState = false;
+    let bagOpen = false;
 
     let width, height;
     function resize() {
@@ -137,6 +171,11 @@
     ];
 
     let stickX = 0, stickY = 0, isTouching = false;
+
+    function toggleBag() {
+        bagOpen = !bagOpen;
+        bagMenu.style.display = bagOpen ? 'block' : 'none';
+    }
 
     function handleDialogueClick() {
         if (scriptIndex < script.length - 1) {
@@ -203,6 +242,8 @@
     }
 
     function update() {
+        if (bagOpen) return; // Freeze movement if bag is open
+
         if (isTouching) {
             player.history.push({x: player.x, y: player.y});
             if (player.history.length > 60) player.history.shift();
@@ -231,14 +272,17 @@
         if (currentMap === 'LAB') {
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            
+            // Blue Mat INSIDE the house
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
+
             ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
             ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
             ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
-            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
 
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
@@ -249,10 +293,7 @@
                 ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // --- OUTSIDE MAP UPDATED ---
-            ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height); // Grass Base
-
-            // Tall Grass Patches
+            ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
             ctx.fillStyle = '#567d56';
             for(let row=0; row<3; row++) {
                 for(let col=0; col<5; col++) {
@@ -260,35 +301,24 @@
                     ctx.fillRect(width - 250 + col*40, 100 + row*40, 35, 35);
                 }
             }
-
-            // Pond
             ctx.fillStyle = '#4d88ff';
             ctx.beginPath(); ctx.ellipse(width - 120, height/2, 80, 50, 0, 0, Math.PI*2); ctx.fill();
-
-            // Trees
             ctx.fillStyle = '#2d4d2d';
             const treePositions = [[40, 40], [100, 60], [40, 120], [width-60, height-60], [width-120, height-100]];
             treePositions.forEach(pos => {
                 ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill();
             });
-
-            // Wooden Fence
             ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
             ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
             for(let x=0; x<width; x+=40) { ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); }
-
-            // House Exterior
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            
-            // Blue Mat (Entrance)
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
             ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 25);
             ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40);
         }
 
-        // Follower & Character
         if (follower.active) {
             ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
