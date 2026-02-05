@@ -3,59 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon K&E - Ultra Pixel Edition</title>
+    <title>Pokémon K&E - Authentic GBA Style</title>
     <style>
-        :root {
-            --gba-blue: #285088; --gba-light-blue: #5888c8;
-            --font-main: 'Courier New', Courier, monospace;
-        }
-        body, html {
-            margin: 0; padding: 0; width: 100vw; height: 100vh;
-            background: #000; overflow: hidden; touch-action: none;
-            display: flex; justify-content: center; align-items: center;
-        }
+        :root { --gba-blue: #285088; --gba-light-blue: #5888c8; --font-main: 'Courier New', Courier, monospace; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; background: #000; overflow: hidden; touch-action: none; display: flex; justify-content: center; align-items: center; }
         #game-wrapper { position: relative; width: 100%; height: 100%; }
         canvas { display: block; width: 100% !important; height: 100% !important; image-rendering: pixelated; }
-        #title-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 2000;
-            transition: opacity 0.5s ease-out; font-family: var(--font-main);
-        }
-        #start-btn {
-            padding: 15px 40px; font-size: 20px; background: var(--gba-blue);
-            color: white; border: 4px solid white; border-radius: 10px; cursor: pointer;
-        }
-        #ui-layer {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; z-index: 100; display: none;
-        }
-        #dialogue-box {
-            background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
-            padding: 20px; font-family: var(--font-main); font-weight: bold; font-size: 18px;
-            box-shadow: inset 0 0 0 3px var(--gba-light-blue); min-height: 60px;
-        }
-        #joystick-wrapper {
-            position: absolute; bottom: 80px; left: 40px; width: 120px; height: 120px;
-            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
-            display: flex; justify-content: center; align-items: center; z-index: 200;
-        }
-        #joystick-knob { width: 40px; height: 40px; background: rgba(255,255,255,0.5); border-radius: 50%; }
-        #bag-btn {
-            position: absolute; bottom: 80px; right: 40px; background: var(--gba-blue);
-            color: white; padding: 12px 25px; border-radius: 8px; border: 3px solid white; z-index: 300;
-        }
-        #shimmer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999;
-        }
+        #title-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; font-family: var(--font-main); transition: opacity 0.5s; }
+        #start-btn { padding: 15px 40px; font-size: 20px; background: var(--gba-blue); color: white; border: 4px solid white; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #ui-layer { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; z-index: 100; display: none; }
+        #dialogue-box { background: white; border: 6px solid var(--gba-blue); border-radius: 18px; padding: 20px; font-family: var(--font-main); font-weight: bold; font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue); min-height: 80px; }
+        #joystick-wrapper { position: absolute; bottom: 80px; left: 40px; width: 130px; height: 130px; background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); display: flex; justify-content: center; align-items: center; z-index: 200; }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+        #bag-btn { position: absolute; bottom: 80px; right: 40px; background: var(--gba-blue); color: white; padding: 15px 30px; border-radius: 8px; border: 3px solid white; font-family: var(--font-main); font-weight: bold; z-index: 300; }
+        #shimmer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999; }
     </style>
 </head>
 <body>
 
 <div id="game-wrapper">
     <div id="title-screen">
-        <h1 style="color:#ffcb05; text-shadow:2px 2px #2a75bb;">Pokémon K&E Version</h1>
+        <h1 style="color:#ffcb05; text-shadow:3px 3px #2a75bb;">Pokémon K&E Version</h1>
         <button id="start-btn" onclick="startGame()">START GAME</button>
     </div>
     <canvas id="gameCanvas"></canvas>
@@ -77,7 +45,6 @@
 
     let width, height, scriptIndex = 0;
     let currentMap = 'LAB', choosingState = false, isTeleporting = false;
-    const px = 4; // Pixel Unit
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
@@ -86,12 +53,12 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const player = { x: width/2, y: height - 120, speed: 4.5, history: [] };
+    const player = { x: width/2, y: height - 120, speed: 5, history: [] };
     const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
     const pokemons = [
-        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
-        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
-        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
+        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true, type: 'grass' },
+        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true, type: 'water' },
+        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true, type: 'fire' }
     ];
 
     function startGame() {
@@ -99,38 +66,55 @@
         setTimeout(() => { document.getElementById('title-screen').style.display = 'none'; uiLayer.style.display = 'block'; }, 500);
     }
 
-    // Controls
+    // Input Handling
     let stickX = 0, stickY = 0, isTouching = false;
     wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
-    window.addEventListener('touchend', () => { isTouching = false; stickX = stickY = 0; knob.style.transform = `translate(0,0)`; });
+    window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
         if (!isTouching) return;
         const rect = wrapper.getBoundingClientRect();
-        const t = e.touches[0];
-        let dx = t.clientX - (rect.left + rect.width/2), dy = t.clientY - (rect.top + rect.height/2);
-        const d = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
-        const a = Math.atan2(dy, dx);
-        stickX = Math.cos(a) * (d/40); stickY = Math.sin(a) * (d/40);
-        knob.style.transform = `translate(${Math.cos(a)*d}px, ${Math.sin(a)*d}px)`;
+        const touch = e.touches[0];
+        let dx = touch.clientX - (rect.left + rect.width/2), dy = touch.clientY - (rect.top + rect.height/2);
+        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+        const angle = Math.atan2(dy, dx);
+        stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
+        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
     function handleDialogueClick() {
-        const lines = ["Look around! This lab is state-of-the-art.", "Go ahead and pick your partner!"];
+        const lines = ["Look around! This lab studies the rare Pokémon of Orebound.", "The earthquake earlier was a warning sign.", "Choose your partner Pokémon to begin!"];
         if (scriptIndex < lines.length) { dialogueBox.innerText = lines[scriptIndex++]; }
         else { uiLayer.style.display = 'none'; choosingState = true; }
     }
 
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
-    function checkPokeClick(cx, cy) {
+    function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
         pokemons.forEach(p => {
             if(!p.active) return;
-            if (Math.sqrt((cx-p.realX)**2 + (cy-p.realY)**2) < 40) {
-                follower.active = true; follower.name = p.name; follower.color = p.color;
-                follower.x = p.realX; follower.y = p.realY; p.active = false;
+            const dx = clickX - p.realX, dy = clickY - p.realY;
+            if (Math.sqrt(dx*dx + dy*dy) < 40) {
+                follower.active = true; follower.name = p.name; follower.x = p.realX; follower.y = p.realY; p.active = false;
             }
         });
+    }
+
+    function checkCollision(nx, ny) {
+        if (currentMap === 'LAB') {
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
+            if (ny < 130) return true;
+        } else {
+            const hX = width/2 - 110, hY = height/2 - 150;
+            if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
+                if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
+                return true;
+            }
+            if (ny > height/2 + 120 && ny < height/2 + 130) { if (Math.abs(nx - width/2) > 40) return true; }
+        }
+        return false;
     }
 
     function teleport() {
@@ -143,77 +127,96 @@
         }, 300);
     }
 
-    // PIXEL RENDERERS
-    function drawPixelGroup(x, y, data, colors) {
-        data.forEach((row, r) => {
-            row.forEach((col, c) => {
-                if (col !== 0) {
-                    ctx.fillStyle = colors[col];
-                    ctx.fillRect(x + (c * px), y + (r * px), px, px);
-                }
-            });
-        });
+    // AUTHENTIC PIXEL DRAWING
+    function drawPokemonSprite(x, y, name) {
+        if (name === 'Treecko') {
+            ctx.fillStyle = '#32CD32'; ctx.fillRect(x-10, y-15, 20, 25); // Body
+            ctx.fillStyle = '#228B22'; ctx.fillRect(x-5, y-5, 12, 6); // Tail
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-6, y-10, 4, 4); ctx.fillRect(x+2, y-10, 4, 4); // Eyes
+        } else if (name === 'Froakie') {
+            ctx.fillStyle = '#1E90FF'; ctx.fillRect(x-12, y-10, 24, 18);
+            ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y-12, 12, 0, Math.PI); ctx.fill(); // Bubbles
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-7, y-6, 4, 4); ctx.fillRect(x+3, y-6, 4, 4);
+        } else if (name === 'Charmander') {
+            ctx.fillStyle = '#FF4500'; ctx.fillRect(x-10, y-15, 20, 25);
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-4, y+5, 8, 5); // Belly
+            ctx.fillStyle = '#FFFF00'; ctx.beginPath(); ctx.arc(x+12, y+5, 5, 0, Math.PI*2); ctx.fill(); // Tail Flame
+        }
     }
 
-    function drawPixelTree(x, y) {
-        const data = [[0,0,1,1,0,0],[0,1,2,1,1,0],[1,2,2,2,2,1],[1,1,2,1,1,1],[0,0,3,3,0,0]];
-        const cols = { 1: '#1e3d1e', 2: '#6ab06a', 3: '#5d3a1a' };
-        drawPixelGroup(x-12, y-12, data, cols);
-    }
-
-    function drawPixelPlayer(x, y) {
-        const data = [[0,1,1,1,1,0],[0,2,2,2,2,0],[3,4,4,4,4,3],[0,4,4,4,4,0],[0,5,0,0,5,0]];
-        const cols = { 1: '#fff', 2: '#ffdbac', 3: '#ffdbac', 4: '#a03030', 5: '#333' };
-        drawPixelGroup(x-12, y-12, data, cols);
+    function drawBush(x, y) {
+        ctx.fillStyle = '#1e3d1e'; ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#3a6b3a'; ctx.beginPath(); ctx.arc(x-5, y-5, 25, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#6ab06a'; ctx.beginPath(); ctx.arc(x-10, y-10, 10, 0, Math.PI*2); ctx.fill();
     }
 
     function update() {
         if (isTouching) {
             let nx = player.x + stickX * player.speed, ny = player.y + stickY * player.speed;
-            player.history.push({x: player.x, y: player.y});
-            if (player.history.length > 50) player.history.shift();
-            player.x = nx; player.y = ny;
+            if (!checkCollision(nx, ny)) {
+                player.history.push({x: player.x, y: player.y});
+                if (player.history.length > 50) player.history.shift();
+                player.x = nx; player.y = ny;
+            }
         }
-        if (Math.abs(player.x - width/2) < 40 && ((currentMap==='LAB' && player.y > height-40) || (currentMap==='OUTSIDE' && player.y < height/2+20 && player.y > height/2-20))) teleport();
-        if (follower.active && player.history.length > 10) {
-            const h = player.history[player.history.length - 10];
-            follower.x += (h.x - follower.x) * 0.2; follower.y += (h.y - follower.y) * 0.2;
+        const matX = width/2, matY = (currentMap === 'LAB') ? height-30 : height/2+10;
+        if (Math.abs(player.x - matX) < 45 && Math.abs(player.y - matY) < 25) teleport();
+        if (follower.active && player.history.length > 12) {
+            const fp = player.history[player.history.length - 12];
+            follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
         }
     }
 
     function draw() {
         ctx.clearRect(0,0,width,height);
         if (currentMap === 'LAB') {
-            ctx.fillStyle = '#d89060'; ctx.fillRect(0,0,width,height);
-            ctx.fillStyle = '#b87040'; for(let i=0; i<width; i+=40) ctx.fillRect(i,0,2,height);
-            // Lab Decorations
-            ctx.fillStyle = '#444'; ctx.fillRect(60, 60, 80, 40); // PC
-            ctx.fillStyle = '#804020'; const dW=350, dX=width/2-dW/2; ctx.fillRect(dX, height/2.5, dW, 80); // Table
+            ctx.fillStyle = '#d89060'; ctx.fillRect(0,0,width,height); // Floor
+            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i,0,60,height); // Floor Lines
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2-50, height-50, 100, 50); // Entry Mat
+            
+            // Lab Gear
+            ctx.fillStyle = '#444'; ctx.fillRect(50, 80, 80, 40); // PC Desk
+            ctx.fillStyle = '#0ff'; ctx.fillRect(60, 85, 20, 10); // Screen
+            
+            const dW=350, dH=100, dX=width/2-dW/2, dY=height/2.5;
+            ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH); // Table
             pokemons.forEach((p, i) => {
                 if (!p.active) return;
-                p.realX = dX + 60 + (i * 110); p.realY = height/2.5 + 40;
-                ctx.fillStyle = p.color; ctx.fillRect(p.realX-10, p.realY-10, 20, 20);
+                p.realX = dX + 60 + (i * 110); p.realY = dY + 40;
+                drawPokemonSprite(p.realX, p.realY, p.name);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(p.name.toUpperCase(), p.realX, p.realY - 30);
             });
         } else {
-            // OUTSIDE - FULL DECORATIONS
-            ctx.fillStyle = '#83c47a'; ctx.fillRect(0,0,width,height);
-            // Path
-            ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2 + 100, width, height);
+            // OUTSIDE - RESTORED DECORATIONS
+            ctx.fillStyle = '#83c47a'; ctx.fillRect(0,0,width,height); // Grass
+            ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2+120, width, height); // Path
+            
             // Pond
-            ctx.fillStyle = '#8dcbe4'; ctx.fillRect(width/2-400, height/2-100, 250, 150);
-            // Fence Posts (Individual Pixels)
-            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=40) { if(Math.abs(x-width/2)>60) ctx.fillRect(x, height/2+90, 8, 20); }
+            const wX = width/2-350, wY = height/2-50;
+            ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX-150, wY-100, 300, 200);
+            ctx.fillStyle = '#b7e4f7'; ctx.fillRect(wX-130, wY-80, 260, 160);
+
+            // Fence
+            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=35) { if(Math.abs(x-width/2)>50) ctx.fillRect(x, height/2+110, 12, 25); }
+            
             // Trees
-            for(let x=40; x<width; x+=100) { drawPixelTree(x, 60); drawPixelTree(x, height-60); }
-            // HOUSE (Detailed Pixels)
-            const hX = width/2-110, hY = height/2-160;
+            for(let x=40; x<width; x+=100) { drawBush(x, 40); drawBush(x, height-40); }
+
+            // HOUSE (FULLY RESTORED)
+            const hX = width/2-110, hY = height/2-150;
             ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150); // Walls
-            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-40, 240, 50); // Roof
+            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-50, 240, 60); // Roof
             ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40); // Windows
-            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2-30, hY+105, 60, 45); // Door
+            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2-30, height/2-45, 60, 45); // Door
         }
-        if (follower.active) { ctx.fillStyle = follower.color; ctx.fillRect(follower.x-10, follower.y-10, 20, 20); }
-        drawPixelPlayer(player.x, player.y);
+
+        if (follower.active) drawPokemonSprite(follower.x, follower.y, follower.name);
+        
+        // PLAYER
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        
         update(); requestAnimationFrame(draw);
     }
     draw();
