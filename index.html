@@ -19,10 +19,7 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        #game-wrapper {
-            position: relative;
-            width: 100%; height: 100%;
-        }
+        #game-wrapper { position: relative; width: 100%; height: 100%; }
 
         canvas {
             display: block;
@@ -31,20 +28,25 @@
             image-rendering: pixelated;
         }
 
-        #title-screen {
+        #title-screen, #battle-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #fff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2000; transition: opacity 0.5s ease-out;
-            font-family: var(--font-main);
+            z-index: 2000; font-family: var(--font-main);
         }
 
-        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+        #title-screen { background: #000; color: #fff; transition: opacity 0.5s; }
+        #title-screen h1 { font-size: 40px; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
 
-        #start-btn {
+        #battle-screen { 
+            background: rgba(0,0,0,0.85); 
+            display: none; z-index: 2500; color: white;
+            border: 10px double white;
+        }
+
+        #start-btn, .battle-btn {
             padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
             background: var(--gba-blue); color: white; border: 4px solid white;
-            cursor: pointer; border-radius: 10px; font-weight: bold;
+            cursor: pointer; border-radius: 10px; font-weight: bold; margin: 10px;
         }
 
         #ui-layer {
@@ -56,15 +58,13 @@
         #dialogue-box {
             background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
             padding: 20px; font-family: var(--font-main); font-weight: bold;
-            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
-            min-height: 80px; user-select: none;
+            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue);
+            min-height: 80px;
         }
 
         #speaker-tag {
             position: absolute; top: -25px; left: 30px;
-            background: var(--gba-blue); color: white;
-            padding: 5px 20px; border-radius: 10px 10px 0 0;
-            font-size: 16px; border: 3px solid var(--gba-blue);
+            background: var(--gba-blue); color: white; padding: 5px 20px; border-radius: 10px 10px 0 0;
         }
 
         #joystick-wrapper {
@@ -76,33 +76,20 @@
 
         #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
-        #shimmer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none;
-            transition: opacity 0.3s; z-index: 999;
-        }
-
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
-            background: var(--gba-blue); color: white;
-            padding: 15px 30px; border-radius: 8px;
-            font-family: var(--font-main); font-weight: bold;
-            border: 3px solid white; cursor: pointer; z-index: 300;
-            box-shadow: 0 4px #183058;
+            background: var(--gba-blue); color: white; padding: 15px 30px; border-radius: 8px;
+            font-family: var(--font-main); font-weight: bold; border: 3px solid white; z-index: 300;
         }
-        #bag-btn:active { transform: translateY(2px); box-shadow: 0 2px #183058; }
 
-        /* NEW BAG MODAL STYLES */
         #bag-menu {
             display: none; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 80%; max-width: 400px;
-            background: #f8f8f8; border: 6px solid var(--gba-blue); border-radius: 15px;
-            z-index: 3000; font-family: var(--font-main); padding: 20px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            transform: translate(-50%, -50%); width: 70%; background: white;
+            border: 6px solid var(--gba-blue); border-radius: 15px; padding: 20px; z-index: 3000;
+            font-family: var(--font-main);
         }
-        #bag-menu h2 { margin: 0 0 15px 0; color: var(--gba-blue); border-bottom: 2px solid #ccc; }
-        .bag-item { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
-        #close-bag { margin-top: 15px; width: 100%; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        #shimmer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999; }
     </style>
 </head>
 <body>
@@ -113,14 +100,22 @@
         <button id="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
+    <div id="battle-screen">
+        <h2 id="battle-text">A Wild Pokémon appeared!</h2>
+        <div style="display:flex;">
+            <button class="battle-btn" onclick="battleAction('ATTACK')">ATTACK</button>
+            <button class="battle-btn" onclick="battleAction('CATCH')">THROW BALL</button>
+        </div>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="toggleBag(true)">BAG</div>
+    <div id="bag-btn" onclick="openBag()">BAG</div>
 
     <div id="bag-menu">
-        <h2>ADVENTURE BAG</h2>
-        <div id="bag-content"></div>
-        <button id="close-bag" onclick="toggleBag(false)">CLOSE</button>
+        <h2 style="color:var(--gba-blue)">POKÉMON BAG</h2>
+        <div id="bag-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+        <button class="battle-btn" onclick="closeBag()">CLOSE</button>
     </div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
@@ -141,7 +136,7 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
-    const bagMenu = document.getElementById('bag-menu');
+    const battleScreen = document.getElementById('battle-screen');
 
     const script = [
         "Welcome to the Habitat Research Lab!",
@@ -149,31 +144,33 @@
         "The tremor earlier was quite strong. We must act quickly.",
         "Go ahead and click on the Pokémon you want to partner with!"
     ];
+
+    const encounters = {
+        GRASS: ['Shroomish', 'Ralts', 'Lillipup', 'Venipede', 'Skwovet'],
+        WATER: ['Lotad', 'Magikarp', 'Slowpoke', 'Buizel', 'Chewtle'],
+        ROCKY: ['Onix', 'Larvitar', 'Cubone', 'Rockruff', 'Aron']
+    };
+
     let scriptIndex = 0;
     let currentMap = 'LAB';
     let choosingState = false;
     let holdingPokeball = false; 
-    let isBagOpen = false;
+    let isBattle = false;
+    let currentWild = "";
+    let caughtPokemon = [];
     let width, height;
+    let walkCounter = 0;
 
-    // Rock positions (pre-generated for consistency)
     const rocks = [];
-    function generateRocks() {
+    function genRocks() {
         rocks.length = 0;
-        for(let i=0; i<30; i++) {
-            rocks.push({
-                x: Math.random() * 2000, 
-                y: 500 + Math.random() * 500,
-                size: 15 + Math.random() * 25,
-                color: Math.random() > 0.5 ? '#c5b16c' : '#b5a15c'
-            });
-        }
+        for(let i=0; i<25; i++) rocks.push({x: Math.random()*2000, y: Math.random()*400, s: 15+Math.random()*20});
     }
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
         canvas.width = width; canvas.height = height;
-        generateRocks();
+        genRocks();
     }
     window.addEventListener('resize', resize);
     resize();
@@ -187,38 +184,44 @@
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    function toggleBag(open) {
-        isBagOpen = open;
-        bagMenu.style.display = open ? 'block' : 'none';
-        if (open) {
-            const content = document.getElementById('bag-content');
-            content.innerHTML = `
-                <div class="bag-item"><span>Partner:</span> <strong>${follower.active ? follower.name : 'None'}</strong></div>
-                <div class="bag-item"><span>Potions:</span> <strong>x3</strong></div>
-                <div class="bag-item"><span>Pokéballs:</span> <strong>x5</strong></div>
-                <div class="bag-item"><span>Map:</span> <strong>Orebound Region</strong></div>
-            `;
-        }
-    }
-
     function startGame() {
         titleScreen.style.opacity = '0';
-        setTimeout(() => {
-            titleScreen.style.display = 'none';
-            uiLayer.style.display = 'block';
-        }, 500);
+        setTimeout(() => { titleScreen.style.display = 'none'; uiLayer.style.display = 'block'; }, 500);
+    }
+
+    function openBag() {
+        const list = document.getElementById('bag-list');
+        list.innerHTML = caughtPokemon.length ? caughtPokemon.map(p => `• ${p}`).join('<br>') : "No Pokémon caught.";
+        document.getElementById('bag-menu').style.display = 'block';
+    }
+    function closeBag() { document.getElementById('bag-menu').style.display = 'none'; }
+
+    function triggerBattle(terrain) {
+        if (!follower.active || isBattle) return;
+        isBattle = true;
+        const pool = encounters[terrain];
+        currentWild = pool[Math.floor(Math.random()*pool.length)];
+        document.getElementById('battle-text').innerText = `A wild ${currentWild} appeared!`;
+        battleScreen.style.display = 'flex';
+        isTouching = false;
+    }
+
+    function battleAction(act) {
+        if (act === 'ATTACK') {
+            document.getElementById('battle-text').innerText = `${follower.name} used Tackle!`;
+        } else {
+            caughtPokemon.push(currentWild);
+            document.getElementById('battle-text').innerText = `Gotcha! ${currentWild} was caught!`;
+            setTimeout(() => { battleScreen.style.display = 'none'; isBattle = false; }, 1200);
+        }
     }
 
     let stickX = 0, stickY = 0, isTouching = false;
 
     function handleDialogueClick() {
         if (scriptIndex < script.length - 1) {
-            scriptIndex++;
-            dialogueBox.innerText = script[scriptIndex];
-        } else {
-            uiLayer.style.display = 'none';
-            choosingState = true;
-        }
+            scriptIndex++; dialogueBox.innerText = script[scriptIndex];
+        } else { uiLayer.style.display = 'none'; choosingState = true; }
     }
 
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
@@ -228,13 +231,13 @@
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
         pokeballs.forEach(ball => {
             if(!ball.active) return;
-            const dx = clickX - ball.realX;
-            const dy = clickY - ball.realY;
+            const dx = clickX - ball.realX, dy = clickY - ball.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
                 follower.active = true; follower.name = ball.name;
                 follower.color = ball.color; follower.x = ball.realX;
                 follower.y = ball.realY; ball.active = false;
                 holdingPokeball = true;
+                caughtPokemon.push(ball.name);
             }
         });
     }
@@ -242,87 +245,53 @@
     wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
     window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
-        if (!isTouching) return;
+        if (!isTouching || isBattle) return;
         const rect = wrapper.getBoundingClientRect();
         const touch = e.touches[0];
-        let dx = touch.clientX - (rect.left + rect.width/2);
-        let dy = touch.clientY - (rect.top + rect.height/2);
+        let dx = touch.clientX - (rect.left + rect.width/2), dy = touch.clientY - (rect.top + rect.height/2);
         const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
         const angle = Math.atan2(dy, dx);
         stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
-    function checkCollision(nx, ny) {
-        if (currentMap === 'LAB') {
-            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-            if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
-            if (ny < 130) return true;
-        } else {
-            const hX = width/2 - 110, hY = height/2 - 150;
-            if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
-                if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
-                return true;
-            }
-            if (ny > height/2 + 120 && ny < height/2 + 130) {
-                if (Math.abs(nx - width/2) > 40) return true;
-            }
-        }
-        return false;
-    }
-
-    let isTeleporting = false;
-    function teleport() {
-        if (isTeleporting) return;
-        isTeleporting = true;
-        const shim = document.getElementById('shimmer');
-        shim.style.opacity = '1';
-        setTimeout(() => {
-            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
-            player.x = width/2;
-            player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
-            player.history = []; 
-            shim.style.opacity = '0';
-            isTeleporting = false;
-        }, 300);
-    }
-
     function update() {
-        if (isBagOpen) return;
+        if (isBattle) return;
         if (isTouching) {
-            let nextX = player.x + stickX * player.speed;
-            let nextY = player.y + stickY * player.speed;
-            if (!checkCollision(nextX, nextY)) {
-                player.history.push({x: player.x, y: player.y});
-                if (player.history.length > 60) player.history.shift();
-                player.x = nextX; player.y = nextY;
+            let nx = player.x + stickX * player.speed, ny = player.y + stickY * player.speed;
+            player.history.push({x: player.x, y: player.y});
+            if (player.history.length > 60) player.history.shift();
+            player.x = nx; player.y = ny;
+
+            // ENCOUNTER CHECK
+            if (currentMap === 'OUTSIDE') {
+                walkCounter++;
+                if (walkCounter > 120) {
+                    walkCounter = 0;
+                    if (ny > height/2 + 120) triggerBattle('ROCKY');
+                    else if (nx > width - 450 && ny < height/2 + 100) triggerBattle('GRASS');
+                    else if (Math.hypot(nx - (width/2 - 350), ny - (height/2 - 50)) < 100) triggerBattle('WATER');
+                }
             }
         }
-        const matX = width / 2;
-        const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
-        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
-        
+        const matX = width/2, matY = (currentMap === 'LAB') ? height-30 : height/2+10;
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) {
+            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
+            player.x = width/2; player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
+            player.history = [];
+        }
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
         }
-        player.x = Math.max(20, Math.min(width-20, player.x));
-        player.y = Math.max(20, Math.min(height-20, player.y));
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
-
         if (currentMap === 'LAB') {
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
-            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
-
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
             pokeballs.forEach((ball, i) => {
@@ -330,84 +299,21 @@
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
                 ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); 
-            
-            // GRASS
-            ctx.fillStyle = '#567d56'; 
-            for(let row=0; row<8; row++) {
-                for(let col=0; col<12; col++) {
-                    let gx = width - 450 + col*40, gy = 50 + row*40;
-                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
-                }
-            }
-
-            // ENHANCED ROCKY TERRAIN
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#567d56'; for(let r=0; r<8; r++) for(let c=0; c<12; c++) ctx.fillRect(width - 450 + c*40, 50 + r*40, 35, 35);
             ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
-            rocks.forEach(rock => {
-                ctx.fillStyle = rock.color;
-                ctx.beginPath();
-                ctx.moveTo(rock.x % width, (rock.y % (height/2)) + height/2 + 120);
-                ctx.lineTo((rock.x + rock.size) % width, (rock.y % (height/2)) + height/2 + 120);
-                ctx.lineTo((rock.x + rock.size/2) % width, (rock.y % (height/2)) + height/2 + 120 - rock.size);
-                ctx.fill();
-                // Rock Crack Detail
-                ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(rock.x % width + 5, (rock.y % (height/2)) + height/2 + 120 - 5);
-                ctx.lineTo(rock.x % width + 15, (rock.y % (height/2)) + height/2 + 120 - 15); ctx.stroke();
-            });
-
-            // POND
-            const wX = width/2 - 350, wY = height/2 - 50;
-            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
-
-            // TREES
-            ctx.fillStyle = '#1a331a';
-            const fenceY = height/2 + 120;
-            for(let x = 40; x < width; x += 80) {
-                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
-                if (x < 100 || x > width - 100) {
-                    for(let y = 120; y < fenceY - 40; y += 80) {
-                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-                    }
-                }
-            }
-            
-            // FENCE
-            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
-            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
-
-            // HOUSE
+            rocks.forEach(r => { ctx.fillStyle = '#c5b16c'; ctx.beginPath(); ctx.moveTo(r.x%width, height/2+120+(r.y%200)); ctx.lineTo(r.x%width+r.s, height/2+120+(r.y%200)); ctx.lineTo(r.x%width+r.s/2, height/2+120+(r.y%200)-r.s); ctx.fill(); });
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(width/2-350, height/2-50, 145, 95, 0, 0, Math.PI*2); ctx.fill();
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
-
-        if (follower.active) {
-            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
-        }
-
-        // PLAYER
-        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
+        if (follower.active) { ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI*2); ctx.fill(); }
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
-        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
-        
-        if (holdingPokeball) {
-            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
-        }
-
-        update();
-        requestAnimationFrame(draw);
+        update(); requestAnimationFrame(draw);
     }
     draw();
 </script>
