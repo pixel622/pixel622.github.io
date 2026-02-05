@@ -35,11 +35,17 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #fff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2000; transition: opacity 1s ease-in-out;
+            z-index: 2000; transition: opacity 0.5s ease-out;
             font-family: var(--font-main);
         }
 
-        #title-screen h1 { font-size: 40px; margin-bottom: 10px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+
+        #start-btn {
+            padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
+            background: var(--gba-blue); color: white; border: 4px solid white;
+            cursor: pointer; border-radius: 10px; font-weight: bold;
+        }
 
         #ui-layer {
             position: absolute; bottom: 20px; left: 50%;
@@ -73,7 +79,7 @@
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; opacity: 0; pointer-events: none;
-            transition: opacity 0.4s; z-index: 999;
+            transition: opacity 0.3s; z-index: 999;
         }
 
         #bag-btn {
@@ -90,7 +96,7 @@
 <div id="game-wrapper">
     <div id="title-screen">
         <h1>Pokémon K&E Version</h1>
-        <p>Loading Adventure...</p>
+        <button id="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -116,6 +122,13 @@
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
 
+    const script = [
+        "Welcome to the Habitat Research Lab!",
+        "Look around! This facility is dedicated to studying Orebound's ecology.",
+        "The tremor earlier was quite strong. We must act quickly.",
+        "Go ahead and click on the Pokémon you want to partner with!"
+    ];
+    let scriptIndex = 0;
     let currentMap = 'LAB';
     let choosingState = false;
     let holdingPokeball = false; 
@@ -137,19 +150,24 @@
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    setTimeout(() => {
+    function startGame() {
         titleScreen.style.opacity = '0';
         setTimeout(() => {
             titleScreen.style.display = 'none';
             uiLayer.style.display = 'block';
-        }, 1000);
-    }, 2000);
+        }, 500);
+    }
 
     let stickX = 0, stickY = 0, isTouching = false;
 
     function handleDialogueClick() {
-        uiLayer.style.display = 'none';
-        choosingState = true;
+        if (scriptIndex < script.length - 1) {
+            scriptIndex++;
+            dialogueBox.innerText = script[scriptIndex];
+        } else {
+            uiLayer.style.display = 'none';
+            choosingState = true;
+        }
     }
 
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
@@ -170,7 +188,7 @@
         });
     }
 
-    wrapper.addEventListener('touchstart', () => isTouching = true);
+    wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
     window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
         if (!isTouching) return;
@@ -202,15 +220,20 @@
         return false;
     }
 
+    let isTeleporting = false;
     function teleport() {
+        if (isTeleporting) return;
+        isTeleporting = true;
         const shim = document.getElementById('shimmer');
         shim.style.opacity = '1';
         setTimeout(() => {
             currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
             player.x = width/2;
             player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
-            player.history = []; shim.style.opacity = '0';
-        }, 400);
+            player.history = []; 
+            shim.style.opacity = '0';
+            isTeleporting = false;
+        }, 300);
     }
 
     function update() {
@@ -226,6 +249,7 @@
         const matX = width / 2;
         const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
         if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
+        
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
@@ -243,7 +267,6 @@
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
             ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
             
-            // RE-ADDED LAB DECO
             ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
             ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
             ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
@@ -261,13 +284,13 @@
         } else {
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
             
-            // YELLOW ROCKY TERRAIN (Clean - No grass)
+            // YELLOW ROCKY TERRAIN (Zero grass dots)
             ctx.fillStyle = '#f0e68c'; ctx.fillRect(0, height/2 + 120, width, height);
             ctx.fillStyle = '#bdb76b'; 
-            for(let i=0; i<width; i+=100) { ctx.fillRect(i + 20, height/2 + 150, 25, 15); ctx.fillRect(i + 60, height/2 + 180, 20, 10); }
+            for(let i=0; i<width; i+=140) { ctx.fillRect(i + 40, height/2 + 160, 30, 15); ctx.fillRect(i + 90, height/2 + 190, 20, 10); }
 
-            // BIGGER WATER ON LEFT
-            ctx.fillStyle = '#4d88ff'; ctx.beginPath(); ctx.ellipse(width/2 - 250, height/2 - 50, 120, 80, 0, 0, Math.PI*2); ctx.fill();
+            // BIGGER WATER - MOVED MORE LEFT
+            ctx.fillStyle = '#4d88ff'; ctx.beginPath(); ctx.ellipse(width/2 - 350, height/2 - 50, 140, 90, 0, 0, Math.PI*2); ctx.fill();
 
             // GRASS (Only in upper green area)
             ctx.fillStyle = '#567d56';
@@ -291,11 +314,9 @@
 
         if (follower.active) {
             ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
-            // RE-ADDED FOLLOWER EYES
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
-        // PLAYER (Full model restored)
         ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
