@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Full Screen</title>
+    <title>Pokémon Amber: Following Partner</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -11,7 +11,6 @@
             --font-main: 'Courier New', Courier, monospace;
         }
 
-        /* FULL SCREEN SETUP */
         body, html {
             margin: 0; padding: 0; 
             width: 100vw; height: 100vh;
@@ -23,7 +22,7 @@
         #game-wrapper {
             position: relative;
             width: 100%; height: 100%;
-            background: #4a7a4a; /* Grass/Background base */
+            background: #4a7a4a;
         }
 
         canvas {
@@ -33,7 +32,6 @@
             image-rendering: pixelated;
         }
 
-        /* DIALOGUE UI - CLICK TO PASS */
         #ui-layer {
             position: absolute; bottom: 20px; left: 50%;
             transform: translateX(-50%); width: 90%;
@@ -60,7 +58,6 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
-        /* JOYSTICK */
         #joystick-wrapper {
             position: absolute; bottom: 40px; left: 40px;
             width: 140px; height: 140px;
@@ -76,7 +73,6 @@
             border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
-        /* TRANSITION EFFECT */
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; opacity: 0; pointer-events: none;
@@ -129,17 +125,23 @@
     resize();
 
     const player = {
-        x: 100, y: 100,
-        gridX: 10, gridY: 15,
-        speed: 4, width: 40, height: 40
+        x: width/2, y: height - 150,
+        speed: 4, width: 40, height: 40,
+        history: [] // Stores previous positions for follower to trace
     };
-    player.x = width/2;
-    player.y = height - 150;
+
+    const follower = {
+        active: false,
+        name: '',
+        x: 0, y: 0,
+        color: '#000',
+        targetDist: 50 // How far behind the player it sits
+    };
 
     const pokeballs = [
-        { name: 'Treecko', x: 0, y: 0, color: '#32CD32' },
-        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF' },
-        { name: 'Charmander', x: 0, y: 0, color: '#FF4500' }
+        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
+        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
+        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
     // Input Logic
@@ -160,28 +162,35 @@
     }
     updateUI();
 
-    // Pokéball Clicking Logic
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
     function checkPokeClick(clickX, clickY) {
-        if (!choosingState) return;
+        if (!choosingState || follower.active) return;
         
         pokeballs.forEach(ball => {
+            if(!ball.active) return;
             const dx = clickX - ball.realX;
             const dy = clickY - ball.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 30) {
-                selectPokemon(ball.name);
+                selectPokemon(ball);
             }
         });
     }
 
-    function selectPokemon(name) {
+    function selectPokemon(ball) {
         document.getElementById('shimmer').style.opacity = '1';
-        dialogueBox.innerText = "Professor Sequoia: So, you've chosen " + name + "!";
+        follower.active = true;
+        follower.name = ball.name;
+        follower.color = ball.color;
+        follower.x = ball.realX;
+        follower.y = ball.realY;
+        
+        ball.active = false; // Remove the ball from the desk
+        
         setTimeout(() => {
             document.getElementById('shimmer').style.opacity = '0';
-            alert("You received " + name + "!");
+            dialogueBox.innerText = "Professor Sequoia: " + ball.name + " seems to really like you! It wants to follow you.";
         }, 600);
     }
 
@@ -196,8 +205,8 @@
         if (!isTouching) return;
         const rect = wrapper.getBoundingClientRect();
         const touch = e.touches[0];
-        let dx = touch.clientX - (rect.left + 70);
-        let dy = touch.clientY - (rect.top + 70);
+        let dx = touch.clientX - (rect.left + rect.width/2);
+        let dy = touch.clientY - (rect.top + rect.height/2);
         const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 45);
         const angle = Math.atan2(dy, dx);
         
@@ -208,8 +217,19 @@
 
     function update() {
         if (isTouching) {
+            // Save current position to history for the follower
+            player.history.push({x: player.x, y: player.y});
+            if (player.history.length > 100) player.history.shift();
+
             player.x += stickX * player.speed;
             player.y += stickY * player.speed;
+        }
+
+        // Follower logic: Move toward a point in player's history
+        if (follower.active && player.history.length > 15) {
+            const followPoint = player.history[player.history.length - 15];
+            follower.x += (followPoint.x - follower.x) * 0.1;
+            follower.y += (followPoint.y - follower.y) * 0.1;
         }
     }
 
@@ -229,12 +249,12 @@
         ctx.fillRect(deskX, deskY, deskW, deskH);
         ctx.strokeRect(deskX, deskY, deskW, deskH);
 
-        // Draw Pokéballs and Names
+        // Draw Pokéballs
         pokeballs.forEach((ball, i) => {
+            if (!ball.active) return;
             ball.realX = deskX + 60 + (i * 110);
             ball.realY = deskY + 40;
             
-            // Draw Pokéball
             ctx.fillStyle = 'red';
             ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white';
@@ -242,16 +262,23 @@
             ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(ball.realX - 15, ball.realY); ctx.lineTo(ball.realX + 15, ball.realY); ctx.stroke();
             
-            // Draw Name Label if Choosable
             if (choosingState) {
                 ctx.fillStyle = 'rgba(0,0,0,0.7)';
                 ctx.fillRect(ball.realX - 40, ball.realY - 45, 80, 20);
                 ctx.fillStyle = 'white';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
+                ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
                 ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             }
         });
+
+        // Draw Follower Pokémon
+        if (follower.active) {
+            ctx.fillStyle = follower.color;
+            ctx.beginPath(); ctx.arc(follower.x, follower.y, 12, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'white'; // Eyes for follower
+            ctx.fillRect(follower.x - 5, follower.y - 4, 3, 3);
+            ctx.fillRect(follower.x + 2, follower.y - 4, 3, 3);
+        }
 
         // Draw Character Sprite
         const p = player;
