@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Deluxe Lab</title>
+    <title>Pokémon Amber: Exploration</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -22,7 +22,6 @@
         #game-wrapper {
             position: relative;
             width: 100%; height: 100%;
-            background: #2d4d2d;
         }
 
         canvas {
@@ -88,7 +87,7 @@
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
-        <div id="dialogue-box">Loading Research Lab...</div>
+        <div id="dialogue-box">Welcome to the Research Lab!</div>
     </div>
 
     <div id="joystick-wrapper">
@@ -103,14 +102,15 @@
     const wrapper = document.getElementById('joystick-wrapper');
     const dialogueBox = document.getElementById('dialogue-box');
 
+    // Game States
+    let currentMap = 'LAB'; // LAB or OUTSIDE
+    let scriptIndex = 0;
+    let choosingState = false;
     const script = [
         "Welcome to the Habitat Research Lab!",
         "Look around! This facility is dedicated to studying Orebound's ecology.",
-        "The tremor earlier was quite strong. We must act quickly.",
         "Choose a partner and let's begin our investigation!"
     ];
-    let scriptIndex = 0;
-    let choosingState = false;
 
     let width, height;
     function resize() {
@@ -124,7 +124,7 @@
 
     const player = {
         x: width/2, y: height - 120,
-        speed: 4.5, width: 40, height: 40,
+        speed: 5, width: 40, height: 40,
         history: []
     };
 
@@ -141,43 +141,35 @@
     function handleDialogueClick() {
         if (scriptIndex < script.length - 1) {
             scriptIndex++;
-            updateUI();
-        } else {
+            dialogueBox.innerText = script[scriptIndex];
+        } else if (!choosingState) {
             choosingState = true;
             dialogueBox.innerText = "Click a Pokéball on the center desk!";
         }
     }
 
-    function updateUI() { dialogueBox.innerText = script[scriptIndex]; }
-    updateUI();
-
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
 
     function checkPokeClick(clickX, clickY) {
-        if (!choosingState || follower.active) return;
+        if (!choosingState || follower.active || currentMap !== 'LAB') return;
         pokeballs.forEach(ball => {
             if(!ball.active) return;
             const dx = clickX - ball.realX;
             const dy = clickY - ball.realY;
-            if (Math.sqrt(dx*dx + dy*dy) < 35) selectPokemon(ball);
+            if (Math.sqrt(dx*dx + dy*dy) < 35) {
+                follower.active = true;
+                follower.name = ball.name;
+                follower.color = ball.color;
+                follower.x = ball.realX;
+                follower.y = ball.realY;
+                ball.active = false;
+                dialogueBox.innerText = "Professor Sequoia: Your amazing adventure is about to start! Go to the door and explore!";
+            }
         });
     }
 
-    function selectPokemon(ball) {
-        document.getElementById('shimmer').style.opacity = '1';
-        follower.active = true;
-        follower.name = ball.name;
-        follower.color = ball.color;
-        follower.x = ball.realX;
-        follower.y = ball.realY;
-        ball.active = false;
-        setTimeout(() => {
-            document.getElementById('shimmer').style.opacity = '0';
-            dialogueBox.innerText = "Professor Sequoia: Great! " + ball.name + " is ready to explore with you.";
-        }, 600);
-    }
-
+    // Joystick Engine
     wrapper.addEventListener('touchstart', () => isTouching = true);
     window.addEventListener('touchend', () => {
         isTouching = false; stickX = 0; stickY = 0;
@@ -197,6 +189,22 @@
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
 
+    function teleport() {
+        const shim = document.getElementById('shimmer');
+        shim.style.opacity = '1';
+        setTimeout(() => {
+            if (currentMap === 'LAB') {
+                currentMap = 'OUTSIDE';
+                player.y = height / 2 + 50; // Place player in front of house
+            } else {
+                currentMap = 'LAB';
+                player.y = height - 100; // Place player inside by door
+            }
+            player.history = []; // Reset history to prevent follower snapping
+            shim.style.opacity = '0';
+        }, 400);
+    }
+
     function update() {
         if (isTouching) {
             player.history.push({x: player.x, y: player.y});
@@ -204,81 +212,83 @@
             player.x += stickX * player.speed;
             player.y += stickY * player.speed;
         }
+
+        // TELEPORT LOGIC (DOOR SENSOR)
+        const doorY = (currentMap === 'LAB') ? height - 20 : height / 2;
+        const doorX = width / 2;
+        if (Math.abs(player.x - doorX) < 50 && Math.abs(player.y - doorY) < 20) {
+            teleport();
+            player.y += (currentMap === 'LAB') ? -60 : 60; // Nudge away from door
+        }
+
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
             follower.x += (fp.x - follower.x) * 0.15;
             follower.y += (fp.y - follower.y) * 0.15;
         }
-        // Boundaries
-        player.x = Math.max(40, Math.min(width - 40, player.x));
-        player.y = Math.max(150, Math.min(height - 40, player.y));
+        player.x = Math.max(20, Math.min(width - 20, player.x));
+        player.y = Math.max(20, Math.min(height - 20, player.y));
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        // Floor Planks
-        ctx.fillStyle = '#d89060';
-        ctx.fillRect(0, 0, width, height);
-        ctx.strokeStyle = '#b87040';
-        ctx.lineWidth = 1;
-        for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+        if (currentMap === 'LAB') {
+            // Lab Floor
+            ctx.fillStyle = '#d89060';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#b87040';
+            for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
 
-        // -- ADDED DECORATIONS --
-        
-        // Bookshelves at the back
-        ctx.fillStyle = '#5d3a1a';
-        for(let i=50; i<width-100; i+=120) {
-            ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b5a2b';
-            ctx.fillRect(i+5, 30, 90, 10);
-            ctx.fillRect(i+5, 55, 90, 10);
-            ctx.fillRect(i+5, 80, 90, 10);
-            ctx.fillStyle = '#5d3a1a';
+            // Lab Decorations
+            ctx.fillStyle = '#5d3a1a'; // Shelves
+            for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 80);
+            
+            // Lab Desk
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            ctx.fillStyle = '#804020';
+            ctx.fillRect(dX, dY, dW, dH);
+
+            // Door Mat (Exit)
+            ctx.fillStyle = '#285088';
+            ctx.fillRect(width/2 - 40, height - 20, 80, 20);
+
+            // Pokéballs
+            pokeballs.forEach((ball, i) => {
+                if (!ball.active) return;
+                ball.realX = dX + 60 + (i * 110);
+                ball.realY = dY + 40;
+                ctx.fillStyle = 'red';
+                ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                if (choosingState) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.fillRect(ball.realX - 45, ball.realY - 50, 90, 24);
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+                    ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 33);
+                }
+            });
+        } else {
+            // OUTSIDE MAP
+            ctx.fillStyle = '#8dbd8d'; // Grass Territory
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw House Exterior (Based on IMG_0616)
+            const hW = 220, hH = 160, hX = width/2 - hW/2, hY = height/2 - hH;
+            ctx.fillStyle = '#a0c0d8'; // Light blue siding
+            ctx.fillRect(hX, hY, hW, hH);
+            ctx.fillStyle = '#e06060'; // Red Roof
+            ctx.beginPath();
+            ctx.moveTo(hX - 20, hY); ctx.lineTo(hX + hW/2, hY - 60); ctx.lineTo(hX + hW + 20, hY);
+            ctx.fill();
+
+            // House Door (Back into lab)
+            ctx.fillStyle = '#c04040';
+            ctx.fillRect(width/2 - 25, height/2 - 50, 50, 50);
+            ctx.fillStyle = '#285088'; // Door Mat
+            ctx.fillRect(width/2 - 30, height/2 - 10, 60, 15);
         }
-
-        // Potted Plants
-        ctx.fillStyle = '#8b4513';
-        ctx.fillRect(20, height - 100, 30, 30); // Pot left
-        ctx.fillRect(width - 50, height - 100, 30, 30); // Pot right
-        ctx.fillStyle = '#228b22';
-        ctx.beginPath(); ctx.arc(35, height-110, 25, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(width-35, height-110, 25, 0, Math.PI*2); ctx.fill();
-
-        // Computer Desk
-        ctx.fillStyle = '#444';
-        ctx.fillRect(width - 150, 130, 120, 60);
-        ctx.fillStyle = '#00ff00'; // Glowing Screen
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(width - 140, 135, 40, 30);
-        ctx.globalAlpha = 1.0;
-
-        // -- END DECORATIONS --
-
-        // Center Desk
-        const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-        ctx.fillStyle = '#804020';
-        ctx.fillRect(dX, dY, dW, dH);
-        ctx.strokeRect(dX, dY, dW, dH);
-
-        // Pokéballs
-        pokeballs.forEach((ball, i) => {
-            if (!ball.active) return;
-            ball.realX = dX + 60 + (i * 110);
-            ball.realY = dY + 40;
-            ctx.fillStyle = 'red';
-            ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-            ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(ball.realX - 15, ball.realY); ctx.lineTo(ball.realX + 15, ball.realY); ctx.stroke();
-            if (choosingState) {
-                ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                ctx.fillRect(ball.realX - 45, ball.realY - 50, 90, 24);
-                ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
-                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 33);
-            }
-        });
 
         // Follower
         if (follower.active) {
