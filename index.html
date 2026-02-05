@@ -9,15 +9,6 @@
             --gba-blue: #285088;
             --gba-light-blue: #5888c8;
             --font-main: 'Courier New', Courier, monospace;
-            --grass-green: #2e7d32;
-            --dirt-brown: #8d6e63;
-            --water-blue: #1e88e5;
-            --tree-dark: #2e7d32;
-            --tree-light: #4caf50;
-            --rock-gray: #757575;
-            --path-tan: #d7ccc8;
-            --roof-red: #c62828;
-            --wood-brown: #6d4c41;
         }
 
         body, html {
@@ -26,16 +17,11 @@
             background: #000; overflow: hidden; 
             touch-action: none;
             display: flex; justify-content: center; align-items: center;
-            font-family: 'Press Start 2P', cursive, 'Courier New', monospace;
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         #game-wrapper {
             position: relative;
             width: 100%; height: 100%;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
         }
 
         canvas {
@@ -43,336 +29,68 @@
             width: 100% !important;
             height: 100% !important;
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
         }
 
         #title-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%);
-            color: #fff;
+            background: #000; color: #fff;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 2000; transition: opacity 0.8s ease-out;
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
+            z-index: 2000; transition: opacity 0.5s ease-out;
+            font-family: var(--font-main);
         }
 
-        #title-screen::before {
-            content: '';
-            position: absolute;
-            width: 200%; height: 200%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(255,255,255,0.03) 2px,
-                rgba(255,255,255,0.03) 4px
-            );
-            animation: scanlines 20s linear infinite;
-        }
-
-        @keyframes scanlines {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-4px); }
-        }
-
-        #title-screen h1 {
-            font-size: 32px;
-            margin-bottom: 40px;
-            text-align: center;
-            color: #ffeb3b;
-            text-shadow: 
-                4px 4px 0 #ff9800,
-                8px 8px 0 #f44336,
-                12px 12px 0 #2196f3;
-            letter-spacing: 2px;
-            z-index: 2;
-            animation: titleGlow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            from { text-shadow: 4px 4px 0 #ff9800, 8px 8px 0 #f44336, 12px 12px 0 #2196f3; }
-            to { text-shadow: 6px 6px 0 #ff9800, 12px 12px 0 #f44336, 18px 18px 0 #2196f3; }
-        }
-
-        #title-screen h2 {
-            font-size: 16px;
-            color: #4fc3f7;
-            margin-bottom: 60px;
-            text-shadow: 2px 2px 0 #0277bd;
-            animation: subtitleFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes subtitleFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        #title-screen .pixel-art {
-            position: absolute;
-            opacity: 0.2;
-            z-index: 1;
-        }
-
-        #title-screen .pixel-art:nth-child(1) {
-            top: 20%; left: 10%;
-            animation: float 20s infinite linear;
-        }
-
-        #title-screen .pixel-art:nth-child(2) {
-            top: 60%; right: 15%;
-            animation: float 25s infinite linear reverse;
-        }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(100px, 100px) rotate(360deg); }
-        }
+        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
 
         #start-btn {
-            padding: 18px 50px;
-            font-size: 18px;
-            font-family: 'Press Start 2P', cursive;
-            background: linear-gradient(145deg, #ff5252, #ff1744);
-            color: white;
-            border: 4px solid #ffeb3b;
-            cursor: pointer;
-            border-radius: 0;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #c62828;
-            box-shadow: 
-                0 8px 0 #c62828,
-                0 12px 20px rgba(0,0,0,0.5);
-            transition: all 0.1s;
-            position: relative;
-            overflow: hidden;
-            z-index: 2;
-        }
-
-        #start-btn:hover {
-            transform: translateY(2px);
-            box-shadow: 
-                0 6px 0 #c62828,
-                0 10px 20px rgba(0,0,0,0.5);
-        }
-
-        #start-btn:active {
-            transform: translateY(4px);
-            box-shadow: 
-                0 4px 0 #c62828,
-                0 8px 20px rgba(0,0,0,0.5);
-        }
-
-        #start-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255,255,255,0.1) 50%,
-                transparent 70%
-            );
-            animation: buttonShine 3s infinite;
-        }
-
-        @keyframes buttonShine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
+            background: var(--gba-blue); color: white; border: 4px solid white;
+            cursor: pointer; border-radius: 10px; font-weight: bold;
         }
 
         #ui-layer {
             position: absolute; bottom: 20px; left: 50%;
             transform: translateX(-50%); width: 90%;
-            max-width: 600px;
             z-index: 100; cursor: pointer; display: none;
         }
 
         #dialogue-box {
-            background: #f0f0f0;
-            border: 6px solid var(--gba-blue);
-            border-radius: 12px;
-            padding: 20px;
-            font-family: 'Press Start 2P', cursive;
-            font-weight: normal;
-            font-size: 14px;
-            box-shadow: 
-                inset 0 0 0 4px var(--gba-light-blue),
-                0 8px 16px rgba(0,0,0,0.3),
-                0 0 0 4px rgba(255,255,255,0.1);
-            min-height: 80px;
-            user-select: none;
-            line-height: 1.6;
-            color: #333;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #dialogue-box::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 1px,
-                rgba(255,255,255,0.05) 1px,
-                rgba(255,255,255,0.05) 2px
-            );
-            pointer-events: none;
+            background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
+            padding: 20px; font-family: var(--font-main); font-weight: bold;
+            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
+            min-height: 80px; user-select: none;
         }
 
         #speaker-tag {
-            position: absolute; top: -18px; left: 30px;
-            background: linear-gradient(145deg, #ff9800, #f57c00);
-            color: white;
-            padding: 6px 20px; border-radius: 8px 8px 0 0;
-            font-size: 12px; border: 3px solid #ffeb3b;
-            text-shadow: 1px 1px 0 #e65100;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-            font-family: 'Press Start 2P', cursive;
-            letter-spacing: 0.5px;
+            position: absolute; top: -25px; left: 30px;
+            background: var(--gba-blue); color: white;
+            padding: 5px 20px; border-radius: 10px 10px 0 0;
+            font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
+        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
             position: absolute; bottom: 80px; left: 40px;
-            width: 140px; height: 140px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 70%);
-            border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);
+            width: 130px; height: 130px;
+            background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
             display: flex; justify-content: center; align-items: center; z-index: 200;
-            box-shadow: 
-                0 8px 32px rgba(0,0,0,0.3),
-                inset 0 0 0 2px rgba(255,255,255,0.1);
         }
 
-        #joystick-knob {
-            width: 60px; height: 60px;
-            background: radial-gradient(circle at 30% 30%, #ff9800, #f57c00);
-            border-radius: 50%;
-            border: 3px solid #ffeb3b;
-            box-shadow: 
-                0 4px 8px rgba(0,0,0,0.3),
-                inset 2px 2px 4px rgba(255,255,255,0.3),
-                inset -2px -2px 4px rgba(0,0,0,0.2);
-            cursor: pointer;
-        }
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
 
         #shimmer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #2196f3, #4fc3f7, #29b6f6);
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 999;
+            background: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; z-index: 999;
         }
 
+        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
-            background: linear-gradient(145deg, #4caf50, #2e7d32);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 8px;
-            font-family: 'Press Start 2P', cursive;
-            font-weight: bold;
-            font-size: 12px;
-            border: 4px solid #ffeb3b;
-            cursor: pointer;
-            z-index: 300;
-            box-shadow: 
-                0 6px 0 #1b5e20,
-                0 8px 20px rgba(0,0,0,0.3);
-            text-shadow: 1px 1px 0 #1b5e20;
-            transition: all 0.1s;
-        }
-
-        #bag-btn:hover {
-            transform: translateY(2px);
-            box-shadow: 
-                0 4px 0 #1b5e20,
-                0 6px 20px rgba(0,0,0,0.3);
-        }
-
-        #bag-btn:active {
-            transform: translateY(4px);
-            box-shadow: 
-                0 2px 0 #1b5e20,
-                0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        #grass-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0,0,0,0.1) 2px,
-                    rgba(0,0,0,0.1) 4px
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0,0,0,0.1) 2px,
-                    rgba(0,0,0,0.1) 4px
-                );
-            opacity: 0.1;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .cloud {
-            position: absolute;
-            background: rgba(255,255,255,0.8);
-            border-radius: 50%;
-            animation: cloudFloat 60s linear infinite;
-            z-index: 1;
-        }
-
-        @keyframes cloudFloat {
-            0% { transform: translateX(-100px); }
-            100% { transform: translateX(calc(100vw + 100px)); }
-        }
-
-        .ripple {
-            position: absolute;
-            border: 2px solid rgba(33, 150, 243, 0.3);
-            border-radius: 50%;
-            animation: rippleEffect 1s linear forwards;
-            z-index: 2;
-        }
-
-        @keyframes rippleEffect {
-            0% {
-                transform: scale(0.1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(3);
-                opacity: 0;
-            }
-        }
-
-        .weather-particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: fall linear infinite;
-            z-index: 3;
-        }
-
-        @keyframes fall {
-            to {
-                transform: translateY(100vh);
-            }
+            background: var(--gba-blue); color: white;
+            padding: 15px 30px; border-radius: 8px;
+            font-family: var(--font-main); font-weight: bold;
+            border: 3px solid white; cursor: pointer; z-index: 300;
+            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
         }
     </style>
 </head>
@@ -381,18 +99,16 @@
 <div id="game-wrapper">
     <div id="title-screen">
         <h1>Pokémon K&E Version</h1>
-        <h2>Kanto & Eterna Adventure</h2>
         <button id="start-btn" onclick="startGame()">START GAME</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
-    <div id="grass-overlay"></div>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="openBag()">BAG</div>
+    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
-        <div id="dialogue-box">Welcome to the Habitat Research Lab! Press to continue...</div>
+        <div id="dialogue-box">Welcome to the Habitat Research Lab!</div>
     </div>
 
     <div id="joystick-wrapper">
@@ -408,45 +124,12 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
-    const grassOverlay = document.getElementById('grass-overlay');
 
-    // Enhanced graphics variables
-    let clouds = [];
-    let particles = [];
-    let weatherParticles = [];
-    let ripplePool = [];
-    let animationFrame = 0;
-    let timeOfDay = 0; // 0-359 for day cycle
-    let weather = 'clear'; // clear, rain, snow
-    let isNight = false;
-
-    // Pixel art patterns for textures
-    const patterns = {
-        wood: [0xAA, 0x55, 0xAA, 0x55], // Checkerboard pattern
-        brick: [0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00], // Striped pattern
-        water: [0x33, 0x66, 0x99, 0xCC, 0xFF], // Gradient pattern
-        grass: [0x2E, 0x7D, 0x32, 0x4C, 0xAF, 0x50], // Grass shades
-        dirt: [0x8D, 0x6E, 0x63, 0xA1, 0x88, 0x7E] // Dirt shades
-    };
-
-    // Create clouds
-    for (let i = 0; i < 5; i++) {
-        clouds.push({
-            x: Math.random() * width,
-            y: Math.random() * 200,
-            size: 60 + Math.random() * 40,
-            speed: 0.5 + Math.random() * 0.5,
-            opacity: 0.3 + Math.random() * 0.3
-        });
-    }
-
-    // Enhanced script with more dialogue
     const script = [
         "Welcome to the Habitat Research Lab!",
         "Look around! This facility is dedicated to studying Orebound's ecology.",
         "The tremor earlier was quite strong. We must act quickly.",
-        "Choose your partner wisely. Each Pokémon has unique abilities.",
-        "Click on the Poké Ball to select your partner!"
+        "Go ahead and click on the Pokémon you want to partner with!"
     ];
     let scriptIndex = 0;
     let currentMap = 'LAB';
@@ -455,258 +138,61 @@
     let width, height;
 
     function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-        
-        // Update overlay
-        grassOverlay.style.width = width + 'px';
-        grassOverlay.style.height = height + 'px';
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
     }
     window.addEventListener('resize', resize);
     resize();
 
-    const player = {
-        x: width/2,
-        y: height - 120,
-        speed: 5,
-        history: [],
-        frame: 0,
-        direction: 'down',
-        shadowX: 0,
-        shadowY: 0
-    };
-
-    const follower = {
-        active: false,
-        name: '',
-        x: 0,
-        y: 0,
-        color: '#000',
-        frame: 0,
-        animation: 'idle',
-        shadowX: 0,
-        shadowY: 0
-    };
+    const player = { x: width/2, y: height - 120, speed: 5, history: [] };
+    const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
 
     const pokeballs = [
-        { 
-            name: 'Treecko',
-            x: 0,
-            y: 0,
-            color: '#32CD32',
-            active: true,
-            description: 'A grass type Pokémon. It makes its nest in large trees.',
-            animation: 0,
-            glow: 0
-        },
-        { 
-            name: 'Froakie',
-            x: 0,
-            y: 0,
-            color: '#1E90FF',
-            active: true,
-            description: 'A water type Pokémon. It secretes protective bubbles.',
-            animation: 0,
-            glow: 0
-        },
-        { 
-            name: 'Charmander',
-            x: 0,
-            y: 0,
-            color: '#FF4500',
-            active: true,
-            description: 'A fire type Pokémon. The flame on its tail shows its life force.',
-            animation: 0,
-            glow: 0
-        }
+        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
+        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
+        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    // Enhanced start game function
     function startGame() {
-        // Create sparkle effect
-        createSparkles(width/2, height/2, 20);
-        
         titleScreen.style.opacity = '0';
         setTimeout(() => {
             titleScreen.style.display = 'none';
             uiLayer.style.display = 'block';
-            // Start weather effects
-            if (Math.random() > 0.7) {
-                weather = Math.random() > 0.5 ? 'rain' : 'snow';
-                initWeather();
-            }
-        }, 800);
+        }, 500);
     }
 
-    // Particle system
-    function createParticles(x, y, count, color) {
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 4,
-                vy: (Math.random() - 0.5) * 4,
-                life: 60,
-                color: color,
-                size: 2 + Math.random() * 3
-            });
-        }
-    }
+    let stickX = 0, stickY = 0, isTouching = false;
 
-    function createSparkles(x, y, count) {
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: x,
-                y: y,
-                vx: (Math.random() - 0.5) * 3,
-                vy: (Math.random() - 0.5) * 3,
-                life: 120,
-                color: `hsl(${Math.random() * 60 + 40}, 100%, 60%)`,
-                size: 1 + Math.random() * 2,
-                type: 'sparkle'
-            });
-        }
-    }
-
-    function createRipple(x, y, color) {
-        ripplePool.push({
-            x: x,
-            y: y,
-            radius: 5,
-            maxRadius: 50,
-            color: color,
-            life: 60
-        });
-    }
-
-    // Weather effects
-    function initWeather() {
-        weatherParticles = [];
-        const count = weather === 'rain' ? 200 : 100;
-        for (let i = 0; i < count; i++) {
-            weatherParticles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                speed: 2 + Math.random() * 3,
-                size: weather === 'rain' ? 2 : 3,
-                color: weather === 'rain' ? 'rgba(33, 150, 243, 0.6)' : 'rgba(255, 255, 255, 0.8)',
-                wind: Math.random() * 0.5 - 0.25
-            });
-        }
-    }
-
-    // Enhanced dialogue handling
     function handleDialogueClick() {
         if (scriptIndex < script.length - 1) {
             scriptIndex++;
             dialogueBox.innerText = script[scriptIndex];
-            // Add typing effect
-            typeWriterEffect(dialogueBox, script[scriptIndex]);
         } else {
             uiLayer.style.display = 'none';
             choosingState = true;
-            createSparkles(width/2, height/2.5, 30);
         }
     }
 
-    function typeWriterEffect(element, text, speed = 50) {
-        element.innerHTML = '';
-        let i = 0;
-        function type() {
-            if (i < text.length) {
-                element.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            }
-        }
-        type();
-    }
-
-    // Enhanced click handling with visual feedback
-    canvas.addEventListener('mousedown', (e) => {
-        checkPokeClick(e.clientX, e.clientY);
-        createRipple(e.clientX, e.clientY, 'rgba(33, 150, 243, 0.3)');
-    });
-    
-    canvas.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        checkPokeClick(touch.clientX, touch.clientY);
-        createRipple(touch.clientX, touch.clientY, 'rgba(33, 150, 243, 0.3)');
-        e.preventDefault();
-    });
+    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
     function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
         pokeballs.forEach(ball => {
             if(!ball.active) return;
-            const dx = clickX - ball.x;
-            const dy = clickY - ball.y;
+            const dx = clickX - ball.realX;
+            const dy = clickY - ball.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
-                follower.active = true;
-                follower.name = ball.name;
-                follower.color = ball.color;
-                follower.x = ball.x;
-                follower.y = ball.y;
-                ball.active = false;
+                follower.active = true; follower.name = ball.name;
+                follower.color = ball.color; follower.x = ball.realX;
+                follower.y = ball.realY; ball.active = false;
                 holdingPokeball = true;
-                createSparkles(ball.x, ball.y, 50);
-                
-                // Show selection message
-                showFloatingText(`${ball.name} joined you!`, ball.x, ball.y - 50, ball.color);
             }
         });
     }
 
-    // Floating text effect
-    function showFloatingText(text, x, y, color) {
-        const floatingText = {
-            text: text,
-            x: x,
-            y: y,
-            life: 120,
-            color: color,
-            alpha: 1
-        };
-        
-        function animate() {
-            if (floatingText.life > 0) {
-                floatingText.y -= 1;
-                floatingText.life--;
-                floatingText.alpha = floatingText.life / 120;
-                
-                // Draw text
-                ctx.save();
-                ctx.globalAlpha = floatingText.alpha;
-                ctx.fillStyle = floatingText.color;
-                ctx.font = 'bold 16px "Press Start 2P"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(floatingText.text, floatingText.x, floatingText.y);
-                ctx.restore();
-                
-                requestAnimationFrame(animate);
-            }
-        }
-        animate();
-    }
-
-    // Enhanced joystick controls
-    wrapper.addEventListener('touchstart', (e) => {
-        isTouching = true;
-        createParticles(e.touches[0].clientX, e.touches[0].clientY, 10, '#ff9800');
-        e.preventDefault();
-    });
-    
-    window.addEventListener('touchend', () => {
-        isTouching = false;
-        stickX = 0;
-        stickY = 0;
-        knob.style.transform = `translate(0px, 0px)`;
-        createParticles(knob.offsetLeft + 30, knob.offsetTop + 30, 5, '#4caf50');
-    });
-    
+    wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
+    window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
     window.addEventListener('touchmove', (e) => {
         if (!isTouching) return;
         const rect = wrapper.getBoundingClientRect();
@@ -715,992 +201,155 @@
         let dy = touch.clientY - (rect.top + rect.height/2);
         const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
         const angle = Math.atan2(dy, dx);
-        stickX = Math.cos(angle) * (dist/40);
-        stickY = Math.sin(angle) * (dist/40);
+        stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
-        
-        // Create trail particles when moving
-        if (animationFrame % 3 === 0) {
-            createParticles(
-                rect.left + rect.width/2 + Math.cos(angle)*dist,
-                rect.top + rect.height/2 + Math.sin(angle)*dist,
-                1,
-                '#ff9800'
-            );
-        }
     });
 
-    // Enhanced collision detection with more detailed shapes
     function checkCollision(nx, ny) {
         if (currentMap === 'LAB') {
-            // Desk collision
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-            if (nx > dX - 20 && nx < dX + dW + 20 && ny > dY - 20 && ny < dY + dH + 20) return true;
-            
-            // Wall collisions
-            if (ny < 150) return true; // Top wall
-            if (nx < 50 || nx > width - 50) return true; // Side walls
-            
-            // Computer station collision
-            if (nx > width - 200 && nx < width - 30 && ny > 130 && ny < 190) return true;
-            
-            // Plant collisions
-            const plants = [
-                {x: 35, y: height - 110, r: 25},
-                {x: width - 35, y: height - 110, r: 25}
-            ];
-            for (let plant of plants) {
-                const dist = Math.sqrt((nx - plant.x)**2 + (ny - plant.y)**2);
-                if (dist < plant.r) return true;
-            }
+            if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
+            if (ny < 130) return true;
         } else {
-            // House collision
             const hX = width/2 - 110, hY = height/2 - 150;
-            if (nx > hX - 25 && nx < hX + 245 && ny > hY - 70 && ny < hY + 170) {
-                if (Math.abs(nx - width/2) < 35 && ny > hY + 100) return false;
+            if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
+                if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            
-            // Fence collision
-            const fenceY = height/2 + 120;
-            if (ny > fenceY - 10 && ny < fenceY + 10) {
-                if (Math.abs(nx - width/2) > 45) return true;
+            if (ny > height/2 + 120 && ny < height/2 + 130) {
+                if (Math.abs(nx - width/2) > 40) return true;
             }
-            
-            // Tree collisions
-            const trees = [
-                {x: 40, y: 40, r: 40},
-                {x: width - 40, y: 40, r: 40},
-                {x: 40, y: fenceY - 80, r: 40},
-                {x: width - 40, y: fenceY - 80, r: 40}
-            ];
-            for (let tree of trees) {
-                const dist = Math.sqrt((nx - tree.x)**2 + (ny - tree.y)**2);
-                if (dist < tree.r) return true;
-            }
-            
-            // Pond collision
-            const pondX = width/2 - 350, pondY = height/2 - 50;
-            const pondDist = Math.sqrt(((nx - pondX)/145)**2 + ((ny - pondY)/95)**2);
-            if (pondDist < 1 && ny < pondY + 50) return true;
         }
         return false;
     }
 
-    // Enhanced teleport with particle effects
     let isTeleporting = false;
     function teleport() {
         if (isTeleporting) return;
         isTeleporting = true;
-        
-        // Create teleport particles
-        createSparkles(player.x, player.y, 100);
-        createParticles(player.x, player.y, 50, '#2196f3');
-        
         const shim = document.getElementById('shimmer');
         shim.style.opacity = '1';
-        
         setTimeout(() => {
             currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
             player.x = width/2;
             player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
-            player.history = [];
-            
-            // Move follower with player
-            if (follower.active) {
-                follower.x = player.x;
-                follower.y = player.y;
-            }
-            
-            // Create arrival particles
-            createSparkles(player.x, player.y, 100);
-            
+            player.history = []; 
             shim.style.opacity = '0';
             isTeleporting = false;
-            
-            // Change weather occasionally when going outside
-            if (currentMap === 'OUTSIDE' && Math.random() > 0.8) {
-                weather = Math.random() > 0.5 ? 'rain' : 'snow';
-                initWeather();
-            }
         }, 300);
     }
 
-    // Enhanced update function with animations
     function update() {
-        animationFrame++;
-        timeOfDay = (timeOfDay + 0.1) % 360;
-        isNight = timeOfDay > 180;
-        
-        // Update clouds
-        clouds.forEach(cloud => {
-            cloud.x += cloud.speed;
-            if (cloud.x > width + cloud.size) {
-                cloud.x = -cloud.size;
-                cloud.y = Math.random() * 200;
-            }
-        });
-        
-        // Update particles
-        particles = particles.filter(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life--;
-            p.vy += 0.05; // Gravity
-            return p.life > 0;
-        });
-        
-        // Update ripples
-        ripplePool = ripplePool.filter(r => {
-            r.radius += 1;
-            r.life--;
-            return r.life > 0 && r.radius < r.maxRadius;
-        });
-        
-        // Update weather particles
-        if (weather !== 'clear') {
-            weatherParticles.forEach(p => {
-                p.y += p.speed;
-                p.x += p.wind;
-                if (p.y > height) {
-                    p.y = -20;
-                    p.x = Math.random() * width;
-                }
-                if (p.x < 0) p.x = width;
-                if (p.x > width) p.x = 0;
-            });
-        }
-        
-        // Update Pokémon animations
-        pokeballs.forEach(ball => {
-            if (ball.active) {
-                ball.animation = (ball.animation + 0.1) % (Math.PI * 2);
-                ball.glow = Math.sin(animationFrame * 0.1) * 0.3 + 0.7;
-            }
-        });
-        
-        // Player animation
-        if (isTouching && (Math.abs(stickX) > 0.1 || Math.abs(stickY) > 0.1)) {
-            player.frame = (player.frame + 0.2) % 4;
-            
-            // Determine direction for sprite
-            if (Math.abs(stickY) > Math.abs(stickX)) {
-                player.direction = stickY > 0 ? 'down' : 'up';
-            } else {
-                player.direction = stickX > 0 ? 'right' : 'left';
-            }
-            
-            // Create footprints occasionally
-            if (animationFrame % 10 === 0) {
-                createParticles(player.x, player.y + 20, 1, currentMap === 'LAB' ? '#8d6e63' : '#2e7d32');
-            }
-        } else {
-            player.frame = 0;
-        }
-        
-        // Follower animation
-        if (follower.active) {
-            follower.frame = (follower.frame + 0.1) % 4;
-        }
-        
-        // Movement
         if (isTouching) {
             let nextX = player.x + stickX * player.speed;
             let nextY = player.y + stickY * player.speed;
-            
             if (!checkCollision(nextX, nextY)) {
                 player.history.push({x: player.x, y: player.y});
                 if (player.history.length > 60) player.history.shift();
-                player.x = nextX;
-                player.y = nextY;
+                player.x = nextX; player.y = nextY;
             }
         }
-        
-        // Check for teleport mat
         const matX = width / 2;
         const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
-        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) {
-            teleport();
-        }
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
         
-        // Follower movement with smooth following
         if (follower.active && player.history.length > 12) {
             const fp = player.history[player.history.length - 12];
-            follower.x += (fp.x - follower.x) * 0.15;
-            follower.y += (fp.y - follower.y) * 0.15;
-            
-            // Keep follower within bounds
-            follower.x = Math.max(40, Math.min(width-40, follower.x));
-            follower.y = Math.max(40, Math.min(height-40, follower.y));
+            follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
         }
-        
-        // Keep player within bounds
-        player.x = Math.max(30, Math.min(width-30, player.x));
-        player.y = Math.max(40, Math.min(height-40, player.y));
-        
-        // Update player shadow position
-        player.shadowX = player.x;
-        player.shadowY = player.y + 25;
-        
-        // Update follower shadow position
-        if (follower.active) {
-            follower.shadowX = follower.x;
-            follower.shadowY = follower.y + 15;
-        }
+        player.x = Math.max(20, Math.min(width-20, player.x));
+        player.y = Math.max(20, Math.min(height-20, player.y));
     }
 
-    // Enhanced drawing functions
-    function drawPixelCircle(x, y, radius, color, pixelSize = 2) {
-        ctx.save();
-        ctx.fillStyle = color;
-        const steps = Math.PI * 2 * radius / pixelSize;
-        for (let i = 0; i < steps; i++) {
-            const angle = (i / steps) * Math.PI * 2;
-            const px = x + Math.cos(angle) * radius;
-            const py = y + Math.sin(angle) * radius;
-            ctx.fillRect(Math.floor(px/pixelSize)*pixelSize, Math.floor(py/pixelSize)*pixelSize, pixelSize, pixelSize);
-        }
-        ctx.restore();
-    }
-
-    function drawPixelRect(x, y, w, h, color, pixelSize = 2) {
-        ctx.save();
-        ctx.fillStyle = color;
-        for (let i = 0; i < w; i += pixelSize) {
-            for (let j = 0; j < h; j += pixelSize) {
-                ctx.fillRect(x + i, y + j, pixelSize, pixelSize);
-            }
-        }
-        ctx.restore();
-    }
-
-    function drawTree(x, y, size) {
-        // Tree trunk
-        drawPixelRect(x - size/4, y + size/2, size/2, size/2, '#5D4037', 2);
-        
-        // Tree leaves
-        drawPixelCircle(x, y, size/2, '#2E7D32', 2);
-        drawPixelCircle(x - size/3, y + size/6, size/3, '#4CAF50', 2);
-        drawPixelCircle(x + size/3, y + size/6, size/3, '#4CAF50', 2);
-        drawPixelCircle(x, y - size/3, size/3, '#66BB6A', 2);
-        
-        // Highlights
-        drawPixelCircle(x - size/4, y - size/6, size/8, '#81C784', 1);
-        drawPixelCircle(x + size/4, y - size/6, size/8, '#81C784', 1);
-    }
-
-    function drawRock(x, y, size) {
-        // Rock base
-        drawPixelCircle(x, y, size, '#616161', 2);
-        
-        // Rock highlights
-        drawPixelCircle(x - size/3, y - size/3, size/4, '#9E9E9E', 1);
-        drawPixelCircle(x + size/4, y - size/4, size/6, '#9E9E9E', 1);
-        
-        // Shadow
-        drawPixelCircle(x + size/4, y + size/4, size/3, '#424242', 1);
-    }
-
-    function drawWater(x, y, width, height) {
-        ctx.save();
-        
-        // Water gradient
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, Math.max(width, height));
-        gradient.addColorStop(0, 'rgba(33, 150, 243, 0.8)');
-        gradient.addColorStop(0.5, 'rgba(30, 136, 229, 0.6)');
-        gradient.addColorStop(1, 'rgba(21, 101, 192, 0.4)');
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Water ripple effect
-        if (animationFrame % 60 < 30) {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.ellipse(x, y, width * 0.8, height * 0.8, 0, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-        
-        ctx.restore();
-    }
-
-    function drawPlayer() {
-        const frame = Math.floor(player.frame);
-        const pixelSize = 2;
-        
-        // Draw shadow
-        drawPixelCircle(player.shadowX, player.shadowY, 12, 'rgba(0, 0, 0, 0.3)', pixelSize);
-        
-        // Body (changes with direction)
-        let bodyOffsetX = 0;
-        let bodyOffsetY = 0;
-        
-        switch(player.direction) {
-            case 'up':
-                bodyOffsetY = -frame * 2;
-                break;
-            case 'down':
-                bodyOffsetY = frame * 2;
-                break;
-            case 'left':
-                bodyOffsetX = -frame * 2;
-                break;
-            case 'right':
-                bodyOffsetX = frame * 2;
-                break;
-        }
-        
-        // Hat
-        drawPixelRect(player.x - 15, player.y - 40, 30, 8, '#FF5252', pixelSize);
-        drawPixelRect(player.x - 12, player.y - 32, 24, 4, '#FFFFFF', pixelSize);
-        
-        // Face
-        drawPixelRect(player.x - 10 + bodyOffsetX, player.y - 28 + bodyOffsetY, 20, 16, '#FFDBAC', pixelSize);
-        
-        // Eyes
-        drawPixelRect(player.x - 6 + bodyOffsetX, player.y - 22 + bodyOffsetY, 3, 3, '#000000', pixelSize);
-        drawPixelRect(player.x + 3 + bodyOffsetX, player.y - 22 + bodyOffsetY, 3, 3, '#000000', pixelSize);
-        
-        // Shirt
-        drawPixelRect(player.x - 15 + bodyOffsetX, player.y - 12 + bodyOffsetY, 30, 20, '#D32F2F', pixelSize);
-        
-        // Pants
-        drawPixelRect(player.x - 15, player.y + 8, 30, 12, '#303F9F', pixelSize);
-        
-        // Shoes
-        drawPixelRect(player.x - 15, player.y + 20, 10, 8, '#212121', pixelSize);
-        drawPixelRect(player.x + 5, player.y + 20, 10, 8, '#212121', pixelSize);
-        
-        // Arms (animated)
-        const armY = player.y - 4;
-        if (player.direction === 'right') {
-            drawPixelRect(player.x + 15, armY + Math.sin(animationFrame * 0.2) * 4, 8, 6, '#FFDBAC', pixelSize);
-            drawPixelRect(player.x - 23, armY, 8, 6, '#FFDBAC', pixelSize);
-        } else if (player.direction === 'left') {
-            drawPixelRect(player.x - 23, armY + Math.sin(animationFrame * 0.2) * 4, 8, 6, '#FFDBAC', pixelSize);
-            drawPixelRect(player.x + 15, armY, 8, 6, '#FFDBAC', pixelSize);
-        } else {
-            drawPixelRect(player.x - 23, armY, 8, 6, '#FFDBAC', pixelSize);
-            drawPixelRect(player.x + 15, armY, 8, 6, '#FFDBAC', pixelSize);
-        }
-        
-        // Draw held Pokéball if holding one
-        if (holdingPokeball) {
-            const ballX = player.x + 20;
-            const ballY = player.y - 5;
-            
-            // Pokéball
-            drawPixelCircle(ballX, ballY, 8, '#FF0000', pixelSize);
-            drawPixelRect(ballX - 8, ballY - 1, 16, 4, '#FFFFFF', pixelSize);
-            drawPixelCircle(ballX, ballY, 3, '#000000', pixelSize);
-            drawPixelCircle(ballX, ballY, 1, '#FFFFFF', pixelSize);
-            
-            // Sparkle effect
-            if (animationFrame % 30 < 15) {
-                drawPixelCircle(ballX - 10, ballY - 10, 2, '#FFEB3B', 1);
-                drawPixelCircle(ballX + 10, ballY + 10, 2, '#FFEB3B', 1);
-            }
-        }
-    }
-
-    function drawPokemon(pokemon, x, y, isFollower = false) {
-        const pixelSize = 2;
-        const frame = Math.floor(pokemon.frame);
-        const bobY = Math.sin(animationFrame * 0.1) * 3;
-        
-        // Draw shadow
-        if (isFollower) {
-            drawPixelCircle(pokemon.shadowX, pokemon.shadowY, 10, 'rgba(0, 0, 0, 0.3)', pixelSize);
-        }
-        
-        switch(pokemon.name) {
-            case 'Treecko':
-                // Body
-                drawPixelCircle(x, y + bobY, 12, pokemon.color, pixelSize);
-                
-                // Head
-                drawPixelCircle(x, y - 8 + bobY, 8, pokemon.color, pixelSize);
-                
-                // Eyes
-                drawPixelRect(x - 3, y - 10 + bobY, 2, 2, '#000000', pixelSize);
-                drawPixelRect(x + 1, y - 10 + bobY, 2, 2, '#000000', pixelSize);
-                
-                // Tail
-                drawPixelRect(x + 10, y + 2 + bobY, 12, 4, pokemon.color, pixelSize);
-                
-                // Crest
-                drawPixelRect(x, y - 16 + bobY, 2, 6, '#FF0000', pixelSize);
-                
-                // Feet
-                drawPixelRect(x - 6, y + 10 + bobY, 4, 4, '#228B22', pixelSize);
-                drawPixelRect(x + 2, y + 10 + bobY, 4, 4, '#228B22', pixelSize);
-                break;
-                
-            case 'Froakie':
-                // Body
-                drawPixelCircle(x, y + bobY, 10, pokemon.color, pixelSize);
-                
-                // Head
-                drawPixelCircle(x, y - 6 + bobY, 10, pokemon.color, pixelSize);
-                
-                // Eyes
-                drawPixelCircle(x - 4, y - 8 + bobY, 4, '#FFFFFF', pixelSize);
-                drawPixelCircle(x + 4, y - 8 + bobY, 4, '#FFFFFF', pixelSize);
-                drawPixelCircle(x - 4, y - 8 + bobY, 2, '#000000', pixelSize);
-                drawPixelCircle(x + 4, y - 8 + bobY, 2, '#000000', pixelSize);
-                
-                // Bubbles
-                if (frame % 4 === 0) {
-                    drawPixelCircle(x - 12, y - 4 + bobY, 4, 'rgba(255, 255, 255, 0.5)', pixelSize);
-                }
-                
-                // Feet
-                drawPixelRect(x - 8, y + 8 + bobY, 4, 3, pokemon.color, pixelSize);
-                drawPixelRect(x + 4, y + 8 + bobY, 4, 3, pokemon.color, pixelSize);
-                break;
-                
-            case 'Charmander':
-                // Body
-                drawPixelCircle(x, y + bobY, 12, pokemon.color, pixelSize);
-                
-                // Head
-                drawPixelCircle(x, y - 8 + bobY, 8, pokemon.color, pixelSize);
-                
-                // Eyes
-                drawPixelRect(x - 3, y - 10 + bobY, 2, 2, '#000000', pixelSize);
-                drawPixelRect(x + 1, y - 10 + bobY, 2, 2, '#000000', pixelSize);
-                
-                // Tail and flame
-                drawPixelRect(x + 10, y + bobY, 12, 4, '#FF9800', pixelSize);
-                if (animationFrame % 20 < 10) {
-                    drawPixelCircle(x + 20, y + bobY, 6, '#FF5722', pixelSize);
-                    drawPixelCircle(x + 22, y - 2 + bobY, 4, '#FFC107', pixelSize);
-                } else {
-                    drawPixelCircle(x + 20, y + bobY, 7, '#FF5722', pixelSize);
-                    drawPixelCircle(x + 23, y - 3 + bobY, 5, '#FFC107', pixelSize);
-                }
-                
-                // Belly
-                drawPixelCircle(x, y + 4 + bobY, 6, '#FFEB3B', pixelSize);
-                break;
-        }
-        
-        // Glow effect for selected Pokémon
-        if (isFollower) {
-            ctx.save();
-            ctx.shadowColor = pokemon.color;
-            ctx.shadowBlur = 15;
-            drawPixelCircle(x, y + bobY, 14, 'rgba(255, 255, 255, 0.1)', pixelSize);
-            ctx.restore();
-        }
-    }
-
-    function drawPokeBall(ball, x, y) {
-        const pixelSize = 2;
-        const bobY = Math.sin(ball.animation) * 5;
-        const glow = ball.glow;
-        
-        // Glow effect
-        ctx.save();
-        ctx.globalAlpha = 0.3 * glow;
-        ctx.shadowColor = ball.color;
-        ctx.shadowBlur = 20;
-        drawPixelCircle(x, y + bobY, 20, ball.color, pixelSize);
-        ctx.restore();
-        
-        // Pokéball base
-        drawPixelCircle(x, y + bobY, 15, '#FF0000', pixelSize);
-        drawPixelRect(x - 15, y - 1 + bobY, 30, 4, '#FFFFFF', pixelSize);
-        
-        // Center button
-        drawPixelCircle(x, y + bobY, 5, '#000000', pixelSize);
-        drawPixelCircle(x, y + bobY, 3, '#FFFFFF', pixelSize);
-        
-        // Sparkle effect
-        if (animationFrame % 20 < 10) {
-            drawPixelCircle(x - 12, y - 12 + bobY, 2, '#FFFFFF', 1);
-            drawPixelCircle(x + 12, y + 12 + bobY, 2, '#FFFFFF', 1);
-        }
-        
-        // Name tag
-        ctx.save();
-        ctx.fillStyle = ball.color;
-        ctx.font = 'bold 14px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(ball.name.toUpperCase(), x, y - 30 + bobY);
-        ctx.restore();
-    }
-
-    function drawLab() {
-        // Floor with wood texture
-        for(let i = 0; i < width; i += 60) {
-            for(let j = 0; j < height; j += 30) {
-                ctx.fillStyle = (i + j) % 120 === 0 ? '#d89060' : '#c88050';
-                ctx.fillRect(i, j, 60, 30);
-                // Wood grain effect
-                ctx.fillStyle = 'rgba(0,0,0,0.1)';
-                ctx.fillRect(i + 5, j + 5, 50, 2);
-                ctx.fillRect(i + 5, j + 15, 50, 2);
-            }
-        }
-        
-        // Walls with brick texture
-        ctx.fillStyle = '#3a8fb7';
-        ctx.fillRect(0, 0, width, 150);
-        
-        // Brick pattern
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-        ctx.lineWidth = 2;
-        for(let i = 0; i < width; i += 40) {
-            for(let j = 0; j < 150; j += 20) {
-                ctx.strokeRect(i, j, 40, 20);
-            }
-        }
-        
-        // Research desk
-        const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
-        
-        // Desk top
-        drawPixelRect(dX, dY, dW, dH, '#5D4037', 2);
-        
-        // Desk legs
-        drawPixelRect(dX, dY + dH, 20, 50, '#3E2723', 2);
-        drawPixelRect(dX + dW - 20, dY + dH, 20, 50, '#3E2723', 2);
-        
-        // Draw Pokéballs on desk
-        pokeballs.forEach((ball, i) => {
-            if (!ball.active) return;
-            ball.x = dX + 60 + (i * 110);
-            ball.y = dY + 40;
-            drawPokeBall(ball, ball.x, ball.y);
-        });
-        
-        // Computer station
-        drawPixelRect(width - 150, 130, 120, 60, '#212121', 2);
-        drawPixelRect(width - 140, 140, 40, 40, '#00C853', 2);
-        drawPixelRect(width - 90, 140, 20, 20, '#FFD600', 2);
-        
-        // Plants
-        drawTree(35, height - 110, 60);
-        drawTree(width - 35, height - 110, 60);
-        
-        // Bookshelf
-        drawPixelRect(50, 180, 100, 200, '#795548', 2);
-        for(let i = 0; i < 5; i++) {
-            drawPixelRect(60, 190 + i * 35, 80, 25, '#D7CCC8', 2);
-            drawPixelRect(65, 195 + i * 35, 70, 5, '#5D4037', 1);
-        }
-        
-        // Teleportation mat
-        ctx.save();
-        const gradient = ctx.createRadialGradient(width/2, height - 30, 0, width/2, height - 30, 50);
-        gradient.addColorStop(0, '#2196F3');
-        gradient.addColorStop(1, '#0D47A1');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-        
-        // Mat pattern
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.strokeRect(width/2 - 45, height - 45, 90, 40);
-        ctx.restore();
-        
-        // Windows
-        drawPixelRect(200, 50, 100, 80, '#E3F2FD', 2);
-        drawPixelRect(205, 55, 90, 70, '#BBDEFB', 2);
-        drawPixelRect(210, 60, 20, 60, '#64B5F6', 2);
-        drawPixelRect(240, 60, 20, 60, '#64B5F6', 2);
-        drawPixelRect(270, 60, 20, 60, '#64B5F6', 2);
-    }
-
-    function drawOutside() {
-        // Sky gradient based on time of day
-        const skyGradient = ctx.createLinearGradient(0, 0, 0, height/2);
-        if (isNight) {
-            skyGradient.addColorStop(0, '#0D1B2A');
-            skyGradient.addColorStop(1, '#1B3A4B');
-        } else {
-            skyGradient.addColorStop(0, '#87CEEB');
-            skyGradient.addColorStop(1, '#E3F2FD');
-        }
-        ctx.fillStyle = skyGradient;
-        ctx.fillRect(0, 0, width, height/2 + 100);
-        
-        // Ground
-        const groundGradient = ctx.createLinearGradient(0, height/2 + 100, 0, height);
-        groundGradient.addColorStop(0, '#8BC34A');
-        groundGradient.addColorStop(0.5, '#7CB342');
-        groundGradient.addColorStop(1, '#689F38');
-        ctx.fillStyle = groundGradient;
-        ctx.fillRect(0, height/2 + 100, width, height/2 - 100);
-        
-        // Draw clouds
-        clouds.forEach(cloud => {
-            ctx.save();
-            ctx.globalAlpha = cloud.opacity;
-            ctx.fillStyle = isNight ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)';
-            
-            // Draw fluffy cloud
-            ctx.beginPath();
-            ctx.arc(cloud.x, cloud.y, cloud.size * 0.4, 0, Math.PI * 2);
-            ctx.arc(cloud.x + cloud.size * 0.3, cloud.y - cloud.size * 0.2, cloud.size * 0.3, 0, Math.PI * 2);
-            ctx.arc(cloud.x - cloud.size * 0.3, cloud.y - cloud.size * 0.2, cloud.size * 0.3, 0, Math.PI * 2);
-            ctx.arc(cloud.x + cloud.size * 0.2, cloud.y + cloud.size * 0.1, cloud.size * 0.35, 0, Math.PI * 2);
-            ctx.arc(cloud.x - cloud.size * 0.2, cloud.y + cloud.size * 0.1, cloud.size * 0.35, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        });
-        
-        // Sun/Moon
-        const celestialX = width * (timeOfDay / 360);
-        const celestialY = height/4 + Math.sin(timeOfDay * Math.PI / 180) * 50;
-        
-        if (isNight) {
-            // Moon
-            ctx.fillStyle = '#FAFAFA';
-            ctx.beginPath();
-            ctx.arc(celestialX, celestialY, 40, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Moon craters
-            ctx.fillStyle = '#E0E0E0';
-            ctx.beginPath();
-            ctx.arc(celestialX - 15, celestialY - 10, 8, 0, Math.PI * 2);
-            ctx.arc(celestialX + 20, celestialY + 15, 12, 0, Math.PI * 2);
-            ctx.arc(celestialX + 5, celestialY + 20, 6, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // Sun
-            const sunGradient = ctx.createRadialGradient(celestialX, celestialY, 0, celestialX, celestialY, 50);
-            sunGradient.addColorStop(0, '#FFEB3B');
-            sunGradient.addColorStop(0.7, '#FFC107');
-            sunGradient.addColorStop(1, 'rgba(255, 193, 7, 0)');
-            ctx.fillStyle = sunGradient;
-            ctx.beginPath();
-            ctx.arc(celestialX, celestialY, 50, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Sun rays
-            ctx.strokeStyle = '#FFC107';
-            ctx.lineWidth = 3;
-            for (let i = 0; i < 12; i++) {
-                const angle = (i / 12) * Math.PI * 2;
-                const rayLength = 70;
-                ctx.beginPath();
-                ctx.moveTo(
-                    celestialX + Math.cos(angle) * 50,
-                    celestialY + Math.sin(angle) * 50
-                );
-                ctx.lineTo(
-                    celestialX + Math.cos(angle) * (50 + rayLength),
-                    celestialY + Math.sin(angle) * (50 + rayLength)
-                );
-                ctx.stroke();
-            }
-        }
-        
-        // Trees (forest perimeter)
-        const treePositions = [
-            [40, 40], [width - 40, 40],
-            [40, height/2 + 40], [width - 40, height/2 + 40],
-            [100, 80], [width - 100, 80],
-            [100, height/2 + 80], [width - 100, height/2 + 80],
-            [width/2 - 200, 120], [width/2 + 200, 120]
-        ];
-        
-        treePositions.forEach(pos => {
-            drawTree(pos[0], pos[1], 80);
-        });
-        
-        // Pond
-        drawWater(width/2 - 350, height/2 - 50, 145, 95);
-        
-        // Rocks around pond
-        const rockPositions = [
-            [width/2 - 350 - 100, height/2 - 50],
-            [width/2 - 350 + 100, height/2 - 50 + 30],
-            [width/2 - 350 - 50, height/2 - 50 + 70],
-            [width/2 - 350 + 50, height/2 - 50 - 40]
-        ];
-        
-        rockPositions.forEach(pos => {
-            drawRock(pos[0], pos[1], 25 + Math.random() * 15);
-        });
-        
-        // House
-        const hX = width/2 - 110, hY = height/2 - 150;
-        
-        // House base
-        drawPixelRect(hX, hY, 220, 150, '#BBDEFB', 2);
-        
-        // Windows
-        drawPixelRect(hX + 30, hY + 40, 40, 40, '#E3F2FD', 2);
-        drawPixelRect(hX + 150, hY + 40, 40, 40, '#E3F2FD', 2);
-        drawPixelRect(hX + 85, hY + 100, 50, 40, '#FFECB3', 2);
-        
-        // Door
-        drawPixelRect(width/2 - 30, height/2 - 45, 60, 45, '#5D4037', 2);
-        drawPixelCircle(width/2 - 10, height/2 - 25, 4, '#FFD600', 2);
-        
-        // Roof
-        ctx.save();
-        const roofGradient = ctx.createLinearGradient(hX, hY, hX, hY - 60);
-        roofGradient.addColorStop(0, '#D32F2F');
-        roofGradient.addColorStop(1, '#B71C1C');
-        ctx.fillStyle = roofGradient;
-        ctx.beginPath();
-        ctx.moveTo(hX - 20, hY);
-        ctx.lineTo(width/2, hY - 60);
-        ctx.lineTo(hX + 240, hY);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-        
-        // Chimney
-        drawPixelRect(hX + 180, hY - 80, 25, 60, '#795548', 2);
-        drawPixelRect(hX + 180, hY - 85, 25, 5, '#212121', 2);
-        
-        // Fence
-        const fenceY = height/2 + 120;
-        ctx.strokeStyle = '#5D4037';
-        ctx.lineWidth = 6;
-        ctx.lineCap = 'round';
-        
-        ctx.beginPath();
-        ctx.moveTo(0, fenceY);
-        ctx.lineTo(width/2 - 45, fenceY);
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.moveTo(width/2 + 45, fenceY);
-        ctx.lineTo(width, fenceY);
-        ctx.stroke();
-        
-        // Fence posts
-        for(let x = 0; x < width; x += 40) {
-            if(Math.abs(x - width/2) > 40) {
-                ctx.beginPath();
-                ctx.moveTo(x, fenceY - 10);
-                ctx.lineTo(x, fenceY + 15);
-                ctx.stroke();
-                
-                // Post caps
-                drawPixelCircle(x, fenceY - 10, 4, '#3E2723', 2);
-            }
-        }
-        
-        // Pathway to house
-        const pathGradient = ctx.createLinearGradient(width/2, fenceY, width/2, height/2 - 45);
-        ctx.fillStyle = pathGradient;
-        ctx.fillRect(width/2 - 40, fenceY, 80, (height/2 - 45) - fenceY);
-        
-        // Path texture
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        for(let i = 0; i < 80; i += 10) {
-            for(let j = 0; j < (height/2 - 45) - fenceY; j += 10) {
-                if((i + j) % 20 === 0) {
-                    ctx.fillRect(width/2 - 40 + i, fenceY + j, 5, 5);
-                }
-            }
-        }
-        
-        // Flowers
-        const flowerColors = ['#E91E63', '#9C27B0', '#2196F3', '#4CAF50', '#FFEB3B'];
-        for(let i = 0; i < 20; i++) {
-            const flowerX = 100 + Math.random() * (width - 200);
-            const flowerY = height/2 + 140 + Math.random() * 100;
-            if(Math.abs(flowerX - width/2) > 60 || flowerY < fenceY) {
-                const color = flowerColors[Math.floor(Math.random() * flowerColors.length)];
-                drawPixelCircle(flowerX, flowerY, 3, color, 1);
-                drawPixelCircle(flowerX - 3, flowerY, 2, color, 1);
-                drawPixelCircle(flowerX + 3, flowerY, 2, color, 1);
-                drawPixelCircle(flowerX, flowerY - 3, 2, color, 1);
-                drawPixelCircle(flowerX, flowerY + 3, 2, color, 1);
-            }
-        }
-        
-        // Teleportation mat (outside)
-        const matGradient = ctx.createRadialGradient(width/2, height/2 + 10, 0, width/2, height/2 + 10, 30);
-        matGradient.addColorStop(0, '#4CAF50');
-        matGradient.addColorStop(1, '#2E7D32');
-        ctx.fillStyle = matGradient;
-        ctx.fillRect(width/2 - 40, height/2 - 10, 80, 40);
-        
-        // Mat pattern
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([3, 3]);
-        ctx.strokeRect(width/2 - 35, height/2 - 5, 70, 30);
-        ctx.setLineDash([]);
-    }
-
-    // Enhanced draw function
     function draw() {
-        // Clear with fade effect
-        ctx.fillStyle = isNight ? 'rgba(13, 27, 42, 0.1)' : 'rgba(255, 255, 255, 0.1)';
-        ctx.fillRect(0, 0, width, height);
-        
-        // Draw environment based on current map
+        ctx.clearRect(0, 0, width, height);
+
         if (currentMap === 'LAB') {
-            drawLab();
+            ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
+            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
+            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
+
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+            pokeballs.forEach((ball, i) => {
+                if (!ball.active) return;
+                ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
+                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
+            });
         } else {
-            drawOutside();
-        }
-        
-        // Draw weather effects
-        if (weather !== 'clear') {
-            weatherParticles.forEach(p => {
-                ctx.save();
-                ctx.globalAlpha = 0.6;
-                ctx.fillStyle = p.color;
-                if (weather === 'snow') {
-                    // Draw snowflake
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Snowflake arms
-                    for (let i = 0; i < 6; i++) {
-                        const angle = (i / 6) * Math.PI * 2;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(
-                            p.x + Math.cos(angle) * p.size * 2,
-                            p.y + Math.sin(angle) * p.size * 2
-                        );
-                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-                    }
-                } else {
-                    // Draw raindrop
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p.x + 2, p.y + 6);
-                    ctx.lineTo(p.x - 2, p.y + 6);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-                ctx.restore();
-            });
-        }
-        
-        // Draw ripples
-        ripplePool.forEach(r => {
-            ctx.save();
-            ctx.globalAlpha = r.life / 60;
-            ctx.strokeStyle = r.color;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
-        });
-        
-        // Draw particles
-        particles.forEach(p => {
-            ctx.save();
-            ctx.globalAlpha = p.life / 120;
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
             
-            if (p.type === 'sparkle') {
-                // Sparkle effect
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Add glow
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 5;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                // Regular particle
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.restore();
-        });
-        
-        // Draw player
-        drawPlayer();
-        
-        // Draw follower Pokémon
-        if (follower.active) {
-            drawPokemon(follower, follower.x, follower.y, true);
-        }
-        
-        // Draw inactive Pokéballs on desk
-        if (currentMap === 'LAB' && choosingState) {
-            pokeballs.forEach(ball => {
-                if (ball.active) {
-                    drawPokemon(ball, ball.x, ball.y);
+            // GRASS DESIGN
+            ctx.fillStyle = '#567d56'; 
+            for(let row=0; row<8; row++) {
+                for(let col=0; col<12; col++) {
+                    let gx = width - 450 + col*40, gy = 50 + row*40;
+                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
                 }
-            });
+            }
+
+            // YELLOW ROCKY TERRAIN
+            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
+
+            // POND (Left)
+            const wX = width/2 - 350, wY = height/2 - 50;
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
+
+            // TREE PERIMETER (Only outer edge, skipping fence area)
+            ctx.fillStyle = '#1a331a';
+            const fenceY = height/2 + 120;
+            for(let x = 40; x < width; x += 80) {
+                // Top edge
+                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
+                // Left & Right edges down to fence
+                if (x < 100 || x > width - 100) {
+                    for(let y = 120; y < fenceY - 40; y += 80) {
+                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            }
+            
+            // FENCE
+            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
+            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
+
+            // HOUSE
+            const hX = width/2 - 110, hY = height/2 - 150;
+            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
+            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
-        
-        // Add scanline overlay for retro effect
-        ctx.save();
-        ctx.globalAlpha = 0.03;
-        ctx.fillStyle = '#000000';
-        for(let i = 0; i < height; i += 4) {
-            ctx.fillRect(0, i, width, 2);
+
+        if (follower.active) {
+            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
-        ctx.restore();
+
+        // PLAYER
+        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
         
-        // Add vignette effect
-        const vignette = ctx.createRadialGradient(
-            width/2, height/2, 0,
-            width/2, height/2, Math.max(width, height)/2
-        );
-        vignette.addColorStop(0, 'rgba(0,0,0,0)');
-        vignette.addColorStop(0.7, 'rgba(0,0,0,0)');
-        vignette.addColorStop(1, 'rgba(0,0,0,0.3)');
-        ctx.fillStyle = vignette;
-        ctx.fillRect(0, 0, width, height);
-        
-        // Update game state
+        if (holdingPokeball) {
+            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
+        }
+
         update();
-        
-        // Continue animation
         requestAnimationFrame(draw);
     }
-
-    // Bag function
-    function openBag() {
-        uiLayer.style.display = 'block';
-        dialogueBox.innerHTML = `
-            <div style="text-align: center;">
-                <div style="color: #4CAF50; margin-bottom: 10px;">POKéDEX & BAG</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div>
-                        <strong>ITEMS:</strong><br>
-                        • Potion x3<br>
-                        • Poké Ball x5<br>
-                        • Antidote x2<br>
-                        • Rare Candy x1
-                    </div>
-                    <div>
-                        <strong>POKéMON:</strong><br>
-                        ${follower.active ? `• ${follower.name} Lv.5<br>HP: ▰▰▰▰▰` : '• None'}
-                    </div>
-                </div>
-                <div style="margin-top: 15px; color: #666; font-size: 12px;">
-                    Press anywhere to close
-                </div>
-            </div>
-        `;
-    }
-
-    // Initialize game
     draw();
 </script>
 </body>
