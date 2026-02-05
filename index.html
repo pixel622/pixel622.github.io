@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon K&E Version</title>
+    <title>Pokémon K&E - High Density Pixel Version</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -25,7 +25,7 @@
             display: block;
             width: 100% !important;
             height: 100% !important;
-            image-rendering: pixelated; /* Essential for mini-pixel look */
+            image-rendering: pixelated;
         }
 
         #title-screen {
@@ -130,6 +130,7 @@
     let choosingState = false;
     let width, height;
     let isTeleporting = false;
+    const pxSize = 4; // The size of our "mini pixels"
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
@@ -223,42 +224,47 @@
         }, 300);
     }
 
-    // PIXEL DRAWING FUNCTIONS
-    function drawMiniPlayer(x, y) {
-        // Feet
-        ctx.fillStyle = '#333'; ctx.fillRect(x-8, y+15, 6, 4); ctx.fillRect(x+2, y+15, 6, 4);
-        // Body (Jacket)
-        ctx.fillStyle = '#a03030'; ctx.fillRect(x-10, y-5, 20, 20);
-        // Hands
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(x-14, y+5, 4, 4); ctx.fillRect(x+10, y+5, 4, 4);
-        // Head
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(x-7, y-18, 14, 14);
-        // Hat
-        ctx.fillStyle = '#fff'; ctx.fillRect(x-9, y-22, 18, 6);
-        // Eyes
-        ctx.fillStyle = '#000'; ctx.fillRect(x-4, y-13, 2, 2); ctx.fillRect(x+2, y-13, 2, 2);
-    }
-
-    function drawMiniPokemon(x, y, name) {
-        if (name === 'Treecko') {
-            ctx.fillStyle = '#32CD32'; ctx.fillRect(x-8, y-5, 16, 16); // Body
-            ctx.fillStyle = '#228B22'; ctx.fillRect(x+4, y+5, 8, 4); // Tail
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-4, y-2, 3, 3); ctx.fillRect(x+1, y-2, 3, 3); // Eyes
-        } else if (name === 'Froakie') {
-            ctx.fillStyle = '#1E90FF'; ctx.fillRect(x-10, y-5, 20, 15);
-            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x-8, y-10, 16, 6); // Bubbles
-            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-5, y-2, 3, 3); ctx.fillRect(x+2, y-2, 3, 3);
-        } else if (name === 'Charmander') {
-            ctx.fillStyle = '#FF4500'; ctx.fillRect(x-8, y-8, 16, 18);
-            ctx.fillStyle = '#FFFF00'; ctx.fillRect(x-3, y+2, 6, 6); // Belly
-            ctx.fillStyle = '#FF0000'; ctx.fillRect(x+6, y+5, 4, 4); // Tail fire
+    // PIXEL-BY-PIXEL DRAWING FUNCTIONS
+    function drawPixelRect(startX, startY, grid, colorMap) {
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                if (grid[r][c] !== 0) {
+                    ctx.fillStyle = colorMap[grid[r][c]];
+                    ctx.fillRect(startX + (c * pxSize), startY + (r * pxSize), pxSize, pxSize);
+                }
+            }
         }
     }
 
-    function drawMiniBush(x, y) {
-        ctx.fillStyle = '#1e3d1e'; ctx.fillRect(x-30, y-15, 60, 45); // Outline
-        ctx.fillStyle = '#3a6b3a'; ctx.fillRect(x-25, y-10, 50, 35); // Main
-        ctx.fillStyle = '#6ab06a'; ctx.fillRect(x-15, y-5, 15, 5); // Highlight
+    function drawHighDensityTree(x, y) {
+        const treeData = [
+            [0,0,0,1,1,1,0,0,0],
+            [0,0,1,1,2,1,1,0,0],
+            [0,1,1,2,2,2,1,1,0],
+            [0,1,2,2,1,2,2,1,0],
+            [1,1,2,1,1,1,2,1,1],
+            [1,2,2,2,2,2,2,2,1],
+            [1,1,1,2,2,2,1,1,1],
+            [0,0,0,3,3,3,0,0,0],
+            [0,0,0,3,3,3,0,0,0]
+        ];
+        const treeColors = { 1: '#1e3d1e', 2: '#3a6b3a', 3: '#5d3a1a' };
+        drawPixelRect(x - 18, y - 18, treeData, treeColors);
+    }
+
+    function drawHighDensityPlayer(x, y) {
+        const pData = [
+            [0,0,4,4,4,4,0,0],
+            [0,4,4,4,4,4,4,0],
+            [0,1,1,1,1,1,1,0],
+            [1,1,5,1,1,5,1,1],
+            [0,1,1,1,1,1,1,0],
+            [2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2],
+            [0,3,3,0,0,3,3,0]
+        ];
+        const pColors = { 1: '#ffdbac', 2: '#a03030', 3: '#333', 4: '#fff', 5: '#000' };
+        drawPixelRect(x - 16, y - 16, pData, pColors);
     }
 
     function update() {
@@ -284,15 +290,10 @@
         ctx.clearRect(0, 0, width, height);
 
         if (currentMap === 'LAB') {
-            // Lab Floor & Rug
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#b87040'; for(let i=0; i<width; i+=40) ctx.fillRect(i, 0, 2, height);
-            
-            // Lab Decorations (Mini Pixel Style)
-            ctx.fillStyle = '#444'; ctx.fillRect(50, 50, 80, 40); // Computer desk
-            ctx.fillStyle = '#0ff'; ctx.fillRect(60, 55, 20, 10); // Screen
-            ctx.fillStyle = '#5d3a1a'; ctx.fillRect(width-130, 50, 80, 120); // Bookshelf
-            ctx.fillStyle = '#a63d3d'; ctx.fillRect(width-125, 60, 70, 5); // Books row
+            // High density floor pixels
+            ctx.fillStyle = '#b87040'; 
+            for(let i=0; i<width; i+=20) ctx.fillRect(i, 0, 1, height);
             
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
@@ -300,50 +301,47 @@
             pokemons.forEach((p, i) => {
                 if (!p.active) return;
                 p.realX = dX + 60 + (i * 110); p.realY = dY + 40;
-                drawMiniPokemon(p.realX, p.realY, p.name);
+                ctx.fillStyle = p.color; ctx.fillRect(p.realX-10, p.realY-10, 20, 20); // Placeholder for density sprites
                 ctx.fillStyle = 'white'; ctx.font = 'bold 10px Courier'; ctx.textAlign = 'center';
                 ctx.fillText(p.name.toUpperCase(), p.realX, p.realY - 30);
             });
         } else {
-            // OUTSIDE - FULL MINI PIXEL DECORATIONS
-            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height); // Grass
+            // OUTSIDE MAP - HIGH DENSITY
+            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height);
             
-            // Path with dithered edge
+            // Dithered Path Pixels
             ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#c5b76b'; for(let i=0; i<width; i+=10) { if(i%20==0) ctx.fillRect(i, height/2+118, 5, 5); }
+            ctx.fillStyle = '#c5b76b';
+            for(let x=0; x<width; x+=pxSize) { if((x/pxSize)%2==0) ctx.fillRect(x, height/2+116, pxSize, pxSize); }
 
-            // Pond (Pixelated Edge)
+            // Pond with jagged pixel borders
             const wX = width/2 - 350, wY = height/2 - 50;
             ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX - 150, wY - 100, 300, 200);
             ctx.fillStyle = '#b7e4f7'; ctx.fillRect(wX - 130, wY - 80, 260, 160);
 
-            // Perimeter Trees (Bushes)
+            // Perimeter Trees (50+ Pixels each)
             const fenceY = height/2 + 120;
             for(let x = 40; x < width; x += 80) {
-                drawMiniBush(x, 40);
-                if (x < 120 || x > width - 120) { for(let y = 120; y < fenceY - 40; y += 80) { drawMiniBush(x, y); } }
+                drawHighDensityTree(x, 40);
+                if (x < 120 || x > width - 120) {
+                    for(let y = 120; y < fenceY - 40; y += 80) { drawHighDensityTree(x, y); }
+                }
             }
 
-            // Wooden Fence Posts
-            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=35) { if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 10, 30); }
-
-            // HOUSE - IMPROVED MINI PIXEL DESIGN
+            // High Density House
             const hX = width/2 - 110, hY = height/2 - 150;
             ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150); // Walls
-            ctx.fillStyle = '#9e623d'; for(let i=hY; i<hY+150; i+=15) ctx.fillRect(hX, i, 220, 2); // Wood Grain
-            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-50, 240, 60); // Roof
-            ctx.fillStyle = '#7a2d2d'; for(let i=hX-10; i<hX+230; i+=15) ctx.fillRect(i, hY-50, 2, 60); // Roof detail
-            ctx.fillStyle = '#333'; ctx.fillRect(hX+180, hY-70, 20, 30); // Chimney
-            
-            ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40); // Windows
-            ctx.fillStyle = '#add8e6'; ctx.fillRect(hX+35, hY+25, 30, 30); ctx.fillRect(hX+155, hY+25, 30, 30); // Glass
+            ctx.fillStyle = '#a63d3d'; // Roof Pixels
+            for(let r=0; r<60; r+=pxSize) ctx.fillRect(hX-10, hY-60+r, 240, pxSize-1);
             
             ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
-            ctx.fillStyle = '#ffcb05'; ctx.fillRect(width/2 + 15, height/2 - 25, 5, 5); // Doorknob
         }
 
-        if (follower.active) drawMiniPokemon(follower.x, follower.y, follower.name);
-        drawMiniPlayer(player.x, player.y);
+        if (follower.active) {
+            ctx.fillStyle = follower.color; ctx.fillRect(follower.x-8, follower.y-8, 16, 16);
+        }
+
+        drawHighDensityPlayer(player.x, player.y);
         
         update();
         requestAnimationFrame(draw);
