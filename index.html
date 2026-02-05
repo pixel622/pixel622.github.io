@@ -157,6 +157,13 @@
     window.addEventListener('resize', resize);
     resize();
 
+    // Fixed rock positions for the bottom area
+    const staticRocks = Array.from({length: 12}, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        size: 10 + Math.random() * 15
+    }));
+
     const player = {
         x: width/2, y: height/2 + 50,
         speed: 5, history: []
@@ -236,9 +243,8 @@
                 if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
                 return true;
             }
-            // FENCE COLLISION WITH PASSAGE
+            // FENCE WITH PASSAGE
             if (ny > height/2 + 100 && ny < height/2 + 130) {
-                // Allows passage if player X is within a 60px wide gap in the center
                 if (Math.abs(nx - width/2) > 40) return true;
             }
         }
@@ -298,82 +304,54 @@
         if (currentMap === 'LAB') {
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
-            
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
-
-            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
-
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
                 ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
-                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            // OUTSIDE MAP UPDATES
-            // 1. Grass Base with subtle pattern
+            // OUTSIDE VISUALS
             ctx.fillStyle = '#8dbd8d'; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#82af82';
-            for(let i=0; i<width; i+=40) {
-                for(let j=0; j<height; j+=40) {
-                    if((i+j)%80===0) ctx.fillRect(i,j,2,2);
-                }
-            }
 
-            // 2. Rocky Terrain (Bottom Side)
-            ctx.fillStyle = '#9e9e9e'; ctx.fillRect(0, height/2 + 130, width, height);
-            ctx.fillStyle = '#7d7d7d';
-            for(let r=0; r<15; r++) {
-                ctx.fillRect(Math.random()*width, height/2 + 140 + Math.random()*(height/2), 15, 8);
-            }
+            // YELLOW ROCKY TERRAIN (Bottom Side)
+            ctx.fillStyle = '#e8d58a'; ctx.fillRect(0, height/2 + 120, width, height);
+            ctx.fillStyle = '#c4b062'; // Rocky textures
+            staticRocks.forEach(rock => {
+                let rx = rock.x * width;
+                let ry = height/2 + 140 + (rock.y * (height/2 - 140));
+                ctx.beginPath();
+                ctx.moveTo(rx, ry);
+                ctx.lineTo(rx + rock.size, ry - 5);
+                ctx.lineTo(rx + rock.size + 5, ry + 5);
+                ctx.lineTo(rx, ry + 10);
+                ctx.fill();
+            });
 
-            // 3. Prettier Tall Grass
+            // PRETTIER GRASS
             ctx.fillStyle = '#567d56';
             for(let row=0; row<3; row++) {
                 for(let col=0; col<5; col++) {
-                    let gx = 50 + col*40; let gy = height - 200 + row*40;
-                    ctx.fillRect(gx, gy, 35, 35);
-                    ctx.fillStyle = '#4a6d4a'; ctx.fillRect(gx+5, gy+5, 4, 10); ctx.fillRect(gx+25, gy+15, 4, 10);
-                    ctx.fillStyle = '#567d56';
-                    
-                    let gx2 = width - 250 + col*40; let gy2 = 100 + row*40;
-                    ctx.fillRect(gx2, gy2, 35, 35);
-                    ctx.fillStyle = '#4a6d4a'; ctx.fillRect(gx2+10, gy2+5, 4, 10);
+                    let gx = 50 + col*45; let gy = height/2 - 100 + row*40;
+                    ctx.fillRect(gx, gy, 32, 32);
+                    ctx.fillStyle = '#416141'; ctx.fillRect(gx+4, gy+4, 4, 8);
                     ctx.fillStyle = '#567d56';
                 }
             }
 
-            // 4. Prettier Water
+            // PRETTIER WATER
             ctx.fillStyle = '#4d88ff';
-            ctx.beginPath(); ctx.ellipse(width - 120, height/2, 80, 50, 0, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#8bb4ff'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(width-160, height/2-10); ctx.lineTo(width-100, height/2-10); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width-140, height/2+10); ctx.lineTo(width-80, height/2+10); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(width - 120, height/2 - 100, 80, 50, 0, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#adebff'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(width-140, height/2-110, 20, 0.2, Math.PI-0.2); ctx.stroke();
 
-            // 5. Trees and Objects
-            ctx.fillStyle = '#2d4d2d';
-            const treePositions = [[40, 40], [100, 60], [40, 120], [width-60, height-60], [width-120, height-100]];
-            treePositions.forEach(pos => {
-                ctx.beginPath(); ctx.arc(pos[0], pos[1], 30, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#243e24'; ctx.beginPath(); ctx.arc(pos[0]-5, pos[1]-5, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#2d4d2d';
-            });
-
-            // 6. Fence with PASSAGE
-            ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 4;
-            // Draw Fence Left Side
-            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 40, height/2 + 120); ctx.stroke();
-            // Draw Fence Right Side
-            ctx.beginPath(); ctx.moveTo(width/2 + 40, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
-            // Fence Posts
+            // FENCE WITH PASSAGE
+            ctx.strokeStyle = '#5d3a1a'; ctx.lineWidth = 5;
+            ctx.beginPath(); ctx.moveTo(0, height/2 + 120); ctx.lineTo(width/2 - 45, height/2 + 120); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, height/2 + 120); ctx.lineTo(width, height/2 + 120); ctx.stroke();
             for(let x=0; x<width; x+=40) { 
                 if(Math.abs(x - width/2) > 40) {
                    ctx.beginPath(); ctx.moveTo(x, height/2+110); ctx.lineTo(x, height/2+130); ctx.stroke(); 
@@ -384,8 +362,6 @@
             ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
             ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 40, height/2, 80, 25);
-            ctx.strokeStyle = 'white'; ctx.strokeRect(width/2 - 40, height/2, 80, 25);
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 40, 60, 40);
         }
 
         if (follower.active) {
@@ -393,17 +369,13 @@
             ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
         }
 
-        // PLAYER DRAWING
+        // PLAYER
         ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
-        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
-
         if (holdingPokeball) {
             ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
-            ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
         }
 
         update();
@@ -412,4 +384,4 @@
     draw();
 </script>
 </body>
-</html>
+</html
