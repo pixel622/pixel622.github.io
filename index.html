@@ -1,308 +1,356 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pokémon K&E Version</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pokémon K&E Version</title>
+    <style>
+        :root {
+            --gba-blue: #285088;
+            --gba-light-blue: #5888c8;
+            --font-main: 'Courier New', Courier, monospace;
+        }
 
-<style>
-:root {
-    --gba-blue:#285088;
-    --gba-light-blue:#5888c8;
-    --font-main:'Courier New', monospace;
-}
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    background:black;
-    overflow:hidden;
-}
-canvas{
-    width:100%!important;
-    height:100%!important;
-    image-rendering:pixelated;
-}
-#title-screen{
-    position:absolute; inset:0;
-    background:black;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    z-index:5;
-    font-family:var(--font-main);
-}
-#start-btn{
-    padding:15px 40px;
-    font-size:20px;
-    background:var(--gba-blue);
-    color:white;
-    border:4px solid white;
-    border-radius:12px;
-}
-#ui-layer{
-    position:absolute;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    display:none;
-}
-#dialogue-box{
-    background:white;
-    border:6px solid var(--gba-blue);
-    border-radius:18px;
-    padding:20px;
-    font-size:20px;
-    font-weight:bold;
-}
-#speaker-tag{
-    position:absolute;
-    top:-26px;
-    left:30px;
-    background:var(--gba-blue);
-    color:white;
-    padding:5px 18px;
-    border-radius:10px 10px 0 0;
-}
-#joystick-wrapper{
-    position:absolute;
-    bottom:80px;
-    left:40px;
-    width:130px;
-    height:130px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.15);
-}
-#joystick-knob{
-    width:50px;
-    height:50px;
-    background:rgba(255,255,255,0.6);
-    border-radius:50%;
-    position:absolute;
-    left:40px;
-    top:40px;
-}
-#bag-btn{
-    position:absolute;
-    bottom:80px;
-    right:40px;
-    background:var(--gba-blue);
-    color:white;
-    padding:14px 30px;
-    border:3px solid white;
-    border-radius:8px;
-}
-#shimmer{
-    position:fixed;
-    inset:0;
-    background:white;
-    opacity:0;
-    transition:opacity .3s;
-    pointer-events:none;
-}
-</style>
+        body, html {
+            margin: 0; padding: 0; 
+            width: 100vw; height: 100vh;
+            background: #000; overflow: hidden; 
+            touch-action: none;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 100%; height: 100%;
+        }
+
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            image-rendering: pixelated;
+        }
+
+        #title-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #fff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 2000; transition: opacity 0.5s ease-out;
+            font-family: var(--font-main);
+        }
+
+        #title-screen h1 { font-size: 40px; margin-bottom: 20px; text-align: center; color: #ffcb05; text-shadow: 3px 3px #2a75bb; }
+
+        #start-btn {
+            padding: 15px 40px; font-size: 20px; font-family: var(--font-main);
+            background: var(--gba-blue); color: white; border: 4px solid white;
+            cursor: pointer; border-radius: 10px; font-weight: bold;
+        }
+
+        #ui-layer {
+            position: absolute; bottom: 20px; left: 50%;
+            transform: translateX(-50%); width: 90%;
+            z-index: 100; cursor: pointer; display: none;
+        }
+
+        #dialogue-box {
+            background: white; border: 6px solid var(--gba-blue); border-radius: 18px;
+            padding: 20px; font-family: var(--font-main); font-weight: bold;
+            font-size: 20px; box-shadow: inset 0 0 0 3px var(--gba-light-blue), 0 4px 10px rgba(0,0,0,0.5);
+            min-height: 80px; user-select: none;
+        }
+
+        #speaker-tag {
+            position: absolute; top: -25px; left: 30px;
+            background: var(--gba-blue); color: white;
+            padding: 5px 20px; border-radius: 10px 10px 0 0;
+            font-size: 16px; border: 3px solid var(--gba-blue);
+        }
+
+        /* Joystick moved up approx 1cm (~40px) */
+        #joystick-wrapper {
+            position: absolute; bottom: 80px; left: 40px;
+            width: 130px; height: 130px;
+            background: rgba(255,255,255,0.15); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+            display: flex; justify-content: center; align-items: center; z-index: 200;
+        }
+
+        #joystick-knob { width: 50px; height: 50px; background: rgba(255,255,255,0.6); border-radius: 50%; }
+
+        #shimmer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s; z-index: 999;
+        }
+
+        /* Fixed Bag Button positioned opposite joystick (bottom right) */
+        #bag-btn {
+            position: absolute; bottom: 80px; right: 40px;
+            background: var(--gba-blue); color: white;
+            padding: 15px 30px; border-radius: 8px;
+            font-family: var(--font-main); font-weight: bold;
+            border: 3px solid white; cursor: pointer; z-index: 300;
+            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
+        }
+    </style>
 </head>
-
 <body>
-<div id="title-screen">
-    <h1 style="color:#ffcb05;text-shadow:3px 3px #2a75bb;">Pokémon K&E Version</h1>
-    <button id="start-btn" onclick="startGame()">START GAME</button>
-</div>
 
-<canvas id="gameCanvas"></canvas>
-<div id="shimmer"></div>
-<div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
+<div id="game-wrapper">
+    <div id="title-screen">
+        <h1>Pokémon K&E Version</h1>
+        <button id="start-btn" onclick="startGame()">START GAME</button>
+    </div>
 
-<div id="ui-layer" onclick="handleDialogueClick()">
-    <div id="speaker-tag">Professor Sequoia</div>
-    <div id="dialogue-box">Welcome to the Habitat Research Lab!</div>
-</div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="shimmer"></div>
+    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
 
-<div id="joystick-wrapper">
-    <div id="joystick-knob"></div>
+    <div id="ui-layer" onclick="handleDialogueClick()">
+        <div id="speaker-tag">Professor Sequoia</div>
+        <div id="dialogue-box">Welcome to the Habitat Research Lab!</div>
+    </div>
+
+    <div id="joystick-wrapper">
+        <div id="joystick-knob"></div>
+    </div>
 </div>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const uiLayer = document.getElementById("ui-layer");
-const dialogueBox = document.getElementById("dialogue-box");
-const titleScreen = document.getElementById("title-screen");
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const knob = document.getElementById('joystick-knob');
+    const wrapper = document.getElementById('joystick-wrapper');
+    const uiLayer = document.getElementById('ui-layer');
+    const dialogueBox = document.getElementById('dialogue-box');
+    const titleScreen = document.getElementById('title-screen');
 
-let width,height;
-function resize(){
-    width=innerWidth;
-    height=innerHeight;
-    canvas.width=width;
-    canvas.height=height;
-}
-addEventListener("resize",resize);
-resize();
+    const script = [
+        "Welcome to the Habitat Research Lab!",
+        "Look around! This facility is dedicated to studying Orebound's ecology.",
+        "The tremor earlier was quite strong. We must act quickly.",
+        "Go ahead and click on the Pokémon you want to partner with!"
+    ];
+    let scriptIndex = 0;
+    let currentMap = 'LAB';
+    let choosingState = false;
+    let holdingPokeball = false; 
+    let width, height;
 
-const script=[
- "Welcome to the Habitat Research Lab!",
- "This place studies Orebound's ecosystems.",
- "A tremor shook the region earlier...",
- "Choose a Pokémon partner!"
-];
-let scriptIndex=0;
-
-let currentMap="LAB";
-let choosingState=false;
-let holdingPokeball=false;
-
-const player={x:width/2,y:height-120,speed:5,history:[]};
-const follower={active:false,x:0,y:0,color:"#000",bob:0};
-
-const pokeballs=[
- {name:"Treecko",color:"#32cd32",active:true},
- {name:"Froakie",color:"#1e90ff",active:true},
- {name:"Charmander",color:"#ff4500",active:true}
-];
-
-function startGame(){
-    titleScreen.style.display="none";
-    uiLayer.style.display="block";
-}
-
-function handleDialogueClick(){
-    if(scriptIndex<script.length-1){
-        scriptIndex++;
-        dialogueBox.innerText=script[scriptIndex];
-    }else{
-        uiLayer.style.display="none";
-        choosingState=true;
+    function resize() {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
     }
-}
+    window.addEventListener('resize', resize);
+    resize();
 
-/* ===== GRAPHICS HELPERS ===== */
-function shadowCircle(x,y,r,color){
-    ctx.fillStyle="rgba(0,0,0,.25)";
-    ctx.beginPath();
-    ctx.ellipse(x,y+r+6,r*.9,r*.4,0,0,Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle=color;
-    ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2);
-    ctx.fill();
-}
+    const player = { x: width/2, y: height - 120, speed: 5, history: [] };
+    const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
 
-function pokeball(x,y){
-    ctx.beginPath();
-    ctx.fillStyle="#c00";
-    ctx.arc(x,y,16,Math.PI,0);
-    ctx.fill();
-    ctx.fillStyle="white";
-    ctx.beginPath();
-    ctx.arc(x,y,16,0,Math.PI);
-    ctx.fill();
-    ctx.strokeStyle="black";
-    ctx.lineWidth=2;
-    ctx.beginPath();
-    ctx.moveTo(x-16,y);
-    ctx.lineTo(x+16,y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x,y,4,0,Math.PI*2);
-    ctx.stroke();
-}
+    const pokeballs = [
+        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
+        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
+        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
+    ];
 
-/* ===== MAIN LOOP ===== */
-function draw(){
-ctx.clearRect(0,0,width,height);
+    function startGame() {
+        titleScreen.style.opacity = '0';
+        setTimeout(() => {
+            titleScreen.style.display = 'none';
+            uiLayer.style.display = 'block';
+        }, 500);
+    }
 
-/* ===== LAB ===== */
-if(currentMap==="LAB"){
-    let g=ctx.createLinearGradient(0,0,0,height);
-    g.addColorStop(0,"#e0a070");
-    g.addColorStop(1,"#c08050");
-    ctx.fillStyle=g;
-    ctx.fillRect(0,0,width,height);
+    let stickX = 0, stickY = 0, isTouching = false;
 
-    // desk
-    const dW=360,dH=110,dX=width/2-dW/2,dY=height/2.4;
-    ctx.fillStyle="#6b3b1e";
-    ctx.fillRect(dX,dY,dW,dH);
-    ctx.fillStyle="#8c522f";
-    ctx.fillRect(dX,dY,dW,14);
+    function handleDialogueClick() {
+        if (scriptIndex < script.length - 1) {
+            scriptIndex++;
+            dialogueBox.innerText = script[scriptIndex];
+        } else {
+            uiLayer.style.display = 'none';
+            choosingState = true;
+        }
+    }
 
-    pokeballs.forEach((b,i)=>{
-        if(!b.active)return;
-        b.x=dX+70+i*110;
-        b.y=dY+55;
-        ctx.fillStyle="black";
-        ctx.fillText(b.name.toUpperCase(),b.x,b.y-30);
-        pokeball(b.x,b.y);
+    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
+
+    function checkPokeClick(clickX, clickY) {
+        if (!choosingState || follower.active || currentMap !== 'LAB') return;
+        pokeballs.forEach(ball => {
+            if(!ball.active) return;
+            const dx = clickX - ball.realX;
+            const dy = clickY - ball.realY;
+            if (Math.sqrt(dx*dx + dy*dy) < 40) {
+                follower.active = true; follower.name = ball.name;
+                follower.color = ball.color; follower.x = ball.realX;
+                follower.y = ball.realY; ball.active = false;
+                holdingPokeball = true;
+            }
+        });
+    }
+
+    wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
+    window.addEventListener('touchend', () => { isTouching = false; stickX = 0; stickY = 0; knob.style.transform = `translate(0px, 0px)`; });
+    window.addEventListener('touchmove', (e) => {
+        if (!isTouching) return;
+        const rect = wrapper.getBoundingClientRect();
+        const touch = e.touches[0];
+        let dx = touch.clientX - (rect.left + rect.width/2);
+        let dy = touch.clientY - (rect.top + rect.height/2);
+        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+        const angle = Math.atan2(dy, dx);
+        stickX = Math.cos(angle) * (dist/40); stickY = Math.sin(angle) * (dist/40);
+        knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
     });
-}
 
-/* ===== OUTSIDE ===== */
-else{
-    let sky=ctx.createLinearGradient(0,0,0,height/2);
-    sky.addColorStop(0,"#7db9e8");
-    sky.addColorStop(1,"#9fe09f");
-    ctx.fillStyle=sky;
-    ctx.fillRect(0,0,width,height);
+    function checkCollision(nx, ny) {
+        if (currentMap === 'LAB') {
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            if (nx > dX - 15 && nx < dX + dW + 15 && ny > dY - 15 && ny < dY + dH + 15) return true;
+            if (ny < 130) return true;
+        } else {
+            const hX = width/2 - 110, hY = height/2 - 150;
+            if (nx > hX - 20 && nx < hX + 240 && ny > hY - 60 && ny < hY + 150) {
+                if (Math.abs(nx - width/2) < 30 && ny > hY + 100) return false;
+                return true;
+            }
+            if (ny > height/2 + 120 && ny < height/2 + 130) {
+                if (Math.abs(nx - width/2) > 40) return true;
+            }
+        }
+        return false;
+    }
 
-    // grass
-    ctx.fillStyle="#5f9f5f";
-    ctx.fillRect(0,height/2,width,height);
+    let isTeleporting = false;
+    function teleport() {
+        if (isTeleporting) return;
+        isTeleporting = true;
+        const shim = document.getElementById('shimmer');
+        shim.style.opacity = '1';
+        setTimeout(() => {
+            currentMap = (currentMap === 'LAB') ? 'OUTSIDE' : 'LAB';
+            player.x = width/2;
+            player.y = (currentMap === 'OUTSIDE') ? height/2 + 80 : height - 120;
+            player.history = []; 
+            shim.style.opacity = '0';
+            isTeleporting = false;
+        }, 300);
+    }
 
-    // pond
-    ctx.fillStyle="#1e5aab";
-    ctx.beginPath();
-    ctx.ellipse(width/2-350,height/2-40,150,90,0,0,Math.PI*2);
-    ctx.fill();
-    ctx.fillStyle="rgba(255,255,255,.25)";
-    ctx.beginPath();
-    ctx.ellipse(width/2-380,height/2-70,50,25,0,0,Math.PI*2);
-    ctx.fill();
+    function update() {
+        if (isTouching) {
+            let nextX = player.x + stickX * player.speed;
+            let nextY = player.y + stickY * player.speed;
+            if (!checkCollision(nextX, nextY)) {
+                player.history.push({x: player.x, y: player.y});
+                if (player.history.length > 60) player.history.shift();
+                player.x = nextX; player.y = nextY;
+            }
+        }
+        const matX = width / 2;
+        const matY = (currentMap === 'LAB') ? height - 30 : height / 2 + 10;
+        if (Math.abs(player.x - matX) < 50 && Math.abs(player.y - matY) < 30) teleport();
+        
+        if (follower.active && player.history.length > 12) {
+            const fp = player.history[player.history.length - 12];
+            follower.x += (fp.x - follower.x) * 0.15; follower.y += (fp.y - follower.y) * 0.15;
+        }
+        player.x = Math.max(20, Math.min(width-20, player.x));
+        player.y = Math.max(20, Math.min(height-20, player.y));
+    }
 
-    // house
-    const hX=width/2-120,hY=height/2-150;
-    ctx.fillStyle="#a0c0d8";
-    ctx.fillRect(hX,hY,240,160);
-    ctx.fillStyle="#d05050";
-    ctx.beginPath();
-    ctx.moveTo(hX-20,hY);
-    ctx.lineTo(width/2,hY-70);
-    ctx.lineTo(hX+260,hY);
-    ctx.fill();
-}
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
 
-/* ===== FOLLOWER ===== */
-if(follower.active){
-    follower.bob+=0.1;
-    shadowCircle(
-        follower.x,
-        follower.y+Math.sin(follower.bob)*3,
-        14,
-        follower.color
-    );
-}
+        if (currentMap === 'LAB') {
+            ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
+            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
+            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
+            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
 
-/* ===== PLAYER ===== */
-ctx.fillStyle="rgba(0,0,0,.25)";
-ctx.beginPath();
-ctx.ellipse(player.x,player.y+22,14,6,0,0,Math.PI*2);
-ctx.fill();
+            const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
+            ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+            pokeballs.forEach((ball, i) => {
+                if (!ball.active) return;
+                ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
+                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
+            });
+        } else {
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
+            
+            // GRASS DESIGN
+            ctx.fillStyle = '#567d56'; 
+            for(let row=0; row<8; row++) {
+                for(let col=0; col<12; col++) {
+                    let gx = width - 450 + col*40, gy = 50 + row*40;
+                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
+                }
+            }
 
-ctx.fillStyle="#a03030";
-ctx.fillRect(player.x-15,player.y-10,30,25);
-ctx.fillStyle="#ffdbac";
-ctx.fillRect(player.x-10,player.y-28,20,18);
+            // YELLOW ROCKY TERRAIN
+            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
 
-if(holdingPokeball){
-    pokeball(player.x+18,player.y+2);
-}
+            // POND (Left)
+            const wX = width/2 - 350, wY = height/2 - 50;
+            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
 
-requestAnimationFrame(draw);
-}
-draw();
+            // TREE PERIMETER (Only outer edge, skipping fence area)
+            ctx.fillStyle = '#1a331a';
+            const fenceY = height/2 + 120;
+            for(let x = 40; x < width; x += 80) {
+                // Top edge
+                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
+                // Left & Right edges down to fence
+                if (x < 100 || x > width - 100) {
+                    for(let y = 120; y < fenceY - 40; y += 80) {
+                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+            }
+            
+            // FENCE
+            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
+            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
+
+            // HOUSE
+            const hX = width/2 - 110, hY = height/2 - 150;
+            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
+            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
+            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
+        }
+
+        if (follower.active) {
+            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
+        }
+
+        // PLAYER
+        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
+        
+        if (holdingPokeball) {
+            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
+        }
+
+        update();
+        requestAnimationFrame(draw);
+    }
+    draw();
 </script>
 </body>
 </html>
