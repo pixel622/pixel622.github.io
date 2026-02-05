@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Amber: Following Partner</title>
+    <title>Pokémon Amber: Deluxe Lab</title>
     <style>
         :root {
             --gba-blue: #285088;
@@ -22,7 +22,7 @@
         #game-wrapper {
             position: relative;
             width: 100%; height: 100%;
-            background: #4a7a4a;
+            background: #2d4d2d;
         }
 
         canvas {
@@ -88,7 +88,7 @@
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
-        <div id="dialogue-box">Loading...</div>
+        <div id="dialogue-box">Loading Research Lab...</div>
     </div>
 
     <div id="joystick-wrapper">
@@ -103,17 +103,15 @@
     const wrapper = document.getElementById('joystick-wrapper');
     const dialogueBox = document.getElementById('dialogue-box');
 
-    // Dialogue State
     const script = [
-        "Welcome to the Orebound Region!",
-        "Earlier, a mysterious tremor shook the lab.",
-        "These three Pokémon need Trainers to protect them.",
-        "Walk up and CLICK on the Pokémon you want to choose!"
+        "Welcome to the Habitat Research Lab!",
+        "Look around! This facility is dedicated to studying Orebound's ecology.",
+        "The tremor earlier was quite strong. We must act quickly.",
+        "Choose a partner and let's begin our investigation!"
     ];
     let scriptIndex = 0;
     let choosingState = false;
 
-    // Game Setup
     let width, height;
     function resize() {
         width = window.innerWidth;
@@ -125,18 +123,12 @@
     resize();
 
     const player = {
-        x: width/2, y: height - 150,
-        speed: 4, width: 40, height: 40,
-        history: [] // Stores previous positions for follower to trace
+        x: width/2, y: height - 120,
+        speed: 4.5, width: 40, height: 40,
+        history: []
     };
 
-    const follower = {
-        active: false,
-        name: '',
-        x: 0, y: 0,
-        color: '#000',
-        targetDist: 50 // How far behind the player it sits
-    };
+    const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
 
     const pokeballs = [
         { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
@@ -144,7 +136,6 @@
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    // Input Logic
     let stickX = 0, stickY = 0, isTouching = false;
 
     function handleDialogueClick() {
@@ -153,28 +144,23 @@
             updateUI();
         } else {
             choosingState = true;
-            dialogueBox.innerText = "Click a Pokéball to choose your partner!";
+            dialogueBox.innerText = "Click a Pokéball on the center desk!";
         }
     }
 
-    function updateUI() {
-        dialogueBox.innerText = script[scriptIndex];
-    }
+    function updateUI() { dialogueBox.innerText = script[scriptIndex]; }
     updateUI();
 
-    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
+    canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
 
     function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active) return;
-        
         pokeballs.forEach(ball => {
             if(!ball.active) return;
             const dx = clickX - ball.realX;
             const dy = clickY - ball.realY;
-            if (Math.sqrt(dx*dx + dy*dy) < 30) {
-                selectPokemon(ball);
-            }
+            if (Math.sqrt(dx*dx + dy*dy) < 35) selectPokemon(ball);
         });
     }
 
@@ -185,16 +171,13 @@
         follower.color = ball.color;
         follower.x = ball.realX;
         follower.y = ball.realY;
-        
-        ball.active = false; // Remove the ball from the desk
-        
+        ball.active = false;
         setTimeout(() => {
             document.getElementById('shimmer').style.opacity = '0';
-            dialogueBox.innerText = "Professor Sequoia: " + ball.name + " seems to really like you! It wants to follow you.";
+            dialogueBox.innerText = "Professor Sequoia: Great! " + ball.name + " is ready to explore with you.";
         }, 600);
     }
 
-    // Joystick Engine
     wrapper.addEventListener('touchstart', () => isTouching = true);
     window.addEventListener('touchend', () => {
         isTouching = false; stickX = 0; stickY = 0;
@@ -209,7 +192,6 @@
         let dy = touch.clientY - (rect.top + rect.height/2);
         const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 45);
         const angle = Math.atan2(dy, dx);
-        
         stickX = Math.cos(angle) * (dist/45);
         stickY = Math.sin(angle) * (dist/45);
         knob.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
@@ -217,81 +199,105 @@
 
     function update() {
         if (isTouching) {
-            // Save current position to history for the follower
             player.history.push({x: player.x, y: player.y});
-            if (player.history.length > 100) player.history.shift();
-
+            if (player.history.length > 80) player.history.shift();
             player.x += stickX * player.speed;
             player.y += stickY * player.speed;
         }
-
-        // Follower logic: Move toward a point in player's history
-        if (follower.active && player.history.length > 15) {
-            const followPoint = player.history[player.history.length - 15];
-            follower.x += (followPoint.x - follower.x) * 0.1;
-            follower.y += (followPoint.y - follower.y) * 0.1;
+        if (follower.active && player.history.length > 12) {
+            const fp = player.history[player.history.length - 12];
+            follower.x += (fp.x - follower.x) * 0.15;
+            follower.y += (fp.y - follower.y) * 0.15;
         }
+        // Boundaries
+        player.x = Math.max(40, Math.min(width - 40, player.x));
+        player.y = Math.max(150, Math.min(height - 40, player.y));
     }
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        // Draw Floor
+        // Floor Planks
         ctx.fillStyle = '#d89060';
         ctx.fillRect(0, 0, width, height);
         ctx.strokeStyle = '#b87040';
-        for(let i=0; i<width; i+=50) ctx.strokeRect(i, 0, 50, height);
+        ctx.lineWidth = 1;
+        for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
 
-        // Draw Lab Desk
-        const deskW = 350, deskH = 100;
-        const deskX = width/2 - deskW/2, deskY = height/3;
+        // -- ADDED DECORATIONS --
+        
+        // Bookshelves at the back
+        ctx.fillStyle = '#5d3a1a';
+        for(let i=50; i<width-100; i+=120) {
+            ctx.fillRect(i, 20, 100, 100);
+            ctx.fillStyle = '#8b5a2b';
+            ctx.fillRect(i+5, 30, 90, 10);
+            ctx.fillRect(i+5, 55, 90, 10);
+            ctx.fillRect(i+5, 80, 90, 10);
+            ctx.fillStyle = '#5d3a1a';
+        }
+
+        // Potted Plants
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(20, height - 100, 30, 30); // Pot left
+        ctx.fillRect(width - 50, height - 100, 30, 30); // Pot right
+        ctx.fillStyle = '#228b22';
+        ctx.beginPath(); ctx.arc(35, height-110, 25, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(width-35, height-110, 25, 0, Math.PI*2); ctx.fill();
+
+        // Computer Desk
+        ctx.fillStyle = '#444';
+        ctx.fillRect(width - 150, 130, 120, 60);
+        ctx.fillStyle = '#00ff00'; // Glowing Screen
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(width - 140, 135, 40, 30);
+        ctx.globalAlpha = 1.0;
+
+        // -- END DECORATIONS --
+
+        // Center Desk
+        const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
         ctx.fillStyle = '#804020';
-        ctx.fillRect(deskX, deskY, deskW, deskH);
-        ctx.strokeRect(deskX, deskY, deskW, deskH);
+        ctx.fillRect(dX, dY, dW, dH);
+        ctx.strokeRect(dX, dY, dW, dH);
 
-        // Draw Pokéballs
+        // Pokéballs
         pokeballs.forEach((ball, i) => {
             if (!ball.active) return;
-            ball.realX = deskX + 60 + (i * 110);
-            ball.realY = deskY + 40;
-            
+            ball.realX = dX + 60 + (i * 110);
+            ball.realY = dY + 40;
             ctx.fillStyle = 'red';
             ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
             ctx.fillStyle = 'white';
             ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-            ctx.strokeStyle = 'black'; ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(ball.realX - 15, ball.realY); ctx.lineTo(ball.realX + 15, ball.realY); ctx.stroke();
-            
             if (choosingState) {
-                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                ctx.fillRect(ball.realX - 40, ball.realY - 45, 80, 20);
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
-                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.fillRect(ball.realX - 45, ball.realY - 50, 90, 24);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 33);
             }
         });
 
-        // Draw Follower Pokémon
+        // Follower
         if (follower.active) {
             ctx.fillStyle = follower.color;
-            ctx.beginPath(); ctx.arc(follower.x, follower.y, 12, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = 'white'; // Eyes for follower
-            ctx.fillRect(follower.x - 5, follower.y - 4, 3, 3);
-            ctx.fillRect(follower.x + 2, follower.y - 4, 3, 3);
+            ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x - 6, follower.y - 5, 4, 4); ctx.fillRect(follower.x + 2, follower.y - 5, 4, 4);
         }
 
-        // Draw Character Sprite
+        // Character
         const p = player;
-        ctx.fillStyle = '#333'; ctx.fillRect(p.x - 15, p.y + 15, 10, 10); ctx.fillRect(p.x + 5, p.y + 15, 10, 10); // Feet
-        ctx.fillStyle = '#a03030'; ctx.fillRect(p.x - 15, p.y - 10, 30, 25); // Body
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(p.x - 10, p.y - 25, 20, 18); // Head
-        ctx.fillStyle = 'white'; ctx.fillRect(p.x - 12, p.y - 30, 24, 8); // White Bandana/Hat
-        ctx.fillStyle = '#000'; ctx.fillRect(p.x - 6, p.y - 18, 3, 3); ctx.fillRect(p.x + 3, p.y - 18, 3, 3); // Eyes
+        ctx.fillStyle = '#333'; ctx.fillRect(p.x - 15, p.y + 15, 10, 10); ctx.fillRect(p.x + 5, p.y + 15, 10, 10);
+        ctx.fillStyle = '#a03030'; ctx.fillRect(p.x - 15, p.y - 10, 30, 25);
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(p.x - 10, p.y - 25, 20, 18);
+        ctx.fillStyle = '#fff'; ctx.fillRect(p.x - 12, p.y - 30, 24, 8);
+        ctx.fillStyle = '#000'; ctx.fillRect(p.x - 6, p.y - 18, 3, 3); ctx.fillRect(p.x + 3, p.y - 18, 3, 3);
 
         update();
         requestAnimationFrame(draw);
     }
-
     draw();
 </script>
 </body>
