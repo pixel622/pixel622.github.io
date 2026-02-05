@@ -128,7 +128,6 @@
     let scriptIndex = 0;
     let currentMap = 'LAB';
     let choosingState = false;
-    let holdingPokeball = false; 
     let width, height;
 
     function resize() {
@@ -141,10 +140,10 @@
     const player = { x: width/2, y: height - 120, speed: 5, history: [] };
     const follower = { active: false, name: '', x: 0, y: 0, color: '#000' };
 
-    const pokeballs = [
-        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true },
-        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
-        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
+    const pokemons = [
+        { name: 'Treecko', x: 0, y: 0, color: '#32CD32', active: true, type: 'grass' },
+        { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true, type: 'water' },
+        { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true, type: 'fire' }
     ];
 
     function startGame() {
@@ -160,7 +159,7 @@
             dialogueBox.innerText = script[scriptIndex];
         } else {
             uiLayer.style.display = 'none';
-            choosingState = true;
+            choosingState = true; // Selection is now enabled
         }
     }
 
@@ -169,14 +168,13 @@
 
     function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
-        pokeballs.forEach(ball => {
-            if(!ball.active) return;
-            const dx = clickX - ball.realX; const dy = clickY - ball.realY;
+        pokemons.forEach(p => {
+            if(!p.active) return;
+            const dx = clickX - p.realX; const dy = clickY - p.realY;
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
-                follower.active = true; follower.name = ball.name;
-                follower.color = ball.color; follower.x = ball.realX;
-                follower.y = ball.realY; ball.active = false;
-                holdingPokeball = true;
+                follower.active = true; follower.name = p.name;
+                follower.color = p.color; follower.x = p.realX;
+                follower.y = p.realY; p.active = false;
             }
         });
     }
@@ -211,7 +209,6 @@
         return false;
     }
 
-    let isTeleporting = false;
     function teleport() {
         if (isTeleporting) return;
         isTeleporting = true;
@@ -224,11 +221,22 @@
             player.history = []; shim.style.opacity = '0'; isTeleporting = false;
         }, 300);
     }
+    let isTeleporting = false;
 
-    function drawBush(x, y) {
-        ctx.fillStyle = '#1e3d1e'; ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#3a6b3a'; ctx.beginPath(); ctx.arc(x-5, y-5, 25, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#6ab06a'; ctx.beginPath(); ctx.arc(x-10, y-10, 10, 0, Math.PI*2); ctx.fill();
+    function drawPokemon(x, y, name) {
+        if (name === 'Treecko') {
+            ctx.fillStyle = '#32CD32'; ctx.fillRect(x-10, y-15, 20, 25); // Body
+            ctx.fillStyle = '#228B22'; ctx.fillRect(x-5, y-5, 10, 5); // Tail
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-6, y-10, 4, 4); ctx.fillRect(x+2, y-10, 4, 4); // Eyes
+        } else if (name === 'Froakie') {
+            ctx.fillStyle = '#1E90FF'; ctx.fillRect(x-12, y-10, 24, 18); // Body
+            ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y-12, 12, 0, Math.PI); ctx.fill(); // Cloud
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-8, y-8, 5, 5); ctx.fillRect(x+3, y-8, 5, 5);
+        } else if (name === 'Charmander') {
+            ctx.fillStyle = '#FF4500'; ctx.fillRect(x-10, y-15, 20, 25); // Body
+            ctx.fillStyle = '#FFD700'; ctx.fillRect(x-4, y+5, 8, 5); // Belly
+            ctx.fillStyle = '#FFFF00'; ctx.beginPath(); ctx.arc(x+12, y+5, 5, 0, Math.PI*2); ctx.fill(); // Tail Flame
+        }
     }
 
     function update() {
@@ -259,70 +267,39 @@
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+            
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
-            pokeballs.forEach((ball, i) => {
-                if (!ball.active) return;
-                ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
-                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
+            
+            pokemons.forEach((p, i) => {
+                if (!p.active) return;
+                p.realX = dX + 60 + (i * 110); p.realY = dY + 40;
+                drawPokemon(p.realX, p.realY, p.name);
+                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(p.name.toUpperCase(), p.realX, p.realY - 30);
             });
         } else {
-            // MATCHING IMAGE DESIGN
-            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height); // Grass
-
-            // THE PATH (Rocky terrain) - JAGGER DITHERED EDGE
+            // OUTSIDE VISUALS (Fixed from previous Image Reference)
+            ctx.fillStyle = '#83c47a'; ctx.fillRect(0, 0, width, height);
             ctx.fillStyle = '#dfd38a'; ctx.fillRect(0, height/2 + 120, width, height);
-            ctx.fillStyle = '#c5b76b';
-            for(let i=0; i<width; i+=20) { ctx.fillRect(i, height/2 + 115, 15, 10); } // Dithering
-
-            // POND (Left Side - Jagged Edge)
             const wX = width/2 - 350, wY = height/2 - 50;
-            ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX - 150, wY - 100, 300, 200); // Jagged effect
+            ctx.fillStyle = '#8dcbe4'; ctx.fillRect(wX - 150, wY - 100, 300, 200);
             ctx.fillStyle = '#b7e4f7'; ctx.fillRect(wX - 130, wY - 80, 260, 160);
-
-            // FLOWERS
-            [[wX+200, wY], [wX+230, wY+30]].forEach(p => {
-                ctx.fillStyle = '#f78db7'; ctx.beginPath(); ctx.arc(p[0], p[1], 8, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2); ctx.fill();
-            });
-
-            // TREE PERIMETER (Cones like image)
             const fenceY = height/2 + 120;
-            for(let x = 40; x < width; x += 80) {
-                drawBush(x, 40);
-                if (x < 120 || x > width - 120) {
-                    for(let y = 120; y < fenceY - 40; y += 80) { drawBush(x, y); }
-                }
-            }
-            
-            // FENCE (Round Posts)
-            ctx.fillStyle = '#c28d63';
-            for(let x=0; x<width; x+=35) {
-                if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 15, 30);
-            }
-
-            // HOUSE (Wooden GBA Style)
+            ctx.fillStyle = '#c28d63'; for(let x=0; x<width; x+=35) { if(Math.abs(x - width/2) > 50) ctx.fillRect(x, fenceY-10, 15, 30); }
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150); // Planks
-            ctx.fillStyle = '#9e623d'; for(let i=hY; i<hY+150; i+=20) ctx.fillRect(hX, i, 220, 2); // Lines
-            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-30, 240, 40); // Roof Base
-            ctx.fillStyle = '#c65353'; ctx.fillRect(hX-10, hY-60, 240, 30); // Roof Top
-            ctx.fillStyle = '#fff'; ctx.fillRect(hX+30, hY+20, 40, 40); ctx.fillRect(hX+150, hY+20, 40, 40); // Windows
-            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45); // Door
+            ctx.fillStyle = '#d2966a'; ctx.fillRect(hX, hY, 220, 150);
+            ctx.fillStyle = '#a63d3d'; ctx.fillRect(hX-10, hY-30, 240, 40);
+            ctx.fillStyle = '#2a75bb'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
         }
 
         if (follower.active) {
-            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
+            drawPokemon(follower.x, follower.y, follower.name);
         }
 
-        // PLAYER MODEL
-        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
+        // PLAYER
         ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
         ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
         ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
         
         update();
