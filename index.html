@@ -67,7 +67,6 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
-        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
             position: absolute; bottom: 80px; left: 40px;
             width: 130px; height: 130px;
@@ -83,15 +82,27 @@
             transition: opacity 0.3s; z-index: 999;
         }
 
-        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
             background: var(--gba-blue); color: white;
             padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
-            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
+            box-shadow: 0 4px #183058;
         }
+        #bag-btn:active { transform: translateY(2px); box-shadow: 0 2px #183058; }
+
+        /* NEW BAG MODAL STYLES */
+        #bag-menu {
+            display: none; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 80%; max-width: 400px;
+            background: #f8f8f8; border: 6px solid var(--gba-blue); border-radius: 15px;
+            z-index: 3000; font-family: var(--font-main); padding: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        #bag-menu h2 { margin: 0 0 15px 0; color: var(--gba-blue); border-bottom: 2px solid #ccc; }
+        .bag-item { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        #close-bag { margin-top: 15px; width: 100%; padding: 10px; background: #cc0000; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -104,7 +115,13 @@
 
     <canvas id="gameCanvas"></canvas>
     <div id="shimmer"></div>
-    <div id="bag-btn" onclick="alert('Bag is empty!')">BAG</div>
+    <div id="bag-btn" onclick="toggleBag(true)">BAG</div>
+
+    <div id="bag-menu">
+        <h2>ADVENTURE BAG</h2>
+        <div id="bag-content"></div>
+        <button id="close-bag" onclick="toggleBag(false)">CLOSE</button>
+    </div>
 
     <div id="ui-layer" onclick="handleDialogueClick()">
         <div id="speaker-tag">Professor Sequoia</div>
@@ -124,6 +141,7 @@
     const uiLayer = document.getElementById('ui-layer');
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
+    const bagMenu = document.getElementById('bag-menu');
 
     const script = [
         "Welcome to the Habitat Research Lab!",
@@ -135,11 +153,27 @@
     let currentMap = 'LAB';
     let choosingState = false;
     let holdingPokeball = false; 
+    let isBagOpen = false;
     let width, height;
+
+    // Rock positions (pre-generated for consistency)
+    const rocks = [];
+    function generateRocks() {
+        rocks.length = 0;
+        for(let i=0; i<30; i++) {
+            rocks.push({
+                x: Math.random() * 2000, 
+                y: 500 + Math.random() * 500,
+                size: 15 + Math.random() * 25,
+                color: Math.random() > 0.5 ? '#c5b16c' : '#b5a15c'
+            });
+        }
+    }
 
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
         canvas.width = width; canvas.height = height;
+        generateRocks();
     }
     window.addEventListener('resize', resize);
     resize();
@@ -152,6 +186,20 @@
         { name: 'Froakie', x: 0, y: 0, color: '#1E90FF', active: true },
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
+
+    function toggleBag(open) {
+        isBagOpen = open;
+        bagMenu.style.display = open ? 'block' : 'none';
+        if (open) {
+            const content = document.getElementById('bag-content');
+            content.innerHTML = `
+                <div class="bag-item"><span>Partner:</span> <strong>${follower.active ? follower.name : 'None'}</strong></div>
+                <div class="bag-item"><span>Potions:</span> <strong>x3</strong></div>
+                <div class="bag-item"><span>Pokéballs:</span> <strong>x5</strong></div>
+                <div class="bag-item"><span>Map:</span> <strong>Orebound Region</strong></div>
+            `;
+        }
+    }
 
     function startGame() {
         titleScreen.style.opacity = '0';
@@ -240,6 +288,7 @@
     }
 
     function update() {
+        if (isBagOpen) return;
         if (isTouching) {
             let nextX = player.x + stickX * player.speed;
             let nextY = player.y + stickY * player.speed;
@@ -284,9 +333,9 @@
                 ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
             });
         } else {
-            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
+            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); 
             
-            // GRASS DESIGN
+            // GRASS
             ctx.fillStyle = '#567d56'; 
             for(let row=0; row<8; row++) {
                 for(let col=0; col<12; col++) {
@@ -295,21 +344,31 @@
                 }
             }
 
-            // YELLOW ROCKY TERRAIN
+            // ENHANCED ROCKY TERRAIN
             ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
+            rocks.forEach(rock => {
+                ctx.fillStyle = rock.color;
+                ctx.beginPath();
+                ctx.moveTo(rock.x % width, (rock.y % (height/2)) + height/2 + 120);
+                ctx.lineTo((rock.x + rock.size) % width, (rock.y % (height/2)) + height/2 + 120);
+                ctx.lineTo((rock.x + rock.size/2) % width, (rock.y % (height/2)) + height/2 + 120 - rock.size);
+                ctx.fill();
+                // Rock Crack Detail
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(rock.x % width + 5, (rock.y % (height/2)) + height/2 + 120 - 5);
+                ctx.lineTo(rock.x % width + 15, (rock.y % (height/2)) + height/2 + 120 - 15); ctx.stroke();
+            });
 
-            // POND (Left)
+            // POND
             const wX = width/2 - 350, wY = height/2 - 50;
             ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
 
-            // TREE PERIMETER (Only outer edge, skipping fence area)
+            // TREES
             ctx.fillStyle = '#1a331a';
             const fenceY = height/2 + 120;
             for(let x = 40; x < width; x += 80) {
-                // Top edge
                 ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
-                // Left & Right edges down to fence
                 if (x < 100 || x > width - 100) {
                     for(let y = 120; y < fenceY - 40; y += 80) {
                         ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
