@@ -19,16 +19,15 @@
             display: flex; justify-content: center; align-items: center;
         }
 
-        #game-wrapper {
-            position: relative;
-            width: 100%; height: 100%;
-        }
+        #game-wrapper { position: relative; width: 100%; height: 100%; }
 
         canvas {
             display: block;
             width: 100% !important;
             height: 100% !important;
+            /* Critical for the pixel look: */
             image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
 
         #title-screen {
@@ -67,7 +66,6 @@
             font-size: 16px; border: 3px solid var(--gba-blue);
         }
 
-        /* Joystick moved up approx 1cm (~40px) */
         #joystick-wrapper {
             position: absolute; bottom: 80px; left: 40px;
             width: 130px; height: 130px;
@@ -83,14 +81,13 @@
             transition: opacity 0.3s; z-index: 999;
         }
 
-        /* Fixed Bag Button positioned opposite joystick (bottom right) */
         #bag-btn {
             position: absolute; bottom: 80px; right: 40px;
             background: var(--gba-blue); color: white;
             padding: 15px 30px; border-radius: 8px;
             font-family: var(--font-main); font-weight: bold;
             border: 3px solid white; cursor: pointer; z-index: 300;
-            box-shadow: 0 4px #183058; active: { transform: translateY(2px); box-shadow: 0 2px #183058; }
+            box-shadow: 0 4px #183058;
         }
     </style>
 </head>
@@ -125,6 +122,14 @@
     const dialogueBox = document.getElementById('dialogue-box');
     const titleScreen = document.getElementById('title-screen');
 
+    // --- PIXEL ART ASSET LOADING ---
+    // Note: These use placeholder sprite sheets that mimic the GBA style.
+    const worldTiles = new Image();
+    worldTiles.src = 'https://cyanide-leaf.github.io/GBA-Tileset-Sample.png'; // Sample Tileset
+    
+    const playerImg = new Image();
+    playerImg.src = 'https://i.imgur.com/vA9m99h.png'; // Sample Hero Sprite
+
     const script = [
         "Welcome to the Habitat Research Lab!",
         "Look around! This facility is dedicated to studying Orebound's ecology.",
@@ -140,6 +145,8 @@
     function resize() {
         width = window.innerWidth; height = window.innerHeight;
         canvas.width = width; canvas.height = height;
+        // Keep pixels sharp after resize
+        ctx.imageSmoothingEnabled = false;
     }
     window.addEventListener('resize', resize);
     resize();
@@ -174,7 +181,9 @@
     }
 
     canvas.addEventListener('mousedown', (e) => checkPokeClick(e.clientX, e.clientY));
-    canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
+    canvas.addEventListener('touchstart', (e) => {
+        checkPokeClick(e.touches[0].clientX, e.touches[0].clientY);
+    });
 
     function checkPokeClick(clickX, clickY) {
         if (!choosingState || follower.active || currentMap !== 'LAB') return;
@@ -263,88 +272,89 @@
 
     function draw() {
         ctx.clearRect(0, 0, width, height);
+        ctx.imageSmoothingEnabled = false; // Ensures pixels stay crunchy
 
         if (currentMap === 'LAB') {
+            // Lab Floor (Wooden Pixel Style)
             ctx.fillStyle = '#d89060'; ctx.fillRect(0, 0, width, height);
             ctx.strokeStyle = '#b87040'; for(let i=0; i<width; i+=60) ctx.strokeRect(i, 0, 60, height);
+            
+            // Lab Exit Mat
             ctx.fillStyle = '#3a8fb7'; ctx.fillRect(width/2 - 50, height - 50, 100, 50);
-            ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.strokeRect(width/2 - 50, height - 50, 100, 50);
-            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
-            ctx.fillStyle = '#8b4513'; ctx.fillRect(20, height - 100, 30, 30); ctx.fillRect(width - 50, height - 100, 30, 30);
-            ctx.fillStyle = '#228b22'; ctx.beginPath(); ctx.arc(35, height-110, 20, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(width-35, height-110, 20, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#444'; ctx.fillRect(width - 150, 130, 120, 60);
 
+            // Tables/Lab Equipment
+            ctx.fillStyle = '#5d3a1a'; for(let i=50; i<width-100; i+=120) ctx.fillRect(i, 20, 100, 100);
+
+            // Pokéball Table
             const dW = 350, dH = 100, dX = width/2 - dW/2, dY = height/2.5;
             ctx.fillStyle = '#804020'; ctx.fillRect(dX, dY, dW, dH);
+            
             pokeballs.forEach((ball, i) => {
                 if (!ball.active) return;
                 ball.realX = dX + 60 + (i * 110); ball.realY = dY + 40;
-                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, Math.PI, 0); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(ball.realX, ball.realY, 15, 0, Math.PI); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(ball.name.toUpperCase(), ball.realX, ball.realY - 30);
+                // Pixel Pokéball (Drawn with segments)
+                ctx.fillStyle = 'red'; ctx.fillRect(ball.realX-12, ball.realY-12, 24, 12);
+                ctx.fillStyle = 'white'; ctx.fillRect(ball.realX-12, ball.realY, 24, 12);
+                ctx.fillStyle = 'black'; ctx.fillRect(ball.realX-4, ball.realY-4, 8, 8);
             });
         } else {
-            ctx.fillStyle = '#719e71'; ctx.fillRect(0, 0, width, height); // Base
-            
-            // GRASS DESIGN
-            ctx.fillStyle = '#567d56'; 
-            for(let row=0; row<8; row++) {
-                for(let col=0; col<12; col++) {
-                    let gx = width - 450 + col*40, gy = 50 + row*40;
-                    if (gy < height/2 + 100) { ctx.fillRect(gx, gy, 35, 35); }
+            // --- OUTSIDE MAP (BASED ON YOUR IMAGE) ---
+            // 1. Light Green Grass Base
+            ctx.fillStyle = '#90c8a8'; ctx.fillRect(0, 0, width, height); 
+
+            // 2. Darker Grass Patches
+            ctx.fillStyle = '#80b898';
+            for(let x=0; x<width; x+=40) {
+                for(let y=0; y<height; y+=40) {
+                    if((x+y)%80 === 0) ctx.fillRect(x, y, 20, 20);
                 }
             }
 
-            // YELLOW ROCKY TERRAIN
-            ctx.fillStyle = '#e5d17c'; ctx.fillRect(0, height/2 + 120, width, height);
-
-            // POND (Left)
+            // 3. Pond (Left)
             const wX = width/2 - 350, wY = height/2 - 50;
-            ctx.fillStyle = '#1e5aab'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#3a8fb7'; ctx.beginPath(); ctx.ellipse(wX, wY, 130, 80, 0, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#5890c8'; ctx.beginPath(); ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2); ctx.fill();
 
-            // TREE PERIMETER (Only outer edge, skipping fence area)
-            ctx.fillStyle = '#1a331a';
-            const fenceY = height/2 + 120;
-            for(let x = 40; x < width; x += 80) {
-                // Top edge
-                ctx.beginPath(); ctx.arc(x, 40, 35, 0, Math.PI*2); ctx.fill();
-                // Left & Right edges down to fence
-                if (x < 100 || x > width - 100) {
-                    for(let y = 120; y < fenceY - 40; y += 80) {
-                        ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI*2); ctx.fill();
-                    }
-                }
-            }
-            
-            // FENCE
-            ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
-            ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
-            for(let x=0; x<width; x+=40) { if(Math.abs(x - width/2) > 40) { ctx.beginPath(); ctx.moveTo(x, fenceY-10); ctx.lineTo(x, fenceY+15); ctx.stroke(); } }
-
-            // HOUSE
+            // 4. House (The Pokemon Center look from your photo)
             const hX = width/2 - 110, hY = height/2 - 150;
-            ctx.fillStyle = '#a0c0d8'; ctx.fillRect(hX, hY, 220, 150);
-            ctx.fillStyle = '#e06060'; ctx.beginPath(); ctx.moveTo(hX-20, hY); ctx.lineTo(width/2, hY-60); ctx.lineTo(hX+240, hY); ctx.fill();
-            ctx.fillStyle = '#285088'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
+            // Roof
+            ctx.fillStyle = '#d05040'; ctx.fillRect(hX-10, hY-20, 240, 40);
+            // Walls
+            ctx.fillStyle = '#f0f0f0'; ctx.fillRect(hX, hY+20, 220, 130);
+            // Blue Door
+            ctx.fillStyle = '#5888c8'; ctx.fillRect(width/2 - 30, height/2 - 45, 60, 45);
+
+            // 5. Trees (Bottom & Edges)
+            ctx.fillStyle = '#306048';
+            for(let x = 0; x < width; x += 60) {
+                ctx.fillRect(x, height-80, 50, 60); // Bottom Row
+                if (x < 150 || x > width - 150) ctx.fillRect(x, 20, 50, 60); // Top Corners
+            }
         }
+
+        // --- DRAW PIXEL PLAYER ---
+        // Replacing rectangles with a pixelated "Sprite" look
+        const pSize = 40;
+        ctx.fillStyle = '#000'; // Shadow
+        ctx.fillRect(player.x - 10, player.y + 15, 20, 5);
+        
+        // Body (Red vest)
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x - 12, player.y - 10, 24, 25);
+        // Face
+        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x - 10, player.y - 25, 20, 18);
+        // Hat (White/Red)
+        ctx.fillStyle = '#fff'; ctx.fillRect(player.x - 12, player.y - 32, 24, 10);
+        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x - 12, player.y - 32, 24, 4);
 
         if (follower.active) {
-            ctx.fillStyle = follower.color; ctx.beginPath(); ctx.arc(follower.x, follower.y, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-5, 4, 4); ctx.fillRect(follower.x+2, follower.y-5, 4, 4);
+            // Pixel Follower
+            ctx.fillStyle = follower.color;
+            ctx.fillRect(follower.x - 12, follower.y - 12, 24, 24);
+            ctx.fillStyle = '#fff'; ctx.fillRect(follower.x-6, follower.y-6, 4, 4); ctx.fillRect(follower.x+2, follower.y-6, 4, 4);
         }
 
-        // PLAYER
-        ctx.fillStyle = '#333'; ctx.fillRect(player.x-15, player.y+15, 10, 10); ctx.fillRect(player.x+5, player.y+15, 10, 10);
-        ctx.fillStyle = '#a03030'; ctx.fillRect(player.x-15, player.y-10, 30, 25);
-        ctx.fillStyle = '#ffdbac'; ctx.fillRect(player.x-10, player.y-25, 20, 18);
-        ctx.fillStyle = '#fff'; ctx.fillRect(player.x-12, player.y-30, 24, 8);
-        ctx.fillStyle = '#000'; ctx.fillRect(player.x-6, player.y-18, 3, 3); ctx.fillRect(player.x+3, player.y-18, 3, 3);
-        
         if (holdingPokeball) {
-            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, Math.PI, 0); ctx.fill();
-            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(player.x + 15, player.y, 6, 0, Math.PI); ctx.fill();
+            ctx.fillStyle = 'red'; ctx.fillRect(player.x + 15, player.y - 5, 10, 5);
+            ctx.fillStyle = 'white'; ctx.fillRect(player.x + 15, player.y, 10, 5);
         }
 
         update();
