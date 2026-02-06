@@ -142,22 +142,71 @@
             width: 100%; height: 100%; 
             background: linear-gradient(135deg, #0a1929 0%, #1a3a5f 100%); 
             z-index: 4000;
-            flex-direction: column; justify-content: center; align-items: center;
             font-family: var(--font-main); color: white;
         }
         #battle-screen {
-            width: 90%; max-width: 500px; 
+            width: 100%; height: 100%;
             background: linear-gradient(to bottom, #2a75bb, #1a3a5f);
-            border: 8px solid #ffcb05; border-radius: 20px; padding: 20px;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .battle-hp-bar { 
-            height: 20px; 
-            background: #3a1a1a; 
-            border: 3px solid #000; 
-            border-radius: 10px;
             overflow: hidden;
+        }
+        
+        /* Battle Arena */
+        #battle-arena {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 70%;
+            background: linear-gradient(180deg, #88c070 0%, #a8d890 30%, #70a850 100%);
+        }
+        
+        /* Player Pokémon Side */
+        #player-side {
+            position: absolute;
+            bottom: 150px;
+            left: 100px;
+            width: 200px;
+            height: 200px;
+            z-index: 10;
+        }
+        
+        /* Wild Pokémon Side */
+        #wild-side {
+            position: absolute;
+            top: 100px;
+            right: 100px;
+            width: 200px;
+            height: 200px;
+            z-index: 10;
+        }
+        
+        /* Battle Info Panel */
+        #battle-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 4px solid #ffcb05;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        /* Battle Controls */
+        #battle-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .battle-hp-bar { 
+            height: 16px; 
+            background: #3a1a1a; 
+            border: 2px solid #000; 
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 5px 0;
         }
         .battle-hp-fill { 
             height: 100%; 
@@ -165,10 +214,17 @@
             transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: inset 0 0 10px rgba(0,255,0,0.3);
         }
+        
+        .hp-text {
+            font-size: 14px;
+            color: #ffcb05;
+            font-weight: bold;
+        }
+        
         .battle-btn { 
-            padding: 15px 25px; margin: 10px; 
+            padding: 15px; 
             background: linear-gradient(to bottom, #285088, #1a237e); 
-            color: #ffcb05; border: 4px solid #ffcb05;
+            color: #ffcb05; border: 3px solid #ffcb05;
             border-radius: 10px; cursor: pointer; font-weight: bold;
             font-size: 16px;
             text-shadow: 1px 1px #000;
@@ -179,12 +235,21 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 #1a237e;
         }
+        .battle-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         #battle-text {
-            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;
-            margin-top: 20px; min-height: 80px;
-            border: 3px solid #2a75bb;
+            background: rgba(40, 80, 136, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #5888c8;
+            min-height: 60px;
+            font-size: 18px;
             line-height: 1.4;
         }
+        
         .battle-type-tag {
             display: inline-block;
             padding: 2px 8px;
@@ -194,12 +259,61 @@
             margin-left: 5px;
             text-shadow: none;
         }
+        
         .battle-stats {
             font-size: 14px;
             margin-top: 5px;
             color: #cccccc;
         }
-
+        
+        /* Battle Animation Effects */
+        .battle-animation {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        /* Encounter Alert */
+        #encounter-alert {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 6px solid #ffcb05;
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 5000;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        #encounter-alert h2 {
+            color: #ffcb05;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        
+        #encounter-alert p {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+        
+        .encounter-btn {
+            padding: 15px 30px;
+            margin: 10px;
+            background: linear-gradient(to bottom, #285088, #1a237e);
+            color: #ffcb05;
+            border: 3px solid #ffcb05;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            min-width: 150px;
+        }
+        
         /* BAG MODAL STYLES */
         #bag-menu {
             display: none; position: absolute; top: 50%; left: 50%;
@@ -233,33 +347,22 @@
             border: 2px solid #ff4444;
         }
 
-        /* Type colors */
-        .type-grass { background: var(--type-grass); color: #000; }
-        .type-water { background: var(--type-water); color: #fff; }
-        .type-fire { background: var(--type-fire); color: #fff; }
-        .type-rock { background: var(--type-rock); color: #fff; }
-        .type-normal { background: var(--type-normal); color: #000; }
-        .type-bug { background: var(--type-bug); color: #fff; }
-        .type-poison { background: var(--type-poison); color: #fff; }
-        .type-fighting { background: var(--type-fighting); color: #fff; }
-
         /* Move selection modal */
         #move-selector {
             display: none;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             background: rgba(0, 0, 0, 0.95);
             border: 4px solid #ffcb05;
             border-radius: 10px;
-            padding: 20px;
-            z-index: 5000;
-            width: 80%;
-            max-width: 400px;
-        }
-        .move-option {
             padding: 15px;
+            z-index: 5000;
+        }
+        
+        .move-option {
+            padding: 12px;
             margin: 5px 0;
             background: rgba(40, 80, 136, 0.8);
             border: 2px solid #5888c8;
@@ -284,6 +387,42 @@
             color: #cccccc;
             margin-top: 5px;
         }
+
+        /* Type colors */
+        .type-grass { background: var(--type-grass); color: #000; }
+        .type-water { background: var(--type-water); color: #fff; }
+        .type-fire { background: var(--type-fire); color: #fff; }
+        .type-rock { background: var(--type-rock); color: #fff; }
+        .type-normal { background: var(--type-normal); color: #000; }
+        .type-bug { background: var(--type-bug); color: #fff; }
+        .type-poison { background: var(--type-poison); color: #fff; }
+        .type-fighting { background: var(--type-fighting); color: #fff; }
+
+        /* Battle status indicators */
+        .battle-status {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 20;
+        }
+        
+        /* Terrain indicators on overworld */
+        .terrain-indicator {
+            position: absolute;
+            padding: 5px 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
@@ -299,50 +438,66 @@
     <div id="shimmer"></div>
     <div id="bag-btn" onclick="toggleBag(true)">BAG</div>
 
+    <!-- Encounter Alert -->
+    <div id="encounter-alert">
+        <h2>Wild Pokémon!</h2>
+        <p>A wild <span id="encounter-pokemon-name">Pokémon</span> wants to battle!</p>
+        <div>
+            <button class="encounter-btn" onclick="startBattleFromEncounter()">FIGHT</button>
+            <button class="encounter-btn" onclick="avoidEncounter()">AVOID</button>
+        </div>
+    </div>
+
     <!-- Battle UI -->
     <div id="battle-ui">
         <div id="battle-screen">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h2 id="battle-title">WILD BATTLE!</h2>
-                <div id="battle-environment" style="font-size: 14px; color: #ffcb05;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0;">
-                <div>
-                    <div id="player-pokemon"></div>
-                    <div style="margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span id="player-name">Partner</span>
-                            <span id="player-hp">100/100</span>
-                        </div>
-                        <div class="battle-hp-bar">
-                            <div id="player-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
-                        </div>
-                        <div id="player-type" class="battle-stats"></div>
+            <div id="battle-arena"></div>
+            
+            <!-- Player Pokémon -->
+            <div id="player-side">
+                <canvas id="player-battle-sprite" width="200" height="200"></canvas>
+                <div class="battle-status" id="player-status">Lv. 5</div>
+                <div style="position: absolute; bottom: -50px; left: 0; width: 200px;">
+                    <div class="hp-text" id="player-hp-text">HP: 100/100</div>
+                    <div class="battle-hp-bar">
+                        <div id="player-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
                     </div>
-                </div>
-                <div style="text-align: right;">
-                    <div id="wild-pokemon"></div>
-                    <div style="margin-top: 10px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span id="wild-name">Wild</span>
-                            <span id="wild-hp">100/100</span>
-                        </div>
-                        <div class="battle-hp-bar">
-                            <div id="wild-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
-                        </div>
-                        <div id="wild-type" class="battle-stats"></div>
-                    </div>
+                    <div id="player-type" class="battle-stats"></div>
                 </div>
             </div>
-            <div id="battle-text">A wild Pokémon appeared!</div>
-            <div id="move-selector">
-                <!-- Move options will be populated here -->
+            
+            <!-- Wild Pokémon -->
+            <div id="wild-side">
+                <canvas id="wild-battle-sprite" width="200" height="200"></canvas>
+                <div class="battle-status" id="wild-status">Lv. 5</div>
+                <div style="position: absolute; bottom: -50px; left: 0; width: 200px;">
+                    <div class="hp-text" id="wild-hp-text">HP: 100/100</div>
+                    <div class="battle-hp-bar">
+                        <div id="wild-hp-fill" class="battle-hp-fill" style="width: 100%"></div>
+                    </div>
+                    <div id="wild-type" class="battle-stats"></div>
+                </div>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-                <button class="battle-btn" onclick="showMoveSelector()">FIGHT</button>
-                <button class="battle-btn" onclick="battleAction('bag')">BAG</button>
-                <button class="battle-btn" onclick="battleAction('pokemon')">POKÉMON</button>
-                <button class="battle-btn" onclick="battleAction('run')">RUN</button>
+            
+            <!-- Battle Info -->
+            <div id="battle-info">
+                <div id="battle-text">What will you do?</div>
+                
+                <!-- Move Selector -->
+                <div id="move-selector">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <!-- Move options populated by JavaScript -->
+                    </div>
+                    <button class="battle-btn" onclick="cancelMove()" style="margin-top: 10px; width: 100%;">BACK</button>
+                </div>
+                
+                <!-- Battle Controls -->
+                <div id="battle-controls">
+                    <button class="battle-btn" onclick="showMoveSelector()" id="fight-btn">FIGHT</button>
+                    <button class="battle-btn" onclick="battleAction('bag')" id="bag-btn-battle">BAG</button>
+                    <button class="battle-btn" onclick="battleAction('pokemon')" id="pokemon-btn">POKÉMON</button>
+                    <button class="battle-btn" onclick="battleAction('run')" id="run-btn">RUN</button>
+                </div>
             </div>
         </div>
     </div>
@@ -374,29 +529,32 @@
     const titleScreen = document.getElementById('title-screen');
     const bagMenu = document.getElementById('bag-menu');
     const battleUI = document.getElementById('battle-ui');
+    const encounterAlert = document.getElementById('encounter-alert');
 
     // Type effectiveness chart (simplified)
     const typeEffectiveness = {
-        'GRASS': { strong: ['WATER', 'ROCK'], weak: ['FIRE', 'BUG', 'FLYING'] },
-        'FIRE': { strong: ['GRASS', 'BUG'], weak: ['WATER', 'ROCK'] },
-        'WATER': { strong: ['FIRE', 'ROCK'], weak: ['GRASS', 'ELECTRIC'] },
-        'ROCK': { strong: ['FIRE', 'BUG', 'FLYING'], weak: ['WATER', 'GRASS', 'FIGHTING'] },
-        'BUG': { strong: ['GRASS'], weak: ['FIRE', 'FLYING', 'ROCK'] },
+        'GRASS': { strong: ['WATER', 'ROCK', 'GROUND'], weak: ['FIRE', 'BUG', 'FLYING', 'POISON'] },
+        'FIRE': { strong: ['GRASS', 'BUG', 'ICE'], weak: ['WATER', 'ROCK', 'GROUND'] },
+        'WATER': { strong: ['FIRE', 'ROCK', 'GROUND'], weak: ['GRASS', 'ELECTRIC'] },
+        'ROCK': { strong: ['FIRE', 'BUG', 'FLYING'], weak: ['WATER', 'GRASS', 'FIGHTING', 'GROUND'] },
+        'BUG': { strong: ['GRASS', 'PSYCHIC'], weak: ['FIRE', 'FLYING', 'ROCK'] },
         'NORMAL': { strong: [], weak: ['FIGHTING'] },
-        'POISON': { strong: ['GRASS'], weak: ['PSYCHIC', 'ROCK'] },
-        'FIGHTING': { strong: ['NORMAL', 'ROCK'], weak: ['FLYING', 'PSYCHIC'] }
+        'POISON': { strong: ['GRASS'], weak: ['PSYCHIC', 'GROUND'] },
+        'FIGHTING': { strong: ['NORMAL', 'ROCK', 'ICE'], weak: ['FLYING', 'PSYCHIC'] },
+        'GROUND': { strong: ['FIRE', 'ROCK', 'POISON'], weak: ['WATER', 'GRASS', 'ICE'] }
     };
 
     // Moves database
     const moveDatabase = {
-        'Tackle': { type: 'NORMAL', power: 40, accuracy: 100, pp: 35 },
-        'Vine Whip': { type: 'GRASS', power: 45, accuracy: 100, pp: 25 },
-        'Ember': { type: 'FIRE', power: 40, accuracy: 100, pp: 25 },
-        'Water Gun': { type: 'WATER', power: 40, accuracy: 100, pp: 25 },
-        'Rock Throw': { type: 'ROCK', power: 50, accuracy: 90, pp: 15 },
-        'Bug Bite': { type: 'BUG', power: 60, accuracy: 100, pp: 20 },
+        'Tackle': { type: 'NORMAL', power: 40, accuracy: 100, pp: 35, effect: null },
+        'Vine Whip': { type: 'GRASS', power: 45, accuracy: 100, pp: 25, effect: null },
+        'Ember': { type: 'FIRE', power: 40, accuracy: 100, pp: 25, effect: null },
+        'Water Gun': { type: 'WATER', power: 40, accuracy: 100, pp: 25, effect: null },
+        'Rock Throw': { type: 'ROCK', power: 50, accuracy: 90, pp: 15, effect: null },
+        'Bug Bite': { type: 'BUG', power: 60, accuracy: 100, pp: 20, effect: null },
         'Poison Sting': { type: 'POISON', power: 15, accuracy: 100, pp: 35, effect: 'POISON' },
-        'Karate Chop': { type: 'FIGHTING', power: 50, accuracy: 100, pp: 25 }
+        'Karate Chop': { type: 'FIGHTING', power: 50, accuracy: 100, pp: 25, effect: null },
+        'Mud Slap': { type: 'GROUND', power: 20, accuracy: 100, pp: 10, effect: 'ACCURACY_DOWN' }
     };
 
     // Game state variables
@@ -413,6 +571,7 @@
     let isBagOpen = false;
     let inBattle = false;
     let width, height;
+    let pendingEncounter = null;
 
     // Player inventory
     const playerInventory = {
@@ -526,7 +685,7 @@
             type: 'ROCK',
             secondaryType: 'GROUND',
             color: '#B8A038',
-            moves: ['Tackle', 'Rock Throw'],
+            moves: ['Tackle', 'Rock Throw', 'Mud Slap'],
             sprite: [
                 '  ████████  ',
                 ' ██░░░░░░██ ',
@@ -677,7 +836,7 @@
             type: 'WATER',
             secondaryType: 'GROUND',
             color: '#98D8D8',
-            moves: ['Tackle', 'Water Gun'],
+            moves: ['Tackle', 'Water Gun', 'Mud Slap'],
             sprite: [
                 '  ██████    ',
                 ' ██░░░░██   ',
@@ -773,11 +932,32 @@
     let activeWildPokemon = null;
     let battleState = null;
 
-    // Terrain boundaries
+    // Terrain boundaries (strict for spawning)
     const terrainBounds = {
-        'GRASS': { x: width - 450, y: 50, width: 12*40, height: 8*40 },
-        'ROCKY': { x: 0, y: height/2 + 120, width: width, height: height/2 },
-        'WATER': { x: width/2 - 350, y: height/2 - 50, width: 290, height: 190 }
+        'GRASS': { 
+            x: width - 450, 
+            y: 50, 
+            width: 12*40, 
+            height: 8*40,
+            color: '#567d56',
+            name: 'Grassland'
+        },
+        'ROCKY': { 
+            x: 0, 
+            y: height/2 + 120, 
+            width: width, 
+            height: height/2,
+            color: '#e5d17c',
+            name: 'Rocky Terrain'
+        },
+        'WATER': { 
+            x: width/2 - 350, 
+            y: height/2 - 50, 
+            width: 290, 
+            height: 190,
+            color: '#1e5aab',
+            name: 'Pond'
+        }
     };
 
     // Rock positions
@@ -803,19 +983,25 @@
             x: width - 450, 
             y: 50, 
             width: 12*40, 
-            height: 8*40 
+            height: 8*40,
+            color: '#567d56',
+            name: 'Grassland'
         };
         terrainBounds.ROCKY = { 
             x: 0, 
             y: height/2 + 120, 
             width: width, 
-            height: height/2 
+            height: height/2,
+            color: '#e5d17c',
+            name: 'Rocky Terrain'
         };
         terrainBounds.WATER = { 
             x: width/2 - 350, 
             y: height/2 - 50, 
             width: 290, 
-            height: 190 
+            height: 190,
+            color: '#1e5aab',
+            name: 'Pond'
         };
         
         generateRocks();
@@ -847,89 +1033,141 @@
         { name: 'Charmander', x: 0, y: 0, color: '#FF4500', active: true }
     ];
 
-    // Enhanced spawn function with proper terrain boundaries
+    // Enhanced spawn function with STRICT terrain boundaries
     function spawnWildPokemon() {
         wildPokemon = [];
         if (currentMap === 'OUTSIDE') {
-            // Spawn grass Pokémon only in grass terrain
+            // Clear any existing terrain indicators
+            document.querySelectorAll('.terrain-indicator').forEach(el => el.remove());
+            
+            // Spawn grass Pokémon ONLY in grass terrain
             const grassBounds = terrainBounds.GRASS;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 4; i++) {
                 const grassPokemon = Object.entries(pokemonDatabase)
                     .filter(([name, data]) => data.terrain === 'GRASS');
                 const randomPoke = grassPokemon[Math.floor(Math.random() * grassPokemon.length)];
                 
-                wildPokemon.push({
+                // Ensure spawn is within grass bounds
+                const x = grassBounds.x + 20 + Math.random() * (grassBounds.width - 40);
+                const y = grassBounds.y + 20 + Math.random() * (grassBounds.height - 40);
+                
+                const pokemon = {
                     name: randomPoke[0],
                     ...randomPoke[1],
-                    x: grassBounds.x + Math.random() * grassBounds.width,
-                    y: grassBounds.y + Math.random() * grassBounds.height,
-                    active: true
-                });
+                    x: x,
+                    y: y,
+                    active: true,
+                    terrain: 'GRASS'
+                };
+                
+                wildPokemon.push(pokemon);
+                
+                // Add terrain indicator (visual only, can remove if not wanted)
+                const indicator = document.createElement('div');
+                indicator.className = 'terrain-indicator';
+                indicator.style.left = `${x - 30}px`;
+                indicator.style.top = `${y - 40}px`;
+                indicator.textContent = 'Grass';
+                indicator.style.color = '#78C850';
+                document.getElementById('game-wrapper').appendChild(indicator);
             }
             
-            // Spawn rocky Pokémon only in rocky terrain
+            // Spawn rocky Pokémon ONLY in rocky terrain
             const rockyBounds = terrainBounds.ROCKY;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 4; i++) {
                 const rockyPokemon = Object.entries(pokemonDatabase)
                     .filter(([name, data]) => data.terrain === 'ROCKY');
                 const randomPoke = rockyPokemon[Math.floor(Math.random() * rockyPokemon.length)];
                 
-                wildPokemon.push({
+                // Ensure spawn is within rocky bounds (avoid edges)
+                const x = rockyBounds.x + 50 + Math.random() * (rockyBounds.width - 100);
+                const y = rockyBounds.y + 50 + Math.random() * (rockyBounds.height - 100);
+                
+                const pokemon = {
                     name: randomPoke[0],
                     ...randomPoke[1],
-                    x: rockyBounds.x + Math.random() * rockyBounds.width,
-                    y: rockyBounds.y + 50 + Math.random() * (rockyBounds.height - 100),
-                    active: true
-                });
+                    x: x,
+                    y: y,
+                    active: true,
+                    terrain: 'ROCKY'
+                };
+                
+                wildPokemon.push(pokemon);
+                
+                // Add terrain indicator
+                const indicator = document.createElement('div');
+                indicator.className = 'terrain-indicator';
+                indicator.style.left = `${x - 40}px`;
+                indicator.style.top = `${y - 40}px`;
+                indicator.textContent = 'Rocks';
+                indicator.style.color = '#B8A038';
+                document.getElementById('game-wrapper').appendChild(indicator);
             }
             
-            // Spawn water Pokémon only in water terrain
+            // Spawn water Pokémon ONLY in water terrain
             const waterBounds = terrainBounds.WATER;
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < 3; i++) {
                 const waterPokemon = Object.entries(pokemonDatabase)
                     .filter(([name, data]) => data.terrain === 'WATER');
                 const randomPoke = waterPokemon[Math.floor(Math.random() * waterPokemon.length)];
                 
-                // Generate points within the oval pond
+                // Generate points within the oval pond (avoid edges)
                 const angle = Math.random() * Math.PI * 2;
-                const xRadius = waterBounds.width / 2;
-                const yRadius = waterBounds.height / 2;
+                const xRadius = waterBounds.width / 2 * 0.8; // 80% of radius to stay inside
+                const yRadius = waterBounds.height / 2 * 0.8;
                 
-                wildPokemon.push({
+                const x = waterBounds.x + waterBounds.width/2 + Math.cos(angle) * xRadius;
+                const y = waterBounds.y + waterBounds.height/2 + Math.sin(angle) * yRadius;
+                
+                const pokemon = {
                     name: randomPoke[0],
                     ...randomPoke[1],
-                    x: waterBounds.x + xRadius + Math.cos(angle) * (xRadius * 0.8),
-                    y: waterBounds.y + yRadius + Math.sin(angle) * (yRadius * 0.8),
-                    active: true
-                });
+                    x: x,
+                    y: y,
+                    active: true,
+                    terrain: 'WATER'
+                };
+                
+                wildPokemon.push(pokemon);
+                
+                // Add terrain indicator
+                const indicator = document.createElement('div');
+                indicator.className = 'terrain-indicator';
+                indicator.style.left = `${x - 30}px`;
+                indicator.style.top = `${y - 40}px`;
+                indicator.textContent = 'Water';
+                indicator.style.color = '#6890F0';
+                document.getElementById('game-wrapper').appendChild(indicator);
             }
+            
+            console.log(`Spawned ${wildPokemon.length} Pokémon in their respective terrains`);
         }
     }
 
     // Draw Pokémon sprite
-    function drawPokemonSprite(pokemon, x, y, size = 1) {
+    function drawPokemonSprite(pokemon, x, y, size = 1, context = ctx) {
         const sprite = pokemon.sprite || pokemonDatabase[pokemon.name]?.sprite;
         if (!sprite) return;
         
         const color = pokemon.color || pokemonDatabase[pokemon.name]?.color;
         if (!color) return;
         
-        ctx.fillStyle = color;
+        context.fillStyle = color;
         for (let row = 0; row < sprite.length; row++) {
             for (let col = 0; col < sprite[row].length; col++) {
                 if (sprite[row][col] === '█') {
-                    ctx.fillRect(x + col * size, y + row * size, size, size);
+                    context.fillRect(x + col * size, y + row * size, size, size);
                 } else if (sprite[row][col] === '░') {
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(x + col * size, y + row * size, size, size);
-                    ctx.fillStyle = color;
+                    context.fillStyle = '#FFFFFF';
+                    context.fillRect(x + col * size, y + row * size, size, size);
+                    context.fillStyle = color;
                 }
             }
         }
     }
 
     function toggleBag(open) {
-        if (inBattle) return;
+        if (inBattle || pendingEncounter) return;
         isBagOpen = open;
         bagMenu.style.display = open ? 'block' : 'none';
         if (open) {
@@ -1011,7 +1249,7 @@
     canvas.addEventListener('touchstart', (e) => checkPokeClick(e.touches[0].clientX, e.touches[0].clientY));
 
     function checkPokeClick(clickX, clickY) {
-        if (inBattle || isBagOpen) return;
+        if (inBattle || isBagOpen || pendingEncounter) return;
         
         if (!choosingState || follower.active || currentMap !== 'LAB') {
             // Check for wild Pokémon encounters
@@ -1019,8 +1257,9 @@
                 if (!poke.active) return;
                 const dx = clickX - poke.x;
                 const dy = clickY - poke.y;
-                if (Math.sqrt(dx*dx + dy*dy) < 40 && !inBattle) {
-                    startBattle(poke);
+                if (Math.sqrt(dx*dx + dy*dy) < 40) {
+                    // Show encounter alert instead of starting battle immediately
+                    showEncounterAlert(poke);
                 }
             });
             return;
@@ -1049,6 +1288,39 @@
                 holdingPokeball = true;
             }
         });
+    }
+
+    // Show encounter alert with choice
+    function showEncounterAlert(wildPoke) {
+        if (pendingEncounter || inBattle) return;
+        
+        pendingEncounter = wildPoke;
+        document.getElementById('encounter-pokemon-name').textContent = wildPoke.name;
+        encounterAlert.style.display = 'block';
+    }
+
+    function startBattleFromEncounter() {
+        if (!pendingEncounter) return;
+        
+        encounterAlert.style.display = 'none';
+        startBattle(pendingEncounter);
+        pendingEncounter = null;
+    }
+
+    function avoidEncounter() {
+        if (!pendingEncounter) return;
+        
+        // Make the Pokémon inactive for a short time
+        pendingEncounter.active = false;
+        setTimeout(() => {
+            pendingEncounter.active = true;
+        }, 5000); // Reactivate after 5 seconds
+        
+        encounterAlert.style.display = 'none';
+        pendingEncounter = null;
+        
+        // Show avoidance message
+        showFloatingText('Avoided!', player.x, player.y - 30, '#FFA500');
     }
 
     wrapper.addEventListener('touchstart', (e) => { isTouching = true; e.preventDefault(); });
@@ -1085,7 +1357,7 @@
 
     let isTeleporting = false;
     function teleport() {
-        if (isTeleporting) return;
+        if (isTeleporting || pendingEncounter) return;
         isTeleporting = true;
         const shim = document.getElementById('shimmer');
         shim.style.opacity = '1';
@@ -1100,7 +1372,7 @@
         }, 300);
     }
 
-    // Enhanced Battle System
+    // Enhanced Battle System with proper turn-based mechanics
     function startBattle(wildPoke) {
         inBattle = true;
         activeWildPokemon = wildPoke;
@@ -1110,14 +1382,18 @@
             playerHp: follower.hp,
             playerMaxHp: follower.maxHp,
             playerTurn: true,
-            environment: wildPoke.terrain
+            environment: wildPoke.terrain,
+            turn: 0,
+            waitingForPlayer: true,
+            messageQueue: []
         };
         
+        // Hide move selector initially
+        document.getElementById('move-selector').style.display = 'none';
+        
         // Update battle UI
-        document.getElementById('battle-title').textContent = `Wild ${wildPoke.name.toUpperCase()} appeared!`;
-        document.getElementById('battle-environment').textContent = `Environment: ${wildPoke.terrain}`;
-        document.getElementById('player-name').textContent = follower.name;
-        document.getElementById('wild-name').textContent = wildPoke.name;
+        document.getElementById('player-status').textContent = `Lv. ${follower.level}`;
+        document.getElementById('wild-status').textContent = `Lv. ${wildPoke.level}`;
         
         // Update type tags
         const playerType = document.getElementById('player-type');
@@ -1127,48 +1403,35 @@
         
         updateBattleHP();
         
-        // Draw sprites in battle
-        const playerSprite = document.getElementById('player-pokemon');
-        const wildSprite = document.getElementById('wild-pokemon');
+        // Draw battle sprites
+        updateBattleSprites();
         
-        // Create canvas for player Pokémon
-        const playerCanvas = document.createElement('canvas');
-        playerCanvas.width = 80;
-        playerCanvas.height = 80;
-        const playerCtx = playerCanvas.getContext('2d');
-        playerCtx.clearRect(0, 0, 80, 80);
-        playerCtx.imageSmoothingEnabled = false;
-        const playerPokeData = pokemonDatabase[follower.name.toLowerCase()];
-        if (playerPokeData) {
-            drawPokemonSprite(playerPokeData, 0, 0, 5);
-        }
-        playerSprite.innerHTML = '';
-        playerSprite.appendChild(playerCanvas);
+        battleUI.style.display = 'block';
         
-        // Create canvas for wild Pokémon
-        const wildCanvas = document.createElement('canvas');
-        wildCanvas.width = 80;
-        wildCanvas.height = 80;
-        const wildCtx = wildCanvas.getContext('2d');
-        wildCtx.clearRect(0, 0, 80, 80);
-        wildCtx.imageSmoothingEnabled = false;
-        const wildPokeData = pokemonDatabase[wildPoke.name];
-        if (wildPokeData) {
-            drawPokemonSprite(wildPokeData, 0, 0, 5);
-        }
-        wildSprite.innerHTML = '';
-        wildSprite.appendChild(wildCanvas);
+        // Start with battle message
+        addBattleMessage(`A wild ${wildPoke.name} appeared!`);
+        setTimeout(() => {
+            addBattleMessage(`Go! ${follower.name}!`);
+            setTimeout(() => {
+                addBattleMessage(`What will ${follower.name} do?`);
+            }, 1500);
+        }, 1500);
         
-        battleUI.style.display = 'flex';
-        document.getElementById('battle-text').textContent = `What will ${follower.name} do?`;
+        // Enable fight button after intro
+        setTimeout(() => {
+            document.getElementById('fight-btn').disabled = false;
+            document.getElementById('bag-btn-battle').disabled = false;
+            document.getElementById('pokemon-btn').disabled = false;
+            document.getElementById('run-btn').disabled = false;
+        }, 3500);
     }
 
     function updateBattleHP() {
         const playerPercent = (battleState.playerHp / battleState.playerMaxHp) * 100;
         const wildPercent = (battleState.wildHp / battleState.wildMaxHp) * 100;
         
-        document.getElementById('player-hp').textContent = `${battleState.playerHp}/${battleState.playerMaxHp}`;
-        document.getElementById('wild-hp').textContent = `${battleState.wildHp}/${battleState.wildMaxHp}`;
+        document.getElementById('player-hp-text').textContent = `HP: ${battleState.playerHp}/${battleState.playerMaxHp}`;
+        document.getElementById('wild-hp-text').textContent = `HP: ${battleState.wildHp}/${battleState.wildMaxHp}`;
         document.getElementById('player-hp-fill').style.width = `${playerPercent}%`;
         document.getElementById('wild-hp-fill').style.width = `${wildPercent}%`;
         
@@ -1182,30 +1445,62 @@
         
         wildFill.style.background = wildPercent > 50 ? 'linear-gradient(to right, #00cc00, #88ff88)' : 
                                    wildPercent > 20 ? 'linear-gradient(to right, #ffcc00, #ffff88)' : 
-                                   'linear-gradient(to right, #cc0000, #ff8888)';
+                                   'linear-gradient(to right, #cc0000, #ff8888)`;
+    }
+
+    function updateBattleSprites() {
+        const playerCanvas = document.getElementById('player-battle-sprite');
+        const playerCtx = playerCanvas.getContext('2d');
+        const wildCanvas = document.getElementById('wild-battle-sprite');
+        const wildCtx = wildCanvas.getContext('2d');
+        
+        // Clear canvases
+        playerCtx.clearRect(0, 0, 200, 200);
+        wildCtx.clearRect(0, 0, 200, 200);
+        
+        // Draw player Pokémon (centered)
+        const playerPokeData = pokemonDatabase[follower.name.toLowerCase()];
+        if (playerPokeData) {
+            drawPokemonSprite(playerPokeData, 60, 60, 5, playerCtx);
+        }
+        
+        // Draw wild Pokémon (centered)
+        const wildPokeData = pokemonDatabase[activeWildPokemon.name];
+        if (wildPokeData) {
+            drawPokemonSprite(wildPokeData, 60, 60, 5, wildCtx);
+        }
+    }
+
+    function addBattleMessage(message) {
+        const battleText = document.getElementById('battle-text');
+        battleText.textContent = message;
     }
 
     function showMoveSelector() {
+        if (!battleState.playerTurn || !battleState.waitingForPlayer) return;
+        
         const moveSelector = document.getElementById('move-selector');
         moveSelector.style.display = 'block';
         
-        let movesHTML = '<h3 style="color:#ffcb05; margin-top:0;">Choose a Move:</h3>';
+        let movesHTML = '<h3 style="color:#ffcb05; margin-top:0; text-align:center;">Choose a Move:</h3>';
+        movesHTML += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+        
         follower.moves.forEach(moveName => {
             const move = moveDatabase[moveName];
             if (move) {
                 movesHTML += `
                     <div class="move-option" onclick="useMove('${moveName}')">
-                        ${moveName}
+                        <div style="font-weight:bold;">${moveName}</div>
                         <span class="move-type type-${move.type.toLowerCase()}">${move.type}</span>
                         <div class="move-details">
-                            Power: ${move.power} | Accuracy: ${move.accuracy}% | PP: ${move.pp}
+                            Power: ${move.power} | Acc: ${move.accuracy}%
                         </div>
                     </div>
                 `;
             }
         });
-        movesHTML += '<button class="battle-btn" onclick="cancelMove()" style="margin-top:10px; width:100%;">CANCEL</button>';
         
+        movesHTML += '</div>';
         moveSelector.innerHTML = movesHTML;
     }
 
@@ -1214,58 +1509,215 @@
     }
 
     function useMove(moveName) {
+        if (!battleState.playerTurn || !battleState.waitingForPlayer) return;
+        
         document.getElementById('move-selector').style.display = 'none';
         
+        // Disable buttons during turn
+        document.getElementById('fight-btn').disabled = true;
+        document.getElementById('bag-btn-battle').disabled = true;
+        document.getElementById('pokemon-btn').disabled = true;
+        document.getElementById('run-btn').disabled = true;
+        
+        battleState.waitingForPlayer = false;
+        battleState.turn++;
+        
         const move = moveDatabase[moveName];
-        const battleText = document.getElementById('battle-text');
         
-        if (!move || !battleState.playerTurn) return;
+        // Player's turn
+        executePlayerMove(moveName, move);
         
-        // Check accuracy
-        if (Math.random() * 100 > move.accuracy) {
-            battleText.textContent = `${follower.name}'s ${moveName} missed!`;
-            battleState.playerTurn = false;
-            setTimeout(() => wildAttack(), 1000);
-            return;
-        }
-        
-        // Calculate damage with type effectiveness
-        const playerAttack = follower.attack;
-        const wildDefense = activeWildPokemon.defense;
-        const typeEffect = calculateTypeEffectiveness(move.type, activeWildPokemon.type, activeWildPokemon.secondaryType);
-        
-        let damage = Math.floor((((2 * follower.level) / 5 + 2) * move.power * (playerAttack / wildDefense)) / 50 + 2);
-        damage = Math.floor(damage * typeEffect.multiplier);
-        
-        // Critical hit chance (1/16)
-        if (Math.random() < 0.0625) {
-            damage *= 1.5;
-            battleState.wildHp = Math.max(0, battleState.wildHp - damage);
-            battleText.textContent = `Critical hit! ${follower.name}'s ${moveName} dealt ${damage} damage!`;
-        } else {
-            battleState.wildHp = Math.max(0, battleState.wildHp - damage);
-            battleText.textContent = `${follower.name} used ${moveName} for ${damage} damage!`;
-        }
-        
-        if (typeEffect.multiplier > 1) {
-            battleText.textContent += ` It's super effective!`;
-        } else if (typeEffect.multiplier < 1) {
-            battleText.textContent += ` It's not very effective...`;
-        }
-        
-        battleState.playerTurn = false;
-        updateBattleHP();
-        
-        if (battleState.wildHp <= 0) {
+        // After player move, if wild Pokémon is still alive, wild attacks
+        if (battleState.wildHp > 0) {
             setTimeout(() => {
-                battleText.textContent = `Wild ${activeWildPokemon.name} fainted!`;
-                setTimeout(() => {
-                    attemptCapture();
-                }, 1500);
-            }, 1000);
-        } else {
-            setTimeout(() => wildAttack(), 1000);
+                executeWildMove();
+            }, 2000);
         }
+    }
+
+    function executePlayerMove(moveName, move) {
+        // Animation: Player Pokémon attacks
+        animateAttack('player');
+        
+        setTimeout(() => {
+            // Check accuracy
+            if (Math.random() * 100 > move.accuracy) {
+                addBattleMessage(`${follower.name}'s ${moveName} missed!`);
+                return;
+            }
+            
+            // Calculate damage with type effectiveness
+            const playerAttack = follower.attack;
+            const wildDefense = activeWildPokemon.defense;
+            const typeEffect = calculateTypeEffectiveness(move.type, activeWildPokemon.type, activeWildPokemon.secondaryType);
+            
+            let damage = Math.floor((((2 * follower.level) / 5 + 2) * move.power * (playerAttack / wildDefense)) / 50 + 2);
+            damage = Math.floor(damage * typeEffect.multiplier);
+            
+            // Critical hit chance (1/16)
+            let isCritical = false;
+            if (Math.random() < 0.0625) {
+                damage = Math.floor(damage * 1.5);
+                isCritical = true;
+            }
+            
+            // Apply damage
+            battleState.wildHp = Math.max(0, battleState.wildHp - damage);
+            
+            // Animation: Wild Pokémon takes damage
+            animateDamage('wild');
+            
+            // Update HP display
+            updateBattleHP();
+            
+            // Build message
+            let message = `${follower.name} used ${moveName}!`;
+            if (isCritical) message += " Critical hit!";
+            if (typeEffect.multiplier > 1) message += " It's super effective!";
+            if (typeEffect.multiplier < 1) message += " It's not very effective...";
+            message += `\nDealt ${damage} damage!`;
+            
+            addBattleMessage(message);
+            
+            // Check if wild Pokémon fainted
+            if (battleState.wildHp <= 0) {
+                setTimeout(() => {
+                    addBattleMessage(`Wild ${activeWildPokemon.name} fainted!`);
+                    setTimeout(() => {
+                        attemptCapture();
+                    }, 2000);
+                }, 1500);
+            }
+        }, 500);
+    }
+
+    function executeWildMove() {
+        // Animation: Wild Pokémon attacks
+        animateAttack('wild');
+        
+        setTimeout(() => {
+            // Select a random move
+            const moves = activeWildPokemon.moves;
+            const moveName = moves[Math.floor(Math.random() * moves.length)];
+            const move = moveDatabase[moveName] || moveDatabase['Tackle'];
+            
+            // Check accuracy
+            if (Math.random() * 100 > move.accuracy) {
+                addBattleMessage(`Wild ${activeWildPokemon.name}'s ${moveName} missed!`);
+                endTurn();
+                return;
+            }
+            
+            // Calculate damage with type effectiveness
+            const wildAttack = activeWildPokemon.attack;
+            const playerDefense = follower.defense;
+            const typeEffect = calculateTypeEffectiveness(move.type, follower.type);
+            
+            let damage = Math.floor((((2 * activeWildPokemon.level) / 5 + 2) * move.power * (wildAttack / playerDefense)) / 50 + 2);
+            damage = Math.floor(damage * typeEffect.multiplier);
+            
+            // Critical hit chance
+            let isCritical = false;
+            if (Math.random() < 0.0625) {
+                damage = Math.floor(damage * 1.5);
+                isCritical = true;
+            }
+            
+            // Apply damage
+            battleState.playerHp = Math.max(0, battleState.playerHp - damage);
+            follower.hp = battleState.playerHp;
+            
+            // Animation: Player Pokémon takes damage
+            animateDamage('player');
+            
+            // Update HP display
+            updateBattleHP();
+            
+            // Build message
+            let message = `Wild ${activeWildPokemon.name} used ${moveName}!`;
+            if (isCritical) message += " Critical hit!";
+            if (typeEffect.multiplier > 1) message += " It's super effective!";
+            if (typeEffect.multiplier < 1) message += " It's not very effective...";
+            message += `\nDealt ${damage} damage!`;
+            
+            addBattleMessage(message);
+            
+            // Check if player Pokémon fainted
+            if (battleState.playerHp <= 0) {
+                setTimeout(() => {
+                    addBattleMessage(`${follower.name} fainted!`);
+                    setTimeout(endBattle, 2000);
+                }, 1500);
+            } else {
+                // End turn and allow player to make next move
+                setTimeout(endTurn, 1500);
+            }
+        }, 500);
+    }
+
+    function endTurn() {
+        battleState.playerTurn = true;
+        battleState.waitingForPlayer = true;
+        
+        // Re-enable buttons
+        document.getElementById('fight-btn').disabled = false;
+        document.getElementById('bag-btn-battle').disabled = false;
+        document.getElementById('pokemon-btn').disabled = false;
+        document.getElementById('run-btn').disabled = false;
+        
+        addBattleMessage(`What will ${follower.name} do?`);
+    }
+
+    function animateAttack(attacker) {
+        const side = attacker === 'player' ? 'player-side' : 'wild-side';
+        const element = document.getElementById(side);
+        
+        // Simple attack animation
+        element.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+            element.style.transform = 'translateX(0px)';
+        }, 300);
+        
+        // Create attack effect
+        const effect = document.createElement('div');
+        effect.className = 'battle-animation';
+        effect.style.cssText = `
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            left: ${attacker === 'player' ? '300px' : 'calc(100% - 200px)'};
+            top: ${attacker === 'player' ? '250px' : '150px'};
+            animation: expand 0.5s forwards;
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes expand {
+                0% { transform: scale(0.5); opacity: 1; }
+                100% { transform: scale(2); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.getElementById('battle-screen').appendChild(effect);
+        setTimeout(() => effect.remove(), 500);
+    }
+
+    function animateDamage(target) {
+        const side = target === 'player' ? 'player-side' : 'wild-side';
+        const element = document.getElementById(side);
+        
+        // Damage flash animation
+        let flashes = 0;
+        const flashInterval = setInterval(() => {
+            element.style.opacity = flashes % 2 === 0 ? '0.5' : '1';
+            flashes++;
+            if (flashes > 5) {
+                clearInterval(flashInterval);
+                element.style.opacity = '1';
+            }
+        }, 100);
     }
 
     function calculateTypeEffectiveness(attackType, defenseType, secondaryType = null) {
@@ -1299,60 +1751,8 @@
         return { multiplier, message };
     }
 
-    function wildAttack() {
-        if (battleState.wildHp <= 0) return;
-        
-        const battleText = document.getElementById('battle-text');
-        const moves = activeWildPokemon.moves;
-        const moveName = moves[Math.floor(Math.random() * moves.length)];
-        const move = moveDatabase[moveName] || moveDatabase['Tackle'];
-        
-        // Calculate damage with type effectiveness
-        const wildAttack = activeWildPokemon.attack;
-        const playerDefense = follower.defense;
-        const typeEffect = calculateTypeEffectiveness(move.type, follower.type);
-        
-        let damage = Math.floor((((2 * activeWildPokemon.level) / 5 + 2) * move.power * (wildAttack / playerDefense)) / 50 + 2);
-        damage = Math.floor(damage * typeEffect.multiplier);
-        
-        // Check accuracy
-        if (Math.random() * 100 > move.accuracy) {
-            battleText.textContent = `Wild ${activeWildPokemon.name}'s ${moveName} missed!`;
-            battleState.playerTurn = true;
-            return;
-        }
-        
-        // Critical hit chance
-        if (Math.random() < 0.0625) {
-            damage *= 1.5;
-            battleState.playerHp = Math.max(0, battleState.playerHp - damage);
-            follower.hp = battleState.playerHp;
-            battleText.textContent = `Critical hit! Wild ${activeWildPokemon.name}'s ${moveName} dealt ${damage} damage!`;
-        } else {
-            battleState.playerHp = Math.max(0, battleState.playerHp - damage);
-            follower.hp = battleState.playerHp;
-            battleText.textContent = `Wild ${activeWildPokemon.name} used ${moveName} for ${damage} damage!`;
-        }
-        
-        if (typeEffect.multiplier > 1) {
-            battleText.textContent += ` It's super effective!`;
-        } else if (typeEffect.multiplier < 1) {
-            battleText.textContent += ` It's not very effective...`;
-        }
-        
-        battleState.playerTurn = true;
-        updateBattleHP();
-        
-        if (battleState.playerHp <= 0) {
-            setTimeout(() => {
-                battleText.textContent = `${follower.name} fainted!`;
-                setTimeout(endBattle, 1500);
-            }, 1000);
-        }
-    }
-
     function battleAction(action) {
-        if (!battleState.playerTurn && action !== 'run') return;
+        if (!battleState.playerTurn || !battleState.waitingForPlayer) return;
         
         const battleText = document.getElementById('battle-text');
         
@@ -1375,8 +1775,10 @@
                     setTimeout(endBattle, 1000);
                 } else {
                     battleText.textContent = `Couldn't escape!`;
-                    battleState.playerTurn = false;
-                    setTimeout(() => wildAttack(), 1000);
+                    // Wild attacks after failed escape
+                    setTimeout(() => {
+                        executeWildMove();
+                    }, 1000);
                 }
                 break;
                 
@@ -1387,26 +1789,25 @@
     }
 
     function attemptCapture() {
-        const battleText = document.getElementById('battle-text');
         const captureChance = (battleState.wildHp / battleState.wildMaxHp) < 0.3 ? 0.9 : 
                              (battleState.wildHp / battleState.wildMaxHp) < 0.5 ? 0.7 : 
                              (battleState.wildHp / battleState.wildMaxHp) < 0.7 ? 0.5 : 0.3;
         
-        // Animation
-        battleText.textContent = `You threw a Pokéball!`;
+        // Pokéball animation
+        addBattleMessage(`You threw a Pokéball!`);
         
         setTimeout(() => {
             if (Math.random() < captureChance) {
-                battleText.textContent = `Gotcha! ${activeWildPokemon.name} was caught!`;
+                addBattleMessage(`Gotcha! ${activeWildPokemon.name} was caught!`);
                 playerInventory.capturedPokemon.push(activeWildPokemon.name);
                 
                 // Remove from wild encounters
                 wildPokemon = wildPokemon.filter(poke => poke !== activeWildPokemon);
                 setTimeout(() => {
-                    battleText.textContent = `${activeWildPokemon.name} was added to your Pokédex!`;
+                    addBattleMessage(`${activeWildPokemon.name} was added to your Pokédex!`);
                 }, 1000);
             } else {
-                battleText.textContent = `Oh no! The Pokémon broke free!`;
+                addBattleMessage(`Oh no! The Pokémon broke free!`);
             }
             
             setTimeout(endBattle, 2000);
@@ -1419,10 +1820,13 @@
         battleState = null;
         battleUI.style.display = 'none';
         document.getElementById('move-selector').style.display = 'none';
+        
+        // Clear any terrain indicators that might have been added
+        document.querySelectorAll('.battle-animation').forEach(el => el.remove());
     }
 
     function update() {
-        if (isBagOpen || inBattle) return;
+        if (isBagOpen || inBattle || pendingEncounter) return;
         if (isTouching) {
             let nextX = player.x + stickX * player.speed;
             let nextY = player.y + stickY * player.speed;
@@ -1432,25 +1836,52 @@
                 player.x = nextX; player.y = nextY;
             }
             
-            // Random encounter chance based on terrain
-            if (currentMap === 'OUTSIDE') {
-                let encounterChance = 0.002; // Base chance
+            // Check for random encounters based on terrain
+            if (currentMap === 'OUTSIDE' && !pendingEncounter) {
+                let encounterChance = 0.001; // Base chance
                 
-                // Increase chance in tall grass
+                // Determine which terrain player is in
+                let currentTerrain = null;
+                
+                // Check grass terrain
                 const grassBounds = terrainBounds.GRASS;
                 if (player.x >= grassBounds.x && player.x <= grassBounds.x + grassBounds.width &&
                     player.y >= grassBounds.y && player.y <= grassBounds.y + grassBounds.height) {
-                    encounterChance = 0.005; // Higher chance in grass
+                    currentTerrain = 'GRASS';
+                    encounterChance = 0.003; // Higher chance in grass
                 }
                 
-                if (Math.random() < encounterChance) {
-                    const nearbyPokemon = wildPokemon.filter(poke => 
+                // Check rocky terrain
+                const rockyBounds = terrainBounds.ROCKY;
+                if (player.x >= rockyBounds.x && player.x <= rockyBounds.x + rockyBounds.width &&
+                    player.y >= rockyBounds.y && player.y <= rockyBounds.y + rockyBounds.height) {
+                    currentTerrain = 'ROCKY';
+                    encounterChance = 0.002;
+                }
+                
+                // Check water terrain (only if very close to pond)
+                const waterBounds = terrainBounds.WATER;
+                const dx = player.x - (waterBounds.x + waterBounds.width/2);
+                const dy = player.y - (waterBounds.y + waterBounds.height/2);
+                const distanceFromCenter = Math.sqrt(dx*dx + dy*dy);
+                if (distanceFromCenter < 100) { // Only trigger near water
+                    currentTerrain = 'WATER';
+                    encounterChance = 0.002;
+                }
+                
+                // Random encounter check
+                if (currentTerrain && Math.random() < encounterChance) {
+                    // Find Pokémon in the same terrain
+                    const terrainPokemon = wildPokemon.filter(poke => 
                         poke.active && 
-                        Math.abs(poke.x - player.x) < 300 && 
-                        Math.abs(poke.y - player.y) < 300
+                        poke.terrain === currentTerrain &&
+                        Math.abs(poke.x - player.x) < 200 && 
+                        Math.abs(poke.y - player.y) < 200
                     );
-                    if (nearbyPokemon.length > 0 && !inBattle) {
-                        startBattle(nearbyPokemon[Math.floor(Math.random() * nearbyPokemon.length)]);
+                    
+                    if (terrainPokemon.length > 0) {
+                        const randomPokemon = terrainPokemon[Math.floor(Math.random() * terrainPokemon.length)];
+                        showEncounterAlert(randomPokemon);
                     }
                 }
             }
@@ -1498,15 +1929,6 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, width, height);
             
-            // Draw terrain boundaries (debug - optional)
-            /*
-            ctx.strokeStyle = 'rgba(255,0,0,0.3)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(terrainBounds.GRASS.x, terrainBounds.GRASS.y, terrainBounds.GRASS.width, terrainBounds.GRASS.height);
-            ctx.strokeRect(terrainBounds.WATER.x, terrainBounds.WATER.y, terrainBounds.WATER.width, terrainBounds.WATER.height);
-            ctx.strokeRect(terrainBounds.ROCKY.x, terrainBounds.ROCKY.y, terrainBounds.ROCKY.width, terrainBounds.ROCKY.height);
-            */
-            
             // Draw wild Pokémon in their respective terrains
             wildPokemon.forEach(poke => {
                 if (poke.active) {
@@ -1514,66 +1936,66 @@
                 }
             });
             
-            // GRASS TERRAIN
-            ctx.fillStyle = '#567d56'; 
+            // GRASS TERRAIN (with strict boundaries)
+            ctx.fillStyle = terrainBounds.GRASS.color; 
+            ctx.fillRect(terrainBounds.GRASS.x, terrainBounds.GRASS.y, 
+                        terrainBounds.GRASS.width, terrainBounds.GRASS.height);
+            
+            // Draw grass pattern
+            ctx.fillStyle = '#4a6d4a';
             for(let row=0; row<8; row++) {
                 for(let col=0; col<12; col++) {
-                    let gx = width - 450 + col*40, gy = 50 + row*40;
-                    if (gy < height/2 + 100) { 
-                        ctx.fillRect(gx, gy, 35, 35);
+                    let gx = terrainBounds.GRASS.x + col*40;
+                    let gy = terrainBounds.GRASS.y + row*40;
+                    if (gx < terrainBounds.GRASS.x + terrainBounds.GRASS.width && 
+                        gy < terrainBounds.GRASS.y + terrainBounds.GRASS.height) {
                         // Draw grass blades
-                        ctx.fillStyle = '#4a6d4a';
                         for(let i=0; i<5; i++) {
                             const bladeX = gx + Math.random() * 35;
                             const bladeY = gy + Math.random() * 35;
                             ctx.fillRect(bladeX, bladeY, 1, 3 + Math.random() * 5);
                         }
-                        ctx.fillStyle = '#567d56';
                     }
                 }
             }
 
-            // ROCKY TERRAIN
-            const rockGradient = ctx.createLinearGradient(0, height/2 + 120, 0, height);
-            rockGradient.addColorStop(0, '#e5d17c');
+            // ROCKY TERRAIN (with strict boundaries)
+            const rockGradient = ctx.createLinearGradient(0, terrainBounds.ROCKY.y, 0, height);
+            rockGradient.addColorStop(0, terrainBounds.ROCKY.color);
             rockGradient.addColorStop(1, '#c5b16c');
             ctx.fillStyle = rockGradient;
-            ctx.fillRect(0, height/2 + 120, width, height);
+            ctx.fillRect(terrainBounds.ROCKY.x, terrainBounds.ROCKY.y, 
+                        terrainBounds.ROCKY.width, terrainBounds.ROCKY.height);
             
             rocks.forEach(rock => {
-                ctx.fillStyle = rock.color;
-                ctx.beginPath();
+                // Ensure rocks only appear in rocky terrain
                 const rockX = rock.x % width;
-                const rockY = (rock.y % (height/2)) + height/2 + 120;
-                ctx.moveTo(rockX, rockY);
-                ctx.lineTo(rockX + rock.size, rockY);
-                ctx.lineTo(rockX + rock.size/2, rockY - rock.size);
-                ctx.closePath();
-                ctx.fill();
+                const rockY = (rock.y % (terrainBounds.ROCKY.height/2)) + terrainBounds.ROCKY.y;
                 
-                // Rock texture
-                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-                ctx.lineWidth = 1;
-                for(let i=0; i<3; i++) {
+                if (rockY >= terrainBounds.ROCKY.y && rockY <= height) {
+                    ctx.fillStyle = rock.color;
                     ctx.beginPath();
-                    ctx.moveTo(rockX + 5 + i*5, rockY - 5 - i*2);
-                    ctx.lineTo(rockX + 15 + i*5, rockY - 15 - i*2);
-                    ctx.stroke();
+                    ctx.moveTo(rockX, rockY);
+                    ctx.lineTo(rockX + rock.size, rockY);
+                    ctx.lineTo(rockX + rock.size/2, rockY - rock.size);
+                    ctx.closePath();
+                    ctx.fill();
                 }
             });
 
-            // WATER TERRAIN (Pond)
-            const wX = width/2 - 350, wY = height/2 - 50;
+            // WATER TERRAIN (Pond) - strictly oval shaped
+            const wX = terrainBounds.WATER.x + terrainBounds.WATER.width/2;
+            const wY = terrainBounds.WATER.y + terrainBounds.WATER.height/2;
             
             // Water reflection effect
-            const waterGradient = ctx.createRadialGradient(wX, wY, 0, wX, wY, 145);
+            const waterGradient = ctx.createRadialGradient(wX, wY, 0, wX, wY, terrainBounds.WATER.width/2);
             waterGradient.addColorStop(0, '#3a8fb7');
-            waterGradient.addColorStop(0.7, '#1e5aab');
+            waterGradient.addColorStop(0.7, terrainBounds.WATER.color);
             waterGradient.addColorStop(1, '#0a3a7b');
             
             ctx.fillStyle = waterGradient;
             ctx.beginPath();
-            ctx.ellipse(wX, wY, 145, 95, 0, 0, Math.PI*2);
+            ctx.ellipse(wX, wY, terrainBounds.WATER.width/2, terrainBounds.WATER.height/2, 0, 0, Math.PI*2);
             ctx.fill();
             
             // Water ripple effect
@@ -1581,11 +2003,11 @@
             ctx.lineWidth = 2;
             for(let i=0; i<3; i++) {
                 ctx.beginPath();
-                ctx.ellipse(wX, wY, 100 + i*15, 60 + i*10, 0, 0, Math.PI*2);
+                ctx.ellipse(wX, wY, terrainBounds.WATER.width/3 + i*15, terrainBounds.WATER.height/3 + i*10, 0, 0, Math.PI*2);
                 ctx.stroke();
             }
 
-            // TREES
+            // TREES (around the edges)
             ctx.fillStyle = '#1a331a';
             const fenceY = height/2 + 120;
             for(let x = 40; x < width; x += 80) {
@@ -1612,7 +2034,7 @@
                 }
             }
             
-            // FENCE
+            // FENCE (border between grass and rocky terrain)
             ctx.strokeStyle = '#3e2712'; ctx.lineWidth = 6;
             ctx.beginPath(); ctx.moveTo(0, fenceY); ctx.lineTo(width/2 - 45, fenceY); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(width/2 + 45, fenceY); ctx.lineTo(width, fenceY); ctx.stroke();
