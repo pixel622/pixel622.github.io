@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SURVIVING · lone car · slow dead</title>
+    <title>SURVIVING · vast world · slow dead</title>
     <style>
         * {
             box-sizing: border-box;
@@ -26,6 +26,7 @@
             padding: 1rem;
             box-shadow: 0 20px 30px rgba(0,0,0,0.8);
             border: 3px solid #5f7a5f;
+            position: relative;
         }
         canvas {
             display: block;
@@ -35,10 +36,9 @@
             border-radius: 1.5rem;
             background: #2a3f2a;
             box-shadow: inset 0 0 20px #0f1a0f;
-            cursor: none;
             touch-action: none;
         }
-        /* status bar */
+        /* status bar (fixed on screen) */
         .stats {
             display: flex;
             justify-content: space-between;
@@ -48,6 +48,8 @@
             font-size: 1.2rem;
             margin: 0.5rem 0.2rem 1rem 0.2rem;
             padding: 0 0.5rem;
+            position: relative;
+            z-index: 10;
         }
         .stats span {
             background: #1f2e1f;
@@ -56,7 +58,7 @@
             border: 1px solid #6f9a6f;
             box-shadow: inset 0 2px 3px #0f1f0f;
         }
-        /* mobile controls */
+        /* mobile controls (fixed on screen) */
         .controls {
             display: flex;
             justify-content: space-between;
@@ -64,6 +66,8 @@
             margin-top: 1.2rem;
             padding: 0 0.5rem;
             gap: 1rem;
+            position: relative;
+            z-index: 10;
         }
         .dpad {
             display: grid;
@@ -120,7 +124,6 @@
             box-shadow: 0 2px 0 #3f2a2a, 0 8px 12px rgba(0,0,0,0.6);
             background: #5a3434;
         }
-        /* desktop hint */
         .desktop-hint {
             color: #6d8f6d;
             text-align: center;
@@ -154,45 +157,89 @@
             border-radius: 3rem;
             padding: 0.2rem 0;
         }
+        /* cutscene overlay */
+        #cutsceneOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1.5rem;
+            z-index: 100;
+            color: #9fdf9f;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            opacity: 1;
+            transition: opacity 1s;
+            pointer-events: none; /* click-through after fade? we handle via js */
+        }
+        #cutsceneText {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px #5faf5f;
+            margin-bottom: 3rem;
+            white-space: pre-line;
+            animation: flicker 3s infinite;
+        }
+        #cutsceneSub {
+            font-size: 1.2rem;
+            color: #afcfaf;
+            border: 1px solid #5f9f5f;
+            padding: 1rem 2rem;
+            border-radius: 4rem;
+            background: #1f2f1f;
+            box-shadow: 0 0 20px #1f4f1f;
+            animation: pulse 2s infinite;
+        }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; text-shadow: 0 0 25px #8fd88f; }
+            100% { opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #2f4f2f; }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+<div class="game-container" style="position: relative;">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-        <div class="stats">
-            <span>❤️ <span id="healthDisplay">100</span>%</span>
-            <span>⛽ <span id="fuelDisplay">0</span>/100</span>
-            <span>🧟 <span id="zombieCount">0</span></span>
-        </div>
-
-        <!-- mobile friendly controls -->
-        <div class="controls">
-            <!-- direction pad (4 directions + blank) -->
-            <div class="dpad">
-                <div></div> <!-- empty top-left -->
-                <div class="dpad-btn" id="upBtn">▲</div>
-                <div></div>
-                <div class="dpad-btn" id="leftBtn">◀</div>
-                <div class="empty"></div> <!-- center empty -->
-                <div class="dpad-btn" id="rightBtn">▶</div>
-                <div></div>
-                <div class="dpad-btn" id="downBtn">▼</div>
-                <div></div>
-            </div>
-
-            <!-- attack button (big) -->
-            <div class="attack-btn" id="attackBtn">⚔️</div>
-        </div>
-
-        <!-- extra info & reset -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.7rem;">
-            <div class="desktop-hint">←↑↓→ / A</div>
-            <div class="reset-btn" id="resetBtn">↻ RESTART</div>
-        </div>
-        <div id="messageArea" class="status-message">Find 5 fuel cans for the car...</div>
+    <!-- cutscene overlay (hidden by default, shown via JS) -->
+    <div id="cutsceneOverlay">
+        <div id="cutsceneText">"there is an apocalypse…"</div>
+        <div id="cutsceneSub">⏎ touch / key to start ⏎</div>
     </div>
+
+    <div class="stats">
+        <span>❤️ <span id="healthDisplay">100</span>%</span>
+        <span>⛽ <span id="fuelDisplay">0</span>/100</span>
+        <span>🧟 <span id="zombieCount">0</span></span>
+    </div>
+
+    <!-- mobile friendly controls -->
+    <div class="controls">
+        <div class="dpad">
+            <div></div> <div class="dpad-btn" id="upBtn">▲</div> <div></div>
+            <div class="dpad-btn" id="leftBtn">◀</div> <div class="empty"></div> <div class="dpad-btn" id="rightBtn">▶</div>
+            <div></div> <div class="dpad-btn" id="downBtn">▼</div> <div></div>
+        </div>
+        <div class="attack-btn" id="attackBtn">⚔️</div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.7rem;">
+        <div class="desktop-hint">←↑↓→ / A</div>
+        <div class="reset-btn" id="resetBtn">↻ RESTART</div>
+    </div>
+    <div id="messageArea" class="status-message">Find 5 fuel cans for the car...</div>
 </div>
 
 <script>
@@ -200,80 +247,94 @@
         // ---------- CANVAS ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
+        const cutsceneOverlay = document.getElementById('cutsceneOverlay');
+        
         // display elements
         const healthSpan = document.getElementById('healthDisplay');
         const fuelSpan = document.getElementById('fuelDisplay');
         const zombieSpan = document.getElementById('zombieCount');
         const messageDiv = document.getElementById('messageArea');
 
-        // ---------- FIXED DIMENSIONS ----------
-        const W = 800, H = 600;
-        canvas.width = W; canvas.height = H;
+        // ---------- WORLD DIMENSIONS (vast) ----------
+        const WORLD_WIDTH = 3000;
+        const WORLD_HEIGHT = 3000;
+        const VIEW_W = 800, VIEW_H = 600; // canvas size
+
+        // ---------- CAMERA ----------
+        let camera = { x: 0, y: 0 };
+        function updateCamera() {
+            // center on player
+            camera.x = player.x - VIEW_W/2;
+            camera.y = player.y - VIEW_H/2;
+            // clamp so we don't see outside world
+            camera.x = Math.max(0, Math.min(WORLD_WIDTH - VIEW_W, camera.x));
+            camera.y = Math.max(0, Math.min(WORLD_HEIGHT - VIEW_H, camera.y));
+        }
 
         // ---------- GAME STATE ----------
-        let gameActive = true;
+        let gameActive = false;      // becomes true after cutscene
         let gameWin = false;
         let gameOver = false;
+        let cutscene = true;         // show cutscene initially
 
-        // player
+        // player (smaller for vast world)
         let player = {
-            x: 400, y: 300,
-            r: 18,
+            x: 1500, y: 1500,
+            r: 12,                   // smaller to feel more zoomed out
             health: 100,
             maxHealth: 100,
-            speed: 3.5
+            speed: 4.5                // slightly faster for larger world
         };
 
-        // car (static) – broken down, needs fuel
+        // car (static)
         const car = {
-            x: 680, y: 120,
-            r: 28,
-            fuel: 0,         // collected fuel
-            maxFuel: 100     // 5 cans * 20
+            x: 2600, y: 400,
+            r: 20,
+            fuel: 0,
+            maxFuel: 100
         };
 
-        // fuel cans (each gives +20 when brought to car)
+        // fuel cans
         let fuelCans = [];
         const FUEL_VALUE = 20;
-        const CANS_NEEDED = 5;  // 5 * 20 = 100
-        // generate starting cans
+        const CANS_NEEDED = 5;
+
         function generateFuelCans() {
             fuelCans = [];
             for (let i = 0; i < CANS_NEEDED; i++) {
                 let placed = false;
                 let attempts = 0;
-                while (!placed && attempts < 500) {
-                    let x = 50 + Math.random() * 700;
-                    let y = 50 + Math.random() * 500;
+                while (!placed && attempts < 1000) {
+                    let x = 200 + Math.random() * (WORLD_WIDTH - 400);
+                    let y = 200 + Math.random() * (WORLD_HEIGHT - 400);
                     // not too close to car or player start
                     let distToCar = Math.hypot(x - car.x, y - car.y);
                     let distToPlayer = Math.hypot(x - player.x, y - player.y);
-                    if (distToCar > 100 && distToPlayer > 100) {
-                        fuelCans.push({ x, y, r: 10, collected: false });
+                    if (distToCar > 200 && distToPlayer > 200) {
+                        fuelCans.push({ x, y, r: 8, collected: false });
                         placed = true;
                     }
                     attempts++;
                 }
-                // fallback
-                if (!placed) fuelCans.push({ x: 100 + i*50, y: 400 + i*30, r:10, collected: false });
+                if (!placed) fuelCans.push({ x: 500 + i*150, y: 2200 + i*100, r:8, collected: false });
             }
         }
 
-        // zombies array
+        // zombies
         let zombies = [];
-        const ZOMBIE_SPEED = 0.8;      // slow but steady
-        const ZOMBIE_R = 16;
-        const PLAYER_ATTACK_RANGE = 45; // melee distance
-        const ZOMBIE_ATTACK_COOLDOWN = 40; // frames
-        let globalAttackCooldown = 0;   // simple cooldown for attack button
-
-        // spawning
+        const ZOMBIE_SPEED = 0.9;
+        const ZOMBIE_R = 12;
+        const PLAYER_ATTACK_RANGE = 45;
+        const ZOMBIE_ATTACK_COOLDOWN = 40;
+        let globalAttackCooldown = 0;
         let spawnTimer = 0;
-        const SPAWN_DELAY = 120; // frames ~2 seconds at 60fps
+        const SPAWN_DELAY = 90; // frames
 
-        // movement flags for keyboard & dpad
+        // movement flags
         let moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
+
+        // carried fuel
+        let carriedFuel = 0;
 
         // ---------- HELPER FUNCTIONS ----------
         function updateUI() {
@@ -283,20 +344,22 @@
         }
 
         function resetGame() {
-            gameActive = true;
+            gameActive = true; // after reset we skip cutscene? but cutscene will be off. we'll set cutscene false.
             gameWin = false;
             gameOver = false;
-            player = { x: 400, y: 300, r: 18, health: 100, maxHealth: 100, speed: 3.5 };
+            player = { x: 1500, y: 1500, r: 12, health: 100, maxHealth: 100, speed: 4.5 };
             car.fuel = 0;
             zombies = [];
             spawnTimer = 0;
             globalAttackCooldown = 0;
+            carriedFuel = 0;
             generateFuelCans();
             updateUI();
             messageDiv.innerText = "Find 5 fuel cans for the car...";
+            updateCamera();
         }
 
-        // check win condition
+        // check win
         function checkWin() {
             if (car.fuel >= car.maxFuel && gameActive && !gameWin) {
                 gameWin = true;
@@ -305,11 +368,10 @@
             }
         }
 
-        // attack mechanic
+        // attack
         function attackZombies() {
             if (!gameActive || gameWin || gameOver) return;
             if (globalAttackCooldown > 0) return;
-
             let killedAny = false;
             for (let i = zombies.length - 1; i >= 0; i--) {
                 const z = zombies[i];
@@ -319,27 +381,24 @@
                     killedAny = true;
                 }
             }
-            if (killedAny) {
-                globalAttackCooldown = 15;  // short cooldown (0.25s)
-            }
+            if (killedAny) globalAttackCooldown = 15;
             updateUI();
         }
 
-        // collision between player and zombies -> damage
+        // collisions with zombies
         function handleZombieCollisions() {
             if (!gameActive || gameWin || gameOver) return;
             for (let z of zombies) {
                 const dist = Math.hypot(player.x - z.x, player.y - z.y);
                 if (dist < player.r + z.r) {
-                    // push player away lightly
                     const angle = Math.atan2(player.y - z.y, player.x - z.x);
                     player.x += Math.cos(angle) * 12;
                     player.y += Math.sin(angle) * 12;
-                    // clamp to map
-                    player.x = Math.max(player.r, Math.min(W - player.r, player.x));
-                    player.y = Math.max(player.r, Math.min(H - player.r, player.y));
+                    // clamp to world
+                    player.x = Math.max(player.r, Math.min(WORLD_WIDTH - player.r, player.x));
+                    player.y = Math.max(player.r, Math.min(WORLD_HEIGHT - player.r, player.y));
 
-                    player.health -= 8;
+                    player.health -= 6;
                     if (player.health <= 0) {
                         player.health = 0;
                         gameActive = false;
@@ -347,27 +406,18 @@
                         messageDiv.innerText = "☠️ YOU DIED... GAME OVER ☠️";
                     }
                     updateUI();
-                    break; // only one hit per frame
-                }
+                    break;
             }
         }
+        }
 
-        // collect fuel (if player touches can, mark as collected, add fuel only when near car? we decide: must bring to car)
-        // simpler: if player touches a can, it sticks to player? no, we want deposit at car.
-        // approach: fuel cans are objects. When player collides with a can, we pick it up (can.collected = true) and increment a carried counter? 
-        // But we want "bring to car" mechanic. Let's do: when player touches a can, can is removed from map, and a "pending fuel" count increments.
-        // Then when player touches car, pending fuel is added to car.fuel (if car not full).
-        // That feels intuitive: you carry fuel in your hands, but you must go back to car.
-        let carriedFuel = 0; // amount collected but not yet deposited
-
+        // collect fuel cans
         function handleItemCollection() {
             if (!gameActive || gameWin || gameOver) return;
             for (let i = fuelCans.length - 1; i >= 0; i--) {
                 const can = fuelCans[i];
-                if (can.collected) continue; // already removed
                 const dist = Math.hypot(player.x - can.x, player.y - can.y);
                 if (dist < player.r + can.r) {
-                    // pick up fuel can
                     fuelCans.splice(i, 1);
                     carriedFuel += FUEL_VALUE;
                     messageDiv.innerText = `⛽ Fuel collected! Return to car (${carriedFuel}/100)`;
@@ -390,7 +440,7 @@
             }
         }
 
-        // move player based on flags
+        // move player
         function movePlayer() {
             if (!gameActive || gameWin || gameOver) return;
             let dx = 0, dy = 0;
@@ -406,16 +456,15 @@
                 let newX = player.x + dx;
                 let newY = player.y + dy;
 
-                // boundary
-                newX = Math.max(player.r, Math.min(W - player.r, newX));
-                newY = Math.max(player.r, Math.min(H - player.r, newY));
+                newX = Math.max(player.r, Math.min(WORLD_WIDTH - player.r, newX));
+                newY = Math.max(player.r, Math.min(WORLD_HEIGHT - player.r, newY));
 
                 player.x = newX;
                 player.y = newY;
             }
         }
 
-        // zombie AI: move towards player
+        // zombie AI
         function moveZombies() {
             for (let z of zombies) {
                 const dx = player.x - z.x;
@@ -427,81 +476,75 @@
                     z.x += moveX;
                     z.y += moveY;
                 }
-                // keep zombies inside canvas (optional)
-                z.x = Math.max(ZOMBIE_R, Math.min(W - ZOMBIE_R, z.x));
-                z.y = Math.max(ZOMBIE_R, Math.min(H - ZOMBIE_R, z.y));
+                // keep inside world
+                z.x = Math.max(ZOMBIE_R, Math.min(WORLD_WIDTH - ZOMBIE_R, z.x));
+                z.y = Math.max(ZOMBIE_R, Math.min(WORLD_HEIGHT - ZOMBIE_R, z.y));
             }
         }
 
-        // spawn zombies at edges
+        // spawn zombies at world edges
         function spawnZombie() {
             if (!gameActive || gameWin || gameOver) return;
             const side = Math.floor(Math.random() * 4);
             let x, y;
-            const pad = 30;
+            const pad = 50;
             if (side === 0) { // top
-                x = Math.random() * W;
+                x = Math.random() * WORLD_WIDTH;
                 y = -pad;
             } else if (side === 1) { // right
-                x = W + pad;
-                y = Math.random() * H;
+                x = WORLD_WIDTH + pad;
+                y = Math.random() * WORLD_HEIGHT;
             } else if (side === 2) { // bottom
-                x = Math.random() * W;
-                y = H + pad;
+                x = Math.random() * WORLD_WIDTH;
+                y = WORLD_HEIGHT + pad;
             } else { // left
                 x = -pad;
-                y = Math.random() * H;
+                y = Math.random() * WORLD_HEIGHT;
             }
             zombies.push({ x, y, r: ZOMBIE_R });
         }
 
-        // drawing
+        // drawing (with camera translation)
         function draw() {
-            ctx.clearRect(0, 0, W, H);
+            ctx.clearRect(0, 0, VIEW_W, VIEW_H);
 
-            // background ground (rough)
+            // save context and translate according to camera
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            // background (forest grid)
             ctx.fillStyle = '#3d5a3d';
-            ctx.fillRect(0, 0, W, H);
-            // grid / foliage pattern
+            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
             ctx.strokeStyle = '#4f734f';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < W; i += 50) {
+            ctx.lineWidth = 2;
+            for (let i = 0; i < WORLD_WIDTH; i += 80) {
                 ctx.beginPath();
                 ctx.strokeStyle = '#3a553a';
                 ctx.moveTo(i, 0);
-                ctx.lineTo(i, H);
+                ctx.lineTo(i, WORLD_HEIGHT);
                 ctx.stroke();
             }
-            for (let i = 0; i < H; i += 50) {
+            for (let i = 0; i < WORLD_HEIGHT; i += 80) {
                 ctx.beginPath();
                 ctx.strokeStyle = '#3a553a';
                 ctx.moveTo(0, i);
-                ctx.lineTo(W, i);
+                ctx.lineTo(WORLD_WIDTH, i);
                 ctx.stroke();
             }
 
-            // CAR (broken but hopeful)
-            ctx.fillStyle = '#4b6b8f';
+            // car
             ctx.shadowColor = '#0f1f1f';
             ctx.shadowBlur = 12;
+            ctx.fillStyle = '#4b6b8f';
             ctx.beginPath();
             ctx.arc(car.x, car.y, car.r, 0, 2*Math.PI);
             ctx.fill();
-            ctx.fillStyle = '#2a4055';
-            ctx.beginPath();
-            ctx.arc(car.x-6, car.y-6, 8, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(car.x+10, car.y+2, 8, 0, 2*Math.PI);
-            ctx.fill();
             ctx.fillStyle = '#dbb47a';
-            ctx.font = 'bold 20px monospace';
-            ctx.fillText('🚙', car.x-20, car.y+8);
-            ctx.shadowBlur = 0;
-
-            // fuel cans (only those not collected)
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText('🚙', car.x-18, car.y+8);
+            
+            // fuel cans
             ctx.fillStyle = '#d1b45a';
-            ctx.shadowBlur = 8;
             fuelCans.forEach(can => {
                 ctx.beginPath();
                 ctx.arc(can.x, can.y, can.r, 0, 2*Math.PI);
@@ -512,19 +555,18 @@
                 ctx.fillStyle = '#d1b45a';
             });
 
-            // zombies (slow, relentless)
+            // zombies
             ctx.fillStyle = '#6b4226';
-            ctx.shadowColor = '#2f1f0f';
             zombies.forEach(z => {
                 ctx.beginPath();
                 ctx.arc(z.x, z.y, z.r, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.fillStyle = '#431f0f';
                 ctx.beginPath();
-                ctx.arc(z.x-5, z.y-5, 5, 0, 2*Math.PI);
+                ctx.arc(z.x-4, z.y-4, 4, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(z.x+5, z.y-5, 5, 0, 2*Math.PI);
+                ctx.arc(z.x+4, z.y-4, 4, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.fillStyle = '#ad3a3a';
                 ctx.beginPath();
@@ -533,29 +575,31 @@
                 ctx.fillStyle = '#6b4226';
             });
 
-            // player (the lone survivor)
+            // player
             ctx.shadowBlur = 15;
             ctx.fillStyle = '#3b8f8f';
             ctx.beginPath();
             ctx.arc(player.x, player.y, player.r, 0, 2*Math.PI);
             ctx.fill();
             ctx.fillStyle = '#f4e8c1';
-            ctx.font = '26px monospace';
-            ctx.fillText('🧍', player.x-20, player.y+10);
+            ctx.font = '22px monospace';
+            ctx.fillText('🧍', player.x-16, player.y+8);
             ctx.shadowBlur = 0;
 
-            // carried fuel indicator (if >0)
+            // carried fuel indicator
             if (carriedFuel > 0) {
                 ctx.fillStyle = '#ffe68f';
-                ctx.font = 'bold 20px monospace';
-                ctx.fillText(`+${carriedFuel}`, player.x-40, player.y-30);
+                ctx.font = 'bold 18px monospace';
+                ctx.fillText(`+${carriedFuel}`, player.x-30, player.y-25);
             }
 
-            // game over / win overlay
-            if (!gameActive) {
+            ctx.restore(); // restore to canvas space
+
+            // UI overlays (world space independent)
+            if (!gameActive && !cutscene) {
                 ctx.globalAlpha = 0.6;
                 ctx.fillStyle = '#0a0f0a';
-                ctx.fillRect(0, 0, W, H);
+                ctx.fillRect(0, 0, VIEW_W, VIEW_H);
                 ctx.globalAlpha = 1;
                 ctx.fillStyle = '#ebcba0';
                 ctx.font = 'bold 38px monospace';
@@ -563,9 +607,9 @@
             }
         }
 
-        // main game loop
+        // game loop
         function gameLoop() {
-            if (gameActive && !gameWin && !gameOver) {
+            if (!cutscene && gameActive && !gameWin && !gameOver) {
                 // spawning
                 spawnTimer++;
                 if (spawnTimer >= SPAWN_DELAY) {
@@ -579,20 +623,73 @@
                 moveZombies();
                 handleZombieCollisions();
 
-                // attack cooldown decrease
                 if (globalAttackCooldown > 0) globalAttackCooldown--;
 
+                updateCamera();
                 updateUI();
             }
             draw();
             requestAnimationFrame(gameLoop);
         }
 
-        // ---------- INPUT (keyboard + mobile dpad) ----------
+        // ---------- CUTSCENE HANDLING ----------
+        function endCutscene() {
+            cutscene = false;
+            gameActive = true;
+            cutsceneOverlay.style.opacity = '0';
+            setTimeout(() => {
+                cutsceneOverlay.style.display = 'none';
+            }, 1000);
+        }
+
+        // detect any key or touch to end cutscene
+        function handleCutsceneInput(e) {
+            if (cutscene) {
+                e.preventDefault();
+                endCutscene();
+            }
+        }
+
+        // attach cutscene end listeners
+        window.addEventListener('keydown', (e) => {
+            if (cutscene) {
+                e.preventDefault();
+                endCutscene();
+            }
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            if (cutscene) {
+                e.preventDefault();
+                endCutscene();
+            }
+        });
+        canvas.addEventListener('mousedown', (e) => {
+            if (cutscene) {
+                e.preventDefault();
+                endCutscene();
+            }
+        });
+        // also buttons should end cutscene
+        document.querySelectorAll('.dpad-btn, .attack-btn, #resetBtn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                if (cutscene) {
+                    e.preventDefault();
+                    endCutscene();
+                }
+            });
+            btn.addEventListener('mousedown', (e) => {
+                if (cutscene) {
+                    e.preventDefault();
+                    endCutscene();
+                }
+            });
+        });
+
+        // ---------- INPUT (keyboard + dpad) ----------
         function keyDownHandler(e) {
+            if (!gameActive || gameWin || gameOver || cutscene) return;
             const key = e.key;
-            e.preventDefault(); // prevent scrolling
-            if (!gameActive || gameWin || gameOver) return;
+            e.preventDefault();
             switch(key) {
                 case 'ArrowUp': moveUp = true; break;
                 case 'ArrowDown': moveDown = true; break;
@@ -615,40 +712,43 @@
         window.addEventListener('keydown', (e) => {
             if (e.key.startsWith('Arrow') || e.key === 'a' || e.key === 'A') {
                 e.preventDefault();
+                if (cutscene) { endCutscene(); return; }
                 keyDownHandler(e);
             }
         });
         window.addEventListener('keyup', keyUpHandler);
 
         // touch buttons
-        document.getElementById('upBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveUp = true; });
+        document.getElementById('upBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveUp = true; });
         document.getElementById('upBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveUp = false; });
-        document.getElementById('downBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveDown = true; });
+        document.getElementById('downBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveDown = true; });
         document.getElementById('downBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveDown = false; });
-        document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft = true; });
+        document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveLeft = true; });
         document.getElementById('leftBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveLeft = false; });
-        document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight = true; });
+        document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveRight = true; });
         document.getElementById('rightBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveRight = false; });
 
-        // attack button
-        document.getElementById('attackBtn').addEventListener('touchstart', (e) => { e.preventDefault(); attackZombies(); });
-        // also for mouse (desktop)
-        document.getElementById('attackBtn').addEventListener('mousedown', (e) => { e.preventDefault(); attackZombies(); });
+        document.getElementById('attackBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else attackZombies(); });
+        document.getElementById('attackBtn').addEventListener('mousedown', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else attackZombies(); });
 
         // reset button
         document.getElementById('resetBtn').addEventListener('click', (e) => {
             e.preventDefault();
+            if (cutscene) endCutscene();
             resetGame();
-            // reset movement flags
             moveUp = false; moveDown = false; moveLeft = false; moveRight = false;
             carriedFuel = 0;
         });
 
-        // prevent context menu on canvas
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        // start game
+        // initial reset (with cutscene active)
         resetGame();
+        gameActive = false; // because cutscene active
+        cutscene = true;
+        cutsceneOverlay.style.display = 'flex';
+        cutsceneOverlay.style.opacity = '1';
+
         gameLoop();
     })();
 </script>
