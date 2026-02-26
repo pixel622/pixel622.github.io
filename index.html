@@ -30,6 +30,21 @@
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
+        /* Balance Display */
+        .balance-panel {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .balance-label { color: #888; }
+        .balance-amount { color: #0f0; font-size: 24px; font-weight: bold; }
+        .kyc-symbol { color: var(--accent); font-size: 14px; margin-left: 5px; }
+
         /* Listing Box */
         .upload-area {
             background: var(--card-bg);
@@ -41,12 +56,18 @@
             margin-bottom: 40px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="number"] {
             background: #000;
             border: 1px solid #333;
             color: #0f0;
             padding: 12px;
             outline: none;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button { 
+            opacity: 0.5;
+            background: #333;
         }
 
         /* The Custom Gallery Button */
@@ -73,6 +94,7 @@
         }
 
         #listBtn:hover { opacity: 0.8; }
+        #listBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         /* Grid */
         .market-grid {
@@ -85,6 +107,7 @@
             background: #0a0a0a;
             border: 1px solid #222;
             padding: 10px;
+            position: relative;
         }
 
         .card img {
@@ -95,7 +118,8 @@
         }
 
         .card h3 { margin: 10px 0 5px 0; color: #eee; }
-        .card p { color: #0f0; margin: 0; font-weight: bold; }
+        .card .price { color: #0f0; margin: 0; font-weight: bold; }
+        .card .price span { color: #888; font-size: 12px; }
         
         .clear-btn {
             margin-top: 20px;
@@ -105,6 +129,8 @@
             cursor: pointer;
             font-size: 10px;
         }
+
+        .insufficient { color: var(--accent); font-size: 12px; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
@@ -115,15 +141,25 @@
         <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
+    <!-- KYC Balance Panel -->
+    <div class="balance-panel">
+        <span class="balance-label">WALLET BALANCE</span>
+        <span>
+            <span class="balance-amount" id="balanceDisplay">10000</span>
+            <span class="kyc-symbol">KYC</span>
+        </span>
+    </div>
+
     <div class="upload-area">
         <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
-        <input type="text" id="priceInp" placeholder="Price (e.g. 1.5 ETH)">
+        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
         
         <label class="file-label" id="fileLabel">
             [ SELECT FROM GALLERY ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
+        <div class="insufficient" id="insufficientMsg">INSUFFICIENT KYC BALANCE</div>
         <button id="listBtn">LIST OBJECT</button>
     </div>
 
@@ -137,6 +173,11 @@
     const imageInp = document.getElementById('imageInp');
     const fileLabel = document.getElementById('fileLabel');
     const grid = document.getElementById('grid');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const insufficientMsg = document.getElementById('insufficientMsg');
+    const priceInp = document.getElementById('priceInp');
+
+    let currentBalance = 10000; // Starting KYC balance
 
     // Update label when image is chosen
     imageInp.addEventListener('change', function() {
@@ -147,15 +188,37 @@
         }
     });
 
-    // Load items from local storage on startup
+    // Check balance on price input
+    priceInp.addEventListener('input', function() {
+        const price = parseInt(this.value) || 0;
+        if (price > currentBalance) {
+            insufficientMsg.style.display = 'block';
+            listBtn.disabled = true;
+        } else {
+            insufficientMsg.style.display = 'none';
+            listBtn.disabled = false;
+        }
+    });
+
+    // Load items and balance from local storage on startup
     window.onload = () => {
+        // Load balance
+        const savedBalance = localStorage.getItem('kyc_balance');
+        if (savedBalance !== null) {
+            currentBalance = parseInt(savedBalance);
+        } else {
+            localStorage.setItem('kyc_balance', '10000');
+        }
+        updateBalanceDisplay();
+        
+        // Load items
         const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
         saved.forEach(item => createCard(item.name, item.price, item.img));
     };
 
     listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value;
-        const price = document.getElementById('priceInp').value;
+        const price = parseInt(document.getElementById('priceInp').value);
         const file = imageInp.files[0];
 
         if (!name || !price || !file) {
@@ -163,16 +226,26 @@
             return;
         }
 
+        if (price > currentBalance) {
+            alert("Insufficient KYC balance!");
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const imgData = e.target.result;
             
-            // 1. Add to UI
-            createCard(name, price, imgData);
+            // Deduct KYC
+            currentBalance -= price;
+            localStorage.setItem('kyc_balance', currentBalance.toString());
+            updateBalanceDisplay();
             
-            // 2. Save to Local Storage (Persistence)
+            // Add to UI
+            createCard(name, price + ' KYC', imgData);
+            
+            // Save to Local Storage
             const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            saved.push({name, price, img: imgData});
+            saved.push({name, price: price + ' KYC', img: imgData});
             localStorage.setItem('market_items', JSON.stringify(saved));
 
             // Reset inputs
@@ -181,6 +254,8 @@
             imageInp.value = '';
             fileLabel.innerText = "[ SELECT FROM GALLERY ]";
             fileLabel.style.color = "var(--accent)";
+            insufficientMsg.style.display = 'none';
+            listBtn.disabled = false;
         };
         reader.readAsDataURL(file);
     };
@@ -191,14 +266,27 @@
         div.innerHTML = `
             <img src="${img}">
             <h3>${name}</h3>
-            <p>${price}</p>
+            <div class="price">${price} <span>KYC</span></div>
         `;
         grid.prepend(div);
     }
 
+    function updateBalanceDisplay() {
+        balanceDisplay.textContent = currentBalance;
+        // Re-check price input if exists
+        if (priceInp.value) {
+            const price = parseInt(priceInp.value) || 0;
+            if (price > currentBalance) {
+                insufficientMsg.style.display = 'block';
+                listBtn.disabled = true;
+            }
+        }
+    }
+
     function clearMarket() {
-        if(confirm("Wipe all listings?")) {
+        if(confirm("Wipe all listings and reset balance to 10,000 KYC?")) {
             localStorage.removeItem('market_items');
+            localStorage.setItem('kyc_balance', '10000');
             location.reload();
         }
     }
