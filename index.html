@@ -3,144 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market | Anonymous Exchange</title>
+    <title>THE BLACK MARKET | Secure Exchange</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
     <style>
+        :root {
+            --glow-color: #ff0000; /* Red theme for "Black Market" */
+            --bg-color: #050505;
+        }
+
         body {
-            background-color: #0a0a0a;
-            color: #00ff41; /* Classic Matrix/Terminal green */
+            background-color: var(--bg-color);
+            color: #e0e0e0;
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
             padding: 20px;
         }
 
+        .container { max-width: 1100px; margin: auto; }
+
         header {
-            border-bottom: 2px solid #333;
-            padding-bottom: 20px;
             text-align: center;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-        }
-
-        /* Form section for adding fake items */
-        .listing-form {
-            background: #1a1a1a;
+            border-bottom: 3px double var(--glow-color);
             padding: 20px;
-            border: 1px dashed #00ff41;
-            margin: 20px 0;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
         }
 
-        input, button {
-            background: #000;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 10px;
-            margin: 5px;
-        }
+        h1 { color: var(--glow-color); text-shadow: 0 0 10px var(--glow-color); }
 
-        button:hover {
-            background: #00ff41;
-            color: #000;
-            cursor: pointer;
-        }
-
-        /* Product Grid */
-        .market-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .product-card {
+        /* Listing Form */
+        .listing-panel {
             background: #111;
             border: 1px solid #333;
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-
-        .product-card:hover {
-            border-color: #00ff41;
-            transform: scale(1.02);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 150px;
-            background: #222;
+            padding: 25px;
+            margin-bottom: 40px;
             display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
-            color: #444;
         }
 
-        .price {
-            color: #ffaa00;
-            font-weight: bold;
-            font-size: 1.2em;
+        input[type="text"], input[type="file"] {
+            background: #000;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 10px;
         }
+
+        /* Custom File Upload Button */
+        .file-upload-label {
+            background: #222;
+            border: 1px solid var(--glow-color);
+            padding: 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        button {
+            background: var(--glow-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:hover { background: #b30000; }
+
+        /* Grid System */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .item-card {
+            background: #0f0f0f;
+            border: 1px solid #222;
+            padding: 15px;
+            transition: 0.3s;
+        }
+
+        .item-card:hover { border-color: var(--glow-color); }
+
+        .item-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #222;
+            margin-bottom: 10px;
+        }
+
+        .item-info h3 { margin: 5px 0; color: var(--glow-color); }
+        .price-tag { color: #00ff41; font-weight: bold; font-size: 1.1em; }
+
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>// SHADOW_MARKET_v1.0</h1>
-        <p>Encrypted. Decentralized. Fictional.</p>
+        <h1>The Black Market</h1>
+        <p>[ ACCESS GRANTED // ANONYMOUS_USER ]</p>
     </header>
 
-    <section class="listing-form">
-        <h3>[+] Create New Listing</h3>
+    <section class="listing-panel">
         <input type="text" id="itemName" placeholder="Object Name">
-        <input type="text" id="itemPrice" placeholder="Price (e.g. 0.05 BTC)">
-        <input type="text" id="itemImg" placeholder="Image URL (optional)">
-        <button onclick="addItem()">Post to Ledger</button>
+        <input type="text" id="itemPrice" placeholder="Price (e.g. 500 Credits)">
+        
+        <label class="file-upload-label">
+            CHOOSE IMAGE FROM GALLERY
+            <input type="file" id="itemFile" accept="image/*" style="display:none;" onchange="previewImage(this)">
+        </label>
+        
+        <button onclick="uploadListing()">LIST OBJECT</button>
     </section>
 
     <div class="market-grid" id="marketGrid">
-        <div class="product-card">
-            <div class="product-image">IMG_REDACTED</div>
-            <h3>Quantum Encryption Key</h3>
-            <p class="price">0.45 BTC</p>
-            <button>View Details</button>
         </div>
-
-        <div class="product-card">
-            <div class="product-image">IMG_REDACTED</div>
-            <h3>Void-Matter Battery</h3>
-            <p class="price">1.22 BTC</p>
-            <button>View Details</button>
-        </div>
-    </div>
 </div>
 
 <script>
-    function addItem() {
-        const name = document.getElementById('itemName').value;
-        const price = document.getElementById('itemPrice').value;
-        const img = document.getElementById('itemImg').value || 'IMG_REDACTED';
-        const grid = document.getElementById('marketGrid');
+    // --- FIREBASE CONFIGURATION ---
+    // To make this "Real", go to console.firebase.google.com, 
+    // create a project, and paste your config here.
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+    };
 
-        if (name && price) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            card.innerHTML = `
-                <div class="product-image">${img}</div>
+    // Initialize Firebase (Only if config is provided)
+    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Function to Upload
+        function uploadListing() {
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const fileInput = document.getElementById('itemFile');
+
+            if (name && price && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    db.ref('listings/').push({
+                        name: name,
+                        price: price,
+                        image: base64Image
+                    });
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // Listen for new items for EVERYONE
+        db.ref('listings/').on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            renderItem(data.name, data.price, data.image);
+        });
+    }
+
+    function renderItem(name, price, image) {
+        const grid = document.getElementById('marketGrid');
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+            <img src="${image}" onerror="this.src='https://via.placeholder.com/200?text=NO_IMAGE'">
+            <div class="item-info">
                 <h3>${name}</h3>
-                <p class="price">${price}</p>
-                <button>View Details</button>
-            `;
-            grid.prepend(card);
-            
-            // Clear inputs
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemPrice').value = '';
-        } else {
-            alert("Please enter a name and price.");
+                <p class="price-tag">${price}</p>
+            </div>
+        `;
+        grid.prepend(card);
+    }
+
+    function previewImage(input) {
+        if (input.files[0]) {
+            alert("Image selected: " + input.files[0].name);
         }
     }
 </script>
