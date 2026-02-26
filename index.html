@@ -2,755 +2,148 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SURVIVING · vast world · slow dead</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Market | Anonymous Exchange</title>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Courier New', Courier, monospace;
-        }
         body {
+            background-color: #0a0a0a;
+            color: #00ff41; /* Classic Matrix/Terminal green */
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            min-height: 100vh;
-            background: #0a0f0e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            touch-action: none;  /* prevent pull-to-refresh */
+            padding: 20px;
         }
-        .game-container {
-            background: #1a2a1f;
-            border-radius: 2rem;
-            padding: 1rem;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.8);
-            border: 3px solid #5f7a5f;
-            position: relative;
+
+        header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            text-align: center;
         }
-        canvas {
-            display: block;
-            margin: 0 auto;
-            width: 100%;
-            height: auto;
-            border-radius: 1.5rem;
-            background: #2a3f2a;
-            box-shadow: inset 0 0 20px #0f1a0f;
-            touch-action: none;
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
         }
-        /* status bar (fixed on screen) */
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            color: #b5d6b0;
-            text-shadow: 2px 2px 0 #1f3a1f;
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin: 0.5rem 0.2rem 1rem 0.2rem;
-            padding: 0 0.5rem;
-            position: relative;
-            z-index: 10;
+
+        /* Form section for adding fake items */
+        .listing-form {
+            background: #1a1a1a;
+            padding: 20px;
+            border: 1px dashed #00ff41;
+            margin: 20px 0;
         }
-        .stats span {
-            background: #1f2e1f;
-            padding: 0.3rem 1rem;
-            border-radius: 3rem;
-            border: 1px solid #6f9a6f;
-            box-shadow: inset 0 2px 3px #0f1f0f;
+
+        input, button {
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 10px;
+            margin: 5px;
         }
-        /* mobile controls (fixed on screen) */
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.2rem;
-            padding: 0 0.5rem;
-            gap: 1rem;
-            position: relative;
-            z-index: 10;
+
+        button:hover {
+            background: #00ff41;
+            color: #000;
+            cursor: pointer;
         }
-        .dpad {
+
+        /* Product Grid */
+        .market-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 0.5rem;
-            width: 10rem;
-            height: 10rem;
-            filter: drop-shadow(0 8px 4px #0f1a0f);
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
         }
-        .dpad-btn {
-            background: #364d36;
-            border: 3px solid #718e71;
-            border-radius: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #d9eed9;
-            text-shadow: 2px 2px 0 #1f3a1f;
-            box-shadow: 0 5px 0 #1f321f, 0 8px 8px rgba(0,0,0,0.6);
-            transition: all 0.04s ease;
-            touch-action: manipulation;
-            cursor: pointer;
-        }
-        .dpad-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #1f321f, 0 5px 8px rgba(0,0,0,0.6);
-            background: #2f422f;
-        }
-        .empty {
-            visibility: hidden;
-        }
-        .attack-btn {
-            background: #6d3f3f;
-            border: 4px solid #b18080;
-            width: 7rem;
-            height: 7rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ffd9d9;
-            text-shadow: 2px 2px 0 #4f2f2f;
-            box-shadow: 0 6px 0 #3f2a2a, 0 10px 15px rgba(0,0,0,0.6);
-            touch-action: manipulation;
-            cursor: pointer;
-        }
-        .attack-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #3f2a2a, 0 8px 12px rgba(0,0,0,0.6);
-            background: #5a3434;
-        }
-        .desktop-hint {
-            color: #6d8f6d;
+
+        .product-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
             text-align: center;
-            margin-top: 0.8rem;
-            font-size: 0.9rem;
+            transition: transform 0.2s;
         }
-        .reset-btn {
-            background: #4f624f;
-            border: 2px solid #8fae8f;
-            color: #eaffea;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 0.3rem 1.2rem;
-            border-radius: 2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #2f402f;
-            transition: 0.05s linear;
-            touch-action: manipulation;
+
+        .product-card:hover {
+            border-color: #00ff41;
+            transform: scale(1.02);
         }
-        .reset-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-        .status-message {
-            color: #f7c9a3;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 0.4rem;
-            background: #1f2e1fcc;
-            border-radius: 3rem;
-            padding: 0.2rem 0;
-        }
-        /* cutscene overlay */
-        #cutsceneOverlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+
+        .product-image {
             width: 100%;
-            height: 100%;
-            background: black;
+            height: 150px;
+            background: #222;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 1.5rem;
-            z-index: 100;
-            color: #9fdf9f;
-            text-align: center;
-            padding: 2rem;
-            box-sizing: border-box;
-            opacity: 1;
-            transition: opacity 1s;
-            pointer-events: none; /* click-through after fade? we handle via js */
+            margin-bottom: 10px;
+            color: #444;
         }
-        #cutsceneText {
-            font-size: 2.2rem;
+
+        .price {
+            color: #ffaa00;
             font-weight: bold;
-            text-shadow: 0 0 15px #5faf5f;
-            margin-bottom: 3rem;
-            white-space: pre-line;
-            animation: flicker 3s infinite;
-        }
-        #cutsceneSub {
-            font-size: 1.2rem;
-            color: #afcfaf;
-            border: 1px solid #5f9f5f;
-            padding: 1rem 2rem;
-            border-radius: 4rem;
-            background: #1f2f1f;
-            box-shadow: 0 0 20px #1f4f1f;
-            animation: pulse 2s infinite;
-        }
-        @keyframes flicker {
-            0% { opacity: 1; }
-            50% { opacity: 0.8; text-shadow: 0 0 25px #8fd88f; }
-            100% { opacity: 1; }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); background: #2f4f2f; }
-            100% { transform: scale(1); }
+            font-size: 1.2em;
         }
     </style>
 </head>
 <body>
-<div class="game-container" style="position: relative;">
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
-    <!-- cutscene overlay (hidden by default, shown via JS) -->
-    <div id="cutsceneOverlay">
-        <div id="cutsceneText">"there is an apocalypse…"</div>
-        <div id="cutsceneSub">⏎ touch / key to start ⏎</div>
-    </div>
+<div class="container">
+    <header>
+        <h1>// SHADOW_MARKET_v1.0</h1>
+        <p>Encrypted. Decentralized. Fictional.</p>
+    </header>
 
-    <div class="stats">
-        <span>❤️ <span id="healthDisplay">100</span>%</span>
-        <span>⛽ <span id="fuelDisplay">0</span>/100</span>
-        <span>🧟 <span id="zombieCount">0</span></span>
-    </div>
+    <section class="listing-form">
+        <h3>[+] Create New Listing</h3>
+        <input type="text" id="itemName" placeholder="Object Name">
+        <input type="text" id="itemPrice" placeholder="Price (e.g. 0.05 BTC)">
+        <input type="text" id="itemImg" placeholder="Image URL (optional)">
+        <button onclick="addItem()">Post to Ledger</button>
+    </section>
 
-    <!-- mobile friendly controls -->
-    <div class="controls">
-        <div class="dpad">
-            <div></div> <div class="dpad-btn" id="upBtn">▲</div> <div></div>
-            <div class="dpad-btn" id="leftBtn">◀</div> <div class="empty"></div> <div class="dpad-btn" id="rightBtn">▶</div>
-            <div></div> <div class="dpad-btn" id="downBtn">▼</div> <div></div>
+    <div class="market-grid" id="marketGrid">
+        <div class="product-card">
+            <div class="product-image">IMG_REDACTED</div>
+            <h3>Quantum Encryption Key</h3>
+            <p class="price">0.45 BTC</p>
+            <button>View Details</button>
         </div>
-        <div class="attack-btn" id="attackBtn">⚔️</div>
-    </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.7rem;">
-        <div class="desktop-hint">←↑↓→ / A</div>
-        <div class="reset-btn" id="resetBtn">↻ RESTART</div>
+        <div class="product-card">
+            <div class="product-image">IMG_REDACTED</div>
+            <h3>Void-Matter Battery</h3>
+            <p class="price">1.22 BTC</p>
+            <button>View Details</button>
+        </div>
     </div>
-    <div id="messageArea" class="status-message">Find 5 fuel cans for the car...</div>
 </div>
 
 <script>
-    (function() {
-        // ---------- CANVAS ----------
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const cutsceneOverlay = document.getElementById('cutsceneOverlay');
-        
-        // display elements
-        const healthSpan = document.getElementById('healthDisplay');
-        const fuelSpan = document.getElementById('fuelDisplay');
-        const zombieSpan = document.getElementById('zombieCount');
-        const messageDiv = document.getElementById('messageArea');
+    function addItem() {
+        const name = document.getElementById('itemName').value;
+        const price = document.getElementById('itemPrice').value;
+        const img = document.getElementById('itemImg').value || 'IMG_REDACTED';
+        const grid = document.getElementById('marketGrid');
 
-        // ---------- WORLD DIMENSIONS (vast) ----------
-        const WORLD_WIDTH = 3000;
-        const WORLD_HEIGHT = 3000;
-        const VIEW_W = 800, VIEW_H = 600; // canvas size
-
-        // ---------- CAMERA ----------
-        let camera = { x: 0, y: 0 };
-        function updateCamera() {
-            // center on player
-            camera.x = player.x - VIEW_W/2;
-            camera.y = player.y - VIEW_H/2;
-            // clamp so we don't see outside world
-            camera.x = Math.max(0, Math.min(WORLD_WIDTH - VIEW_W, camera.x));
-            camera.y = Math.max(0, Math.min(WORLD_HEIGHT - VIEW_H, camera.y));
-        }
-
-        // ---------- GAME STATE ----------
-        let gameActive = false;      // becomes true after cutscene
-        let gameWin = false;
-        let gameOver = false;
-        let cutscene = true;         // show cutscene initially
-
-        // player (smaller for vast world)
-        let player = {
-            x: 1500, y: 1500,
-            r: 12,                   // smaller to feel more zoomed out
-            health: 100,
-            maxHealth: 100,
-            speed: 4.5                // slightly faster for larger world
-        };
-
-        // car (static)
-        const car = {
-            x: 2600, y: 400,
-            r: 20,
-            fuel: 0,
-            maxFuel: 100
-        };
-
-        // fuel cans
-        let fuelCans = [];
-        const FUEL_VALUE = 20;
-        const CANS_NEEDED = 5;
-
-        function generateFuelCans() {
-            fuelCans = [];
-            for (let i = 0; i < CANS_NEEDED; i++) {
-                let placed = false;
-                let attempts = 0;
-                while (!placed && attempts < 1000) {
-                    let x = 200 + Math.random() * (WORLD_WIDTH - 400);
-                    let y = 200 + Math.random() * (WORLD_HEIGHT - 400);
-                    // not too close to car or player start
-                    let distToCar = Math.hypot(x - car.x, y - car.y);
-                    let distToPlayer = Math.hypot(x - player.x, y - player.y);
-                    if (distToCar > 200 && distToPlayer > 200) {
-                        fuelCans.push({ x, y, r: 8, collected: false });
-                        placed = true;
-                    }
-                    attempts++;
-                }
-                if (!placed) fuelCans.push({ x: 500 + i*150, y: 2200 + i*100, r:8, collected: false });
-            }
-        }
-
-        // zombies
-        let zombies = [];
-        const ZOMBIE_SPEED = 0.9;
-        const ZOMBIE_R = 12;
-        const PLAYER_ATTACK_RANGE = 45;
-        const ZOMBIE_ATTACK_COOLDOWN = 40;
-        let globalAttackCooldown = 0;
-        let spawnTimer = 0;
-        const SPAWN_DELAY = 90; // frames
-
-        // movement flags
-        let moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
-
-        // carried fuel
-        let carriedFuel = 0;
-
-        // ---------- HELPER FUNCTIONS ----------
-        function updateUI() {
-            healthSpan.innerText = Math.max(0, player.health);
-            fuelSpan.innerText = car.fuel;
-            zombieSpan.innerText = zombies.length;
-        }
-
-        function resetGame() {
-            gameActive = true; // after reset we skip cutscene? but cutscene will be off. we'll set cutscene false.
-            gameWin = false;
-            gameOver = false;
-            player = { x: 1500, y: 1500, r: 12, health: 100, maxHealth: 100, speed: 4.5 };
-            car.fuel = 0;
-            zombies = [];
-            spawnTimer = 0;
-            globalAttackCooldown = 0;
-            carriedFuel = 0;
-            generateFuelCans();
-            updateUI();
-            messageDiv.innerText = "Find 5 fuel cans for the car...";
-            updateCamera();
-        }
-
-        // check win
-        function checkWin() {
-            if (car.fuel >= car.maxFuel && gameActive && !gameWin) {
-                gameWin = true;
-                gameActive = false;
-                messageDiv.innerText = "✨ CAR FIXED! YOU DRIVE AWAY... VICTORY ✨";
-            }
-        }
-
-        // attack
-        function attackZombies() {
-            if (!gameActive || gameWin || gameOver) return;
-            if (globalAttackCooldown > 0) return;
-            let killedAny = false;
-            for (let i = zombies.length - 1; i >= 0; i--) {
-                const z = zombies[i];
-                const dist = Math.hypot(player.x - z.x, player.y - z.y);
-                if (dist < PLAYER_ATTACK_RANGE) {
-                    zombies.splice(i, 1);
-                    killedAny = true;
-                }
-            }
-            if (killedAny) globalAttackCooldown = 15;
-            updateUI();
-        }
-
-        // collisions with zombies
-        function handleZombieCollisions() {
-            if (!gameActive || gameWin || gameOver) return;
-            for (let z of zombies) {
-                const dist = Math.hypot(player.x - z.x, player.y - z.y);
-                if (dist < player.r + z.r) {
-                    const angle = Math.atan2(player.y - z.y, player.x - z.x);
-                    player.x += Math.cos(angle) * 12;
-                    player.y += Math.sin(angle) * 12;
-                    // clamp to world
-                    player.x = Math.max(player.r, Math.min(WORLD_WIDTH - player.r, player.x));
-                    player.y = Math.max(player.r, Math.min(WORLD_HEIGHT - player.r, player.y));
-
-                    player.health -= 6;
-                    if (player.health <= 0) {
-                        player.health = 0;
-                        gameActive = false;
-                        gameOver = true;
-                        messageDiv.innerText = "☠️ YOU DIED... GAME OVER ☠️";
-                    }
-                    updateUI();
-                    break;
-            }
-        }
-        }
-
-        // collect fuel cans
-        function handleItemCollection() {
-            if (!gameActive || gameWin || gameOver) return;
-            for (let i = fuelCans.length - 1; i >= 0; i--) {
-                const can = fuelCans[i];
-                const dist = Math.hypot(player.x - can.x, player.y - can.y);
-                if (dist < player.r + can.r) {
-                    fuelCans.splice(i, 1);
-                    carriedFuel += FUEL_VALUE;
-                    messageDiv.innerText = `⛽ Fuel collected! Return to car (${carriedFuel}/100)`;
-                }
-            }
-        }
-
-        function depositFuelAtCar() {
-            if (!gameActive || gameWin || gameOver) return;
-            if (carriedFuel <= 0) return;
-            const distToCar = Math.hypot(player.x - car.x, player.y - car.y);
-            if (distToCar < player.r + car.r) {
-                let fuelNeeded = car.maxFuel - car.fuel;
-                let fuelToAdd = Math.min(carriedFuel, fuelNeeded);
-                car.fuel += fuelToAdd;
-                carriedFuel -= fuelToAdd;
-                messageDiv.innerText = `⛽ Fuel deposited. Total: ${car.fuel}/${car.maxFuel}`;
-                checkWin();
-                updateUI();
-            }
-        }
-
-        // move player
-        function movePlayer() {
-            if (!gameActive || gameWin || gameOver) return;
-            let dx = 0, dy = 0;
-            if (moveLeft) dx -= 1;
-            if (moveRight) dx += 1;
-            if (moveUp) dy -= 1;
-            if (moveDown) dy += 1;
-
-            if (dx !== 0 || dy !== 0) {
-                const len = Math.hypot(dx, dy);
-                dx = dx / len * player.speed;
-                dy = dy / len * player.speed;
-                let newX = player.x + dx;
-                let newY = player.y + dy;
-
-                newX = Math.max(player.r, Math.min(WORLD_WIDTH - player.r, newX));
-                newY = Math.max(player.r, Math.min(WORLD_HEIGHT - player.r, newY));
-
-                player.x = newX;
-                player.y = newY;
-            }
-        }
-
-        // zombie AI
-        function moveZombies() {
-            for (let z of zombies) {
-                const dx = player.x - z.x;
-                const dy = player.y - z.y;
-                const dist = Math.hypot(dx, dy);
-                if (dist > 0.5) {
-                    const moveX = (dx / dist) * ZOMBIE_SPEED;
-                    const moveY = (dy / dist) * ZOMBIE_SPEED;
-                    z.x += moveX;
-                    z.y += moveY;
-                }
-                // keep inside world
-                z.x = Math.max(ZOMBIE_R, Math.min(WORLD_WIDTH - ZOMBIE_R, z.x));
-                z.y = Math.max(ZOMBIE_R, Math.min(WORLD_HEIGHT - ZOMBIE_R, z.y));
-            }
-        }
-
-        // spawn zombies at world edges
-        function spawnZombie() {
-            if (!gameActive || gameWin || gameOver) return;
-            const side = Math.floor(Math.random() * 4);
-            let x, y;
-            const pad = 50;
-            if (side === 0) { // top
-                x = Math.random() * WORLD_WIDTH;
-                y = -pad;
-            } else if (side === 1) { // right
-                x = WORLD_WIDTH + pad;
-                y = Math.random() * WORLD_HEIGHT;
-            } else if (side === 2) { // bottom
-                x = Math.random() * WORLD_WIDTH;
-                y = WORLD_HEIGHT + pad;
-            } else { // left
-                x = -pad;
-                y = Math.random() * WORLD_HEIGHT;
-            }
-            zombies.push({ x, y, r: ZOMBIE_R });
-        }
-
-        // drawing (with camera translation)
-        function draw() {
-            ctx.clearRect(0, 0, VIEW_W, VIEW_H);
-
-            // save context and translate according to camera
-            ctx.save();
-            ctx.translate(-camera.x, -camera.y);
-
-            // background (forest grid)
-            ctx.fillStyle = '#3d5a3d';
-            ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            ctx.strokeStyle = '#4f734f';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < WORLD_WIDTH; i += 80) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#3a553a';
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, WORLD_HEIGHT);
-                ctx.stroke();
-            }
-            for (let i = 0; i < WORLD_HEIGHT; i += 80) {
-                ctx.beginPath();
-                ctx.strokeStyle = '#3a553a';
-                ctx.moveTo(0, i);
-                ctx.lineTo(WORLD_WIDTH, i);
-                ctx.stroke();
-            }
-
-            // car
-            ctx.shadowColor = '#0f1f1f';
-            ctx.shadowBlur = 12;
-            ctx.fillStyle = '#4b6b8f';
-            ctx.beginPath();
-            ctx.arc(car.x, car.y, car.r, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#dbb47a';
-            ctx.font = 'bold 22px monospace';
-            ctx.fillText('🚙', car.x-18, car.y+8);
+        if (name && price) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-image">${img}</div>
+                <h3>${name}</h3>
+                <p class="price">${price}</p>
+                <button>View Details</button>
+            `;
+            grid.prepend(card);
             
-            // fuel cans
-            ctx.fillStyle = '#d1b45a';
-            fuelCans.forEach(can => {
-                ctx.beginPath();
-                ctx.arc(can.x, can.y, can.r, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#ad822b';
-                ctx.font = '16px monospace';
-                ctx.fillText('⛽', can.x-12, can.y+6);
-                ctx.fillStyle = '#d1b45a';
-            });
-
-            // zombies
-            ctx.fillStyle = '#6b4226';
-            zombies.forEach(z => {
-                ctx.beginPath();
-                ctx.arc(z.x, z.y, z.r, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#431f0f';
-                ctx.beginPath();
-                ctx.arc(z.x-4, z.y-4, 4, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(z.x+4, z.y-4, 4, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#ad3a3a';
-                ctx.beginPath();
-                ctx.arc(z.x-2, z.y+3, 3, 0, 2*Math.PI);
-                ctx.fill();
-                ctx.fillStyle = '#6b4226';
-            });
-
-            // player
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = '#3b8f8f';
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.r, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#f4e8c1';
-            ctx.font = '22px monospace';
-            ctx.fillText('🧍', player.x-16, player.y+8);
-            ctx.shadowBlur = 0;
-
-            // carried fuel indicator
-            if (carriedFuel > 0) {
-                ctx.fillStyle = '#ffe68f';
-                ctx.font = 'bold 18px monospace';
-                ctx.fillText(`+${carriedFuel}`, player.x-30, player.y-25);
-            }
-
-            ctx.restore(); // restore to canvas space
-
-            // UI overlays (world space independent)
-            if (!gameActive && !cutscene) {
-                ctx.globalAlpha = 0.6;
-                ctx.fillStyle = '#0a0f0a';
-                ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#ebcba0';
-                ctx.font = 'bold 38px monospace';
-                ctx.fillText(gameWin ? '🏁 ESCAPED' : '💀 DIED', 220, 300);
-            }
+            // Clear inputs
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+        } else {
+            alert("Please enter a name and price.");
         }
-
-        // game loop
-        function gameLoop() {
-            if (!cutscene && gameActive && !gameWin && !gameOver) {
-                // spawning
-                spawnTimer++;
-                if (spawnTimer >= SPAWN_DELAY) {
-                    spawnZombie();
-                    spawnTimer = 0;
-                }
-
-                movePlayer();
-                handleItemCollection();
-                depositFuelAtCar();
-                moveZombies();
-                handleZombieCollisions();
-
-                if (globalAttackCooldown > 0) globalAttackCooldown--;
-
-                updateCamera();
-                updateUI();
-            }
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // ---------- CUTSCENE HANDLING ----------
-        function endCutscene() {
-            cutscene = false;
-            gameActive = true;
-            cutsceneOverlay.style.opacity = '0';
-            setTimeout(() => {
-                cutsceneOverlay.style.display = 'none';
-            }, 1000);
-        }
-
-        // detect any key or touch to end cutscene
-        function handleCutsceneInput(e) {
-            if (cutscene) {
-                e.preventDefault();
-                endCutscene();
-            }
-        }
-
-        // attach cutscene end listeners
-        window.addEventListener('keydown', (e) => {
-            if (cutscene) {
-                e.preventDefault();
-                endCutscene();
-            }
-        });
-        canvas.addEventListener('touchstart', (e) => {
-            if (cutscene) {
-                e.preventDefault();
-                endCutscene();
-            }
-        });
-        canvas.addEventListener('mousedown', (e) => {
-            if (cutscene) {
-                e.preventDefault();
-                endCutscene();
-            }
-        });
-        // also buttons should end cutscene
-        document.querySelectorAll('.dpad-btn, .attack-btn, #resetBtn').forEach(btn => {
-            btn.addEventListener('touchstart', (e) => {
-                if (cutscene) {
-                    e.preventDefault();
-                    endCutscene();
-                }
-            });
-            btn.addEventListener('mousedown', (e) => {
-                if (cutscene) {
-                    e.preventDefault();
-                    endCutscene();
-                }
-            });
-        });
-
-        // ---------- INPUT (keyboard + dpad) ----------
-        function keyDownHandler(e) {
-            if (!gameActive || gameWin || gameOver || cutscene) return;
-            const key = e.key;
-            e.preventDefault();
-            switch(key) {
-                case 'ArrowUp': moveUp = true; break;
-                case 'ArrowDown': moveDown = true; break;
-                case 'ArrowLeft': moveLeft = true; break;
-                case 'ArrowRight': moveRight = true; break;
-                case 'a': case 'A': attackZombies(); break;
-            }
-        }
-
-        function keyUpHandler(e) {
-            const key = e.key;
-            switch(key) {
-                case 'ArrowUp': moveUp = false; break;
-                case 'ArrowDown': moveDown = false; break;
-                case 'ArrowLeft': moveLeft = false; break;
-                case 'ArrowRight': moveRight = false; break;
-            }
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key.startsWith('Arrow') || e.key === 'a' || e.key === 'A') {
-                e.preventDefault();
-                if (cutscene) { endCutscene(); return; }
-                keyDownHandler(e);
-            }
-        });
-        window.addEventListener('keyup', keyUpHandler);
-
-        // touch buttons
-        document.getElementById('upBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveUp = true; });
-        document.getElementById('upBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveUp = false; });
-        document.getElementById('downBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveDown = true; });
-        document.getElementById('downBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveDown = false; });
-        document.getElementById('leftBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveLeft = true; });
-        document.getElementById('leftBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveLeft = false; });
-        document.getElementById('rightBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else moveRight = true; });
-        document.getElementById('rightBtn').addEventListener('touchend', (e) => { e.preventDefault(); moveRight = false; });
-
-        document.getElementById('attackBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else attackZombies(); });
-        document.getElementById('attackBtn').addEventListener('mousedown', (e) => { e.preventDefault(); if(cutscene) endCutscene(); else attackZombies(); });
-
-        // reset button
-        document.getElementById('resetBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (cutscene) endCutscene();
-            resetGame();
-            moveUp = false; moveDown = false; moveLeft = false; moveRight = false;
-            carriedFuel = 0;
-        });
-
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        // initial reset (with cutscene active)
-        resetGame();
-        gameActive = false; // because cutscene active
-        cutscene = true;
-        cutsceneOverlay.style.display = 'flex';
-        cutsceneOverlay.style.opacity = '1';
-
-        gameLoop();
-    })();
+    }
 </script>
+
 </body>
 </html>
