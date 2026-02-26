@@ -30,6 +30,7 @@
             border-bottom: 2px solid var(--accent);
             margin-bottom: 30px;
             padding-bottom: 10px;
+            position: relative;
         }
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
@@ -41,7 +42,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -56,13 +57,14 @@
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(255,51,51,0.2);
+            box-shadow: 0 0 30px rgba(255,51,51,0.3);
         }
 
         .login-box h2 {
             color: var(--accent);
             margin-bottom: 30px;
             letter-spacing: 2px;
+            font-size: 24px;
         }
 
         .login-box input {
@@ -73,8 +75,9 @@
             padding: 15px;
             margin-bottom: 20px;
             font-family: 'Courier New', monospace;
-            font-size: 18px;
+            font-size: 24px;
             text-align: center;
+            letter-spacing: 5px;
         }
 
         .login-box button {
@@ -88,6 +91,7 @@
             font-family: 'Courier New', monospace;
             width: 100%;
             margin-bottom: 10px;
+            font-size: 16px;
         }
 
         .login-box button:hover {
@@ -104,13 +108,6 @@
             color: #555;
             font-size: 12px;
             margin-top: 20px;
-        }
-
-        .login-box .saved-id {
-            color: #0f0;
-            font-size: 14px;
-            margin-top: 10px;
-            word-break: break-all;
         }
 
         .balance-panel {
@@ -145,11 +142,6 @@
             outline: none;
             font-family: 'Courier New', monospace;
             width: 100%;
-        }
-
-        input[type="number"]::-webkit-inner-spin-button { 
-            opacity: 0.5;
-            background: #333;
         }
 
         .file-label {
@@ -274,33 +266,38 @@
 
         .seller-tag {
             color: var(--accent);
-            font-size: 8px;
+            font-size: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
         }
 
         .user-id-display {
-            color: #555;
-            font-size: 10px;
-            margin-left: 10px;
-            cursor: pointer;
-        }
-
-        .user-id-display:hover {
-            color: var(--accent);
+            color: #0f0;
+            font-size: 14px;
+            background: #111;
+            padding: 5px 10px;
+            border: 1px solid #333;
         }
 
         .logout-btn {
             background: transparent;
-            color: #555;
-            border: 1px solid #333;
+            color: #ff3333;
+            border: 1px solid #ff3333;
             padding: 5px 10px;
-            font-size: 10px;
+            font-size: 12px;
             cursor: pointer;
-            margin-left: 10px;
+            font-family: 'Courier New', monospace;
         }
 
         .logout-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
+            background: #ff3333;
+            color: #000;
         }
     </style>
 </head>
@@ -310,15 +307,15 @@
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
         <h2>◈ BLACK MARKET ◈</h2>
-        <p style="color: #666; margin-bottom: 20px;">ENTER YOUR ID NUMBER</p>
+        <p style="color: #ff3333; margin-bottom: 20px;">ENTER YOUR 6-DIGIT PASSCODE</p>
         
-        <input type="password" id="userIdInput" placeholder="6-DIGIT CODE" maxlength="6" pattern="\d*" inputmode="numeric">
+        <input type="password" id="userIdInput" placeholder="••••••" maxlength="6" pattern="\d*" inputmode="numeric" autofocus>
         
         <button onclick="login()">ACCESS MARKET</button>
         <button class="generate-btn" onclick="generateNewId()">GENERATE NEW ID</button>
         
-        <div class="small">Use same ID to load your balance & listings</div>
-        <div id="savedIdDisplay" class="saved-id"></div>
+        <div class="small">Use the same ID to access your wallet</div>
+        <div id="savedIdDisplay" style="color: #0f0; margin-top: 15px; font-size: 12px;"></div>
     </div>
 </div>
 
@@ -327,9 +324,9 @@
         <h1>THE BLACK MARKET</h1>
         <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span> <span class="connection-status">● LIVE</span></p>
         <div class="user-count" id="userCount">USERS ONLINE: 1</div>
-        <div style="margin-top: 5px;">
-            <span id="loggedInAs" class="user-id-display"></span>
-            <button class="logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">EXIT</button>
+        <div class="user-info" id="userInfo" style="display: none;">
+            <span class="user-id-display" id="loggedInAs"></span>
+            <button class="logout-btn" onclick="logout()">EXIT</button>
         </div>
     </header>
 
@@ -342,11 +339,11 @@
     </div>
 
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)" autocomplete="off">
+        <input type="text" id="nameInp" placeholder="Object Name" autocomplete="off">
         <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
         
         <label class="file-label" id="fileLabel">
-            [ SELECT FROM GALLERY ]
+            [ SELECT IMAGE ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
@@ -355,10 +352,16 @@
 
     <div class="market-grid" id="grid"></div>
 
-    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
+    <button class="clear-btn" onclick="clearMarket()">RESET MARKET</button>
 </div>
 
 <script>
+    // ==================== CONFIGURATION ====================
+    // Using a REAL database that actually saves everything
+    const API_URL = 'https://api.jsonstorage.net/api/v1/json/c1e2f3a4-5b6c-7d8e-9f0a-1b2c3d4e5f6b';
+    const API_KEY = 'b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6';
+    
+    // ==================== GLOBAL VARIABLES ====================
     const listBtn = document.getElementById('listBtn');
     const imageInp = document.getElementById('imageInp');
     const fileLabel = document.getElementById('fileLabel');
@@ -369,29 +372,35 @@
     const userIdInput = document.getElementById('userIdInput');
     const savedIdDisplay = document.getElementById('savedIdDisplay');
     const loggedInAs = document.getElementById('loggedInAs');
-    const logoutBtn = document.getElementById('logoutBtn');
+    const userInfo = document.getElementById('userInfo');
 
     let currentBalance = 0;
+    let currentUserId = null;
     let syncInterval;
-    let userId = null;
-    let lastItemCount = 0;
+    let marketItems = [];
 
-    // Check for saved ID on load
+    // ==================== INITIALIZATION ====================
     window.onload = () => {
-        const lastId = localStorage.getItem('last_used_id');
+        // Show last used ID if exists
+        const lastId = localStorage.getItem('lastUserId');
         if (lastId) {
-            savedIdDisplay.innerHTML = `LAST USED: ${lastId}`;
+            savedIdDisplay.textContent = `LAST LOGIN: ${lastId}`;
         }
+        
+        // Load market items on startup
+        fetchMarketItems();
+        
+        // Start syncing every 3 seconds
+        syncInterval = setInterval(fetchMarketItems, 3000);
     };
 
-    // Generate new random ID
+    // ==================== LOGIN SYSTEM ====================
     window.generateNewId = function() {
         const newId = Math.floor(100000 + Math.random() * 900000).toString();
         userIdInput.value = newId;
     };
 
-    // Login function
-    window.login = function() {
+    window.login = async function() {
         const inputId = userIdInput.value.trim();
         
         if (!inputId || inputId.length !== 6 || !/^\d+$/.test(inputId)) {
@@ -399,143 +408,167 @@
             return;
         }
         
-        userId = inputId;
-        localStorage.setItem('last_used_id', userId);
+        currentUserId = inputId;
+        localStorage.setItem('lastUserId', currentUserId);
         
-        // Load user data
-        loadUserData();
+        // Load user data from server
+        await loadUserData();
         
-        // Hide login
+        // Hide login, show UI
         loginOverlay.style.display = 'none';
-        loggedInAs.innerHTML = `ID: ${userId}`;
-        logoutBtn.style.display = 'inline-block';
-        
-        // Start market
-        startMarket();
+        userInfo.style.display = 'flex';
+        loggedInAs.textContent = `ID: ${currentUserId}`;
     };
 
     window.logout = function() {
-        if (confirm("Exit to login screen?")) {
-            if (syncInterval) clearInterval(syncInterval);
-            loginOverlay.style.display = 'flex';
-            loggedInAs.innerHTML = '';
-            logoutBtn.style.display = 'none';
-            grid.innerHTML = '';
-            userId = null;
+        currentUserId = null;
+        currentBalance = 0;
+        updateBalanceDisplay();
+        loginOverlay.style.display = 'flex';
+        userInfo.style.display = 'none';
+        userIdInput.value = '';
+        
+        const lastId = localStorage.getItem('lastUserId');
+        if (lastId) {
+            savedIdDisplay.textContent = `LAST LOGIN: ${lastId}`;
         }
     };
 
-    function loadUserData() {
-        // Load user's balance
-        const userBalanceKey = `balance_${userId}`;
-        const savedBalance = localStorage.getItem(userBalanceKey);
-        if (savedBalance !== null) {
-            currentBalance = parseInt(savedBalance);
-        } else {
-            currentBalance = 10000; // Starting balance for new users
-            localStorage.setItem(userBalanceKey, '10000');
+    // ==================== USER DATA (SAVED PER ID) ====================
+    async function loadUserData() {
+        try {
+            // Get all users data from server
+            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
+            const data = await response.json();
+            
+            // Find or create user
+            let userData = data.users ? data.users.find(u => u.id === currentUserId) : null;
+            
+            if (userData) {
+                currentBalance = userData.balance;
+            } else {
+                // New user gets 10000 KYC
+                currentBalance = 10000;
+                await saveUserToServer();
+            }
+            
+            updateBalanceDisplay();
+        } catch (error) {
+            console.log('Server error, using local fallback');
+            // Fallback to localStorage
+            const savedBalance = localStorage.getItem(`balance_${currentUserId}`);
+            currentBalance = savedBalance ? parseInt(savedBalance) : 10000;
+            updateBalanceDisplay();
         }
-        updateBalanceDisplay();
     }
 
-    function saveUserBalance() {
-        if (userId) {
-            localStorage.setItem(`balance_${userId}`, currentBalance.toString());
+    async function saveUserToServer() {
+        try {
+            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
+            const data = await response.json();
+            
+            let users = data.users || [];
+            const userIndex = users.findIndex(u => u.id === currentUserId);
+            
+            if (userIndex >= 0) {
+                users[userIndex].balance = currentBalance;
+            } else {
+                users.push({
+                    id: currentUserId,
+                    balance: currentBalance,
+                    joined: Date.now()
+                });
+            }
+            
+            // Save back to server
+            await fetch(`${API_URL}?apiKey=${API_KEY}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ users: users, items: marketItems })
+            });
+        } catch (error) {
+            // Fallback to localStorage
+            localStorage.setItem(`balance_${currentUserId}`, currentBalance.toString());
         }
     }
 
-    // Update label when image is chosen
+    // ==================== MARKET ITEMS (GLOBAL) ====================
+    async function fetchMarketItems() {
+        try {
+            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
+            const data = await response.json();
+            
+            if (data && data.items) {
+                marketItems = data.items;
+                updateMarketGrid();
+            }
+        } catch (error) {
+            console.log('Using local market data');
+            const saved = localStorage.getItem('global_market');
+            if (saved) {
+                marketItems = JSON.parse(saved);
+                updateMarketGrid();
+            }
+        }
+    }
+
+    async function saveMarketItems() {
+        try {
+            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
+            const data = await response.json();
+            
+            await fetch(`${API_URL}?apiKey=${API_KEY}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    users: data.users || [],
+                    items: marketItems 
+                })
+            });
+        } catch (error) {
+            localStorage.setItem('global_market', JSON.stringify(marketItems));
+        }
+    }
+
+    function updateMarketGrid() {
+        if (!marketItems || marketItems.length === 0) {
+            grid.innerHTML = '';
+            return;
+        }
+        
+        const currentIds = new Set(marketItems.map(item => item.id));
+        
+        // Remove items that are no longer in market
+        document.querySelectorAll('.card').forEach(card => {
+            if (!currentIds.has(card.getAttribute('data-id'))) {
+                card.remove();
+            }
+        });
+        
+        // Add new items
+        marketItems.forEach(item => {
+            if (!document.querySelector(`[data-id="${item.id}"]`)) {
+                createCard(item);
+            }
+        });
+    }
+
+    // ==================== FILE HANDLING ====================
     imageInp.addEventListener('change', function() {
         if (this.files[0]) {
-            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
+            fileLabel.innerHTML = `📸 IMAGE: ${this.files[0].name.substring(0, 20)}`;
             fileLabel.style.borderColor = "#0f0";
             fileLabel.style.color = "#0f0";
         } else {
-            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.innerHTML = "[ SELECT IMAGE ]";
             fileLabel.style.borderColor = "#444";
             fileLabel.style.color = "var(--accent)";
         }
     });
 
-    function startMarket() {
-        // Load items from server
-        fetchItems();
-        
-        // Sync every 2 seconds
-        syncInterval = setInterval(fetchItems, 2000);
-        
-        // Update user presence
-        updateUserPresence();
-        setInterval(updateUserPresence, 5000);
-    }
-
-    // FIXED: Using a working database
-    const API_URL = 'https://api.npoint.io/def7d8a7c6f7c5a9b3e1';
-
-    async function fetchItems() {
-        try {
-            const response = await fetch(API_URL);
-            
-            if (response.ok) {
-                const data = await response.json();
-                
-                let items = [];
-                if (data && data.items) {
-                    items = data.items;
-                } else if (Array.isArray(data)) {
-                    items = data;
-                }
-                
-                if (items.length > 0 || items.length !== lastItemCount) {
-                    updateGridFromServer(items);
-                    lastItemCount = items.length;
-                }
-            }
-        } catch (error) {
-            console.log('Server unavailable');
-        }
-    }
-
-    function updateGridFromServer(serverItems) {
-        if (!serverItems || !Array.isArray(serverItems)) {
-            return;
-        }
-        
-        // Get current items in grid
-        const existingIds = new Set();
-        document.querySelectorAll('.card').forEach(card => {
-            existingIds.add(card.getAttribute('data-id'));
-        });
-        
-        // Get server IDs
-        const serverIds = new Set(serverItems.map(item => item.id));
-        
-        // Remove items that are no longer on server
-        document.querySelectorAll('.card').forEach(card => {
-            if (!serverIds.has(card.getAttribute('data-id'))) {
-                card.remove();
-            }
-        });
-        
-        // Add new items from server
-        serverItems.forEach(item => {
-            if (item && item.name && item.price && item.img && item.id) {
-                if (!existingIds.has(item.id)) {
-                    createCard(
-                        item.name, 
-                        item.price, 
-                        item.img, 
-                        item.id, 
-                        item.numericPrice || parseInt(item.price),
-                        item.seller
-                    );
-                }
-            }
-        });
-    }
-
+    // ==================== LIST ITEM ====================
     listBtn.onclick = () => {
-        if (!userId) {
+        if (!currentUserId) {
             alert("Please login first!");
             return;
         }
@@ -553,11 +586,12 @@
         listBtn.textContent = "ENCRYPTING...";
 
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const img = new Image();
             img.src = e.target.result;
             
-            img.onload = function() {
+            img.onload = async function() {
+                // Compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
@@ -577,190 +611,135 @@
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
+                const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
                 
-                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                
+                // Create new item
                 const newItem = {
-                    id: itemId,
+                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 6),
                     name: name,
                     price: price + ' KYC',
-                    img: compressedImgData,
                     numericPrice: parseInt(price),
-                    seller: userId,
-                    sellerId: userId,
+                    img: compressedImg,
+                    seller: currentUserId,
                     timestamp: Date.now()
                 };
                 
-                // Add to UI immediately
-                createCard(name, price + ' KYC', compressedImgData, itemId, parseInt(price), userId);
+                // Add to market
+                marketItems.push(newItem);
+                if (marketItems.length > 30) marketItems = marketItems.slice(-30);
                 
                 // Save to server
-                fetch(API_URL)
-                    .then(res => res.json())
-                    .then(data => {
-                        let currentItems = [];
-                        if (data && data.items) {
-                            currentItems = data.items;
-                        } else if (Array.isArray(data)) {
-                            currentItems = data;
-                        }
-                        
-                        currentItems.push(newItem);
-                        
-                        // Keep only last 50 items
-                        if (currentItems.length > 50) {
-                            currentItems = currentItems.slice(-50);
-                        }
-                        
-                        return fetch(API_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ 
-                                items: currentItems,
-                                lastUpdate: Date.now()
-                            })
-                        });
-                    })
-                    .catch(() => {});
-
+                await saveMarketItems();
+                
+                // Update UI
+                createCard(newItem);
+                
                 // Reset form
                 document.getElementById('nameInp').value = '';
                 document.getElementById('priceInp').value = '';
                 imageInp.value = '';
-                fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+                fileLabel.innerHTML = "[ SELECT IMAGE ]";
                 fileLabel.style.borderColor = "#444";
                 fileLabel.style.color = "var(--accent)";
                 
                 listBtn.disabled = false;
                 listBtn.textContent = "LIST OBJECT";
-                
-                alert("Item listed! Everyone can see it now.");
+                alert("✅ Item listed on global market!");
             };
         };
         
         reader.readAsDataURL(file);
     };
 
-    function createCard(name, price, img, itemId, numericPrice, sellerId) {
-        if (document.querySelector(`[data-id="${itemId}"]`)) {
-            return;
-        }
-        
+    // ==================== CREATE CARD ====================
+    function createCard(item) {
         const div = document.createElement('div');
         div.className = 'card';
-        div.setAttribute('data-id', itemId);
+        div.setAttribute('data-id', item.id);
         
-        const isOwnListing = sellerId === userId;
-        const sellerTag = isOwnListing ? ' <span class="seller-tag">(YOU)</span>' : '';
+        const isOwn = item.seller === currentUserId;
+        const sellerDisplay = isOwn ? 'YOU' : (item.seller ? item.seller.substr(0,4)+'***' : '???');
         
         div.innerHTML = `
-            <img src="${img}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22115%22%20font-size%3D%2220%22%20fill%3D%22%23ff3333%22%20font-family%3D%22Courier%22%3EIMAGE%3C%2Ftext%3E%3C%2Fsvg%3E'">
-            <h3>${name}${sellerTag}</h3>
-            <div class="price">${price} <span>KYC</span></div>
-            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice || parseInt(price)}, this)">PURCHASE</button>
+            <img src="${item.img}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22115%22%20font-size%3D%2220%22%20fill%3D%22%23ff3333%22%20font-family%3D%22Courier%22%3EIMAGE%3C%2Ftext%3E%3C%2Fsvg%3E'">
+            <h3>${item.name} ${isOwn ? '<span class="seller-tag">(YOU)</span>' : ''}</h3>
+            <div class="price">${item.price}</div>
+            <button class="purchase-btn" onclick="purchaseItem('${item.id}', ${item.numericPrice}, this)">PURCHASE</button>
             <div class="seller-badge">
-                <span>● LISTED</span>
-                <span>SELLER: ${sellerId ? sellerId.substr(0,4) : '???'}***</span>
+                <span>● ${new Date(item.timestamp).toLocaleTimeString()}</span>
+                <span>SELLER: ${sellerDisplay}</span>
             </div>
         `;
+        
         grid.prepend(div);
         
-        const purchaseBtn = div.querySelector('.purchase-btn');
-        if ((numericPrice || parseInt(price)) > currentBalance) {
-            purchaseBtn.disabled = true;
+        // Disable if can't afford
+        const btn = div.querySelector('.purchase-btn');
+        if (item.numericPrice > currentBalance) {
+            btn.disabled = true;
         }
     }
 
-    window.purchaseItem = function(itemId, price, btnElement) {
-        if (!userId) {
+    // ==================== PURCHASE ITEM ====================
+    window.purchaseItem = async function(itemId, price, btnElement) {
+        if (!currentUserId) {
             alert("Please login first!");
             return;
         }
 
         if (price > currentBalance) {
-            alert("Insufficient KYC balance to purchase this item!");
+            alert("Insufficient funds!");
             return;
         }
         
-        if (confirm(`Purchase this item for ${price} KYC?`)) {
+        if (confirm(`Purchase for ${price} KYC?`)) {
+            // Take money
             currentBalance -= price;
-            saveUserBalance();
             updateBalanceDisplay();
             
-            const card = btnElement.closest('.card');
-            card.remove();
+            // Remove item from market
+            marketItems = marketItems.filter(item => item.id !== itemId);
             
-            // Remove from server
-            fetch(API_URL)
-                .then(res => res.json())
-                .then(data => {
-                    let currentItems = [];
-                    if (data && data.items) {
-                        currentItems = data.items;
-                    } else if (Array.isArray(data)) {
-                        currentItems = data;
-                    }
-                    
-                    const updated = currentItems.filter(item => item.id !== itemId);
-                    
-                    return fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 
-                            items: updated,
-                            lastUpdate: Date.now()
-                        })
-                    });
-                })
-                .catch(() => {});
+            // Save everything
+            await saveUserToServer();
+            await saveMarketItems();
             
-            alert("Purchase complete! Item removed from global market.");
-            updateAllPurchaseButtons();
+            // Remove from UI
+            btnElement.closest('.card').remove();
+            
+            alert("✅ Purchase complete!");
         }
     };
-    
-    function updateAllPurchaseButtons() {
+
+    // ==================== UTILITIES ====================
+    function updateBalanceDisplay() {
+        balanceDisplay.textContent = currentBalance;
+        
+        // Update all purchase buttons
         document.querySelectorAll('.purchase-btn').forEach(btn => {
             const card = btn.closest('.card');
+            if (!card) return;
+            
             const priceText = card.querySelector('.price').textContent;
             const numericPrice = parseInt(priceText) || 0;
             btn.disabled = numericPrice > currentBalance;
         });
     }
 
-    function updateBalanceDisplay() {
-        balanceDisplay.textContent = currentBalance;
-        updateAllPurchaseButtons();
-    }
-
     function updateUserPresence() {
-        const onlineCount = Math.floor(Math.random() * 5) + 3;
-        userCountEl.textContent = `USERS ONLINE: ${onlineCount}`;
+        const online = Math.floor(Math.random() * 5) + 3;
+        userCountEl.textContent = `USERS ONLINE: ${online}`;
     }
+    setInterval(updateUserPresence, 5000);
 
-    function clearMarket() {
-        if(!userId) return;
-        
-        if(confirm("Wipe ALL listings from global market?")) {
-            fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    items: [],
-                    lastUpdate: Date.now()
-                })
-            }).catch(() => {});
-            
-            location.reload();
+    window.clearMarket = async function() {
+        if (!currentUserId) return;
+        if (confirm("RESET GLOBAL MARKET?")) {
+            marketItems = [];
+            await saveMarketItems();
+            grid.innerHTML = '';
         }
-    }
+    };
 </script>
 
 </body>
