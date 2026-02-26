@@ -478,28 +478,28 @@
         <button class="action-btn" onclick="sortByPrice()">📊 SORT BY PRICE</button>
     </div>
 
-    <!-- Upload Area -->
+    <!-- Upload Area - INFINITE LISTINGS FIXED -->
     <div class="upload-area">
         <div class="upload-header">
-            <span>NEW LISTING</span>
+            <span>NEW LISTING - INFINITE MODE ACTIVE</span>
             <div class="upload-tabs">
-                <span class="tab active">STANDARD</span>
-                <span class="tab">PREMIUM</span>
-                <span class="tab">AUCTION</span>
+                <span class="tab active">UNLIMITED</span>
+                <span class="tab">BULK</span>
+                <span class="tab">MASS</span>
             </div>
         </div>
         
         <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
         <textarea id="descInp" placeholder="Description (optional)"></textarea>
         <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
-        <div class="input-hint">Listing is FREE - No fees!</div>
+        <div class="input-hint">🔥 LISTING IS FREE - POST INFINITE ITEMS 🔥</div>
         
         <label class="file-label" id="fileLabel">
-            [ SELECT FROM GALLERY ]
+            [ SELECT MULTIPLE IMAGES - INFINITE LISTING ]
             <input type="file" id="imageInp" accept="image/*" style="display:none" multiple>
         </label>
 
-        <button id="listBtn">LIST OBJECT</button>
+        <button id="listBtn">🚀 LIST INFINITE OBJECTS 🚀</button>
     </div>
 
     <!-- Market Controls -->
@@ -521,13 +521,15 @@
         <button class="page-btn" onclick="changePage(1)">1</button>
         <button class="page-btn" onclick="changePage(2)">2</button>
         <button class="page-btn" onclick="changePage(3)">3</button>
+        <button class="page-btn" onclick="changePage(4)">4</button>
+        <button class="page-btn" onclick="changePage(5)">5</button>
     </div>
 
     <!-- Activity Feed -->
     <div class="activity-feed">
         <div class="feed-header">⟡ LIVE ACTIVITY FEED ⟡</div>
         <div id="activityFeed">
-            <div class="feed-item"><span class="time">[00:00]</span> <span class="event">●</span> Market initialized</div>
+            <div class="feed-item"><span class="time">[00:00]</span> <span class="event">●</span> Market initialized - INFINITE LISTINGS ENABLED</div>
         </div>
     </div>
 
@@ -557,11 +559,11 @@
     // Update file label when images are selected
     imageInp.addEventListener('change', function() {
         if (this.files.length > 0) {
-            fileLabel.innerText = `📸 ${this.files.length} IMAGE${this.files.length > 1 ? 'S' : ''} SELECTED`;
+            fileLabel.innerText = `🔥 ${this.files.length} IMAGE${this.files.length > 1 ? 'S' : ''} SELECTED - READY FOR INFINITE LISTING 🔥`;
             fileLabel.style.borderColor = "#0f0";
             fileLabel.style.color = "#0f0";
         } else {
-            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.innerText = "[ SELECT MULTIPLE IMAGES - INFINITE LISTING ]";
             fileLabel.style.borderColor = "#444";
             fileLabel.style.color = "var(--accent)";
         }
@@ -595,7 +597,7 @@
         activityLog = savedActivity;
     }
 
-    // List button - UNLIMITED LISTINGS, no money taken
+    // LIST BUTTON - NOW WITH TRUE INFINITE LISTING!!! 🔥🔥🔥
     listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value.trim();
         const desc = document.getElementById('descInp').value.trim();
@@ -603,63 +605,82 @@
         const files = imageInp.files;
 
         if (!name || !price || files.length === 0) {
-            alert("Fill all fields and select at least ONE image!");
+            alert("Fill all fields and select AT LEAST ONE image! YOU CAN SELECT 100+ IMAGES!");
             return;
         }
 
-        // Process each image (UNLIMITED)
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imgData = e.target.result;
-                
-                // Create unique ID
-                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
-                
-                // Add to my listings
-                myListings.push(itemId);
-                
-                // Save item
-                const item = {
-                    id: itemId,
-                    name: name,
-                    description: desc || "No description provided",
-                    price: price + ' KYC',
-                    img: imgData,
-                    numericPrice: parseInt(price),
-                    seller: 'ANON-' + Math.floor(Math.random() * 9999),
-                    timestamp: Date.now(),
-                    sellerId: 'me'
-                };
-                
-                // Save to main storage
-                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-                saved.push(item);
-                localStorage.setItem('market_items', JSON.stringify(saved));
-                
-                // Save my listings
-                localStorage.setItem('my_listings', JSON.stringify(myListings));
-                
-                // Log activity
-                addActivity(`New listing: ${name} for ${price} KYC`);
-                
-                // Render
-                renderMarket();
-                updateStats();
-            };
-            reader.readAsDataURL(file);
-        });
+        let itemsListed = 0;
+        let totalItems = files.length;
 
-        // Reset form
-        document.getElementById('nameInp').value = '';
-        document.getElementById('descInp').value = '';
-        document.getElementById('priceInp').value = '';
-        imageInp.value = '';
-        fileLabel.innerText = "[ SELECT FROM GALLERY ]";
-        fileLabel.style.borderColor = "#444";
-        fileLabel.style.color = "var(--accent)";
-        
-        alert(`${files.length} item${files.length > 1 ? 's' : ''} listed successfully!`);
+        // Process EACH AND EVERY image - INFINITE LOOP FIXED!
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            
+            // Use closure to capture the correct file info
+            reader.onload = (function(currentFile) {
+                return function(e) {
+                    const imgData = e.target.result;
+                    
+                    // Create unique ID for EACH item
+                    const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + i + '-' + Date.now();
+                    
+                    // Add to my listings
+                    myListings.push(itemId);
+                    
+                    // Create item with unique name if multiple
+                    let itemName = name;
+                    if (files.length > 1) {
+                        itemName = name + ' #' + (i + 1);
+                    }
+                    
+                    const item = {
+                        id: itemId,
+                        name: itemName,
+                        description: desc || "No description provided",
+                        price: price + ' KYC',
+                        img: imgData,
+                        numericPrice: parseInt(price),
+                        seller: 'ANON-' + Math.floor(Math.random() * 9999),
+                        timestamp: Date.now() + i, // Slightly different timestamps
+                        sellerId: 'me'
+                    };
+                    
+                    // Save to main storage
+                    const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                    saved.push(item);
+                    localStorage.setItem('market_items', JSON.stringify(saved));
+                    
+                    itemsListed++;
+                    
+                    // When ALL items are processed
+                    if (itemsListed === totalItems) {
+                        // Save my listings
+                        localStorage.setItem('my_listings', JSON.stringify(myListings));
+                        
+                        // Log activity
+                        addActivity(`MASSIVE LISTING: ${totalItems} x ${name} for ${price} KYC each`);
+                        
+                        // Render
+                        renderMarket();
+                        updateStats();
+                        
+                        // Reset form
+                        document.getElementById('nameInp').value = '';
+                        document.getElementById('descInp').value = '';
+                        document.getElementById('priceInp').value = '';
+                        imageInp.value = '';
+                        fileLabel.innerText = "[ SELECT MULTIPLE IMAGES - INFINITE LISTING ]";
+                        fileLabel.style.borderColor = "#444";
+                        fileLabel.style.color = "var(--accent)";
+                        
+                        alert(`🚀 SUCCESS! ${totalItems} ITEMS LISTED! 🚀\n\nYOU CAN LIST INFINITE ITEMS! NO LIMITS!`);
+                    }
+                };
+            })(file);
+            
+            reader.readAsDataURL(file);
+        }
     };
 
     // Generate random item
@@ -922,7 +943,8 @@
                     'New listing appeared',
                     'Price fluctuation detected',
                     'Secure connection established',
-                    'Anonymous transaction processed'
+                    'Anonymous transaction processed',
+                    'INFINITE LISTINGS DETECTED'
                 ];
                 addActivity(actions[Math.floor(Math.random() * actions.length)]);
             }
