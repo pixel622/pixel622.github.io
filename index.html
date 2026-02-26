@@ -3,148 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | Cloud Sync</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
+    <title>THE BLACK MARKET | Anonymous</title>
     <style>
-        :root { --accent: #ff3333; --btc: #f7931a; --bg: #050505; }
-        body { background: var(--bg); color: #bbb; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        :root {
+            --accent: #ff3333;
+            --bg: #050505;
+            --card-bg: #111;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #bbb;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
         .container { max-width: 900px; margin: auto; }
 
-        /* Login & Wallet Header */
-        .top-nav {
-            background: #111; border: 1px solid #333; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 1000; margin-bottom: 20px;
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
         }
-        .balance { color: var(--btc); font-weight: bold; font-size: 1.2em; }
-        
-        .login-box input { background: #000; border: 1px solid var(--accent); color: #fff; padding: 5px; width: 100px; }
-        
-        header { text-align: center; border-bottom: 2px solid var(--accent); margin-bottom: 30px; }
-        h1 { color: var(--accent); letter-spacing: 5px; }
 
-        /* Listing Section */
-        .upload-area { background: #111; padding: 20px; border: 1px solid #222; display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-        input[type="text"], input[type="number"] { background: #000; border: 1px solid #333; color: #0f0; padding: 10px; }
-        
-        .file-btn { background: #222; border: 1px solid #444; padding: 10px; text-align: center; cursor: pointer; color: var(--accent); }
-        #listBtn { background: var(--accent); color: white; border: none; padding: 15px; font-weight: bold; cursor: pointer; }
+        h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
+
+        /* Listing Box */
+        .upload-area {
+            background: var(--card-bg);
+            border: 1px dashed #444;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        input[type="text"] {
+            background: #000;
+            border: 1px solid #333;
+            color: #0f0;
+            padding: 12px;
+            outline: none;
+        }
+
+        /* The Custom Gallery Button */
+        .file-label {
+            background: #222;
+            border: 1px solid #444;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
+
+        #listBtn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #listBtn:hover { opacity: 0.8; }
 
         /* Grid */
-        .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: #0a0a0a; border: 1px solid #222; padding: 10px; position: relative; }
-        .card img { width: 100%; height: 180px; object-fit: cover; }
-        .card.sold { opacity: 0.5; filter: grayscale(1); }
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            padding: 10px;
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #222;
+        }
+
+        .card h3 { margin: 10px 0 5px 0; color: #eee; }
+        .card p { color: #0f0; margin: 0; font-weight: bold; }
         
-        .buy-btn { width: 100%; padding: 10px; background: #008000; color: #fff; border: none; cursor: pointer; margin-top: 10px; }
-        .sold-tag { position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); color: red; border: 3px solid red; font-size: 2em; font-weight: bold; display: none; }
-        .card.sold .sold-tag { display: block; }
+        .clear-btn {
+            margin-top: 20px;
+            background: transparent;
+            color: #555;
+            border: 1px solid #333;
+            cursor: pointer;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-nav">
-        <div class="login-box">
-            <input type="text" id="userKey" placeholder="Enter ID">
-            <button onclick="syncAccount()" style="background:var(--accent); color:#fff; border:none; cursor:pointer;">SYNC PROGRESS</button>
-        </div>
-        <div class="balance">WALLET: <span id="btcVal">10,000,000</span> BTC</div>
-    </div>
-
     <header>
         <h1>THE BLACK MARKET</h1>
-        <p>[ SESSION_SECURED ]</p>
+        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name">
-        <input type="number" id="priceInp" placeholder="Price (BTC)">
-        <label class="file-btn" id="fileLabel">
+        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
+        <input type="text" id="priceInp" placeholder="Price (e.g. 1.5 ETH)">
+        
+        <label class="file-label" id="fileLabel">
             [ SELECT FROM GALLERY ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
+
         <button id="listBtn">LIST OBJECT</button>
     </div>
 
     <div class="market-grid" id="grid"></div>
+
+    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
 </div>
 
 <script>
-    // --- DATABASE CONFIG ---
-    // Replace with your Firebase config to enable cross-device sync!
-    const firebaseConfig = { apiKey: "NULL", databaseURL: "NULL" };
+    const listBtn = document.getElementById('listBtn');
+    const imageInp = document.getElementById('imageInp');
+    const fileLabel = document.getElementById('fileLabel');
+    const grid = document.getElementById('grid');
 
-    let wallet = parseFloat(localStorage.getItem('btc_bal')) || 10000000;
-    let listings = JSON.parse(localStorage.getItem('mkt_items')) || [];
+    // Update label when image is chosen
+    imageInp.addEventListener('change', function() {
+        if (this.files[0]) {
+            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
+            fileLabel.style.borderColor = "#0f0";
+            fileLabel.style.color = "#0f0";
+        }
+    });
 
-    // Initialize UI
-    function updateUI() {
-        document.getElementById('btcVal').innerText = wallet.toLocaleString();
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        listings.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = `card ${item.sold ? 'sold' : ''}`;
-            div.innerHTML = `
-                <div class="sold-tag">SOLD</div>
-                <img src="${item.img}">
-                <h3>${item.name}</h3>
-                <p style="color:var(--btc)">${item.price} BTC</p>
-                <button class="buy-btn" onclick="buy(${index})" ${item.sold ? 'disabled' : ''}>${item.sold ? 'REDACTED' : 'BUY'}</button>
-            `;
-            grid.prepend(div);
-        });
-        localStorage.setItem('btc_bal', wallet);
-        localStorage.setItem('mkt_items', JSON.stringify(listings));
-    }
-
-    // Image Input Bug Fix
-    document.getElementById('imageInp').onchange = function() {
-        if(this.files[0]) document.getElementById('fileLabel').innerText = "READY: " + this.files[0].name;
+    // Load items from local storage on startup
+    window.onload = () => {
+        const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+        saved.forEach(item => createCard(item.name, item.price, item.img));
     };
 
-    // Listing Object Fix
-    document.getElementById('listBtn').onclick = () => {
+    listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value;
-        const price = parseFloat(document.getElementById('priceInp').value);
-        const file = document.getElementById('imageInp').files[0];
+        const price = document.getElementById('priceInp').value;
+        const file = imageInp.files[0];
 
-        if(!name || !price || !file) return alert("Missing Data!");
+        if (!name || !price || !file) {
+            alert("Fill all fields and select an image!");
+            return;
+        }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-            listings.push({ name, price, img: e.target.result, sold: false });
-            updateUI();
-            // Reset Form
+        reader.onload = function(e) {
+            const imgData = e.target.result;
+            
+            // 1. Add to UI
+            createCard(name, price, imgData);
+            
+            // 2. Save to Local Storage (Persistence)
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            saved.push({name, price, img: imgData});
+            localStorage.setItem('market_items', JSON.stringify(saved));
+
+            // Reset inputs
             document.getElementById('nameInp').value = '';
             document.getElementById('priceInp').value = '';
-            document.getElementById('fileLabel').innerText = "[ SELECT FROM GALLERY ]";
+            imageInp.value = '';
+            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.style.color = "var(--accent)";
         };
         reader.readAsDataURL(file);
     };
 
-    // Buy Logic
-    window.buy = (index) => {
-        if (wallet >= listings[index].price) {
-            wallet -= listings[index].price;
-            listings[index].sold = true;
-            updateUI();
-        } else {
-            alert("FUNDS NOT FOUND");
+    function createCard(name, price, img) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <img src="${img}">
+            <h3>${name}</h3>
+            <p>${price}</p>
+        `;
+        grid.prepend(div);
+    }
+
+    function clearMarket() {
+        if(confirm("Wipe all listings?")) {
+            localStorage.removeItem('market_items');
+            location.reload();
         }
-    };
-
-    // Fake Sync Logic (Requires Firebase for real cross-device)
-    window.syncAccount = () => {
-        const id = document.getElementById('userKey').value;
-        if(!id) return alert("Enter a User ID");
-        alert("Account " + id + " linked. (Note: Real cross-device sync requires a Firebase API Key)");
-    };
-
-    updateUI();
+    }
 </script>
 
 </body>
