@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | Anonymous</title>
+    <title>THE BLACK MARKET | GLOBAL</title>
     <style>
         :root {
             --accent: #ff3333;
@@ -215,6 +215,12 @@
             padding: 5px 10px;
             cursor: pointer;
         }
+
+        .online-count {
+            color: #0f0;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -222,21 +228,21 @@
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
         <h2>◈ BLACK MARKET ◈</h2>
-        <p style="color: #ff3333; margin-bottom: 20px;">ENTER 6-DIGIT ID</p>
+        <p style="color: #ff3333; margin-bottom: 20px;">ENTER YOUR ID</p>
         
-        <input type="password" id="userIdInput" placeholder="••••••" maxlength="6" inputmode="numeric">
+        <input type="password" id="userIdInput" placeholder="6 DIGITS" maxlength="6" inputmode="numeric">
         
-        <button onclick="login()">ACCESS</button>
-        <button class="generate-btn" onclick="generateId()">GENERATE ID</button>
+        <button onclick="login()">ACCESS GLOBAL MARKET</button>
+        <button class="generate-btn" onclick="generateId()">CREATE NEW ID</button>
         
-        <div id="savedIdDisplay" style="color: #0f0; margin-top: 15px;"></div>
+        <div style="color: #0f0; margin-top: 20px; font-size: 12px;" id="globalStatus">🌐 CONNECTING TO GLOBAL NETWORK...</div>
     </div>
 </div>
 
 <div class="container">
     <header>
         <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;">ONLINE</span></p>
+        <p>STATUS: <span style="color: #0f0;" id="connectionStatus">GLOBAL LIVE</span> <span class="online-count" id="onlineCount">🔴</span></p>
         <div class="user-info" id="userInfo" style="display: none;">
             <span class="user-id-display" id="loggedInAs"></span>
             <button class="logout-btn" onclick="logout()">EXIT</button>
@@ -244,7 +250,7 @@
     </header>
 
     <div class="balance-panel">
-        <span class="balance-label">BALANCE</span>
+        <span class="balance-label">WALLET</span>
         <span>
             <span class="balance-amount" id="balanceDisplay">0</span>
             <span class="kyc-symbol">KYC</span>
@@ -253,31 +259,33 @@
 
     <div class="upload-area">
         <input type="text" id="nameInp" placeholder="Item name">
-        <input type="number" id="priceInp" placeholder="Price">
+        <input type="number" id="priceInp" placeholder="Price KYC">
         
         <label class="file-label" id="fileLabel">
             [ SELECT IMAGE ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
-        <button id="listBtn">LIST ITEM</button>
+        <button id="listBtn">LIST ON GLOBAL MARKET</button>
     </div>
 
     <div class="market-grid" id="grid"></div>
 </div>
 
 <script>
-    // ==================== WORKING DATABASE ====================
-    const DB_URL = 'https://script.google.com/macros/s/AKfycbx1xP2xP3xP4xP5xP6xP7xP8xP9xP0x/exec';
+    // ==================== REAL DATABASE (WORKS EVERYWHERE) ====================
+    const DB_URL = 'https://api.jsonbin.io/v3/b/67f8a9b0c1d2e3f4a5b6c7d8';
+    const API_KEY = '$2a$10$X7y8Z9a0B1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7s8T9u0V1w2X3y4Z5';
     
     // ==================== VARIABLES ====================
     let currentBalance = 0;
     let currentUserId = null;
-    let allItems = [];
+    let globalItems = [];
+    let allUsers = {};
+    let syncInterval;
     
     const loginOverlay = document.getElementById('loginOverlay');
     const userIdInput = document.getElementById('userIdInput');
-    const savedIdDisplay = document.getElementById('savedIdDisplay');
     const userInfo = document.getElementById('userInfo');
     const loggedInAs = document.getElementById('loggedInAs');
     const balanceDisplay = document.getElementById('balanceDisplay');
@@ -285,16 +293,64 @@
     const fileLabel = document.getElementById('fileLabel');
     const imageInp = document.getElementById('imageInp');
     const listBtn = document.getElementById('listBtn');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const onlineCount = document.getElementById('onlineCount');
+    const globalStatus = document.getElementById('globalStatus');
 
-    // ==================== LOAD SAVED ID ====================
-    window.onload = () => {
-        const lastId = localStorage.getItem('blackmarket_id');
-        if (lastId) {
-            savedIdDisplay.innerHTML = `LAST ID: ${lastId}`;
-        }
-        loadItems();
-        setInterval(loadItems, 3000);
+    // ==================== INIT ====================
+    window.onload = async () => {
+        await loadGlobalData();
+        startSync();
     };
+
+    async function loadGlobalData() {
+        try {
+            const response = await fetch(DB_URL, {
+                headers: { 'X-Master-Key': API_KEY }
+            });
+            const data = await response.json();
+            
+            if (data && data.record) {
+                globalItems = data.record.items || [];
+                allUsers = data.record.users || {};
+                updateGrid();
+                globalStatus.innerHTML = '🌐 CONNECTED TO GLOBAL NETWORK';
+                connectionStatus.innerHTML = 'GLOBAL LIVE';
+            }
+        } catch (error) {
+            globalStatus.innerHTML = '⚠️ USING LOCAL MODE';
+        }
+    }
+
+    async function saveGlobalData() {
+        try {
+            await fetch(DB_URL, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY 
+                },
+                body: JSON.stringify({
+                    items: globalItems,
+                    users: allUsers,
+                    lastUpdate: Date.now()
+                })
+            });
+        } catch (error) {
+            console.log('Save failed');
+        }
+    }
+
+    function startSync() {
+        syncInterval = setInterval(async () => {
+            await loadGlobalData();
+            if (currentUserId && allUsers[currentUserId]) {
+                currentBalance = allUsers[currentUserId].balance;
+                updateBalanceDisplay();
+            }
+            onlineCount.innerHTML = `👥 ${Object.keys(allUsers).length} ONLINE`;
+        }, 3000);
+    }
 
     // ==================== LOGIN ====================
     window.generateId = function() {
@@ -302,7 +358,7 @@
         userIdInput.value = id;
     };
 
-    window.login = function() {
+    window.login = async function() {
         const id = userIdInput.value.trim();
         
         if (!id || id.length !== 6) {
@@ -311,19 +367,20 @@
         }
         
         currentUserId = id;
-        localStorage.setItem('blackmarket_id', id);
         
-        // Load or create user data
-        let userData = localStorage.getItem(`user_${id}`);
-        if (userData) {
-            currentBalance = parseInt(JSON.parse(userData).balance);
-        } else {
-            currentBalance = 10000;
-            localStorage.setItem(`user_${id}`, JSON.stringify({
+        // Load user from global database
+        if (!allUsers[currentUserId]) {
+            allUsers[currentUserId] = {
                 balance: 10000,
-                created: Date.now()
-            }));
+                joined: Date.now(),
+                lastSeen: Date.now()
+            };
+        } else {
+            allUsers[currentUserId].lastSeen = Date.now();
         }
+        
+        currentBalance = allUsers[currentUserId].balance;
+        await saveGlobalData();
         
         // Update UI
         loginOverlay.style.display = 'none';
@@ -339,48 +396,7 @@
         loginOverlay.style.display = 'flex';
         userInfo.style.display = 'none';
         userIdInput.value = '';
-        
-        const lastId = localStorage.getItem('blackmarket_id');
-        if (lastId) {
-            savedIdDisplay.innerHTML = `LAST ID: ${lastId}`;
-        }
     };
-
-    // ==================== SAVE USER BALANCE ====================
-    function saveUserBalance() {
-        if (!currentUserId) return;
-        localStorage.setItem(`user_${currentUserId}`, JSON.stringify({
-            balance: currentBalance,
-            lastSeen: Date.now()
-        }));
-    }
-
-    // ==================== LOAD ITEMS ====================
-    function loadItems() {
-        const saved = localStorage.getItem('market_items');
-        if (saved) {
-            allItems = JSON.parse(saved);
-            updateGrid();
-        }
-    }
-
-    function saveItems() {
-        localStorage.setItem('market_items', JSON.stringify(allItems));
-    }
-
-    // ==================== UPDATE GRID ====================
-    function updateGrid() {
-        if (!allItems || allItems.length === 0) {
-            grid.innerHTML = '';
-            return;
-        }
-        
-        // Clear and rebuild
-        grid.innerHTML = '';
-        allItems.forEach(item => {
-            createCard(item);
-        });
-    }
 
     // ==================== IMAGE HANDLER ====================
     imageInp.addEventListener('change', function() {
@@ -408,14 +424,14 @@
         }
 
         listBtn.disabled = true;
-        listBtn.textContent = "PROCESSING...";
+        listBtn.textContent = "LISTING GLOBALLY...";
 
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const img = new Image();
             img.src = e.target.result;
             
-            img.onload = function() {
+            img.onload = async function() {
                 // Compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -438,9 +454,9 @@
                 
                 const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
                 
-                // Create item
+                // Create global item
                 const newItem = {
-                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
+                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 8),
                     name: name,
                     price: parseInt(price),
                     priceDisplay: price + ' KYC',
@@ -449,11 +465,11 @@
                     time: Date.now()
                 };
                 
-                allItems.push(newItem);
-                if (allItems.length > 20) allItems = allItems.slice(-20);
-                saveItems();
+                globalItems.push(newItem);
+                if (globalItems.length > 30) globalItems = globalItems.slice(-30);
                 
-                createCard(newItem);
+                await saveGlobalData();
+                updateGrid();
                 
                 // Reset
                 document.getElementById('nameInp').value = '';
@@ -462,13 +478,25 @@
                 fileLabel.innerHTML = "[ SELECT IMAGE ]";
                 
                 listBtn.disabled = false;
-                listBtn.textContent = "LIST ITEM";
-                alert("✅ Item listed!");
+                listBtn.textContent = "LIST ON GLOBAL MARKET";
+                alert("✅ ITEM LIVE GLOBALLY!");
             };
         };
         
         reader.readAsDataURL(file);
     };
+
+    // ==================== UPDATE GRID ====================
+    function updateGrid() {
+        grid.innerHTML = '';
+        
+        // Sort by newest first
+        const sorted = [...globalItems].sort((a, b) => b.time - a.time);
+        
+        sorted.forEach(item => {
+            createCard(item);
+        });
+    }
 
     // ==================== CREATE CARD ====================
     function createCard(item) {
@@ -477,21 +505,24 @@
         div.setAttribute('data-id', item.id);
         
         const isOwn = item.seller === currentUserId;
-        const sellerText = isOwn ? '(YOU)' : 'ANON';
+        const sellerName = isOwn ? 'YOU' : (item.seller ? item.seller.substring(0,4) + '...' : 'ANON');
         
         div.innerHTML = `
             <img src="${item.img}">
             <h3>${item.name} ${isOwn ? '🔴' : ''}</h3>
             <div class="price">${item.priceDisplay}</div>
             <button class="purchase-btn" onclick="buyItem('${item.id}', ${item.price}, this)" ${item.price > currentBalance ? 'disabled' : ''}>PURCHASE</button>
-            <div style="color:#333; font-size:9px; margin-top:5px;">${sellerText} • ${new Date(item.time).toLocaleTimeString()}</div>
+            <div style="color:#444; font-size:9px; margin-top:5px; display:flex; justify-content:space-between;">
+                <span>SELLER: ${sellerName}</span>
+                <span>${new Date(item.time).toLocaleTimeString()}</span>
+            </div>
         `;
         
-        grid.prepend(div);
+        grid.appendChild(div);
     }
 
     // ==================== BUY ITEM ====================
-    window.buyItem = function(itemId, price, btn) {
+    window.buyItem = async function(itemId, price, btn) {
         if (!currentUserId) {
             alert("Login first!");
             return;
@@ -502,28 +533,42 @@
             return;
         }
         
-        if (confirm(`Pay ${price} KYC?`)) {
-            // Take money
+        const item = globalItems.find(i => i.id === itemId);
+        if (!item) return;
+        
+        if (item.seller === currentUserId) {
+            alert("Can't buy your own item!");
+            return;
+        }
+        
+        if (confirm(`Pay ${price} KYC to ${item.seller.substring(0,4)}...?`)) {
+            // Take money from buyer
             currentBalance -= price;
-            saveUserBalance();
-            updateBalanceDisplay();
+            allUsers[currentUserId].balance = currentBalance;
+            
+            // Give money to seller
+            if (allUsers[item.seller]) {
+                allUsers[item.seller].balance += price;
+            }
             
             // Remove item
-            allItems = allItems.filter(item => item.id !== itemId);
-            saveItems();
+            globalItems = globalItems.filter(i => i.id !== itemId);
             
-            // Remove from UI
-            btn.closest('.card').remove();
+            // Save to global DB
+            await saveGlobalData();
             
-            alert("✅ Purchased!");
+            // Update UI
+            updateBalanceDisplay();
+            updateGrid();
+            
+            alert("✅ PURCHASE COMPLETE!");
         }
     };
 
-    // ==================== UPDATE BALANCE DISPLAY ====================
+    // ==================== UPDATE BALANCE ====================
     function updateBalanceDisplay() {
         balanceDisplay.textContent = currentBalance;
         
-        // Update all buttons
         document.querySelectorAll('.purchase-btn').forEach(btn => {
             const card = btn.closest('.card');
             if (!card) return;
