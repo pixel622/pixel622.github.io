@@ -3,190 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | Secure Exchange</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-    
+    <title>THE BLACK MARKET | Anonymous</title>
     <style>
         :root {
-            --glow-color: #ff0000; /* Red theme for "Black Market" */
-            --bg-color: #050505;
+            --accent: #ff3333;
+            --bg: #050505;
+            --card-bg: #111;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: #e0e0e0;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg);
+            color: #bbb;
+            font-family: 'Courier New', monospace;
             margin: 0;
             padding: 20px;
         }
 
-        .container { max-width: 1100px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
 
         header {
             text-align: center;
-            border-bottom: 3px double var(--glow-color);
-            padding: 20px;
+            border-bottom: 2px solid var(--accent);
             margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
+            padding-bottom: 10px;
         }
 
-        h1 { color: var(--glow-color); text-shadow: 0 0 10px var(--glow-color); }
+        h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
-        /* Listing Form */
-        .listing-panel {
-            background: #111;
-            border: 1px solid #333;
-            padding: 25px;
-            margin-bottom: 40px;
+        /* Listing Box */
+        .upload-area {
+            background: var(--card-bg);
+            border: 1px dashed #444;
+            padding: 20px;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 15px;
-            align-items: center;
-            justify-content: center;
+            margin-bottom: 40px;
         }
 
-        input[type="text"], input[type="file"] {
+        input[type="text"] {
             background: #000;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 10px;
+            border: 1px solid #333;
+            color: #0f0;
+            padding: 12px;
+            outline: none;
         }
 
-        /* Custom File Upload Button */
-        .file-upload-label {
+        /* The Custom Gallery Button */
+        .file-label {
             background: #222;
-            border: 1px solid var(--glow-color);
-            padding: 10px;
+            border: 1px solid #444;
+            padding: 15px;
+            text-align: center;
             cursor: pointer;
-            font-size: 0.8em;
+            color: var(--accent);
+            font-weight: bold;
         }
 
-        button {
-            background: var(--glow-color);
-            color: white;
+        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
+
+        #listBtn {
+            background: var(--accent);
+            color: #fff;
             border: none;
-            padding: 12px 25px;
+            padding: 15px;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
         }
 
-        button:hover { background: #b30000; }
+        #listBtn:hover { opacity: 0.8; }
 
-        /* Grid System */
+        /* Grid */
         .market-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
         }
 
-        .item-card {
-            background: #0f0f0f;
+        .card {
+            background: #0a0a0a;
             border: 1px solid #222;
-            padding: 15px;
-            transition: 0.3s;
+            padding: 10px;
         }
 
-        .item-card:hover { border-color: var(--glow-color); }
-
-        .item-card img {
+        .card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
             border-bottom: 1px solid #222;
-            margin-bottom: 10px;
         }
 
-        .item-info h3 { margin: 5px 0; color: var(--glow-color); }
-        .price-tag { color: #00ff41; font-weight: bold; font-size: 1.1em; }
-
+        .card h3 { margin: 10px 0 5px 0; color: #eee; }
+        .card p { color: #0f0; margin: 0; font-weight: bold; }
+        
+        .clear-btn {
+            margin-top: 20px;
+            background: transparent;
+            color: #555;
+            border: 1px solid #333;
+            cursor: pointer;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>The Black Market</h1>
-        <p>[ ACCESS GRANTED // ANONYMOUS_USER ]</p>
+        <h1>THE BLACK MARKET</h1>
+        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
-    <section class="listing-panel">
-        <input type="text" id="itemName" placeholder="Object Name">
-        <input type="text" id="itemPrice" placeholder="Price (e.g. 500 Credits)">
+    <div class="upload-area">
+        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
+        <input type="text" id="priceInp" placeholder="Price (e.g. 1.5 ETH)">
         
-        <label class="file-upload-label">
-            CHOOSE IMAGE FROM GALLERY
-            <input type="file" id="itemFile" accept="image/*" style="display:none;" onchange="previewImage(this)">
+        <label class="file-label" id="fileLabel">
+            [ SELECT FROM GALLERY ]
+            <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
-        
-        <button onclick="uploadListing()">LIST OBJECT</button>
-    </section>
 
-    <div class="market-grid" id="marketGrid">
-        </div>
+        <button id="listBtn">LIST OBJECT</button>
+    </div>
+
+    <div class="market-grid" id="grid"></div>
+
+    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
 </div>
 
 <script>
-    // --- FIREBASE CONFIGURATION ---
-    // To make this "Real", go to console.firebase.google.com, 
-    // create a project, and paste your config here.
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        databaseURL: "YOUR_DATABASE_URL",
-        projectId: "YOUR_PROJECT_ID",
+    const listBtn = document.getElementById('listBtn');
+    const imageInp = document.getElementById('imageInp');
+    const fileLabel = document.getElementById('fileLabel');
+    const grid = document.getElementById('grid');
+
+    // Update label when image is chosen
+    imageInp.addEventListener('change', function() {
+        if (this.files[0]) {
+            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
+            fileLabel.style.borderColor = "#0f0";
+            fileLabel.style.color = "#0f0";
+        }
+    });
+
+    // Load items from local storage on startup
+    window.onload = () => {
+        const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+        saved.forEach(item => createCard(item.name, item.price, item.img));
     };
 
-    // Initialize Firebase (Only if config is provided)
-    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    listBtn.onclick = () => {
+        const name = document.getElementById('nameInp').value;
+        const price = document.getElementById('priceInp').value;
+        const file = imageInp.files[0];
 
-        // Function to Upload
-        function uploadListing() {
-            const name = document.getElementById('itemName').value;
-            const price = document.getElementById('itemPrice').value;
-            const fileInput = document.getElementById('itemFile');
-
-            if (name && price && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Image = e.target.result;
-                    db.ref('listings/').push({
-                        name: name,
-                        price: price,
-                        image: base64Image
-                    });
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
+        if (!name || !price || !file) {
+            alert("Fill all fields and select an image!");
+            return;
         }
 
-        // Listen for new items for EVERYONE
-        db.ref('listings/').on('child_added', (snapshot) => {
-            const data = snapshot.val();
-            renderItem(data.name, data.price, data.image);
-        });
-    }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgData = e.target.result;
+            
+            // 1. Add to UI
+            createCard(name, price, imgData);
+            
+            // 2. Save to Local Storage (Persistence)
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            saved.push({name, price, img: imgData});
+            localStorage.setItem('market_items', JSON.stringify(saved));
 
-    function renderItem(name, price, image) {
-        const grid = document.getElementById('marketGrid');
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.innerHTML = `
-            <img src="${image}" onerror="this.src='https://via.placeholder.com/200?text=NO_IMAGE'">
-            <div class="item-info">
-                <h3>${name}</h3>
-                <p class="price-tag">${price}</p>
-            </div>
+            // Reset inputs
+            document.getElementById('nameInp').value = '';
+            document.getElementById('priceInp').value = '';
+            imageInp.value = '';
+            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.style.color = "var(--accent)";
+        };
+        reader.readAsDataURL(file);
+    };
+
+    function createCard(name, price, img) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <img src="${img}">
+            <h3>${name}</h3>
+            <p>${price}</p>
         `;
-        grid.prepend(card);
+        grid.prepend(div);
     }
 
-    function previewImage(input) {
-        if (input.files[0]) {
-            alert("Image selected: " + input.files[0].name);
+    function clearMarket() {
+        if(confirm("Wipe all listings?")) {
+            localStorage.removeItem('market_items');
+            location.reload();
         }
     }
 </script>
