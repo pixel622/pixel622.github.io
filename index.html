@@ -17,9 +17,28 @@
             font-family: 'Courier New', monospace;
             margin: 0;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        .container { max-width: 900px; margin: auto; }
+        /* Matrix Rain Effect */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+            position: relative;
+            z-index: 1;
+        }
 
         header {
             text-align: center;
@@ -28,7 +47,81 @@
             padding-bottom: 10px;
         }
 
-        h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
+        h1 { 
+            color: var(--accent); 
+            letter-spacing: 4px; 
+            margin-bottom: 5px;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Glitch Text Effect */
+        h1:hover {
+            animation: glitch 0.3s infinite;
+            cursor: default;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        h1::before,
+        h1::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        h1:hover::before {
+            animation: glitch-top 0.3s infinite;
+            color: #0ff;
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        h1:hover::after {
+            animation: glitch-bottom 0.3s infinite;
+            color: #f0f;
+            opacity: 0.8;
+            z-index: -2;
+        }
+
+        @keyframes glitch-top {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, -2px); }
+            40% { transform: translate(-2px, 2px); }
+            60% { transform: translate(2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes glitch-bottom {
+            0% { transform: translate(0); }
+            20% { transform: translate(2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        /* Connection warning animation */
+        .status-glitch {
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
 
         /* Balance Display */
         .balance-panel {
@@ -39,6 +132,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-panel::before {
+            content: ">";
+            position: absolute;
+            left: -20px;
+            color: var(--accent);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -20px; opacity: 0; }
+            50% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
         }
         
         .balance-label { color: #888; }
@@ -54,6 +163,17 @@
             flex-direction: column;
             gap: 15px;
             margin-bottom: 40px;
+            position: relative;
+        }
+
+        .upload-area::after {
+            content: "SECURE CONNECTION: ACTIVE";
+            position: absolute;
+            bottom: -20px;
+            right: 0;
+            font-size: 8px;
+            color: #0f0;
+            opacity: 0.5;
         }
 
         input[type="text"], input[type="number"] {
@@ -82,7 +202,11 @@
             display: block;
         }
 
-        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
+        .file-label:hover { 
+            background: #2a2a2a; 
+            border-color: var(--accent);
+            animation: glitch 0.3s infinite;
+        }
 
         #listBtn {
             background: var(--accent);
@@ -94,7 +218,10 @@
             text-transform: uppercase;
         }
 
-        #listBtn:hover { opacity: 0.8; }
+        #listBtn:hover { 
+            opacity: 0.8;
+            animation: glitch 0.3s infinite;
+        }
 
         /* Grid */
         .market-grid {
@@ -108,6 +235,12 @@
             border: 1px solid #222;
             padding: 10px;
             position: relative;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
         }
 
         .card img {
@@ -155,14 +288,32 @@
         }
 
         .seller-badge { color: #444; font-size: 10px; margin-top: 5px; text-align: right; }
+
+        /* Random glitch text */
+        .glitch-text {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: #0f0;
+            font-size: 8px;
+            opacity: 0.3;
+            z-index: 2;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Matrix Canvas -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Random glitch text -->
+    <div class="glitch-text" id="glitchMessage">> CONNECTION: UNSTABLE</div>
+
 <div class="container">
     <header>
-        <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
+        <h1 data-text="THE BLACK MARKET">THE BLACK MARKET</h1>
+        <p>STATUS: <span style="color: #0f0;" class="status-glitch">ENCRYPTED_CONNECTED</span></p>
     </header>
 
     <!-- KYC Balance Panel -->
@@ -192,6 +343,66 @@
 </div>
 
 <script>
+    // Matrix Rain Effect
+    const canvas = document.getElementById('matrix-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+    const matrixArray = matrix.split("");
+
+    const fontSize = 10;
+    const columns = canvas.width / fontSize;
+
+    const drops = [];
+    for(let x = 0; x < columns; x++) {
+        drops[x] = 1;
+    }
+
+    function drawMatrix() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#0f0';
+        ctx.font = fontSize + 'px monospace';
+
+        for(let i = 0; i < drops.length; i++) {
+            const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+            if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+
+    setInterval(drawMatrix, 35);
+
+    // Random glitch messages
+    const glitchMessages = [
+        "> CONNECTION: UNSTABLE",
+        "> TRACE DETECTED",
+        "> ROUTING THROUGH TOR",
+        "> ENCRYPTION: ACTIVE",
+        "> WARNING: MONITORED",
+        "> ANONYMOUS MODE",
+        "> BYPASSING FIREWALL",
+        "> SECURE CHANNEL ESTABLISHED"
+    ];
+
+    setInterval(() => {
+        const glitchEl = document.getElementById('glitchMessage');
+        if (glitchEl && Math.random() > 0.7) {
+            glitchEl.textContent = glitchMessages[Math.floor(Math.random() * glitchMessages.length)];
+            setTimeout(() => {
+                glitchEl.textContent = "> CONNECTION: UNSTABLE";
+            }, 2000);
+        }
+    }, 5000);
+
     const listBtn = document.getElementById('listBtn');
     const imageInp = document.getElementById('imageInp');
     const fileLabel = document.getElementById('fileLabel');
@@ -227,6 +438,12 @@
         // Load items
         const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
         saved.forEach(item => createCard(item.name, item.price, item.img, item.id));
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     };
 
     // List button - FREE listing, no money taken
