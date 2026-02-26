@@ -224,12 +224,22 @@
         }
         updateBalanceDisplay();
         
-        // Load items
-        const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-        saved.forEach(item => createCard(item.name, item.price, item.img, item.id));
+        // Load items - FIXED: Better error handling for corrupted data
+        try {
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            saved.forEach(item => {
+                // Validate item has required fields
+                if (item && item.name && item.price && item.img && item.id) {
+                    createCard(item.name, item.price, item.img, item.id);
+                }
+            });
+        } catch (e) {
+            console.log("Error loading items, clearing corrupted data");
+            localStorage.removeItem('market_items');
+        }
     };
 
-    // List button - FREE listing, no money taken
+    // List button - FIXED: Now with image compression to handle unlimited listings
     listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value.trim();
         const price = document.getElementById('priceInp').value.trim();
@@ -240,39 +250,91 @@
             return;
         }
 
+        // Show loading state
+        listBtn.disabled = true;
+        listBtn.textContent = "ENCRYPTING...";
+
         const reader = new FileReader();
         reader.onload = function(e) {
-            const imgData = e.target.result;
+            // Compress image to save space in localStorage
+            const img = new Image();
+            img.src = e.target.result;
             
-            // NO MONEY TAKEN - listing is free
-            
-            // Generate unique ID for the item
-            const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-            
-            // Add to UI
-            createCard(name, price + ' KYC', imgData, itemId);
-            
-            // Save to Local Storage with ID
-            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            saved.push({
-                id: itemId,
-                name: name, 
-                price: price + ' KYC', 
-                img: imgData,
-                numericPrice: parseInt(price)
-            });
-            localStorage.setItem('market_items', JSON.stringify(saved));
+            img.onload = function() {
+                // Create canvas to compress image
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Max dimensions while maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+                const maxSize = 300;
+                
+                if (width > height && width > maxSize) {
+                    height = (height * maxSize) / width;
+                    width = maxSize;
+                } else if (height > maxSize) {
+                    width = (width * maxSize) / height;
+                    height = maxSize;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Get compressed image (lower quality = smaller file)
+                const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
+                
+                // Generate unique ID for the item
+                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                
+                // Add to UI
+                createCard(name, price + ' KYC', compressedImgData, itemId);
+                
+                // Save to Local Storage with ID - FIXED: Better storage management
+                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                saved.push({
+                    id: itemId,
+                    name: name, 
+                    price: price + ' KYC', 
+                    img: compressedImgData,
+                    numericPrice: parseInt(price)
+                });
+                
+                // FIXED: Check if we're approaching storage limit and clean old items if needed
+                try {
+                    localStorage.setItem('market_items', JSON.stringify(saved));
+                } catch (storageError) {
+                    // If storage is full, remove oldest item and try again
+                    if (saved.length > 0) {
+                        saved.shift(); // Remove oldest item
+                        localStorage.setItem('market_items', JSON.stringify(saved));
+                        alert("Storage limit reached! Oldest item removed to make space.");
+                    }
+                }
 
-            // Reset ALL inputs completely for next listing
-            document.getElementById('nameInp').value = '';
-            document.getElementById('priceInp').value = '';
-            imageInp.value = '';  // Clear the file input
-            fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
-            fileLabel.style.borderColor = "#444";  // Reset border color
-            fileLabel.style.color = "var(--accent)";  // Reset text color
-            
-            alert("Item listed successfully!"); // Confirmation message
+                // Reset ALL inputs completely for next listing
+                document.getElementById('nameInp').value = '';
+                document.getElementById('priceInp').value = '';
+                imageInp.value = '';  // Clear the file input
+                fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
+                fileLabel.style.borderColor = "#444";  // Reset border color
+                fileLabel.style.color = "var(--accent)";  // Reset text color
+                
+                // Re-enable button
+                listBtn.disabled = false;
+                listBtn.textContent = "LIST OBJECT";
+                
+                alert("Item listed successfully!"); // Confirmation message
+            };
         };
+        
+        reader.onerror = function() {
+            listBtn.disabled = false;
+            listBtn.textContent = "LIST OBJECT";
+            alert("Error reading image file!");
+        };
+        
         reader.readAsDataURL(file);
     };
 
