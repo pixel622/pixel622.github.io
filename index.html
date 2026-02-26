@@ -184,7 +184,6 @@
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
-        <div class="insufficient" id="insufficientMsg">INSUFFICIENT KYC BALANCE</div>
         <button id="listBtn">LIST OBJECT</button>
     </div>
 
@@ -199,7 +198,6 @@
     const fileLabel = document.getElementById('fileLabel');
     const grid = document.getElementById('grid');
     const balanceDisplay = document.getElementById('balanceDisplay');
-    const insufficientMsg = document.getElementById('insufficientMsg');
     const priceInp = document.getElementById('priceInp');
 
     let currentBalance = 10000; // Starting KYC balance
@@ -210,18 +208,6 @@
             fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
             fileLabel.style.borderColor = "#0f0";
             fileLabel.style.color = "#0f0";
-        }
-    });
-
-    // Check balance on price input
-    priceInp.addEventListener('input', function() {
-        const price = parseInt(this.value) || 0;
-        if (price > currentBalance) {
-            insufficientMsg.style.display = 'block';
-            listBtn.disabled = true;
-        } else {
-            insufficientMsg.style.display = 'none';
-            listBtn.disabled = false;
         }
     });
 
@@ -241,10 +227,10 @@
         saved.forEach(item => createCard(item.name, item.price, item.img, item.id));
     };
 
-    // FIXED: List button now works properly
+    // List button now FREE - doesn't take money
     listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value;
-        const price = parseInt(document.getElementById('priceInp').value);
+        const price = document.getElementById('priceInp').value;
         const file = imageInp.files[0];
 
         if (!name || !price || !file) {
@@ -252,19 +238,11 @@
             return;
         }
 
-        if (price > currentBalance) {
-            alert("Insufficient KYC balance!");
-            return;
-        }
-
         const reader = new FileReader();
         reader.onload = function(e) {
             const imgData = e.target.result;
             
-            // Deduct KYC for listing fee
-            currentBalance -= price;
-            localStorage.setItem('kyc_balance', currentBalance.toString());
-            updateBalanceDisplay();
+            // NO KYC DEDUCTION - Listing is free!
             
             // Generate unique ID for the item
             const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
@@ -279,7 +257,7 @@
                 name: name, 
                 price: price + ' KYC', 
                 img: imgData,
-                numericPrice: price
+                numericPrice: parseInt(price)
             });
             localStorage.setItem('market_items', JSON.stringify(saved));
 
@@ -288,9 +266,8 @@
             document.getElementById('priceInp').value = '';
             imageInp.value = '';
             fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.style.borderColor = "#444";
             fileLabel.style.color = "var(--accent)";
-            insufficientMsg.style.display = 'none';
-            listBtn.disabled = false;
         };
         reader.readAsDataURL(file);
     };
@@ -319,7 +296,7 @@
         }
     }
 
-    // New: Purchase function
+    // Purchase function - NOW this takes money
     window.purchaseItem = function(itemId, price, btnElement) {
         if (price > currentBalance) {
             alert("Insufficient KYC balance to purchase this item!");
@@ -327,7 +304,7 @@
         }
         
         if (confirm(`Purchase this item for ${price} KYC?`)) {
-            // Deduct KYC
+            // Deduct KYC (only on purchase)
             currentBalance -= price;
             localStorage.setItem('kyc_balance', currentBalance.toString());
             updateBalanceDisplay();
@@ -360,17 +337,6 @@
 
     function updateBalanceDisplay() {
         balanceDisplay.textContent = currentBalance;
-        // Re-check price input if exists
-        if (priceInp.value) {
-            const price = parseInt(priceInp.value) || 0;
-            if (price > currentBalance) {
-                insufficientMsg.style.display = 'block';
-                listBtn.disabled = true;
-            } else {
-                insufficientMsg.style.display = 'none';
-                listBtn.disabled = false;
-            }
-        }
         // Update purchase buttons
         updateAllPurchaseButtons();
     }
