@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | Anonymous</title>
+    <title>THE BLACK MARKET | Secure Exchange</title>
     <style>
         :root {
             --accent: #ff3333;
+            --btc-gold: #f7931a;
             --bg: #050505;
             --card-bg: #111;
         }
@@ -21,6 +22,20 @@
 
         .container { max-width: 900px; margin: auto; }
 
+        /* Wallet Header */
+        .wallet-bar {
+            background: #1a1a1a;
+            border: 1px solid var(--btc-gold);
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .wallet-bar h2 { margin: 0; color: var(--btc-gold); letter-spacing: 2px; }
+
         header {
             text-align: center;
             border-bottom: 2px solid var(--accent);
@@ -30,10 +45,9 @@
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
-        /* Listing Box */
         .upload-area {
             background: var(--card-bg);
-            border: 1px dashed #444;
+            border: 1px solid #333;
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -41,7 +55,7 @@
             margin-bottom: 40px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="number"] {
             background: #000;
             border: 1px solid #333;
             color: #0f0;
@@ -49,7 +63,6 @@
             outline: none;
         }
 
-        /* The Custom Gallery Button */
         .file-label {
             background: #222;
             border: 1px solid #444;
@@ -57,10 +70,7 @@
             text-align: center;
             cursor: pointer;
             color: var(--accent);
-            font-weight: bold;
         }
-
-        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
 
         #listBtn {
             background: var(--accent);
@@ -69,15 +79,12 @@
             padding: 15px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
         }
 
-        #listBtn:hover { opacity: 0.8; }
-
-        /* Grid */
+        /* Market Grid */
         .market-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
         }
 
@@ -85,39 +92,65 @@
             background: #0a0a0a;
             border: 1px solid #222;
             padding: 10px;
+            position: relative;
         }
 
         .card img {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
-            border-bottom: 1px solid #222;
+            filter: grayscale(50%);
         }
 
+        .card.sold img { filter: grayscale(100%) blur(2px); opacity: 0.3; }
+
         .card h3 { margin: 10px 0 5px 0; color: #eee; }
-        .card p { color: #0f0; margin: 0; font-weight: bold; }
-        
-        .clear-btn {
-            margin-top: 20px;
-            background: transparent;
-            color: #555;
-            border: 1px solid #333;
+        .card p { color: var(--btc-gold); margin: 0 0 10px 0; font-weight: bold; }
+
+        .buy-btn {
+            width: 100%;
+            padding: 10px;
+            background: #008000;
+            color: white;
+            border: none;
             cursor: pointer;
-            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
+
+        .buy-btn:disabled { background: #333; cursor: not-allowed; }
+
+        .sold-stamp {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            color: red;
+            border: 3px solid red;
+            padding: 5px;
+            font-size: 2em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .card.sold .sold-stamp { display: block; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="wallet-bar">
+        <h2>BALANCE: <span id="balanceDisplay">10,000,000</span> BTC</h2>
+    </div>
+
     <header>
         <h1>THE BLACK MARKET</h1>
         <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
-        <input type="text" id="priceInp" placeholder="Price (e.g. 1.5 ETH)">
+        <input type="text" id="nameInp" placeholder="Object Name">
+        <input type="number" id="priceInp" placeholder="Price in BTC">
         
         <label class="file-label" id="fileLabel">
             [ SELECT FROM GALLERY ]
@@ -128,80 +161,79 @@
     </div>
 
     <div class="market-grid" id="grid"></div>
-
-    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
 </div>
 
 <script>
-    const listBtn = document.getElementById('listBtn');
-    const imageInp = document.getElementById('imageInp');
-    const fileLabel = document.getElementById('fileLabel');
+    let wallet = parseFloat(localStorage.getItem('btc_balance')) || 10000000;
     const grid = document.getElementById('grid');
+    const balanceDisplay = document.getElementById('balanceDisplay');
 
-    // Update label when image is chosen
-    imageInp.addEventListener('change', function() {
-        if (this.files[0]) {
-            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
-            fileLabel.style.borderColor = "#0f0";
-            fileLabel.style.color = "#0f0";
-        }
-    });
+    function updateWalletUI() {
+        balanceDisplay.innerText = wallet.toLocaleString();
+        localStorage.setItem('btc_balance', wallet);
+    }
 
-    // Load items from local storage on startup
+    // Load items on startup
     window.onload = () => {
+        updateWalletUI();
         const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-        saved.forEach(item => createCard(item.name, item.price, item.img));
+        saved.forEach((item, index) => createCard(item, index));
     };
 
-    listBtn.onclick = () => {
-        const name = document.getElementById('nameInp').value;
-        const price = document.getElementById('priceInp').value;
-        const file = imageInp.files[0];
+    document.getElementById('imageInp').onchange = function() {
+        if (this.files[0]) document.getElementById('fileLabel').innerText = "IMG: " + this.files[0].name;
+    };
 
-        if (!name || !price || !file) {
-            alert("Fill all fields and select an image!");
-            return;
-        }
+    document.getElementById('listBtn').onclick = () => {
+        const name = document.getElementById('nameInp').value;
+        const price = parseFloat(document.getElementById('priceInp').value);
+        const file = document.getElementById('imageInp').files[0];
+
+        if (!name || isNaN(price) || !file) return alert("Fill all fields!");
 
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const imgData = e.target.result;
-            
-            // 1. Add to UI
-            createCard(name, price, imgData);
-            
-            // 2. Save to Local Storage (Persistence)
+        reader.onload = (e) => {
+            const newItem = { name, price, img: e.target.result, sold: false };
             const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            saved.push({name, price, img: imgData});
+            saved.push(newItem);
             localStorage.setItem('market_items', JSON.stringify(saved));
-
-            // Reset inputs
-            document.getElementById('nameInp').value = '';
-            document.getElementById('priceInp').value = '';
-            imageInp.value = '';
-            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
-            fileLabel.style.color = "var(--accent)";
+            location.reload(); // Refresh to update indices
         };
         reader.readAsDataURL(file);
     };
 
-    function createCard(name, price, img) {
+    function createCard(item, index) {
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = `card ${item.sold ? 'sold' : ''}`;
         div.innerHTML = `
-            <img src="${img}">
-            <h3>${name}</h3>
-            <p>${price}</p>
+            <div class="sold-stamp">SOLD</div>
+            <img src="${item.img}">
+            <h3>${item.name}</h3>
+            <p>${item.price} BTC</p>
+            <button class="buy-btn" ${item.sold ? 'disabled' : ''} onclick="buyItem(${index})">
+                ${item.sold ? 'OUT OF STOCK' : 'PURCHASE'}
+            </button>
         `;
         grid.prepend(div);
     }
 
-    function clearMarket() {
-        if(confirm("Wipe all listings?")) {
-            localStorage.removeItem('market_items');
-            location.reload();
+    window.buyItem = (index) => {
+        const saved = JSON.parse(localStorage.getItem('market_items'));
+        const item = saved[index];
+
+        if (wallet >= item.price) {
+            if(confirm(`Confirm purchase of ${item.name} for ${item.price} BTC?`)) {
+                wallet -= item.price;
+                item.sold = true;
+                saved[index] = item;
+                localStorage.setItem('market_items', JSON.stringify(saved));
+                updateWalletUI();
+                location.reload();
+            }
+        } else {
+            alert("INSUFFICIENT BTC BALANCE");
         }
-    }
+    };
 </script>
 
 </body>
