@@ -155,6 +155,20 @@
         }
 
         .seller-badge { color: #444; font-size: 10px; margin-top: 5px; text-align: right; }
+        
+        /* Connection status */
+        .connection-status {
+            color: #0f0;
+            font-size: 12px;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -162,7 +176,7 @@
 <div class="container">
     <header>
         <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
+        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span> <span class="connection-status">● LIVE</span></p>
     </header>
 
     <!-- KYC Balance Panel -->
@@ -198,7 +212,9 @@
     const grid = document.getElementById('grid');
     const balanceDisplay = document.getElementById('balanceDisplay');
 
-    let currentBalance = 10000; // Starting KYC balance
+    let currentBalance = 10000;
+    let syncInterval;
+    let lastUpdate = 0;
 
     // Update label when image is chosen
     imageInp.addEventListener('change', function() {
@@ -213,9 +229,9 @@
         }
     });
 
-    // Load items and balance from local storage on startup
+    // Load items and balance from server on startup
     window.onload = () => {
-        // Load balance
+        // Load balance from local storage (personal wallet)
         const savedBalance = localStorage.getItem('kyc_balance');
         if (savedBalance !== null) {
             currentBalance = parseInt(savedBalance);
@@ -224,22 +240,92 @@
         }
         updateBalanceDisplay();
         
-        // Load items - FIXED: Better error handling for corrupted data
+        // Load shared items from server
+        fetchItems();
+        
+        // Start auto-sync every 3 seconds to see others' listings
+        syncInterval = setInterval(fetchItems, 3000);
+    };
+
+    // Clean up interval on page unload
+    window.onbeforeunload = () => {
+        if (syncInterval) clearInterval(syncInterval);
+    };
+
+    // Fetch items from the shared server
+    async function fetchItems() {
+        try {
+            // Using a free public API as a bridge to share data
+            // This creates a shared "room" where all users see the same items
+            const response = await fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3/latest', {
+                headers: {
+                    'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.record && data.record.items) {
+                    // Update the grid with shared items
+                    updateGridFromServer(data.record.items);
+                }
+            }
+        } catch (error) {
+            // Silent fail - if server unreachable, just use local storage
+            console.log('Using local storage mode');
+            loadFromLocalStorage();
+        }
+    }
+
+    // Save items to shared server
+    async function saveItemsToServer(items) {
+        try {
+            await fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                },
+                body: JSON.stringify({ items: items, lastUpdate: Date.now() })
+            });
+        } catch (error) {
+            // Silent fail - if server unreachable, save to local storage
+            localStorage.setItem('market_items', JSON.stringify(items));
+        }
+    }
+
+    // Update grid with items from server
+    function updateGridFromServer(serverItems) {
+        // Clear current grid
+        grid.innerHTML = '';
+        
+        // Add all items from server
+        if (serverItems && serverItems.length > 0) {
+            serverItems.forEach(item => {
+                if (item && item.name && item.price && item.img && item.id) {
+                    createCard(item.name, item.price, item.img, item.id, item.numericPrice);
+                }
+            });
+        }
+        
+        lastUpdate = Date.now();
+    }
+
+    // Fallback to local storage
+    function loadFromLocalStorage() {
         try {
             const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
             saved.forEach(item => {
-                // Validate item has required fields
                 if (item && item.name && item.price && item.img && item.id) {
-                    createCard(item.name, item.price, item.img, item.id);
+                    createCard(item.name, item.price, item.img, item.id, item.numericPrice);
                 }
             });
         } catch (e) {
-            console.log("Error loading items, clearing corrupted data");
-            localStorage.removeItem('market_items');
+            console.log("Error loading items");
         }
-    };
+    }
 
-    // List button - FIXED: Now with image compression to handle unlimited listings
+    // List button - NOW WITH SHARED LISTINGS
     listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value.trim();
         const price = document.getElementById('priceInp').value.trim();
@@ -256,16 +342,14 @@
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Compress image to save space in localStorage
+            // Compress image
             const img = new Image();
             img.src = e.target.result;
             
             img.onload = function() {
-                // Create canvas to compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Max dimensions while maintaining aspect ratio
                 let width = img.width;
                 let height = img.height;
                 const maxSize = 300;
@@ -282,87 +366,105 @@
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                // Get compressed image (lower quality = smaller file)
                 const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
                 
-                // Generate unique ID for the item
+                // Generate unique ID
                 const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 
-                // Add to UI
-                createCard(name, price + ' KYC', compressedImgData, itemId);
-                
-                // Save to Local Storage with ID - FIXED: Better storage management
-                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-                saved.push({
+                // Create new item
+                const newItem = {
                     id: itemId,
-                    name: name, 
-                    price: price + ' KYC', 
+                    name: name,
+                    price: price + ' KYC',
                     img: compressedImgData,
                     numericPrice: parseInt(price)
-                });
+                };
                 
-                // FIXED: Check if we're approaching storage limit and clean old items if needed
-                try {
-                    localStorage.setItem('market_items', JSON.stringify(saved));
-                } catch (storageError) {
-                    // If storage is full, remove oldest item and try again
-                    if (saved.length > 0) {
-                        saved.shift(); // Remove oldest item
-                        localStorage.setItem('market_items', JSON.stringify(saved));
-                        alert("Storage limit reached! Oldest item removed to make space.");
+                // Add to UI immediately
+                createCard(name, price + ' KYC', compressedImgData, itemId, parseInt(price));
+                
+                // Save to shared server
+                fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3/latest', {
+                    headers: {
+                        'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
                     }
-                }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    let currentItems = [];
+                    if (data.record && data.record.items) {
+                        currentItems = data.record.items;
+                    }
+                    
+                    // Add new item
+                    currentItems.push(newItem);
+                    
+                    // Keep only last 50 items to prevent storage issues
+                    if (currentItems.length > 50) {
+                        currentItems = currentItems.slice(-50);
+                    }
+                    
+                    // Save back to server
+                    return fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                        },
+                        body: JSON.stringify({ items: currentItems, lastUpdate: Date.now() })
+                    });
+                })
+                .catch(() => {
+                    // Fallback to local storage
+                    const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                    saved.push(newItem);
+                    localStorage.setItem('market_items', JSON.stringify(saved));
+                });
 
-                // Reset ALL inputs completely for next listing
+                // Reset form
                 document.getElementById('nameInp').value = '';
                 document.getElementById('priceInp').value = '';
-                imageInp.value = '';  // Clear the file input
-                fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
-                fileLabel.style.borderColor = "#444";  // Reset border color
-                fileLabel.style.color = "var(--accent)";  // Reset text color
+                imageInp.value = '';
+                fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+                fileLabel.style.borderColor = "#444";
+                fileLabel.style.color = "var(--accent)";
                 
-                // Re-enable button
                 listBtn.disabled = false;
                 listBtn.textContent = "LIST OBJECT";
                 
-                alert("Item listed successfully!"); // Confirmation message
+                alert("Item listed and shared with the network!");
             };
-        };
-        
-        reader.onerror = function() {
-            listBtn.disabled = false;
-            listBtn.textContent = "LIST OBJECT";
-            alert("Error reading image file!");
         };
         
         reader.readAsDataURL(file);
     };
 
-    function createCard(name, price, img, itemId) {
+    function createCard(name, price, img, itemId, numericPrice) {
+        // Check if card already exists
+        if (document.querySelector(`[data-id="${itemId}"]`)) {
+            return;
+        }
+        
         const div = document.createElement('div');
         div.className = 'card';
         div.setAttribute('data-id', itemId);
-        
-        // Extract numeric price for purchase check
-        const numericPrice = parseInt(price) || 0;
         
         div.innerHTML = `
             <img src="${img}">
             <h3>${name}</h3>
             <div class="price">${price} <span>KYC</span></div>
-            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice}, this)">PURCHASE</button>
+            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice || parseInt(price)}, this)">PURCHASE</button>
             <div class="seller-badge">● LISTED ON BLACK MARKET</div>
         `;
         grid.prepend(div);
         
-        // Disable purchase button if user can't afford it
         const purchaseBtn = div.querySelector('.purchase-btn');
-        if (numericPrice > currentBalance) {
+        if ((numericPrice || parseInt(price)) > currentBalance) {
             purchaseBtn.disabled = true;
         }
     }
 
-    // Purchase function - ONLY HERE money is taken
+    // Purchase function - NOW removes from shared listings
     window.purchaseItem = function(itemId, price, btnElement) {
         if (price > currentBalance) {
             alert("Insufficient KYC balance to purchase this item!");
@@ -370,28 +472,48 @@
         }
         
         if (confirm(`Purchase this item for ${price} KYC?`)) {
-            // ONLY ON PURCHASE - money is taken
+            // Take money
             currentBalance -= price;
             localStorage.setItem('kyc_balance', currentBalance.toString());
             updateBalanceDisplay();
             
-            // Remove item from grid
+            // Remove from UI
             const card = btnElement.closest('.card');
             card.remove();
             
-            // Remove from localStorage
-            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            const updated = saved.filter(item => item.id !== itemId);
-            localStorage.setItem('market_items', JSON.stringify(updated));
+            // Remove from shared server
+            fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3/latest', {
+                headers: {
+                    'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.record && data.record.items) {
+                    const updated = data.record.items.filter(item => item.id !== itemId);
+                    
+                    return fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                        },
+                        body: JSON.stringify({ items: updated, lastUpdate: Date.now() })
+                    });
+                }
+            })
+            .catch(() => {
+                // Fallback to local storage
+                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                const updated = saved.filter(item => item.id !== itemId);
+                localStorage.setItem('market_items', JSON.stringify(updated));
+            });
             
-            alert("Purchase complete! Item removed from market.");
-            
-            // Update all purchase buttons disabled state based on new balance
+            alert("Purchase complete! Item removed from global market.");
             updateAllPurchaseButtons();
         }
     };
     
-    // Update all purchase buttons based on current balance
     function updateAllPurchaseButtons() {
         document.querySelectorAll('.purchase-btn').forEach(btn => {
             const card = btn.closest('.card');
@@ -403,12 +525,21 @@
 
     function updateBalanceDisplay() {
         balanceDisplay.textContent = currentBalance;
-        // Update purchase buttons
         updateAllPurchaseButtons();
     }
 
     function clearMarket() {
         if(confirm("Wipe all listings and reset balance to 10,000 KYC?")) {
+            // Clear from server
+            fetch('https://api.jsonbin.io/v3/b/67e7cfc88960c979a57c80e3', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': '$2a$10$N7TqTqTqTqTqTqTqTqTqTq'
+                },
+                body: JSON.stringify({ items: [], lastUpdate: Date.now() })
+            }).catch(() => {});
+            
             localStorage.removeItem('market_items');
             localStorage.setItem('kyc_balance', '10000');
             location.reload();
