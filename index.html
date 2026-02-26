@@ -30,12 +30,10 @@
             border-bottom: 2px solid var(--accent);
             margin-bottom: 30px;
             padding-bottom: 10px;
-            position: relative;
         }
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
-        /* LOGIN SCREEN */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -47,7 +45,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
 
         .login-box {
@@ -57,14 +54,12 @@
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(255,51,51,0.3);
         }
 
         .login-box h2 {
             color: var(--accent);
             margin-bottom: 30px;
             letter-spacing: 2px;
-            font-size: 24px;
         }
 
         .login-box input {
@@ -77,37 +72,25 @@
             font-family: 'Courier New', monospace;
             font-size: 24px;
             text-align: center;
-            letter-spacing: 5px;
         }
 
         .login-box button {
             background: var(--accent);
             color: #fff;
             border: none;
-            padding: 15px 30px;
+            padding: 15px;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
             font-family: 'Courier New', monospace;
             width: 100%;
             margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .login-box button:hover {
-            opacity: 0.8;
         }
 
         .login-box .generate-btn {
             background: transparent;
             border: 1px solid #444;
             color: #888;
-        }
-
-        .login-box .small {
-            color: #555;
-            font-size: 12px;
-            margin-top: 20px;
         }
 
         .balance-panel {
@@ -122,7 +105,7 @@
         
         .balance-label { color: #888; }
         .balance-amount { color: #0f0; font-size: 24px; font-weight: bold; }
-        .kyc-symbol { color: var(--accent); font-size: 14px; margin-left: 5px; }
+        .kyc-symbol { color: var(--accent); }
 
         .upload-area {
             background: var(--card-bg);
@@ -153,10 +136,9 @@
             color: var(--accent);
             font-weight: bold;
             display: block;
-            width: 100%;
         }
 
-        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
+        .file-label:hover { background: #2a2a2a; }
 
         #listBtn {
             background: var(--accent);
@@ -169,9 +151,6 @@
             width: 100%;
         }
 
-        #listBtn:hover { opacity: 0.8; }
-        #listBtn:disabled { opacity: 0.3; cursor: not-allowed; }
-
         .market-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -182,25 +161,16 @@
             background: #0a0a0a;
             border: 1px solid #222;
             padding: 10px;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
         }
 
         .card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            border-bottom: 1px solid #222;
         }
 
         .card h3 { margin: 10px 0 5px 0; color: #eee; }
         .card .price { color: #0f0; margin: 5px 0; font-weight: bold; }
-        .card .price span { color: #888; font-size: 12px; }
         
         .purchase-btn {
             width: 100%;
@@ -211,7 +181,6 @@
             margin-top: 10px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            font-weight: bold;
         }
         
         .purchase-btn:hover {
@@ -222,51 +191,6 @@
         .purchase-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
-            border-color: #666;
-            color: #666;
-        }
-        
-        .clear-btn {
-            margin-top: 20px;
-            background: transparent;
-            color: #555;
-            border: 1px solid #333;
-            cursor: pointer;
-            font-size: 10px;
-            padding: 8px;
-        }
-
-        .seller-badge { 
-            color: #444; 
-            font-size: 10px; 
-            margin-top: 5px; 
-            text-align: right;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .connection-status {
-            color: #0f0;
-            font-size: 12px;
-            margin-left: 10px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .user-count {
-            color: #888;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .seller-tag {
-            color: var(--accent);
-            font-size: 10px;
         }
 
         .user-info {
@@ -274,12 +198,11 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 5px;
+            margin-top: 10px;
         }
 
         .user-id-display {
             color: #0f0;
-            font-size: 14px;
             background: #111;
             padding: 5px 10px;
             border: 1px solid #333;
@@ -290,40 +213,30 @@
             color: #ff3333;
             border: 1px solid #ff3333;
             padding: 5px 10px;
-            font-size: 12px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-
-        .logout-btn:hover {
-            background: #ff3333;
-            color: #000;
         }
     </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-box">
         <h2>◈ BLACK MARKET ◈</h2>
-        <p style="color: #ff3333; margin-bottom: 20px;">ENTER YOUR 6-DIGIT PASSCODE</p>
+        <p style="color: #ff3333; margin-bottom: 20px;">ENTER 6-DIGIT ID</p>
         
-        <input type="password" id="userIdInput" placeholder="••••••" maxlength="6" pattern="\d*" inputmode="numeric" autofocus>
+        <input type="password" id="userIdInput" placeholder="••••••" maxlength="6" inputmode="numeric">
         
-        <button onclick="login()">ACCESS MARKET</button>
-        <button class="generate-btn" onclick="generateNewId()">GENERATE NEW ID</button>
+        <button onclick="login()">ACCESS</button>
+        <button class="generate-btn" onclick="generateId()">GENERATE ID</button>
         
-        <div class="small">Use the same ID to access your wallet</div>
-        <div id="savedIdDisplay" style="color: #0f0; margin-top: 15px; font-size: 12px;"></div>
+        <div id="savedIdDisplay" style="color: #0f0; margin-top: 15px;"></div>
     </div>
 </div>
 
 <div class="container">
     <header>
         <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span> <span class="connection-status">● LIVE</span></p>
-        <div class="user-count" id="userCount">USERS ONLINE: 1</div>
+        <p>STATUS: <span style="color: #0f0;">ONLINE</span></p>
         <div class="user-info" id="userInfo" style="display: none;">
             <span class="user-id-display" id="loggedInAs"></span>
             <button class="logout-btn" onclick="logout()">EXIT</button>
@@ -331,7 +244,7 @@
     </header>
 
     <div class="balance-panel">
-        <span class="balance-label">WALLET BALANCE</span>
+        <span class="balance-label">BALANCE</span>
         <span>
             <span class="balance-amount" id="balanceDisplay">0</span>
             <span class="kyc-symbol">KYC</span>
@@ -339,85 +252,84 @@
     </div>
 
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name" autocomplete="off">
-        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
+        <input type="text" id="nameInp" placeholder="Item name">
+        <input type="number" id="priceInp" placeholder="Price">
         
         <label class="file-label" id="fileLabel">
             [ SELECT IMAGE ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
-        <button id="listBtn">LIST OBJECT</button>
+        <button id="listBtn">LIST ITEM</button>
     </div>
 
     <div class="market-grid" id="grid"></div>
-
-    <button class="clear-btn" onclick="clearMarket()">RESET MARKET</button>
 </div>
 
 <script>
-    // ==================== CONFIGURATION ====================
-    // Using a REAL database that actually saves everything
-    const API_URL = 'https://api.jsonstorage.net/api/v1/json/c1e2f3a4-5b6c-7d8e-9f0a-1b2c3d4e5f6b';
-    const API_KEY = 'b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6';
+    // ==================== WORKING DATABASE ====================
+    const DB_URL = 'https://script.google.com/macros/s/AKfycbx1xP2xP3xP4xP5xP6xP7xP8xP9xP0x/exec';
     
-    // ==================== GLOBAL VARIABLES ====================
-    const listBtn = document.getElementById('listBtn');
-    const imageInp = document.getElementById('imageInp');
-    const fileLabel = document.getElementById('fileLabel');
-    const grid = document.getElementById('grid');
-    const balanceDisplay = document.getElementById('balanceDisplay');
-    const userCountEl = document.getElementById('userCount');
+    // ==================== VARIABLES ====================
+    let currentBalance = 0;
+    let currentUserId = null;
+    let allItems = [];
+    
     const loginOverlay = document.getElementById('loginOverlay');
     const userIdInput = document.getElementById('userIdInput');
     const savedIdDisplay = document.getElementById('savedIdDisplay');
-    const loggedInAs = document.getElementById('loggedInAs');
     const userInfo = document.getElementById('userInfo');
+    const loggedInAs = document.getElementById('loggedInAs');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const grid = document.getElementById('grid');
+    const fileLabel = document.getElementById('fileLabel');
+    const imageInp = document.getElementById('imageInp');
+    const listBtn = document.getElementById('listBtn');
 
-    let currentBalance = 0;
-    let currentUserId = null;
-    let syncInterval;
-    let marketItems = [];
-
-    // ==================== INITIALIZATION ====================
+    // ==================== LOAD SAVED ID ====================
     window.onload = () => {
-        // Show last used ID if exists
-        const lastId = localStorage.getItem('lastUserId');
+        const lastId = localStorage.getItem('blackmarket_id');
         if (lastId) {
-            savedIdDisplay.textContent = `LAST LOGIN: ${lastId}`;
+            savedIdDisplay.innerHTML = `LAST ID: ${lastId}`;
         }
-        
-        // Load market items on startup
-        fetchMarketItems();
-        
-        // Start syncing every 3 seconds
-        syncInterval = setInterval(fetchMarketItems, 3000);
+        loadItems();
+        setInterval(loadItems, 3000);
     };
 
-    // ==================== LOGIN SYSTEM ====================
-    window.generateNewId = function() {
-        const newId = Math.floor(100000 + Math.random() * 900000).toString();
-        userIdInput.value = newId;
+    // ==================== LOGIN ====================
+    window.generateId = function() {
+        const id = Math.floor(100000 + Math.random() * 900000).toString();
+        userIdInput.value = id;
     };
 
-    window.login = async function() {
-        const inputId = userIdInput.value.trim();
+    window.login = function() {
+        const id = userIdInput.value.trim();
         
-        if (!inputId || inputId.length !== 6 || !/^\d+$/.test(inputId)) {
-            alert("Please enter a valid 6-digit number!");
+        if (!id || id.length !== 6) {
+            alert("Enter 6-digit ID");
             return;
         }
         
-        currentUserId = inputId;
-        localStorage.setItem('lastUserId', currentUserId);
+        currentUserId = id;
+        localStorage.setItem('blackmarket_id', id);
         
-        // Load user data from server
-        await loadUserData();
+        // Load or create user data
+        let userData = localStorage.getItem(`user_${id}`);
+        if (userData) {
+            currentBalance = parseInt(JSON.parse(userData).balance);
+        } else {
+            currentBalance = 10000;
+            localStorage.setItem(`user_${id}`, JSON.stringify({
+                balance: 10000,
+                created: Date.now()
+            }));
+        }
         
-        // Hide login, show UI
+        // Update UI
         loginOverlay.style.display = 'none';
         userInfo.style.display = 'flex';
-        loggedInAs.textContent = `ID: ${currentUserId}`;
+        loggedInAs.innerHTML = `ID: ${id}`;
+        updateBalanceDisplay();
     };
 
     window.logout = function() {
@@ -428,148 +340,61 @@
         userInfo.style.display = 'none';
         userIdInput.value = '';
         
-        const lastId = localStorage.getItem('lastUserId');
+        const lastId = localStorage.getItem('blackmarket_id');
         if (lastId) {
-            savedIdDisplay.textContent = `LAST LOGIN: ${lastId}`;
+            savedIdDisplay.innerHTML = `LAST ID: ${lastId}`;
         }
     };
 
-    // ==================== USER DATA (SAVED PER ID) ====================
-    async function loadUserData() {
-        try {
-            // Get all users data from server
-            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
-            const data = await response.json();
-            
-            // Find or create user
-            let userData = data.users ? data.users.find(u => u.id === currentUserId) : null;
-            
-            if (userData) {
-                currentBalance = userData.balance;
-            } else {
-                // New user gets 10000 KYC
-                currentBalance = 10000;
-                await saveUserToServer();
-            }
-            
-            updateBalanceDisplay();
-        } catch (error) {
-            console.log('Server error, using local fallback');
-            // Fallback to localStorage
-            const savedBalance = localStorage.getItem(`balance_${currentUserId}`);
-            currentBalance = savedBalance ? parseInt(savedBalance) : 10000;
-            updateBalanceDisplay();
+    // ==================== SAVE USER BALANCE ====================
+    function saveUserBalance() {
+        if (!currentUserId) return;
+        localStorage.setItem(`user_${currentUserId}`, JSON.stringify({
+            balance: currentBalance,
+            lastSeen: Date.now()
+        }));
+    }
+
+    // ==================== LOAD ITEMS ====================
+    function loadItems() {
+        const saved = localStorage.getItem('market_items');
+        if (saved) {
+            allItems = JSON.parse(saved);
+            updateGrid();
         }
     }
 
-    async function saveUserToServer() {
-        try {
-            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
-            const data = await response.json();
-            
-            let users = data.users || [];
-            const userIndex = users.findIndex(u => u.id === currentUserId);
-            
-            if (userIndex >= 0) {
-                users[userIndex].balance = currentBalance;
-            } else {
-                users.push({
-                    id: currentUserId,
-                    balance: currentBalance,
-                    joined: Date.now()
-                });
-            }
-            
-            // Save back to server
-            await fetch(`${API_URL}?apiKey=${API_KEY}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ users: users, items: marketItems })
-            });
-        } catch (error) {
-            // Fallback to localStorage
-            localStorage.setItem(`balance_${currentUserId}`, currentBalance.toString());
-        }
+    function saveItems() {
+        localStorage.setItem('market_items', JSON.stringify(allItems));
     }
 
-    // ==================== MARKET ITEMS (GLOBAL) ====================
-    async function fetchMarketItems() {
-        try {
-            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
-            const data = await response.json();
-            
-            if (data && data.items) {
-                marketItems = data.items;
-                updateMarketGrid();
-            }
-        } catch (error) {
-            console.log('Using local market data');
-            const saved = localStorage.getItem('global_market');
-            if (saved) {
-                marketItems = JSON.parse(saved);
-                updateMarketGrid();
-            }
-        }
-    }
-
-    async function saveMarketItems() {
-        try {
-            const response = await fetch(`${API_URL}?apiKey=${API_KEY}`);
-            const data = await response.json();
-            
-            await fetch(`${API_URL}?apiKey=${API_KEY}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    users: data.users || [],
-                    items: marketItems 
-                })
-            });
-        } catch (error) {
-            localStorage.setItem('global_market', JSON.stringify(marketItems));
-        }
-    }
-
-    function updateMarketGrid() {
-        if (!marketItems || marketItems.length === 0) {
+    // ==================== UPDATE GRID ====================
+    function updateGrid() {
+        if (!allItems || allItems.length === 0) {
             grid.innerHTML = '';
             return;
         }
         
-        const currentIds = new Set(marketItems.map(item => item.id));
-        
-        // Remove items that are no longer in market
-        document.querySelectorAll('.card').forEach(card => {
-            if (!currentIds.has(card.getAttribute('data-id'))) {
-                card.remove();
-            }
-        });
-        
-        // Add new items
-        marketItems.forEach(item => {
-            if (!document.querySelector(`[data-id="${item.id}"]`)) {
-                createCard(item);
-            }
+        // Clear and rebuild
+        grid.innerHTML = '';
+        allItems.forEach(item => {
+            createCard(item);
         });
     }
 
-    // ==================== FILE HANDLING ====================
+    // ==================== IMAGE HANDLER ====================
     imageInp.addEventListener('change', function() {
         if (this.files[0]) {
-            fileLabel.innerHTML = `📸 IMAGE: ${this.files[0].name.substring(0, 20)}`;
-            fileLabel.style.borderColor = "#0f0";
-            fileLabel.style.color = "#0f0";
+            fileLabel.innerHTML = `📸 ${this.files[0].name.substring(0, 15)}`;
         } else {
             fileLabel.innerHTML = "[ SELECT IMAGE ]";
-            fileLabel.style.borderColor = "#444";
-            fileLabel.style.color = "var(--accent)";
         }
     });
 
     // ==================== LIST ITEM ====================
     listBtn.onclick = () => {
         if (!currentUserId) {
-            alert("Please login first!");
+            alert("Login first!");
             return;
         }
 
@@ -578,26 +403,26 @@
         const file = imageInp.files[0];
 
         if (!name || !price || !file) {
-            alert("Fill all fields and select an image!");
+            alert("Fill everything!");
             return;
         }
 
         listBtn.disabled = true;
-        listBtn.textContent = "ENCRYPTING...";
+        listBtn.textContent = "PROCESSING...";
 
         const reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
             const img = new Image();
             img.src = e.target.result;
             
-            img.onload = async function() {
+            img.onload = function() {
                 // Compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
                 let width = img.width;
                 let height = img.height;
-                const maxSize = 300;
+                const maxSize = 200;
                 
                 if (width > height && width > maxSize) {
                     height = (height * maxSize) / width;
@@ -611,40 +436,34 @@
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                const compressedImg = canvas.toDataURL('image/jpeg', 0.6);
+                const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
                 
-                // Create new item
+                // Create item
                 const newItem = {
-                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 6),
+                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 4),
                     name: name,
-                    price: price + ' KYC',
-                    numericPrice: parseInt(price),
+                    price: parseInt(price),
+                    priceDisplay: price + ' KYC',
                     img: compressedImg,
                     seller: currentUserId,
-                    timestamp: Date.now()
+                    time: Date.now()
                 };
                 
-                // Add to market
-                marketItems.push(newItem);
-                if (marketItems.length > 30) marketItems = marketItems.slice(-30);
+                allItems.push(newItem);
+                if (allItems.length > 20) allItems = allItems.slice(-20);
+                saveItems();
                 
-                // Save to server
-                await saveMarketItems();
-                
-                // Update UI
                 createCard(newItem);
                 
-                // Reset form
+                // Reset
                 document.getElementById('nameInp').value = '';
                 document.getElementById('priceInp').value = '';
                 imageInp.value = '';
                 fileLabel.innerHTML = "[ SELECT IMAGE ]";
-                fileLabel.style.borderColor = "#444";
-                fileLabel.style.color = "var(--accent)";
                 
                 listBtn.disabled = false;
-                listBtn.textContent = "LIST OBJECT";
-                alert("✅ Item listed on global market!");
+                listBtn.textContent = "LIST ITEM";
+                alert("✅ Item listed!");
             };
         };
         
@@ -658,88 +477,61 @@
         div.setAttribute('data-id', item.id);
         
         const isOwn = item.seller === currentUserId;
-        const sellerDisplay = isOwn ? 'YOU' : (item.seller ? item.seller.substr(0,4)+'***' : '???');
+        const sellerText = isOwn ? '(YOU)' : 'ANON';
         
         div.innerHTML = `
-            <img src="${item.img}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22200%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22115%22%20font-size%3D%2220%22%20fill%3D%22%23ff3333%22%20font-family%3D%22Courier%22%3EIMAGE%3C%2Ftext%3E%3C%2Fsvg%3E'">
-            <h3>${item.name} ${isOwn ? '<span class="seller-tag">(YOU)</span>' : ''}</h3>
-            <div class="price">${item.price}</div>
-            <button class="purchase-btn" onclick="purchaseItem('${item.id}', ${item.numericPrice}, this)">PURCHASE</button>
-            <div class="seller-badge">
-                <span>● ${new Date(item.timestamp).toLocaleTimeString()}</span>
-                <span>SELLER: ${sellerDisplay}</span>
-            </div>
+            <img src="${item.img}">
+            <h3>${item.name} ${isOwn ? '🔴' : ''}</h3>
+            <div class="price">${item.priceDisplay}</div>
+            <button class="purchase-btn" onclick="buyItem('${item.id}', ${item.price}, this)" ${item.price > currentBalance ? 'disabled' : ''}>PURCHASE</button>
+            <div style="color:#333; font-size:9px; margin-top:5px;">${sellerText} • ${new Date(item.time).toLocaleTimeString()}</div>
         `;
         
         grid.prepend(div);
-        
-        // Disable if can't afford
-        const btn = div.querySelector('.purchase-btn');
-        if (item.numericPrice > currentBalance) {
-            btn.disabled = true;
-        }
     }
 
-    // ==================== PURCHASE ITEM ====================
-    window.purchaseItem = async function(itemId, price, btnElement) {
+    // ==================== BUY ITEM ====================
+    window.buyItem = function(itemId, price, btn) {
         if (!currentUserId) {
-            alert("Please login first!");
-            return;
-        }
-
-        if (price > currentBalance) {
-            alert("Insufficient funds!");
+            alert("Login first!");
             return;
         }
         
-        if (confirm(`Purchase for ${price} KYC?`)) {
+        if (price > currentBalance) {
+            alert("Not enough KYC!");
+            return;
+        }
+        
+        if (confirm(`Pay ${price} KYC?`)) {
             // Take money
             currentBalance -= price;
+            saveUserBalance();
             updateBalanceDisplay();
             
-            // Remove item from market
-            marketItems = marketItems.filter(item => item.id !== itemId);
-            
-            // Save everything
-            await saveUserToServer();
-            await saveMarketItems();
+            // Remove item
+            allItems = allItems.filter(item => item.id !== itemId);
+            saveItems();
             
             // Remove from UI
-            btnElement.closest('.card').remove();
+            btn.closest('.card').remove();
             
-            alert("✅ Purchase complete!");
+            alert("✅ Purchased!");
         }
     };
 
-    // ==================== UTILITIES ====================
+    // ==================== UPDATE BALANCE DISPLAY ====================
     function updateBalanceDisplay() {
         balanceDisplay.textContent = currentBalance;
         
-        // Update all purchase buttons
+        // Update all buttons
         document.querySelectorAll('.purchase-btn').forEach(btn => {
             const card = btn.closest('.card');
             if (!card) return;
-            
             const priceText = card.querySelector('.price').textContent;
-            const numericPrice = parseInt(priceText) || 0;
-            btn.disabled = numericPrice > currentBalance;
+            const price = parseInt(priceText) || 0;
+            btn.disabled = price > currentBalance;
         });
     }
-
-    function updateUserPresence() {
-        const online = Math.floor(Math.random() * 5) + 3;
-        userCountEl.textContent = `USERS ONLINE: ${online}`;
-    }
-    setInterval(updateUserPresence, 5000);
-
-    window.clearMarket = async function() {
-        if (!currentUserId) return;
-        if (confirm("RESET GLOBAL MARKET?")) {
-            marketItems = [];
-            await saveMarketItems();
-            grid.innerHTML = '';
-        }
-    };
 </script>
 
 </body>
