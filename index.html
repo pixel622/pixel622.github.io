@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC INFINITY · pure click & mine</title>
+    <title>KYC FARM · miners go brrrr</title>
     <style>
-        /* pure paperclip aesthetic — no bars, no loss, only growth */
+        /* pure paperclip — numbers go up FAST from miners */
         * {
             box-sizing: border-box;
             font-family: 'Courier New', Courier, monospace;
         }
         body {
-            background: #0b0b0f;
+            background: #0a0a0e;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,39 +20,41 @@
             padding: 16px;
         }
         .game {
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
-            background: #0f0f15;
-            border: 4px solid #38658f;
-            padding: 30px 30px 40px;
-            box-shadow: 14px 14px 0 #1c2533;
+            background: #0e0e14;
+            border: 5px solid #2f5a83;
+            padding: 30px 30px 45px;
+            box-shadow: 16px 16px 0 #1b2433;
         }
         h1 {
-            color: #c8e0ff;
-            font-size: 3rem;
+            color: #cce3ff;
+            font-size: 3.2rem;
             font-weight: normal;
             letter-spacing: -1px;
-            margin: 0 0 5px 0;
-            border-bottom: 4px solid #3d6a91;
-            padding-bottom: 12px;
+            margin: 0 0 8px 0;
+            border-bottom: 5px solid #3c6e9c;
+            padding-bottom: 15px;
             text-transform: uppercase;
         }
         .sub {
-            color: #86a5c9;
-            font-size: 1rem;
+            color: #8dafd4;
+            font-size: 1.1rem;
             margin-top: 8px;
             margin-bottom: 30px;
-            border-left: 20px solid #346188;
-            padding-left: 16px;
+            border-left: 24px solid #2d5e8a;
+            padding-left: 18px;
+            font-weight: bold;
         }
         .stats {
             display: flex;
             gap: 80px;
-            background: #161e2b;
-            border: 3px solid #31587c;
-            padding: 20px 30px;
-            margin-bottom: 35px;
+            background: #18212e;
+            border: 4px solid #2b5580;
+            padding: 20px 35px;
+            margin-bottom: 40px;
             justify-content: center;
+            box-shadow: inset 0 0 15px #010101;
         }
         .stat-block {
             display: flex;
@@ -60,35 +62,40 @@
             align-items: center;
         }
         .stat-label {
-            font-size: 1.1rem;
-            color: #adc9ef;
+            font-size: 1.3rem;
+            color: #b9d4f7;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
         .stat-value {
-            font-size: 4.5rem;
+            font-size: 6rem;
             font-weight: bold;
             line-height: 1;
-            color: #fce7a3;
-            text-shadow: 0 0 8px #e3b15a;
+            color: #fee9a8;
+            text-shadow: 0 0 12px #f0b45a, 0 0 25px #ffa726;
+            transition: all 0.05s;
+        }
+        #minerDisplay {
+            font-size: 5rem; /* slightly smaller but still huge */
         }
         .clicker-panel {
-            background: #1e2838;
-            border: 6px solid #2d5a83;
-            padding: 30px 20px;
-            margin-bottom: 40px;
+            background: #1f2b3d;
+            border: 8px solid #28609c;
+            padding: 35px 20px;
+            margin-bottom: 45px;
             cursor: pointer;
-            transition: all 0.05s ease;
+            transition: all 0.03s ease;
             user-select: none;
             text-align: center;
+            box-shadow: 0 8px 0 #0b1a2b, 0 12px 25px black;
         }
         .clicker-panel:active {
-            background: #26344a;
-            border-color: #fad58b;
-            transform: scale(0.99);
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0b1a2b, 0 8px 20px black;
+            border-color: #ffcf8f;
         }
         .clicker-main {
-            font-size: 3rem;
+            font-size: 3.2rem;
             font-weight: bold;
             color: #ffdd9e;
             letter-spacing: 3px;
@@ -96,7 +103,7 @@
         .clicker-desc {
             color: #c2d9fc;
             font-size: 1.3rem;
-            margin-top: 10px;
+            margin-top: 12px;
         }
         .shop {
             display: flex;
@@ -158,7 +165,7 @@
             border-bottom-color: #1f3143;
             cursor: default;
         }
-        .infinity-footer {
+        .footer-note {
             margin-top: 35px;
             color: #5e83a8;
             border-top: 3px dashed #2c4e73;
@@ -166,23 +173,28 @@
             font-size: 1rem;
             text-align: center;
         }
-        .infinite-note {
+        .blink-note {
             background: #1b2637;
             color: #ffe4a7;
             padding: 10px 20px;
-            border: 3px solid #aarrgg;
+            border: 3px solid #ca9f4b;
             display: inline-block;
             font-size: 1.2rem;
             font-weight: bold;
+        }
+        /* small increment animation */
+        .stat-value.increment {
+            color: #fff5cf;
+            text-shadow: 0 0 20px #ffc107, 0 0 40px #ff9100;
         }
     </style>
 </head>
 <body>
 <div class="game">
-    <h1>∞ KYC: UNLIMITED</h1>
-    <div class="sub">click forever · miners = 1 KYC/sec · zero risk · pure growth</div>
+    <h1>⚡ KYC: MINER RUSH</h1>
+    <div class="sub">miners produce 10 clicks per second · numbers go up FAST</div>
 
-    <!-- main stats: only KYC and miners (no bars, no loss) -->
+    <!-- main stats: KYC and miners -->
     <div class="stats">
         <div class="stat-block">
             <span class="stat-label">🔷 KYC</span>
@@ -194,44 +206,43 @@
         </div>
     </div>
 
-    <!-- big infinite click area – no consequences, only +1 KYC -->
+    <!-- big click area (still adds +1, but miners do the heavy lifting) -->
     <div class="clicker-panel" id="clickButton">
-        <div class="clicker-main">▸ CLICK FOR KYC ◂</div>
-        <div class="clicker-desc">+1 KYC per click · unlimited · no backlog, no scrutiny</div>
+        <div class="clicker-main">▸ CLICK +1 ◂</div>
+        <div class="clicker-desc">each miner now clicks 10 TIMES PER SECOND</div>
     </div>
 
-    <!-- simple shop: only two upgrades – miner and AI (AI still halves nothing but we keep flavor) -->
+    <!-- simple shop: miner and useless AI (cosmetic) -->
     <div class="shop">
         <div class="upgrade">
             <div class="upgrade-title">🧑‍🚀 MINER</div>
-            <div class="upgrade-desc">Generates 1 KYC every second. Forever.</div>
-            <div class="upgrade-cost" id="minerCost">cost: 20 KYC</div>
+            <div class="upgrade-desc">Each miner generates 10 KYC per second (in tiny rapid clicks)</div>
+            <div class="upgrade-cost" id="minerCost">cost: 25 KYC</div>
             <button id="buyMinerBtn">BUY MINER</button>
         </div>
         <div class="upgrade">
-            <div class="upgrade-title">🔍 LIVENESS AI</div>
-            <div class="upgrade-desc">(no mechanics left – just for fun)</div>
-            <div class="upgrade-cost" id="aiCost">cost: 50 KYC</div>
+            <div class="upgrade-title">🔍 AI (cosmetic)</div>
+            <div class="upgrade-desc">no effect — just for fun & flex</div>
+            <div class="upgrade-cost" id="aiCost">cost: 60 KYC</div>
             <button id="buyAiBtn">BUY AI</button>
         </div>
     </div>
 
-    <!-- pure infinite footer -->
-    <div class="infinity-footer">
-        <span class="infinite-note">🚫 no backlog · no scrutiny · you can click as much as you want 🚫</span><br>
-        • each miner gives +1 KYC per second • AI does nothing but looks cool • enjoy the numbers
+    <div class="footer-note">
+        <span class="blink-note">⚡ each miner gives 10 tiny clicks per second · KYC counter flies up ⚡</span><br>
+        • click for manual +1 • miners work at 10Hz — watch the numbers melt
     </div>
 </div>
 
 <script>
     (function() {
-        // --- state: only kyc and miners (no bars, no risk) ---
-        let kyc = 0;                // KYC points – goes to infinity
-        let miners = 0;             // each gives 1 KYC/sec
-        let aiLevel = 0;            // purely cosmetic (does nothing)
+        // --- state ---
+        let kyc = 0;                // KYC points – goes to moon
+        let miners = 0;             // each miner generates 10 clicks/sec
+        let aiLevel = 0;            // purely cosmetic
 
-        const CLICK_KYC = 1;         // per click
-        const MINER_KYC_PER_SEC = 1;  // per miner per second
+        const CLICK_KYC = 1;         // per manual click
+        const MINER_CLICKS_PER_SEC = 10;  // each miner fires 10 times per second
 
         // --- DOM elements ---
         const kycSpan = document.getElementById('kycDisplay');
@@ -243,49 +254,59 @@
         const minerCostSpan = document.getElementById('minerCost');
         const aiCostSpan = document.getElementById('aiCost');
 
-        // refresh UI (only kyc and miners)
+        // simple animation flash (optional)
+        function flashKYC() {
+            kycSpan.classList.add('increment');
+            setTimeout(() => kycSpan.classList.remove('increment'), 80);
+        }
+
+        // refresh numbers
         function refreshUI() {
-            kycSpan.innerText = Math.floor(kyc);      // show as integer
+            kycSpan.innerText = Math.floor(kyc);      // integer look
             minerSpan.innerText = miners;
 
-            // update cost displays (static)
-            minerCostSpan.innerText = 'cost: 20 KYC';
-            aiCostSpan.innerText = 'cost: 50 KYC';
+            // update cost displays
+            minerCostSpan.innerText = 'cost: 25 KYC';
+            aiCostSpan.innerText = 'cost: 60 KYC';
 
-            // button states based on kyc
-            buyMinerBtn.disabled = (kyc < 20);
-            buyAiBtn.disabled = (kyc < 50);
+            buyMinerBtn.disabled = (kyc < 25);
+            buyAiBtn.disabled = (kyc < 60);
         }
 
-        // --- click handler: simply add kyc (no limits) ---
+        // --- manual click ---
         function handleClick() {
             kyc += CLICK_KYC;
+            flashKYC();
             refreshUI();
         }
 
-        // --- miner tick: each miner adds 1 KYC per second ---
-        function minerTick() {
+        // --- miner "rapid fire" — each miner gives 10 small increments per second ---
+        // we'll use a fast interval (100ms) to simulate 10Hz per miner.
+        // total increment per 100ms = miners * 1 (because 10 per sec = 1 per 100ms)
+        function minerRapidTick() {
             if (miners > 0) {
-                kyc += miners * MINER_KYC_PER_SEC;   // each miner = +1 per second
-                // no cap, no bars, pure growth
+                // each miner contributes 1 KYC every 100ms → 10 per second
+                kyc += miners;   // +miners every 100ms = miners*10 per second
+                // flash on each tick to show activity (but not too aggressive)
+                flashKYC();
+                refreshUI();
             }
-            refreshUI();
         }
 
-        // --- buy miner (cost 20) ---
+        // --- buy miner (cost 25) ---
         function buyMiner() {
-            if (kyc >= 20) {
-                kyc -= 20;
+            if (kyc >= 25) {
+                kyc -= 25;
                 miners++;
                 refreshUI();
             }
         }
 
-        // --- buy AI (cost 50) – does nothing but costs kyc, purely cosmetic ---
+        // --- buy AI (cosmetic, cost 60) ---
         function buyAi() {
-            if (kyc >= 50) {
-                kyc -= 50;
-                aiLevel++;      // no gameplay effect, just for fun
+            if (kyc >= 60) {
+                kyc -= 60;
+                aiLevel++;      // no effect, but you know you have it
                 refreshUI();
             }
         }
@@ -295,14 +316,13 @@
         buyMinerBtn.addEventListener('click', buyMiner);
         buyAiBtn.addEventListener('click', buyAi);
 
-        // start miner interval (every second)
-        setInterval(minerTick, 1000);
+        // start miner rapid tick (100ms = 10 times per second)
+        setInterval(minerRapidTick, 100);  // 10Hz
 
         // initial render
         refreshUI();
 
-        // just for fun: show aiLevel in console if anyone clicks, but no UI needed
-        // (optional: we could display ai level, but it's intentionally hidden)
+        // (optional) extra little flair: track ai in console, but not needed
     })();
 </script>
 </body>
