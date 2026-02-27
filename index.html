@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC FARM · miners go brrrr</title>
+    <title>KYC · streaming digits effect</title>
     <style>
-        /* pure paperclip — numbers go up FAST from miners */
         * {
             box-sizing: border-box;
             font-family: 'Courier New', Courier, monospace;
@@ -73,10 +72,11 @@
             line-height: 1;
             color: #fee9a8;
             text-shadow: 0 0 12px #f0b45a, 0 0 25px #ffa726;
+            font-variant-numeric: tabular-nums;
             transition: all 0.05s;
         }
         #minerDisplay {
-            font-size: 5rem; /* slightly smaller but still huge */
+            font-size: 5rem;
         }
         .clicker-panel {
             background: #1f2b3d;
@@ -182,19 +182,13 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
-        /* small increment animation */
-        .stat-value.increment {
-            color: #fff5cf;
-            text-shadow: 0 0 20px #ffc107, 0 0 40px #ff9100;
-        }
     </style>
 </head>
 <body>
 <div class="game">
-    <h1>⚡ KYC: MINER RUSH</h1>
-    <div class="sub">miners produce 10 clicks per second · numbers go up FAST</div>
+    <h1>⚡ KYC: STREAMING DIGITS</h1>
+    <div class="sub">miners add digits one by one · numbers flow fast</div>
 
-    <!-- main stats: KYC and miners -->
     <div class="stats">
         <div class="stat-block">
             <span class="stat-label">🔷 KYC</span>
@@ -206,90 +200,85 @@
         </div>
     </div>
 
-    <!-- big click area (still adds +1, but miners do the heavy lifting) -->
     <div class="clicker-panel" id="clickButton">
         <div class="clicker-main">▸ CLICK +1 ◂</div>
-        <div class="clicker-desc">each miner now clicks 10 TIMES PER SECOND</div>
+        <div class="clicker-desc">each miner streams +1 KYC every 0.1 seconds (10/sec)</div>
     </div>
 
-    <!-- simple shop: miner and useless AI (cosmetic) -->
     <div class="shop">
         <div class="upgrade">
             <div class="upgrade-title">🧑‍🚀 MINER</div>
-            <div class="upgrade-desc">Each miner generates 10 KYC per second (in tiny rapid clicks)</div>
+            <div class="upgrade-desc">Adds 1 KYC in a smooth stream 10 times per second</div>
             <div class="upgrade-cost" id="minerCost">cost: 25 KYC</div>
             <button id="buyMinerBtn">BUY MINER</button>
         </div>
         <div class="upgrade">
             <div class="upgrade-title">🔍 AI (cosmetic)</div>
-            <div class="upgrade-desc">no effect — just for fun & flex</div>
+            <div class="upgrade-desc">just for fun — no effect</div>
             <div class="upgrade-cost" id="aiCost">cost: 60 KYC</div>
             <button id="buyAiBtn">BUY AI</button>
         </div>
     </div>
 
     <div class="footer-note">
-        <span class="blink-note">⚡ each miner gives 10 tiny clicks per second · KYC counter flies up ⚡</span><br>
-        • click for manual +1 • miners work at 10Hz — watch the numbers melt
+        <span class="blink-note">⚡ each miner adds +1 every 0.1s · KYC streams up digit by digit ⚡</span><br>
+        • manual click adds +1 instantly • watch the numbers flow
     </div>
 </div>
 
 <script>
     (function() {
         // --- state ---
-        let kyc = 0;                // KYC points – goes to moon
-        let miners = 0;             // each miner generates 10 clicks/sec
-        let aiLevel = 0;            // purely cosmetic
+        let kyc = 0;                // real KYC value (integer)
+        let miners = 0;             // each miner adds 1 per 0.1s
+        let aiLevel = 0;
 
-        const CLICK_KYC = 1;         // per manual click
-        const MINER_CLICKS_PER_SEC = 10;  // each miner fires 10 times per second
-
-        // --- DOM elements ---
+        // DOM elements
         const kycSpan = document.getElementById('kycDisplay');
         const minerSpan = document.getElementById('minerDisplay');
-
         const clickBtn = document.getElementById('clickButton');
         const buyMinerBtn = document.getElementById('buyMinerBtn');
         const buyAiBtn = document.getElementById('buyAiBtn');
         const minerCostSpan = document.getElementById('minerCost');
         const aiCostSpan = document.getElementById('aiCost');
 
-        // simple animation flash (optional)
-        function flashKYC() {
-            kycSpan.classList.add('increment');
-            setTimeout(() => kycSpan.classList.remove('increment'), 80);
+        // --- streaming display variables ---
+        let displayedKYC = 0;        // what the user sees (lags behind real kyc)
+        const STEP = 1;              // we increment displayed value by 1 each step
+
+        // update the displayed number with a streaming effect
+        function animateDisplay() {
+            if (displayedKYC < kyc) {
+                // increase displayed value by STEP, but never overshoot
+                displayedKYC = Math.min(displayedKYC + STEP, kyc);
+                kycSpan.innerText = Math.floor(displayedKYC);
+            } else if (displayedKYC > kyc) {
+                // just in case (shouldn't happen)
+                displayedKYC = kyc;
+                kycSpan.innerText = Math.floor(displayedKYC);
+            }
         }
 
-        // refresh numbers
-        function refreshUI() {
-            kycSpan.innerText = Math.floor(kyc);      // integer look
+        // refresh miner display and buttons (immediate)
+        function refreshStaticUI() {
             minerSpan.innerText = miners;
-
-            // update cost displays
             minerCostSpan.innerText = 'cost: 25 KYC';
             aiCostSpan.innerText = 'cost: 60 KYC';
-
             buyMinerBtn.disabled = (kyc < 25);
             buyAiBtn.disabled = (kyc < 60);
         }
 
         // --- manual click ---
         function handleClick() {
-            kyc += CLICK_KYC;
-            flashKYC();
-            refreshUI();
+            kyc += 1;   // real value goes up
+            refreshStaticUI();
         }
 
-        // --- miner "rapid fire" — each miner gives 10 small increments per second ---
-        // we'll use a fast interval (100ms) to simulate 10Hz per miner.
-        // total increment per 100ms = miners * 1 (because 10 per sec = 1 per 100ms)
-        function minerRapidTick() {
+        // --- miner rapid stream (adds to REAL kyc every 0.1s) ---
+        function minerTick() {
             if (miners > 0) {
-                // each miner contributes 1 KYC every 100ms → 10 per second
-                kyc += miners;   // +miners every 100ms = miners*10 per second
-                // flash on each tick to show activity (but not too aggressive)
-                flashKYC();
-                refreshUI();
+                kyc += miners;   // real value increases by number of miners each 0.1s
+                refreshStaticUI();
             }
         }
 
@@ -298,16 +287,16 @@
             if (kyc >= 25) {
                 kyc -= 25;
                 miners++;
-                refreshUI();
+                refreshStaticUI();
             }
         }
 
-        // --- buy AI (cosmetic, cost 60) ---
+        // --- buy AI (cosmetic) ---
         function buyAi() {
             if (kyc >= 60) {
                 kyc -= 60;
-                aiLevel++;      // no effect, but you know you have it
-                refreshUI();
+                aiLevel++;
+                refreshStaticUI();
             }
         }
 
@@ -316,13 +305,15 @@
         buyMinerBtn.addEventListener('click', buyMiner);
         buyAiBtn.addEventListener('click', buyAi);
 
-        // start miner rapid tick (100ms = 10 times per second)
-        setInterval(minerRapidTick, 100);  // 10Hz
+        // start miner real ticks (10Hz)
+        setInterval(minerTick, 100);
 
-        // initial render
-        refreshUI();
+        // start display animation (60fps smooth streaming)
+        setInterval(animateDisplay, 16);  // ~60fps
 
-        // (optional) extra little flair: track ai in console, but not needed
+        // initial UI
+        refreshStaticUI();
+        kycSpan.innerText = '0';
     })();
 </script>
 </body>
