@@ -3,418 +3,555 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | Anonymous</title>
+    <title>COMPLIANCE CLICKER · KYC NIGHTMARE</title>
     <style>
-        :root {
-            --accent: #ff3333;
-            --bg: #050505;
-            --card-bg: #111;
+        * {
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
         }
-
         body {
-            background-color: var(--bg);
-            color: #bbb;
-            font-family: 'Courier New', monospace;
+            background: #1a1e2b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
         }
-
-        .container { max-width: 900px; margin: auto; }
-
-        header {
+        .game-container {
+            max-width: 780px;
+            width: 100%;
+            background: #0b0d15;
+            border: 2px solid #3a4a5f;
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 2px #2a3b4e inset;
+            color: #c0d3e6;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            letter-spacing: 3px;
             text-align: center;
-            border-bottom: 2px solid var(--accent);
-            margin-bottom: 30px;
+            text-shadow: 0 0 5px #7aa9c9;
+            color: #e0eefb;
+            border-bottom: 2px dashed #4d708b;
             padding-bottom: 10px;
         }
-
-        h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
-
-        /* Balance Display */
-        .balance-panel {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            padding: 15px;
+        .tagline {
+            text-align: center;
+            font-style: italic;
             margin-bottom: 20px;
+            color: #8fa9c2;
+            font-size: 0.9rem;
+        }
+        .status-panel {
+            background: #10131f;
+            border: 2px solid #4f6f8f;
+            border-radius: 18px;
+            padding: 16px 20px;
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 15px #00000055;
         }
-        
-        .balance-label { color: #888; }
-        .balance-amount { color: #0f0; font-size: 24px; font-weight: bold; }
-        .kyc-symbol { color: var(--accent); font-size: 14px; margin-left: 5px; }
-
-        /* Listing Box */
-        .upload-area {
-            background: var(--card-bg);
-            border: 1px dashed #444;
-            padding: 20px;
+        .stat {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-bottom: 40px;
+            align-items: center;
+            min-width: 100px;
         }
-
-        input[type="text"], input[type="number"] {
-            background: #000;
-            border: 1px solid #333;
-            color: #0f0;
-            padding: 12px;
-            outline: none;
-            font-family: 'Courier New', monospace;
-        }
-
-        input[type="number"]::-webkit-inner-spin-button { 
-            opacity: 0.5;
-            background: #333;
-        }
-
-        /* The Custom Gallery Button */
-        .file-label {
-            background: #222;
-            border: 1px solid #444;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            color: var(--accent);
-            font-weight: bold;
-            display: block;
-        }
-
-        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
-
-        #listBtn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 15px;
-            font-weight: bold;
-            cursor: pointer;
+        .stat-label {
+            font-size: 0.8rem;
             text-transform: uppercase;
+            color: #7e98b3;
+            letter-spacing: 1px;
         }
-
-        #listBtn:hover { opacity: 0.8; }
-
-        /* Grid */
-        .market-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            line-height: 1.2;
+            color: #ffd98c;
+            text-shadow: 0 0 8px #f0b000;
         }
-
-        .card {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            padding: 10px;
+        .progress-section {
+            background: #191e2b;
+            border-radius: 60px;
+            height: 40px;
+            border: 2px solid #5c799b;
+            margin: 25px 0 20px 0;
             position: relative;
+            box-shadow: inset 0 3px 6px #00000080;
+            overflow: hidden;
         }
-
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-bottom: 1px solid #222;
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #d45f5f, #aa4040);
+            box-shadow: 0 0 15px #ff5e5e;
+            transition: width 0.2s ease;
         }
-
-        .card h3 { margin: 10px 0 5px 0; color: #eee; }
-        .card .price { color: #0f0; margin: 5px 0; font-weight: bold; }
-        .card .price span { color: #888; font-size: 12px; }
-        
-        .purchase-btn {
-            width: 100%;
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 8px;
-            margin-top: 10px;
+        .progress-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 2px black;
+            mix-blend-mode: difference;
+            font-size: 1.1rem;
+        }
+        .click-area {
+            background: #1d2a36;
+            border-radius: 50px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 4px solid #51718b;
+            margin-bottom: 28px;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
+            transition: all 0.08s;
+            box-shadow: 0 8px 0 #2a3b4a, 0 12px 25px black;
+        }
+        .click-area:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #2a3b4a, 0 8px 20px black;
+            border-color: #ffb86b;
+        }
+        .click-area p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0;
+            color: #ebcba0;
+        }
+        .click-area small {
+            color: #afc9e7;
+            font-size: 1rem;
+        }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 24px 0 20px;
+        }
+        .shop-item {
+            background: #141c26;
+            border: 2px solid #3a5f7a;
+            border-radius: 20px;
+            padding: 14px 10px;
+            text-align: center;
+            transition: 0.1s;
+            box-shadow: 0 5px 0 #1a2938;
+        }
+        .shop-item.disabled {
+            opacity: 0.45;
+            filter: grayscale(0.7);
+            border-color: #4d4f5a;
+            box-shadow: none;
+        }
+        .item-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #bfdaf5;
+        }
+        .item-cost {
+            font-size: 1.1rem;
+            background: #1f3343;
+            display: inline-block;
+            padding: 4px 15px;
+            border-radius: 40px;
+            margin: 10px 0 6px;
+            border: 1px solid #ffcf8a;
+            color: #ffe1a3;
+        }
+        .item-desc {
+            font-size: 0.75rem;
+            color: #90accf;
+            min-height: 40px;
+        }
+        button {
+            background: #38658f;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            border-bottom: 4px solid #1b3348;
+            transition: 0.07s;
+            width: 100%;
+        }
+        button:active:not(:disabled) {
+            transform: translateY(3px);
+            border-bottom-width: 1px;
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #4b5b6b;
+            border-bottom-color: #2e3d4d;
+        }
+        .scrutiny-meter {
+            background: #1b222f;
+            border-radius: 30px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin: 20px 0 5px;
+            border: 2px solid #ab6f4b;
+        }
+        .scrutiny-label {
+            font-weight: bold;
+            color: #f9b buton;
+            white-space: nowrap;
+        }
+        .scrutiny-bg {
+            flex: 1;
+            height: 24px;
+            background: #352b22;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 2px solid #765d44;
+        }
+        .scrutiny-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #f19b3e, #f1c40f);
+            box-shadow: 0 0 12px orange;
+        }
+        .scrutiny-value {
+            font-weight: bold;
+            min-width: 4ch;
+            color: #ffc285;
+        }
+        .footer-small {
+            font-size: 0.7rem;
+            color: #4e6984;
+            text-align: center;
+            margin-top: 25px;
+            border-top: 1px solid #2e4560;
+            padding-top: 12px;
+        }
+        .flash {
+            color: #ffaa70;
             font-weight: bold;
         }
-        
-        .purchase-btn:hover {
-            background: var(--accent);
-            color: #000;
-        }
-        
-        .purchase-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-color: #666;
-            color: #666;
-        }
-        
-        .clear-btn {
-            margin-top: 20px;
-            background: transparent;
-            color: #555;
-            border: 1px solid #333;
-            cursor: pointer;
-            font-size: 10px;
-        }
-
-        .seller-badge { color: #444; font-size: 10px; margin-top: 5px; text-align: right; }
     </style>
 </head>
 <body>
+<div class="game-container">
+    <h1>⚖️ COMPLIANCE CLICKER</h1>
+    <div class="tagline">The blockchain is immutable. Your paperwork is not.</div>
 
-<div class="container">
-    <header>
-        <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
-    </header>
-
-    <!-- KYC Balance Panel -->
-    <div class="balance-panel">
-        <span class="balance-label">WALLET BALANCE</span>
-        <span>
-            <span class="balance-amount" id="balanceDisplay">10000</span>
-            <span class="kyc-symbol">KYC</span>
-        </span>
+    <!-- main stats -->
+    <div class="status-panel">
+        <div class="stat"><span class="stat-label">CP (sanity)</span><span id="cpDisplay" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">KC (credits)</span><span id="kcDisplay" class="stat-value">0</span></div>
+        <div class="stat"><span class="stat-label">users/s</span><span id="upsDisplay" class="stat-value">0.0</span></div>
     </div>
 
-    <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
-        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
-        
-        <label class="file-label" id="fileLabel">
-            [ SELECT FROM GALLERY ]
-            <input type="file" id="imageInp" accept="image/*" style="display:none">
-        </label>
-
-        <button id="listBtn">LIST OBJECT</button>
+    <!-- backlog progress -->
+    <div class="progress-section">
+        <div id="backlogBar" class="progress-bar" style="width:0%"></div>
+        <span class="progress-label" id="backlogText">BACKLOG 0%</span>
     </div>
 
-    <div class="market-grid" id="grid"></div>
+    <!-- main click button -->
+    <div id="mainClick" class="click-area">
+        <p>📄 VERIFY 📸</p>
+        <small>blurry passport · selfie · utility bill</small>
+    </div>
 
-    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
+    <!-- scrutiny meter -->
+    <div class="scrutiny-meter">
+        <span class="scrutiny-label">⚡ REGULATORY SCRUTINY</span>
+        <div class="scrutiny-bg"><div id="scrutinyFill" class="scrutiny-fill" style="width:0%"></div></div>
+        <span id="scrutinyPercent" class="scrutiny-value">0%</span>
+    </div>
+
+    <!-- shop -->
+    <h3 style="margin: 12px 0 4px; color:#c6defa;">🔧 AUTOMATION (spend CP)</h3>
+    <div class="shop-grid" id="cpShop"></div>
+
+    <h3 style="margin: 18px 0 4px; color:#c6defa;">💼 COMPLIANCE MARKETS (spend KC)</h3>
+    <div class="shop-grid" id="kcShop"></div>
+
+    <!-- form 83-B mini game -->
+    <div style="background: #131d2b; border-radius: 30px; padding: 15px; border: 2px solid #6a4e3c; margin: 15px 0;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-weight: bold; background: #342d1f; padding: 8px 12px; border-radius: 30px;">📋 FORM 83-B</span>
+            <span style="color: #aac7f0;">convert CP → KC</span>
+            <button id="convertBtn" style="width: auto; margin-left: auto; background: #5f6d3a;">CONVERT</button>
+        </div>
+        <div id="conversionStatus" style="font-size:0.85rem; margin-top:10px; color:#f4cba4;"></div>
+    </div>
+
+    <div class="footer-small">
+        ⚠️ every high‑risk user increases scrutiny · if backlog > 100% you're replaced by an offshore team
+    </div>
 </div>
 
 <script>
-    const listBtn = document.getElementById('listBtn');
-    const imageInp = document.getElementById('imageInp');
-    const fileLabel = document.getElementById('fileLabel');
-    const grid = document.getElementById('grid');
-    const balanceDisplay = document.getElementById('balanceDisplay');
+    (function() {
+        // ---------- state ----------
+        let cp = 0;                 // compliance points (sanity)
+        let kc = 0;                 // KYC credits
+        let backlog = 0;            // 0 .. 100 (if >100 gameover)
+        let scrutiny = 0;           // 0..100 (if >=100 triggers consultant message)
+        let usersProcessed = 0;      // for risk flavor
 
-    let currentBalance = 10000; // Starting KYC balance
+        // automation multipliers
+        let autoClickers = 0;          // 0.2/sec each
+        let docVerifiers = 0;          // +1 CP per click
+        let ocrScanners = 0;            // reduces backlog increase per user
+        let livenessAI = 0;             // reduces scrutiny gain
+        let blockchainModule = 0;        // adds extra scrutiny but boosts KC? we'll do: +0.5kc per sec but +scrutiny/sec
+        let consultantCharge = 0;        // one-use? we make it a toggle cooldown later.
 
-    // Update label when image is chosen
-    imageInp.addEventListener('change', function() {
-        if (this.files[0]) {
-            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
-            fileLabel.style.borderColor = "#0f0";
-            fileLabel.style.color = "#0f0";
-        } else {
-            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
-            fileLabel.style.borderColor = "#444";
-            fileLabel.style.color = "var(--accent)";
+        // base click value
+        const BASE_CLICK_CP = 1;
+
+        // ---------- helpers ----------
+        function updateUI() {
+            document.getElementById('cpDisplay').innerText = Math.floor(cp);
+            document.getElementById('kcDisplay').innerText = Math.floor(kc);
+
+            let totalAuto = (autoClickers * 0.2) + (docVerifiers * 0.05); // just visual ups
+            document.getElementById('upsDisplay').innerText = totalAuto.toFixed(1);
+
+            let backlogPercent = Math.min(backlog, 100);
+            document.getElementById('backlogBar').style.width = backlogPercent + '%';
+            document.getElementById('backlogText').innerText = `BACKLOG ${Math.floor(backlog)}%`;
+
+            let scrPercent = Math.min(scrutiny, 100);
+            document.getElementById('scrutinyFill').style.width = scrPercent + '%';
+            document.getElementById('scrutinyPercent').innerText = Math.floor(scrutiny) + '%';
+
+            // gameover check
+            if (backlog >= 100) {
+                alert('💔 AUDIT FAILED: You have been replaced by an offshore team. Game over. (refresh to restart)');
+                // disable further play (simple freeze)
+                document.getElementById('mainClick').style.pointerEvents = 'none';
+            }
+
+            // re-render shops
+            renderShops();
         }
-    });
 
-    // Load items and balance from local storage on startup
-    window.onload = () => {
-        // Load balance
-        const savedBalance = localStorage.getItem('kyc_balance');
-        if (savedBalance !== null) {
-            currentBalance = parseInt(savedBalance);
-        } else {
-            localStorage.setItem('kyc_balance', '10000');
+        // ---------- risk & backlog when verifying a user ----------
+        function processUser(manual = true) {
+            if (backlog >= 100) return;
+
+            // base backlog increase
+            let backlogIncrease = 1.2;
+            // OCR scanner reduces backlog (each scanner -0.15)
+            backlogIncrease -= ocrScanners * 0.15;
+            if (backlogIncrease < 0.1) backlogIncrease = 0.1;
+            backlog += backlogIncrease;
+            if (backlog > 100) backlog = 100;
+
+            // cp gain
+            let clickCP = BASE_CLICK_CP + (docVerifiers * 1); // each doc verifier gives +1 CP per click
+            cp += clickCP;
+
+            // RISK: each user has hidden risk based on imaginary country
+            // random risk factor 0.2 ~ 2.0
+            let riskFactor = 0.5 + Math.random() * 1.8;
+            // if liveness AI is active, reduce risk
+            if (livenessAI > 0) riskFactor *= 0.4; 
+            let scrutinyIncrease = riskFactor * 0.8;
+            // blockchain module increases scrutiny even more (because of alerts)
+            if (blockchainModule > 0) scrutinyIncrease *= 1.6; 
+            scrutiny += scrutinyIncrease;
+            if (scrutiny > 100) scrutiny = 100;
+
+            usersProcessed++;
+
+            // if scrutiny goes over 90, maybe warning but no auto loss (consultant needed)
+            if (scrutiny >= 100) {
+                // can be fixed only by "hire consultant" (manual)
+            }
         }
-        updateBalanceDisplay();
-        
-        // Load items - FIXED: Better error handling for corrupted data
-        try {
-            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            saved.forEach(item => {
-                // Validate item has required fields
-                if (item && item.name && item.price && item.img && item.id) {
-                    createCard(item.name, item.price, item.img, item.id);
+
+        // ---------- auto generation per second ----------
+        function autoTick() {
+            if (backlog >= 100) return;
+
+            // auto clickers produce users (and backlog/risk)
+            for (let i = 0; i < autoClickers; i++) {
+                // each autoclicker processes 0.2 users per sec -> every 5 sec we do 1 user? easier: increment per sec but fractional
+                // we'll do fractional users: we add fractional backlog, cp etc
+                if (Math.random() < 0.2) { // roughly 0.2 per second per clicker
+                    let clickCP = BASE_CLICK_CP + (docVerifiers * 1);
+                    cp += clickCP;
+                    let inc = 1.2 - ocrScanners * 0.15;
+                    if (inc < 0.1) inc = 0.1;
+                    backlog += inc;
+                    let risk = 0.5 + Math.random() * 1.8;
+                    if (livenessAI > 0) risk *= 0.4;
+                    scrutiny += risk * 0.8;
+                    if (blockchainModule > 0) scrutiny += 0.6; // extra scrutiny per auto user
                 }
-            });
-        } catch (e) {
-            console.log("Error loading items, clearing corrupted data");
-            localStorage.removeItem('market_items');
-        }
-    };
-
-    // List button - FIXED: Now with image compression to handle unlimited listings
-    listBtn.onclick = () => {
-        const name = document.getElementById('nameInp').value.trim();
-        const price = document.getElementById('priceInp').value.trim();
-        const file = imageInp.files[0];
-
-        if (!name || !price || !file) {
-            alert("Fill all fields and select an image!");
-            return;
+            }
+            if (blockchainModule > 0) {
+                // also gives some kc per sec but adds scrutiny
+                kc += 0.3 * blockchainModule;
+                scrutiny += 0.7 * blockchainModule;
+            }
+            if (scrutiny > 100) scrutiny = 100;
+            if (backlog > 100) backlog = 100;
+            updateUI();
         }
 
-        // Show loading state
-        listBtn.disabled = true;
-        listBtn.textContent = "ENCRYPTING...";
+        // ---------- purchase helpers ----------
+        function buyCPItem(cost, callback) {
+            if (cp >= cost) {
+                cp -= cost;
+                callback();
+                updateUI();
+                return true;
+            }
+            return false;
+        }
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Compress image to save space in localStorage
-            const img = new Image();
-            img.src = e.target.result;
-            
-            img.onload = function() {
-                // Create canvas to compress image
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Max dimensions while maintaining aspect ratio
-                let width = img.width;
-                let height = img.height;
-                const maxSize = 300;
-                
-                if (width > height && width > maxSize) {
-                    height = (height * maxSize) / width;
-                    width = maxSize;
-                } else if (height > maxSize) {
-                    width = (width * maxSize) / height;
-                    height = maxSize;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Get compressed image (lower quality = smaller file)
-                const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
-                
-                // Generate unique ID for the item
-                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                
-                // Add to UI
-                createCard(name, price + ' KYC', compressedImgData, itemId);
-                
-                // Save to Local Storage with ID - FIXED: Better storage management
-                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-                saved.push({
-                    id: itemId,
-                    name: name, 
-                    price: price + ' KYC', 
-                    img: compressedImgData,
-                    numericPrice: parseInt(price)
+        function buyKCItem(cost, callback) {
+            if (kc >= cost) {
+                kc -= cost;
+                callback();
+                updateUI();
+                return true;
+            }
+            return false;
+        }
+
+        //  ---------- render shop items (dynamic) ----------
+        function renderShops() {
+            const cpDiv = document.getElementById('cpShop');
+            const kcDiv = document.getElementById('kcShop');
+            // CP shop items
+            cpDiv.innerHTML = '';
+            const cpItems = [
+                { name: '🤖 Auto‑Clicker', desc: 'clicks 0.2 users/sec', cost: 10, key: 'auto', type:'cp' },
+                { name: '📄 Document Verifier', desc: '+1 CP per click', cost: 50, key: 'doc', type:'cp' },
+                { name: '🔍 OCR Scanner', desc: 'reduces backlog growth', cost: 200, key: 'ocr', type:'cp' },
+                { name: '👻 3AM shift', desc: 'adds 0.2 auto (like clicker)', cost: 500, key: 'shift', type:'cp' } // similar to clicker
+            ];
+            cpItems.forEach(item => {
+                let btn = document.createElement('button');
+                btn.innerText = `${item.name} (${item.cost} CP)`;
+                btn.disabled = (cp < item.cost);
+                btn.addEventListener('click', () => {
+                    if (item.key === 'auto') buyCPItem(10, () => autoClickers++);
+                    if (item.key === 'doc') buyCPItem(50, () => docVerifiers++);
+                    if (item.key === 'ocr') buyCPItem(200, () => ocrScanners++);
+                    if (item.key === 'shift') buyCPItem(500, () => autoClickers++); // same effect
+                    updateUI();
                 });
-                
-                // FIXED: Check if we're approaching storage limit and clean old items if needed
-                try {
-                    localStorage.setItem('market_items', JSON.stringify(saved));
-                } catch (storageError) {
-                    // If storage is full, remove oldest item and try again
-                    if (saved.length > 0) {
-                        saved.shift(); // Remove oldest item
-                        localStorage.setItem('market_items', JSON.stringify(saved));
-                        alert("Storage limit reached! Oldest item removed to make space.");
+                let div = document.createElement('div');
+                div.className = 'shop-item' + (btn.disabled ? ' disabled' : '');
+                div.innerHTML = `<div class="item-name">${item.name}</div><div class="item-cost">${item.cost} CP</div><div class="item-desc">${item.desc}</div>`;
+                div.appendChild(btn);
+                cpDiv.appendChild(div);
+            });
+
+            // KC shop items
+            kcDiv.innerHTML = '';
+            const kcItems = [
+                { name: '🧠 Liveness AI', desc: 'halves scrutiny gain', cost: 80, key: 'live', type:'kc' },
+                { name: '🔗 Blockchain Analytics', desc: '+0.3 KC/s but +scrutiny', cost: 250, key: 'chain', type:'kc' },
+                { name: '👔 Hire Consultant', desc: 'resets scrutiny (one shot)', cost: 180, key: 'consult', type:'kc' }
+            ];
+            kcItems.forEach(item => {
+                let btn = document.createElement('button');
+                btn.innerText = `${item.name} (${item.cost} KC)`;
+                btn.disabled = (kc < item.cost);
+                btn.addEventListener('click', () => {
+                    if (item.key === 'live') buyKCItem(80, () => livenessAI++);
+                    if (item.key === 'chain') buyKCItem(250, () => blockchainModule++);
+                    if (item.key === 'consult') {
+                        buyKCItem(180, () => {
+                            scrutiny = 0;
+                        });
                     }
-                }
-
-                // Reset ALL inputs completely for next listing
-                document.getElementById('nameInp').value = '';
-                document.getElementById('priceInp').value = '';
-                imageInp.value = '';  // Clear the file input
-                fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
-                fileLabel.style.borderColor = "#444";  // Reset border color
-                fileLabel.style.color = "var(--accent)";  // Reset text color
-                
-                // Re-enable button
-                listBtn.disabled = false;
-                listBtn.textContent = "LIST OBJECT";
-                
-                alert("Item listed successfully!"); // Confirmation message
-            };
-        };
-        
-        reader.onerror = function() {
-            listBtn.disabled = false;
-            listBtn.textContent = "LIST OBJECT";
-            alert("Error reading image file!");
-        };
-        
-        reader.readAsDataURL(file);
-    };
-
-    function createCard(name, price, img, itemId) {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.setAttribute('data-id', itemId);
-        
-        // Extract numeric price for purchase check
-        const numericPrice = parseInt(price) || 0;
-        
-        div.innerHTML = `
-            <img src="${img}">
-            <h3>${name}</h3>
-            <div class="price">${price} <span>KYC</span></div>
-            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice}, this)">PURCHASE</button>
-            <div class="seller-badge">● LISTED ON BLACK MARKET</div>
-        `;
-        grid.prepend(div);
-        
-        // Disable purchase button if user can't afford it
-        const purchaseBtn = div.querySelector('.purchase-btn');
-        if (numericPrice > currentBalance) {
-            purchaseBtn.disabled = true;
+                    updateUI();
+                });
+                let div = document.createElement('div');
+                div.className = 'shop-item' + (btn.disabled ? ' disabled' : '');
+                div.innerHTML = `<div class="item-name">${item.name}</div><div class="item-cost">${item.cost} KC</div><div class="item-desc">${item.desc}</div>`;
+                div.appendChild(btn);
+                kcDiv.appendChild(div);
+            });
         }
-    }
 
-    // Purchase function - ONLY HERE money is taken
-    window.purchaseItem = function(itemId, price, btnElement) {
-        if (price > currentBalance) {
-            alert("Insufficient KYC balance to purchase this item!");
-            return;
+        // ---------- convert CP -> KC via form 83-B (annoying delay) ----------
+        function convertCPtoKC() {
+            if (cp < 50) {
+                document.getElementById('conversionStatus').innerText = '❌ Need at least 50 CP to convert.';
+                return;
+            }
+            // start mini game: disable convert button, simulate form
+            let convertBtn = document.getElementById('convertBtn');
+            convertBtn.disabled = true;
+            let originalText = convertBtn.innerText;
+            convertBtn.innerText = 'FILING 83‑B...';
+            let statusDiv = document.getElementById('conversionStatus');
+            statusDiv.innerHTML = '📝 Tick box: ☑ I confirm the conversion. <span id="fakeTick" style="cursor:pointer; background:#444; padding:4px;">[click to confirm]</span>';
+
+            let tick = document.getElementById('fakeTick');
+            if (tick) {
+                tick.addEventListener('click', function handler() {
+                    statusDiv.innerHTML = '⏳ Typing justification "I hereby confirm..." ...';
+                    setTimeout(() => {
+                        // conversion happens
+                        let convertAmount = Math.min(100, cp - 20); // leave some CP
+                        if (convertAmount < 10) convertAmount = cp * 0.5;
+                        let deducted = Math.floor(convertAmount);
+                        cp -= deducted;
+                        kc += Math.floor(deducted / 5); // 5 CP → 1 KC roughly
+                        if (kc < 0) kc = 0;
+                        statusDiv.innerHTML = `✅ Conversion complete! you received ${Math.floor(deducted/5)} KC.`;
+                        convertBtn.disabled = false;
+                        convertBtn.innerText = originalText;
+                        updateUI();
+                    }, 2000);
+                    tick.removeEventListener('click', handler);
+                });
+            }
         }
-        
-        if (confirm(`Purchase this item for ${price} KYC?`)) {
-            // ONLY ON PURCHASE - money is taken
-            currentBalance -= price;
-            localStorage.setItem('kyc_balance', currentBalance.toString());
-            updateBalanceDisplay();
-            
-            // Remove item from grid
-            const card = btnElement.closest('.card');
-            card.remove();
-            
-            // Remove from localStorage
-            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
-            const updated = saved.filter(item => item.id !== itemId);
-            localStorage.setItem('market_items', JSON.stringify(updated));
-            
-            alert("Purchase complete! Item removed from market.");
-            
-            // Update all purchase buttons disabled state based on new balance
-            updateAllPurchaseButtons();
-        }
-    };
-    
-    // Update all purchase buttons based on current balance
-    function updateAllPurchaseButtons() {
-        document.querySelectorAll('.purchase-btn').forEach(btn => {
-            const card = btn.closest('.card');
-            const priceText = card.querySelector('.price').textContent;
-            const numericPrice = parseInt(priceText) || 0;
-            btn.disabled = numericPrice > currentBalance;
+
+        // ---------- event listeners ----------
+        document.getElementById('mainClick').addEventListener('click', () => {
+            if (backlog >= 100) return;
+            processUser(true);
+            updateUI();
         });
-    }
 
-    function updateBalanceDisplay() {
-        balanceDisplay.textContent = currentBalance;
-        // Update purchase buttons
-        updateAllPurchaseButtons();
-    }
+        document.getElementById('convertBtn').addEventListener('click', convertCPtoKC);
 
-    function clearMarket() {
-        if(confirm("Wipe all listings and reset balance to 10,000 KYC?")) {
-            localStorage.removeItem('market_items');
-            localStorage.setItem('kyc_balance', '10000');
-            location.reload();
-        }
-    }
+        // set intervals
+        setInterval(() => {
+            autoTick();
+        }, 1000);
+
+        // initial render
+        updateUI();
+
+        // extra: every few seconds simulate random news (flavor)
+        setInterval(() => {
+            if (scrutiny < 95 && backlog < 90) {
+                // add small random backlog creep
+                backlog = Math.min(100, backlog + 0.1);
+                updateUI();
+            }
+        }, 5000);
+    })();
 </script>
-
 </body>
 </html>
