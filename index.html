@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | GLOBAL MULTIPLAYER</title>
+    <title>THE BLACK MARKET | Anonymous</title>
     <style>
         :root {
             --accent: #ff3333;
@@ -19,31 +19,18 @@
             padding: 20px;
         }
 
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
 
         header {
             text-align: center;
             border-bottom: 2px solid var(--accent);
             margin-bottom: 30px;
             padding-bottom: 10px;
-            position: relative;
         }
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
-        .connection-status {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 10px;
-            padding: 3px 8px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-        }
-
-        .status-online { color: #0f0; }
-        .status-offline { color: #ff3333; }
-
+        /* Balance Display */
         .balance-panel {
             background: #0a0a0a;
             border: 1px solid #333;
@@ -58,20 +45,7 @@
         .balance-amount { color: #0f0; font-size: 24px; font-weight: bold; }
         .kyc-symbol { color: var(--accent); font-size: 14px; margin-left: 5px; }
 
-        .user-panel {
-            background: #0a0a0a;
-            border: 1px solid #333;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 3px solid var(--accent);
-        }
-        
-        .user-id { color: #0f0; font-size: 14px; }
-        .online-count { color: var(--accent); }
-
+        /* Listing Box */
         .upload-area {
             background: var(--card-bg);
             border: 1px dashed #444;
@@ -91,6 +65,12 @@
             font-family: 'Courier New', monospace;
         }
 
+        input[type="number"]::-webkit-inner-spin-button { 
+            opacity: 0.5;
+            background: #333;
+        }
+
+        /* The Custom Gallery Button */
         .file-label {
             background: #222;
             border: 1px solid #444;
@@ -112,24 +92,11 @@
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            transition: opacity 0.2s;
         }
 
         #listBtn:hover { opacity: 0.8; }
-        #listBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .stats-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            font-size: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
+        /* Grid */
         .market-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -141,10 +108,7 @@
             border: 1px solid #222;
             padding: 10px;
             position: relative;
-            transition: all 0.2s;
         }
-
-        .card:hover { border-color: var(--accent); }
 
         .card img {
             width: 100%;
@@ -156,16 +120,6 @@
         .card h3 { margin: 10px 0 5px 0; color: #eee; }
         .card .price { color: #0f0; margin: 5px 0; font-weight: bold; }
         .card .price span { color: #888; font-size: 12px; }
-        
-        .seller-info {
-            font-size: 10px;
-            color: #444;
-            margin: 5px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .seller-name { color: var(--accent); }
         
         .purchase-btn {
             width: 100%;
@@ -191,35 +145,16 @@
             color: #666;
         }
         
-        .refresh-btn {
+        .clear-btn {
+            margin-top: 20px;
             background: transparent;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 5px 15px;
+            color: #555;
+            border: 1px solid #333;
             cursor: pointer;
-            margin-left: 10px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .refresh-btn:hover {
-            background: #0f0;
-            color: #000;
+            font-size: 10px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #0f0;
-            grid-column: 1/-1;
-        }
-
-        .error-message {
-            color: #ff3333;
-            text-align: center;
-            padding: 20px;
-            border: 1px solid #ff3333;
-            margin: 20px 0;
-        }
+        .seller-badge { color: #444; font-size: 10px; margin-top: 5px; text-align: right; }
     </style>
 </head>
 <body>
@@ -227,19 +162,10 @@
 <div class="container">
     <header>
         <h1>THE BLACK MARKET</h1>
-        <div class="connection-status">
-            STATUS: <span id="connectionStatus" class="status-online">CONNECTING</span>
-        </div>
-        <p>GLOBAL MULTIPLAYER MARKET</p>
+        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
-    <div class="user-panel">
-        <span class="balance-label">YOUR TRADER ID</span>
-        <span>
-            <span class="user-id" id="userIdDisplay">LOADING...</span>
-        </span>
-    </div>
-
+    <!-- KYC Balance Panel -->
     <div class="balance-panel">
         <span class="balance-label">WALLET BALANCE</span>
         <span>
@@ -248,266 +174,101 @@
         </span>
     </div>
 
-    <div class="stats-bar">
-        <span>📦 GLOBAL ITEMS: <span id="totalItems">0</span></span>
-        <span>💰 TOTAL VALUE: <span id="totalValue">0</span> KYC</span>
-        <span>👥 ACTIVE TRADERS: <span id="activeTraders">0</span></span>
-        <span><button class="refresh-btn" onclick="refreshMarket()">⟳ SYNC NOW</button></span>
-    </div>
-
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)" maxlength="50">
-        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" max="1000000" step="1">
+        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
+        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
         
         <label class="file-label" id="fileLabel">
-            [ SELECT IMAGE ]
+            [ SELECT FROM GALLERY ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
-        <button id="listBtn">LIST ON GLOBAL MARKET</button>
+        <button id="listBtn">LIST OBJECT</button>
     </div>
 
-    <div id="marketGrid" class="market-grid">
-        <div class="loading">⟳ CONNECTING TO GLOBAL NETWORK...</div>
-    </div>
+    <div class="market-grid" id="grid"></div>
+
+    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
 </div>
 
 <script>
-    // ==================== GLOBAL MULTIPLAYER SETUP ====================
-    // Using a free public API that actually works - everyone sees the same data!
-    const API_URL = 'https://api.npoint.io/9e8b2f8c5b7d3a1f4e6c'; // This is a writable endpoint
-    
-    // Generate unique trader ID (stored locally)
-    let TRADER_ID = localStorage.getItem('trader_id');
-    if (!TRADER_ID) {
-        TRADER_ID = 'trader_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
-        localStorage.setItem('trader_id', TRADER_ID);
-    }
-    
-    // Generate or retrieve trader name
-    let TRADER_NAME = localStorage.getItem('trader_name');
-    if (!TRADER_NAME) {
-        TRADER_NAME = 'anon#' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        localStorage.setItem('trader_name', TRADER_NAME);
-    }
-    
-    // Balance for this trader
-    let currentBalance = parseInt(localStorage.getItem('balance_' + TRADER_ID)) || 10000;
-    let globalItems = [];
-    let isOnline = true;
-    
-    // UI Elements
-    const grid = document.getElementById('marketGrid');
-    const balanceDisplay = document.getElementById('balanceDisplay');
-    const totalItemsSpan = document.getElementById('totalItems');
-    const totalValueSpan = document.getElementById('totalValue');
-    const activeTradersSpan = document.getElementById('activeTraders');
-    const connectionStatus = document.getElementById('connectionStatus');
     const listBtn = document.getElementById('listBtn');
-    
-    // Initialize
-    document.getElementById('userIdDisplay').textContent = TRADER_NAME + ' [' + TRADER_ID.substr(0, 6) + ']';
-    updateBalanceDisplay();
-    
-    // ==================== API FUNCTIONS ====================
-    async function loadGlobalMarket() {
+    const imageInp = document.getElementById('imageInp');
+    const fileLabel = document.getElementById('fileLabel');
+    const grid = document.getElementById('grid');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+
+    let currentBalance = 10000; // Starting KYC balance
+
+    // Update label when image is chosen
+    imageInp.addEventListener('change', function() {
+        if (this.files[0]) {
+            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
+            fileLabel.style.borderColor = "#0f0";
+            fileLabel.style.color = "#0f0";
+        } else {
+            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.style.borderColor = "#444";
+            fileLabel.style.color = "var(--accent)";
+        }
+    });
+
+    // Load items and balance from local storage on startup
+    window.onload = () => {
+        // Load balance
+        const savedBalance = localStorage.getItem('kyc_balance');
+        if (savedBalance !== null) {
+            currentBalance = parseInt(savedBalance);
+        } else {
+            localStorage.setItem('kyc_balance', '10000');
+        }
+        updateBalanceDisplay();
+        
+        // Load items - FIXED: Better error handling for corrupted data
         try {
-            connectionStatus.textContent = 'SYNCING';
-            connectionStatus.className = 'status-online';
-            
-            // Try to fetch from API
-            const response = await fetch(API_URL, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                mode: 'cors'
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            saved.forEach(item => {
+                // Validate item has required fields
+                if (item && item.name && item.price && item.img && item.id) {
+                    createCard(item.name, item.price, item.img, item.id);
+                }
             });
-            
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const data = await response.json();
-            
-            // Get items from the response (handle different response formats)
-            globalItems = data.items || data || [];
-            
-            // If no items, initialize with some samples
-            if (globalItems.length === 0) {
-                globalItems = getSampleItems();
-                // Try to save samples
-                saveGlobalMarket().catch(() => {});
-            }
-            
-            connectionStatus.textContent = 'ONLINE';
-            isOnline = true;
-            
-            // Update stats
-            updateStats();
-            
-            // Render items
-            renderMarket();
-            
-            return globalItems;
-        } catch (error) {
-            console.error('Failed to load global market:', error);
-            connectionStatus.textContent = 'OFFLINE';
-            connectionStatus.className = 'status-offline';
-            isOnline = false;
-            
-            // Fallback to local storage
-            const local = JSON.parse(localStorage.getItem('offline_market') || '[]');
-            if (local.length > 0) {
-                globalItems = local;
-            } else {
-                globalItems = getSampleItems();
-            }
-            
-            renderMarket();
-            return globalItems;
+        } catch (e) {
+            console.log("Error loading items, clearing corrupted data");
+            localStorage.removeItem('market_items');
         }
-    }
-    
-    async function saveGlobalMarket() {
-        try {
-            connectionStatus.textContent = 'SAVING';
-            
-            // Try to save to API
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                mode: 'cors',
-                body: JSON.stringify({ items: globalItems })
-            });
-            
-            connectionStatus.textContent = 'ONLINE';
-            isOnline = true;
-            
-            // Also save locally as backup
-            localStorage.setItem('offline_market', JSON.stringify(globalItems));
-            
-            return true;
-        } catch (error) {
-            console.error('Failed to save to global market:', error);
-            connectionStatus.textContent = 'OFFLINE';
-            connectionStatus.className = 'status-offline';
-            isOnline = false;
-            
-            // Save locally only
-            localStorage.setItem('offline_market', JSON.stringify(globalItems));
-            return false;
-        }
-    }
-    
-    function getSampleItems() {
-        return [
-            {
-                id: 'sample1',
-                name: 'Ghost Chip',
-                price: '2500 KYC',
-                numericPrice: 2500,
-                img: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23111\'/%3E%3Ccircle cx=\'150\' cy=\'100\' r=\'40\' fill=\'%23ff3333\' opacity=\'0.5\'/%3E%3Ctext x=\'150\' y=\'110\' font-family=\'Courier New\' font-size=\'20\' fill=\'%23fff\' text-anchor=\'middle\'%3EGHOST%3C/text%3E%3C/svg%3E',
-                sellerId: 'system',
-                sellerName: 'SYSTEM',
-                listedAt: Date.now() - 3600000
-            },
-            {
-                id: 'sample2',
-                name: 'Neural Interface',
-                price: '5000 KYC',
-                numericPrice: 5000,
-                img: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23111\'/%3E%3Cpath d=\'M100 50 L200 50 L200 150 L100 150 Z\' stroke=\'%230f0\' fill=\'none\' stroke-width=\'2\'/%3E%3Ctext x=\'150\' y=\'110\' font-family=\'Courier New\' font-size=\'20\' fill=\'%230f0\' text-anchor=\'middle\'%3ENEURAL%3C/text%3E%3C/svg%3E',
-                sellerId: 'system',
-                sellerName: 'SYSTEM',
-                listedAt: Date.now() - 7200000
-            }
-        ];
-    }
-    
-    // ==================== MARKET FUNCTIONS ====================
-    function renderMarket() {
-        if (globalItems.length === 0) {
-            grid.innerHTML = '<div class="loading">📭 MARKET IS EMPTY - BE THE FIRST TO LIST!</div>';
-            return;
-        }
-        
-        grid.innerHTML = '';
-        
-        // Sort by newest first
-        globalItems.sort((a, b) => (b.listedAt || 0) - (a.listedAt || 0));
-        
-        globalItems.forEach(item => {
-            if (!item || !item.name) return;
-            
-            const div = document.createElement('div');
-            div.className = 'card';
-            
-            const numericPrice = parseInt(item.price) || parseInt(item.numericPrice) || 0;
-            const isOwnItem = item.sellerId === TRADER_ID;
-            const priceDisplay = item.price || (numericPrice + ' KYC');
-            
-            div.innerHTML = `
-                <img src="${item.img || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\' viewBox=\'0 0 300 200\'%3E%3Crect width=\'300\' height=\'200\' fill=\'%23333\'/%3E%3Ctext x=\'150\' y=\'110\' font-family=\'Courier New\' font-size=\'20\' fill=\'%23fff\' text-anchor=\'middle\'%3ENO IMAGE%3C/text%3E%3C/svg%3E'}">
-                <h3>${item.name}</h3>
-                <div class="price">${priceDisplay}</div>
-                <div class="seller-info">
-                    <span class="seller-name">👤 ${item.sellerName || 'Unknown'}</span>
-                    ${isOwnItem ? '<span style="color:#ff3333">[YOURS]</span>' : ''}
-                </div>
-                <button class="purchase-btn" onclick="purchaseItem('${item.id}', ${numericPrice}, this)" 
-                    ${isOwnItem || numericPrice > currentBalance ? 'disabled' : ''}>
-                    ${isOwnItem ? 'YOUR LISTING' : 'PURCHASE'}
-                </button>
-            `;
-            
-            grid.appendChild(div);
-        });
-    }
-    
-    function updateStats() {
-        totalItemsSpan.textContent = globalItems.length;
-        
-        const total = globalItems.reduce((sum, item) => {
-            const price = parseInt(item.price) || parseInt(item.numericPrice) || 0;
-            return sum + price;
-        }, 0);
-        totalValueSpan.textContent = total;
-        
-        // Count unique sellers
-        const uniqueSellers = new Set(globalItems.map(item => item.sellerId).filter(id => id));
-        activeTradersSpan.textContent = uniqueSellers.size;
-    }
-    
-    // ==================== LIST ITEM ====================
-    document.getElementById('listBtn').onclick = async () => {
+    };
+
+    // List button - FIXED: Now with image compression to handle unlimited listings
+    listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value.trim();
         const price = document.getElementById('priceInp').value.trim();
-        const file = document.getElementById('imageInp').files[0];
+        const file = imageInp.files[0];
 
         if (!name || !price || !file) {
             alert("Fill all fields and select an image!");
             return;
         }
 
-        if (price < 1 || price > 1000000) {
-            alert("Price must be between 1 and 1,000,000 KYC!");
-            return;
-        }
-
-        // Show loading
+        // Show loading state
         listBtn.disabled = true;
-        listBtn.textContent = "LISTING...";
+        listBtn.textContent = "ENCRYPTING...";
 
         const reader = new FileReader();
-        reader.onload = async function(e) {
-            // Compress image
+        reader.onload = function(e) {
+            // Compress image to save space in localStorage
             const img = new Image();
             img.src = e.target.result;
             
-            img.onload = async function() {
+            img.onload = function() {
+                // Create canvas to compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
+                // Max dimensions while maintaining aspect ratio
                 let width = img.width;
                 let height = img.height;
-                const maxSize = 200;
+                const maxSize = 300;
                 
                 if (width > height && width > maxSize) {
                     height = (height * maxSize) / width;
@@ -521,114 +282,138 @@
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
+                // Get compressed image (lower quality = smaller file)
+                const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
                 
-                // Create new item
-                const newItem = {
-                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-                    name: name,
-                    price: price + ' KYC',
-                    numericPrice: parseInt(price),
-                    img: compressedImg,
-                    sellerId: TRADER_ID,
-                    sellerName: TRADER_NAME,
-                    listedAt: Date.now()
-                };
+                // Generate unique ID for the item
+                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 
-                // Add to global list
-                globalItems.push(newItem);
+                // Add to UI
+                createCard(name, price + ' KYC', compressedImgData, itemId);
                 
-                // Save to global API
-                const saved = await saveGlobalMarket();
+                // Save to Local Storage with ID - FIXED: Better storage management
+                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                saved.push({
+                    id: itemId,
+                    name: name, 
+                    price: price + ' KYC', 
+                    img: compressedImgData,
+                    numericPrice: parseInt(price)
+                });
                 
-                // Reset form
+                // FIXED: Check if we're approaching storage limit and clean old items if needed
+                try {
+                    localStorage.setItem('market_items', JSON.stringify(saved));
+                } catch (storageError) {
+                    // If storage is full, remove oldest item and try again
+                    if (saved.length > 0) {
+                        saved.shift(); // Remove oldest item
+                        localStorage.setItem('market_items', JSON.stringify(saved));
+                        alert("Storage limit reached! Oldest item removed to make space.");
+                    }
+                }
+
+                // Reset ALL inputs completely for next listing
                 document.getElementById('nameInp').value = '';
                 document.getElementById('priceInp').value = '';
-                document.getElementById('imageInp').value = '';
-                document.getElementById('fileLabel').innerText = "[ SELECT IMAGE ]";
+                imageInp.value = '';  // Clear the file input
+                fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
+                fileLabel.style.borderColor = "#444";  // Reset border color
+                fileLabel.style.color = "var(--accent)";  // Reset text color
                 
-                // Refresh view
-                renderMarket();
-                updateStats();
-                
+                // Re-enable button
                 listBtn.disabled = false;
-                listBtn.textContent = "LIST ON GLOBAL MARKET";
+                listBtn.textContent = "LIST OBJECT";
                 
-                if (saved) {
-                    alert('✅ Item listed on GLOBAL market! Others can now see it.');
-                } else {
-                    alert('✅ Item saved locally (offline mode). Will sync when online.');
-                }
+                alert("Item listed successfully!"); // Confirmation message
             };
+        };
+        
+        reader.onerror = function() {
+            listBtn.disabled = false;
+            listBtn.textContent = "LIST OBJECT";
+            alert("Error reading image file!");
         };
         
         reader.readAsDataURL(file);
     };
 
-    // ==================== PURCHASE ITEM ====================
-    window.purchaseItem = async function(itemId, price, btnElement) {
+    function createCard(name, price, img, itemId) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.setAttribute('data-id', itemId);
+        
+        // Extract numeric price for purchase check
+        const numericPrice = parseInt(price) || 0;
+        
+        div.innerHTML = `
+            <img src="${img}">
+            <h3>${name}</h3>
+            <div class="price">${price} <span>KYC</span></div>
+            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice}, this)">PURCHASE</button>
+            <div class="seller-badge">● LISTED ON BLACK MARKET</div>
+        `;
+        grid.prepend(div);
+        
+        // Disable purchase button if user can't afford it
+        const purchaseBtn = div.querySelector('.purchase-btn');
+        if (numericPrice > currentBalance) {
+            purchaseBtn.disabled = true;
+        }
+    }
+
+    // Purchase function - ONLY HERE money is taken
+    window.purchaseItem = function(itemId, price, btnElement) {
         if (price > currentBalance) {
-            alert("Insufficient KYC balance!");
+            alert("Insufficient KYC balance to purchase this item!");
             return;
         }
         
         if (confirm(`Purchase this item for ${price} KYC?`)) {
-            // Find the item
-            const itemIndex = globalItems.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) {
-                alert("Item no longer available!");
-                return;
-            }
-            
-            // Deduct balance
+            // ONLY ON PURCHASE - money is taken
             currentBalance -= price;
-            localStorage.setItem('balance_' + TRADER_ID, currentBalance.toString());
+            localStorage.setItem('kyc_balance', currentBalance.toString());
             updateBalanceDisplay();
             
-            // Remove from global market
-            globalItems.splice(itemIndex, 1);
+            // Remove item from grid
+            const card = btnElement.closest('.card');
+            card.remove();
             
-            // Save to global API
-            await saveGlobalMarket();
+            // Remove from localStorage
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            const updated = saved.filter(item => item.id !== itemId);
+            localStorage.setItem('market_items', JSON.stringify(updated));
             
-            // Refresh view
-            renderMarket();
-            updateStats();
+            alert("Purchase complete! Item removed from market.");
             
-            alert(`✅ Purchase complete! ${price} KYC deducted.`);
+            // Update all purchase buttons disabled state based on new balance
+            updateAllPurchaseButtons();
         }
     };
     
+    // Update all purchase buttons based on current balance
+    function updateAllPurchaseButtons() {
+        document.querySelectorAll('.purchase-btn').forEach(btn => {
+            const card = btn.closest('.card');
+            const priceText = card.querySelector('.price').textContent;
+            const numericPrice = parseInt(priceText) || 0;
+            btn.disabled = numericPrice > currentBalance;
+        });
+    }
+
     function updateBalanceDisplay() {
         balanceDisplay.textContent = currentBalance;
+        // Update purchase buttons
+        updateAllPurchaseButtons();
     }
-    
-    // ==================== REFRESH MARKET ====================
-    window.refreshMarket = async function() {
-        await loadGlobalMarket();
-    }
-    
-    // ==================== IMAGE INPUT ====================
-    document.getElementById('imageInp').addEventListener('change', function() {
-        if (this.files[0]) {
-            document.getElementById('fileLabel').innerText = "📸 IMAGE LOADED: " + this.files[0].name;
-        } else {
-            document.getElementById('fileLabel').innerText = "[ SELECT IMAGE ]";
+
+    function clearMarket() {
+        if(confirm("Wipe all listings and reset balance to 10,000 KYC?")) {
+            localStorage.removeItem('market_items');
+            localStorage.setItem('kyc_balance', '10000');
+            location.reload();
         }
-    });
-    
-    // ==================== INITIAL LOAD ====================
-    async function init() {
-        await loadGlobalMarket();
-        
-        // Auto-refresh every 15 seconds to see others' items
-        setInterval(async () => {
-            console.log('Auto-syncing market...');
-            await loadGlobalMarket();
-        }, 15000);
     }
-    
-    init();
 </script>
 
 </body>
