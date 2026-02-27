@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE BLACK MARKET | GLOBAL</title>
+    <title>THE BLACK MARKET | Anonymous</title>
     <style>
         :root {
             --accent: #ff3333;
             --bg: #050505;
             --card-bg: #111;
-        }
-
-        * {
-            box-sizing: border-box;
         }
 
         body {
@@ -34,65 +30,7 @@
 
         h1 { color: var(--accent); letter-spacing: 4px; margin-bottom: 5px; }
 
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.98);
-            z-index: 9999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-box {
-            background: #0a0a0a;
-            border: 2px solid var(--accent);
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-box h2 {
-            color: var(--accent);
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-        }
-
-        .login-box input {
-            width: 100%;
-            background: #000;
-            border: 1px solid #333;
-            color: #0f0;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .login-box button {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-family: 'Courier New', monospace;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .login-box .generate-btn {
-            background: transparent;
-            border: 1px solid #444;
-            color: #888;
-        }
-
+        /* Balance Display */
         .balance-panel {
             background: #0a0a0a;
             border: 1px solid #333;
@@ -105,8 +43,9 @@
         
         .balance-label { color: #888; }
         .balance-amount { color: #0f0; font-size: 24px; font-weight: bold; }
-        .kyc-symbol { color: var(--accent); }
+        .kyc-symbol { color: var(--accent); font-size: 14px; margin-left: 5px; }
 
+        /* Listing Box */
         .upload-area {
             background: var(--card-bg);
             border: 1px dashed #444;
@@ -124,9 +63,14 @@
             padding: 12px;
             outline: none;
             font-family: 'Courier New', monospace;
-            width: 100%;
         }
 
+        input[type="number"]::-webkit-inner-spin-button { 
+            opacity: 0.5;
+            background: #333;
+        }
+
+        /* The Custom Gallery Button */
         .file-label {
             background: #222;
             border: 1px solid #444;
@@ -138,7 +82,7 @@
             display: block;
         }
 
-        .file-label:hover { background: #2a2a2a; }
+        .file-label:hover { background: #2a2a2a; border-color: var(--accent); }
 
         #listBtn {
             background: var(--accent);
@@ -148,9 +92,11 @@
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
-            width: 100%;
         }
 
+        #listBtn:hover { opacity: 0.8; }
+
+        /* Grid */
         .market-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -161,16 +107,19 @@
             background: #0a0a0a;
             border: 1px solid #222;
             padding: 10px;
+            position: relative;
         }
 
         .card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
+            border-bottom: 1px solid #222;
         }
 
         .card h3 { margin: 10px 0 5px 0; color: #eee; }
         .card .price { color: #0f0; margin: 5px 0; font-weight: bold; }
+        .card .price span { color: #888; font-size: 12px; }
         
         .purchase-btn {
             width: 100%;
@@ -181,6 +130,7 @@
             margin-top: 10px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
         
         .purchase-btn:hover {
@@ -191,254 +141,134 @@
         .purchase-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+            border-color: #666;
+            color: #666;
         }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .user-id-display {
-            color: #0f0;
-            background: #111;
-            padding: 5px 10px;
-            border: 1px solid #333;
-        }
-
-        .logout-btn {
+        
+        .clear-btn {
+            margin-top: 20px;
             background: transparent;
-            color: #ff3333;
-            border: 1px solid #ff3333;
-            padding: 5px 10px;
+            color: #555;
+            border: 1px solid #333;
             cursor: pointer;
+            font-size: 10px;
         }
 
-        .online-count {
-            color: #0f0;
-            font-size: 12px;
-            margin-top: 5px;
-        }
+        .seller-badge { color: #444; font-size: 10px; margin-top: 5px; text-align: right; }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-box">
-        <h2>◈ BLACK MARKET ◈</h2>
-        <p style="color: #ff3333; margin-bottom: 20px;">ENTER YOUR ID</p>
-        
-        <input type="password" id="userIdInput" placeholder="6 DIGITS" maxlength="6" inputmode="numeric">
-        
-        <button onclick="login()">ACCESS GLOBAL MARKET</button>
-        <button class="generate-btn" onclick="generateId()">CREATE NEW ID</button>
-        
-        <div style="color: #0f0; margin-top: 20px; font-size: 12px;" id="globalStatus">🌐 CONNECTING TO GLOBAL NETWORK...</div>
-    </div>
-</div>
-
 <div class="container">
     <header>
         <h1>THE BLACK MARKET</h1>
-        <p>STATUS: <span style="color: #0f0;" id="connectionStatus">GLOBAL LIVE</span> <span class="online-count" id="onlineCount">🔴</span></p>
-        <div class="user-info" id="userInfo" style="display: none;">
-            <span class="user-id-display" id="loggedInAs"></span>
-            <button class="logout-btn" onclick="logout()">EXIT</button>
-        </div>
+        <p>STATUS: <span style="color: #0f0;">ENCRYPTED_CONNECTED</span></p>
     </header>
 
+    <!-- KYC Balance Panel -->
     <div class="balance-panel">
-        <span class="balance-label">WALLET</span>
+        <span class="balance-label">WALLET BALANCE</span>
         <span>
-            <span class="balance-amount" id="balanceDisplay">0</span>
+            <span class="balance-amount" id="balanceDisplay">10000</span>
             <span class="kyc-symbol">KYC</span>
         </span>
     </div>
 
     <div class="upload-area">
-        <input type="text" id="nameInp" placeholder="Item name">
-        <input type="number" id="priceInp" placeholder="Price KYC">
+        <input type="text" id="nameInp" placeholder="Object Name (e.g. Ghost Chip)">
+        <input type="number" id="priceInp" placeholder="Price (KYC)" min="1" step="1">
         
         <label class="file-label" id="fileLabel">
-            [ SELECT IMAGE ]
+            [ SELECT FROM GALLERY ]
             <input type="file" id="imageInp" accept="image/*" style="display:none">
         </label>
 
-        <button id="listBtn">LIST ON GLOBAL MARKET</button>
+        <button id="listBtn">LIST OBJECT</button>
     </div>
 
     <div class="market-grid" id="grid"></div>
+
+    <button class="clear-btn" onclick="clearMarket()">WIPE ALL DATA</button>
 </div>
 
 <script>
-    // ==================== REAL DATABASE (WORKS EVERYWHERE) ====================
-    const DB_URL = 'https://api.jsonbin.io/v3/b/67f8a9b0c1d2e3f4a5b6c7d8';
-    const API_KEY = '$2a$10$X7y8Z9a0B1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7s8T9u0V1w2X3y4Z5';
-    
-    // ==================== VARIABLES ====================
-    let currentBalance = 0;
-    let currentUserId = null;
-    let globalItems = [];
-    let allUsers = {};
-    let syncInterval;
-    
-    const loginOverlay = document.getElementById('loginOverlay');
-    const userIdInput = document.getElementById('userIdInput');
-    const userInfo = document.getElementById('userInfo');
-    const loggedInAs = document.getElementById('loggedInAs');
-    const balanceDisplay = document.getElementById('balanceDisplay');
-    const grid = document.getElementById('grid');
-    const fileLabel = document.getElementById('fileLabel');
-    const imageInp = document.getElementById('imageInp');
     const listBtn = document.getElementById('listBtn');
-    const connectionStatus = document.getElementById('connectionStatus');
-    const onlineCount = document.getElementById('onlineCount');
-    const globalStatus = document.getElementById('globalStatus');
+    const imageInp = document.getElementById('imageInp');
+    const fileLabel = document.getElementById('fileLabel');
+    const grid = document.getElementById('grid');
+    const balanceDisplay = document.getElementById('balanceDisplay');
 
-    // ==================== INIT ====================
-    window.onload = async () => {
-        await loadGlobalData();
-        startSync();
-    };
+    let currentBalance = 10000; // Starting KYC balance
 
-    async function loadGlobalData() {
-        try {
-            const response = await fetch(DB_URL, {
-                headers: { 'X-Master-Key': API_KEY }
-            });
-            const data = await response.json();
-            
-            if (data && data.record) {
-                globalItems = data.record.items || [];
-                allUsers = data.record.users || {};
-                updateGrid();
-                globalStatus.innerHTML = '🌐 CONNECTED TO GLOBAL NETWORK';
-                connectionStatus.innerHTML = 'GLOBAL LIVE';
-            }
-        } catch (error) {
-            globalStatus.innerHTML = '⚠️ USING LOCAL MODE';
-        }
-    }
-
-    async function saveGlobalData() {
-        try {
-            await fetch(DB_URL, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': API_KEY 
-                },
-                body: JSON.stringify({
-                    items: globalItems,
-                    users: allUsers,
-                    lastUpdate: Date.now()
-                })
-            });
-        } catch (error) {
-            console.log('Save failed');
-        }
-    }
-
-    function startSync() {
-        syncInterval = setInterval(async () => {
-            await loadGlobalData();
-            if (currentUserId && allUsers[currentUserId]) {
-                currentBalance = allUsers[currentUserId].balance;
-                updateBalanceDisplay();
-            }
-            onlineCount.innerHTML = `👥 ${Object.keys(allUsers).length} ONLINE`;
-        }, 3000);
-    }
-
-    // ==================== LOGIN ====================
-    window.generateId = function() {
-        const id = Math.floor(100000 + Math.random() * 900000).toString();
-        userIdInput.value = id;
-    };
-
-    window.login = async function() {
-        const id = userIdInput.value.trim();
-        
-        if (!id || id.length !== 6) {
-            alert("Enter 6-digit ID");
-            return;
-        }
-        
-        currentUserId = id;
-        
-        // Load user from global database
-        if (!allUsers[currentUserId]) {
-            allUsers[currentUserId] = {
-                balance: 10000,
-                joined: Date.now(),
-                lastSeen: Date.now()
-            };
-        } else {
-            allUsers[currentUserId].lastSeen = Date.now();
-        }
-        
-        currentBalance = allUsers[currentUserId].balance;
-        await saveGlobalData();
-        
-        // Update UI
-        loginOverlay.style.display = 'none';
-        userInfo.style.display = 'flex';
-        loggedInAs.innerHTML = `ID: ${id}`;
-        updateBalanceDisplay();
-    };
-
-    window.logout = function() {
-        currentUserId = null;
-        currentBalance = 0;
-        updateBalanceDisplay();
-        loginOverlay.style.display = 'flex';
-        userInfo.style.display = 'none';
-        userIdInput.value = '';
-    };
-
-    // ==================== IMAGE HANDLER ====================
+    // Update label when image is chosen
     imageInp.addEventListener('change', function() {
         if (this.files[0]) {
-            fileLabel.innerHTML = `📸 ${this.files[0].name.substring(0, 15)}`;
+            fileLabel.innerText = "IMAGE LOADED: " + this.files[0].name;
+            fileLabel.style.borderColor = "#0f0";
+            fileLabel.style.color = "#0f0";
         } else {
-            fileLabel.innerHTML = "[ SELECT IMAGE ]";
+            fileLabel.innerText = "[ SELECT FROM GALLERY ]";
+            fileLabel.style.borderColor = "#444";
+            fileLabel.style.color = "var(--accent)";
         }
     });
 
-    // ==================== LIST ITEM ====================
-    listBtn.onclick = () => {
-        if (!currentUserId) {
-            alert("Login first!");
-            return;
+    // Load items and balance from local storage on startup
+    window.onload = () => {
+        // Load balance
+        const savedBalance = localStorage.getItem('kyc_balance');
+        if (savedBalance !== null) {
+            currentBalance = parseInt(savedBalance);
+        } else {
+            localStorage.setItem('kyc_balance', '10000');
         }
+        updateBalanceDisplay();
+        
+        // Load items - FIXED: Better error handling for corrupted data
+        try {
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            saved.forEach(item => {
+                // Validate item has required fields
+                if (item && item.name && item.price && item.img && item.id) {
+                    createCard(item.name, item.price, item.img, item.id);
+                }
+            });
+        } catch (e) {
+            console.log("Error loading items, clearing corrupted data");
+            localStorage.removeItem('market_items');
+        }
+    };
 
+    // List button - FIXED: Now with image compression to handle unlimited listings
+    listBtn.onclick = () => {
         const name = document.getElementById('nameInp').value.trim();
         const price = document.getElementById('priceInp').value.trim();
         const file = imageInp.files[0];
 
         if (!name || !price || !file) {
-            alert("Fill everything!");
+            alert("Fill all fields and select an image!");
             return;
         }
 
+        // Show loading state
         listBtn.disabled = true;
-        listBtn.textContent = "LISTING GLOBALLY...";
+        listBtn.textContent = "ENCRYPTING...";
 
         const reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = function(e) {
+            // Compress image to save space in localStorage
             const img = new Image();
             img.src = e.target.result;
             
-            img.onload = async function() {
-                // Compress image
+            img.onload = function() {
+                // Create canvas to compress image
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
+                // Max dimensions while maintaining aspect ratio
                 let width = img.width;
                 let height = img.height;
-                const maxSize = 200;
+                const maxSize = 300;
                 
                 if (width > height && width > maxSize) {
                     height = (height * maxSize) / width;
@@ -452,130 +282,137 @@
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
                 
-                const compressedImg = canvas.toDataURL('image/jpeg', 0.5);
+                // Get compressed image (lower quality = smaller file)
+                const compressedImgData = canvas.toDataURL('image/jpeg', 0.7);
                 
-                // Create global item
-                const newItem = {
-                    id: Date.now() + '-' + Math.random().toString(36).substr(2, 8),
-                    name: name,
-                    price: parseInt(price),
-                    priceDisplay: price + ' KYC',
-                    img: compressedImg,
-                    seller: currentUserId,
-                    time: Date.now()
-                };
+                // Generate unique ID for the item
+                const itemId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 
-                globalItems.push(newItem);
-                if (globalItems.length > 30) globalItems = globalItems.slice(-30);
+                // Add to UI
+                createCard(name, price + ' KYC', compressedImgData, itemId);
                 
-                await saveGlobalData();
-                updateGrid();
+                // Save to Local Storage with ID - FIXED: Better storage management
+                const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+                saved.push({
+                    id: itemId,
+                    name: name, 
+                    price: price + ' KYC', 
+                    img: compressedImgData,
+                    numericPrice: parseInt(price)
+                });
                 
-                // Reset
+                // FIXED: Check if we're approaching storage limit and clean old items if needed
+                try {
+                    localStorage.setItem('market_items', JSON.stringify(saved));
+                } catch (storageError) {
+                    // If storage is full, remove oldest item and try again
+                    if (saved.length > 0) {
+                        saved.shift(); // Remove oldest item
+                        localStorage.setItem('market_items', JSON.stringify(saved));
+                        alert("Storage limit reached! Oldest item removed to make space.");
+                    }
+                }
+
+                // Reset ALL inputs completely for next listing
                 document.getElementById('nameInp').value = '';
                 document.getElementById('priceInp').value = '';
-                imageInp.value = '';
-                fileLabel.innerHTML = "[ SELECT IMAGE ]";
+                imageInp.value = '';  // Clear the file input
+                fileLabel.innerText = "[ SELECT FROM GALLERY ]";  // Reset label text
+                fileLabel.style.borderColor = "#444";  // Reset border color
+                fileLabel.style.color = "var(--accent)";  // Reset text color
                 
+                // Re-enable button
                 listBtn.disabled = false;
-                listBtn.textContent = "LIST ON GLOBAL MARKET";
-                alert("✅ ITEM LIVE GLOBALLY!");
+                listBtn.textContent = "LIST OBJECT";
+                
+                alert("Item listed successfully!"); // Confirmation message
             };
+        };
+        
+        reader.onerror = function() {
+            listBtn.disabled = false;
+            listBtn.textContent = "LIST OBJECT";
+            alert("Error reading image file!");
         };
         
         reader.readAsDataURL(file);
     };
 
-    // ==================== UPDATE GRID ====================
-    function updateGrid() {
-        grid.innerHTML = '';
-        
-        // Sort by newest first
-        const sorted = [...globalItems].sort((a, b) => b.time - a.time);
-        
-        sorted.forEach(item => {
-            createCard(item);
-        });
-    }
-
-    // ==================== CREATE CARD ====================
-    function createCard(item) {
+    function createCard(name, price, img, itemId) {
         const div = document.createElement('div');
         div.className = 'card';
-        div.setAttribute('data-id', item.id);
+        div.setAttribute('data-id', itemId);
         
-        const isOwn = item.seller === currentUserId;
-        const sellerName = isOwn ? 'YOU' : (item.seller ? item.seller.substring(0,4) + '...' : 'ANON');
+        // Extract numeric price for purchase check
+        const numericPrice = parseInt(price) || 0;
         
         div.innerHTML = `
-            <img src="${item.img}">
-            <h3>${item.name} ${isOwn ? '🔴' : ''}</h3>
-            <div class="price">${item.priceDisplay}</div>
-            <button class="purchase-btn" onclick="buyItem('${item.id}', ${item.price}, this)" ${item.price > currentBalance ? 'disabled' : ''}>PURCHASE</button>
-            <div style="color:#444; font-size:9px; margin-top:5px; display:flex; justify-content:space-between;">
-                <span>SELLER: ${sellerName}</span>
-                <span>${new Date(item.time).toLocaleTimeString()}</span>
-            </div>
+            <img src="${img}">
+            <h3>${name}</h3>
+            <div class="price">${price} <span>KYC</span></div>
+            <button class="purchase-btn" onclick="purchaseItem('${itemId}', ${numericPrice}, this)">PURCHASE</button>
+            <div class="seller-badge">● LISTED ON BLACK MARKET</div>
         `;
+        grid.prepend(div);
         
-        grid.appendChild(div);
+        // Disable purchase button if user can't afford it
+        const purchaseBtn = div.querySelector('.purchase-btn');
+        if (numericPrice > currentBalance) {
+            purchaseBtn.disabled = true;
+        }
     }
 
-    // ==================== BUY ITEM ====================
-    window.buyItem = async function(itemId, price, btn) {
-        if (!currentUserId) {
-            alert("Login first!");
-            return;
-        }
-        
+    // Purchase function - ONLY HERE money is taken
+    window.purchaseItem = function(itemId, price, btnElement) {
         if (price > currentBalance) {
-            alert("Not enough KYC!");
+            alert("Insufficient KYC balance to purchase this item!");
             return;
         }
         
-        const item = globalItems.find(i => i.id === itemId);
-        if (!item) return;
-        
-        if (item.seller === currentUserId) {
-            alert("Can't buy your own item!");
-            return;
-        }
-        
-        if (confirm(`Pay ${price} KYC to ${item.seller.substring(0,4)}...?`)) {
-            // Take money from buyer
+        if (confirm(`Purchase this item for ${price} KYC?`)) {
+            // ONLY ON PURCHASE - money is taken
             currentBalance -= price;
-            allUsers[currentUserId].balance = currentBalance;
-            
-            // Give money to seller
-            if (allUsers[item.seller]) {
-                allUsers[item.seller].balance += price;
-            }
-            
-            // Remove item
-            globalItems = globalItems.filter(i => i.id !== itemId);
-            
-            // Save to global DB
-            await saveGlobalData();
-            
-            // Update UI
+            localStorage.setItem('kyc_balance', currentBalance.toString());
             updateBalanceDisplay();
-            updateGrid();
             
-            alert("✅ PURCHASE COMPLETE!");
+            // Remove item from grid
+            const card = btnElement.closest('.card');
+            card.remove();
+            
+            // Remove from localStorage
+            const saved = JSON.parse(localStorage.getItem('market_items') || '[]');
+            const updated = saved.filter(item => item.id !== itemId);
+            localStorage.setItem('market_items', JSON.stringify(updated));
+            
+            alert("Purchase complete! Item removed from market.");
+            
+            // Update all purchase buttons disabled state based on new balance
+            updateAllPurchaseButtons();
         }
     };
-
-    // ==================== UPDATE BALANCE ====================
-    function updateBalanceDisplay() {
-        balanceDisplay.textContent = currentBalance;
-        
+    
+    // Update all purchase buttons based on current balance
+    function updateAllPurchaseButtons() {
         document.querySelectorAll('.purchase-btn').forEach(btn => {
             const card = btn.closest('.card');
-            if (!card) return;
             const priceText = card.querySelector('.price').textContent;
-            const price = parseInt(priceText) || 0;
-            btn.disabled = price > currentBalance;
+            const numericPrice = parseInt(priceText) || 0;
+            btn.disabled = numericPrice > currentBalance;
         });
+    }
+
+    function updateBalanceDisplay() {
+        balanceDisplay.textContent = currentBalance;
+        // Update purchase buttons
+        updateAllPurchaseButtons();
+    }
+
+    function clearMarket() {
+        if(confirm("Wipe all listings and reset balance to 10,000 KYC?")) {
+            localStorage.removeItem('market_items');
+            localStorage.setItem('kyc_balance', '10000');
+            location.reload();
+        }
     }
 </script>
 
