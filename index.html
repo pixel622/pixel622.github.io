@@ -1,320 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC · streaming digits effect</title>
+    <title>Full TD Game</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        body {
-            background: #0a0a0e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 16px;
-        }
-        .game {
-            max-width: 800px;
-            width: 100%;
-            background: #0e0e14;
-            border: 5px solid #2f5a83;
-            padding: 30px 30px 45px;
-            box-shadow: 16px 16px 0 #1b2433;
-        }
-        h1 {
-            color: #cce3ff;
-            font-size: 3.2rem;
-            font-weight: normal;
-            letter-spacing: -1px;
-            margin: 0 0 8px 0;
-            border-bottom: 5px solid #3c6e9c;
-            padding-bottom: 15px;
-            text-transform: uppercase;
-        }
-        .sub {
-            color: #8dafd4;
-            font-size: 1.1rem;
-            margin-top: 8px;
-            margin-bottom: 30px;
-            border-left: 24px solid #2d5e8a;
-            padding-left: 18px;
-            font-weight: bold;
-        }
-        .stats {
-            display: flex;
-            gap: 80px;
-            background: #18212e;
-            border: 4px solid #2b5580;
-            padding: 20px 35px;
-            margin-bottom: 40px;
-            justify-content: center;
-            box-shadow: inset 0 0 15px #010101;
-        }
-        .stat-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .stat-label {
-            font-size: 1.3rem;
-            color: #b9d4f7;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-        .stat-value {
-            font-size: 6rem;
-            font-weight: bold;
-            line-height: 1;
-            color: #fee9a8;
-            text-shadow: 0 0 12px #f0b45a, 0 0 25px #ffa726;
-            font-variant-numeric: tabular-nums;
-            transition: all 0.05s;
-        }
-        #minerDisplay {
-            font-size: 5rem;
-        }
-        .clicker-panel {
-            background: #1f2b3d;
-            border: 8px solid #28609c;
-            padding: 35px 20px;
-            margin-bottom: 45px;
-            cursor: pointer;
-            transition: all 0.03s ease;
-            user-select: none;
-            text-align: center;
-            box-shadow: 0 8px 0 #0b1a2b, 0 12px 25px black;
-        }
-        .clicker-panel:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #0b1a2b, 0 8px 20px black;
-            border-color: #ffcf8f;
-        }
-        .clicker-main {
-            font-size: 3.2rem;
-            font-weight: bold;
-            color: #ffdd9e;
-            letter-spacing: 3px;
-        }
-        .clicker-desc {
-            color: #c2d9fc;
-            font-size: 1.3rem;
-            margin-top: 12px;
-        }
-        .shop {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin: 25px 0 20px;
-            justify-content: center;
-        }
-        .upgrade {
-            background: #192232;
-            border: 4px solid #2b4f75;
-            padding: 25px 20px;
-            flex: 1 0 240px;
-            text-align: center;
-        }
-        .upgrade-title {
-            font-size: 2rem;
-            color: #f8d58c;
-            font-weight: bold;
-        }
-        .upgrade-desc {
-            font-size: 1rem;
-            color: #bdd2f2;
-            min-height: 50px;
-            margin: 12px 0;
-        }
-        .upgrade-cost {
-            background: #1f364d;
-            display: inline-block;
-            padding: 8px 20px;
-            border: 3px solid #dbaa5b;
-            color: #fff0bb;
-            margin: 12px 0 18px;
-            font-weight: bold;
-            font-size: 1.4rem;
-        }
-        button {
-            background: #2f5580;
-            border: none;
-            border-bottom: 6px solid #0f243b;
-            color: white;
-            font-size: 1.6rem;
-            padding: 14px 20px;
-            width: 100%;
-            font-family: inherit;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.05s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        button:active {
-            transform: translateY(4px);
-            border-bottom-width: 2px;
-        }
-        button:disabled {
-            opacity: 0.4;
-            background: #3b5570;
-            border-bottom-color: #1f3143;
-            cursor: default;
-        }
-        .footer-note {
-            margin-top: 35px;
-            color: #5e83a8;
-            border-top: 3px dashed #2c4e73;
-            padding-top: 20px;
-            font-size: 1rem;
-            text-align: center;
-        }
-        .blink-note {
-            background: #1b2637;
-            color: #ffe4a7;
-            padding: 10px 20px;
-            border: 3px solid #ca9f4b;
-            display: inline-block;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+        body { background: #222; color: white; text-align: center; font-family: sans-serif; }
+        canvas { background: #333; display: block; margin: 10px auto; border: 2px solid #555; cursor: crosshair; }
     </style>
 </head>
 <body>
-<div class="game">
-    <h1>⚡ KYC: STREAMING DIGITS</h1>
-    <div class="sub">miners add digits one by one · numbers flow fast</div>
+    <h1>Tower Defense: Levels</h1>
+    <p>Money: $<span id="money">100</span> | Level: <span id="level">1</span></p>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const moneyEl = document.getElementById('money');
+        const levelEl = document.getElementById('level');
 
-    <div class="stats">
-        <div class="stat-block">
-            <span class="stat-label">🔷 KYC</span>
-            <span class="stat-value" id="kycDisplay">0</span>
-        </div>
-        <div class="stat-block">
-            <span class="stat-label">⛏️ MINERS</span>
-            <span class="stat-value" id="minerDisplay">0</span>
-        </div>
-    </div>
+        let money = 100;
+        let currentLevel = 0;
+        let enemies = [];
+        let towers = [];
+        let projectiles = [];
 
-    <div class="clicker-panel" id="clickButton">
-        <div class="clicker-main">▸ CLICK +1 ◂</div>
-        <div class="clicker-desc">each miner streams +1 KYC every 0.1 seconds (10/sec)</div>
-    </div>
+        // Define Levels
+        const levels = [
+            { path: [{x: 0, y: 300}, {x: 800, y: 300}], enemyHealth: 10, speed: 2 },
+            { path: [{x: 0, y: 100}, {x: 700, y: 100}, {x: 700, y: 500}, {x: 0, y: 500}], enemyHealth: 20, speed: 2.5 }
+        ];
 
-    <div class="shop">
-        <div class="upgrade">
-            <div class="upgrade-title">🧑‍🚀 MINER</div>
-            <div class="upgrade-desc">Adds 1 KYC in a smooth stream 10 times per second</div>
-            <div class="upgrade-cost" id="minerCost">cost: 25 KYC</div>
-            <button id="buyMinerBtn">BUY MINER</button>
-        </div>
-        <div class="upgrade">
-            <div class="upgrade-title">🔍 AI (cosmetic)</div>
-            <div class="upgrade-desc">just for fun — no effect</div>
-            <div class="upgrade-cost" id="aiCost">cost: 60 KYC</div>
-            <button id="buyAiBtn">BUY AI</button>
-        </div>
-    </div>
-
-    <div class="footer-note">
-        <span class="blink-note">⚡ each miner adds +1 every 0.1s · KYC streams up digit by digit ⚡</span><br>
-        • manual click adds +1 instantly • watch the numbers flow
-    </div>
-</div>
-
-<script>
-    (function() {
-        // --- state ---
-        let kyc = 0;                // real KYC value (integer)
-        let miners = 0;             // each miner adds 1 per 0.1s
-        let aiLevel = 0;
-
-        // DOM elements
-        const kycSpan = document.getElementById('kycDisplay');
-        const minerSpan = document.getElementById('minerDisplay');
-        const clickBtn = document.getElementById('clickButton');
-        const buyMinerBtn = document.getElementById('buyMinerBtn');
-        const buyAiBtn = document.getElementById('buyAiBtn');
-        const minerCostSpan = document.getElementById('minerCost');
-        const aiCostSpan = document.getElementById('aiCost');
-
-        // --- streaming display variables ---
-        let displayedKYC = 0;        // what the user sees (lags behind real kyc)
-        const STEP = 1;              // we increment displayed value by 1 each step
-
-        // update the displayed number with a streaming effect
-        function animateDisplay() {
-            if (displayedKYC < kyc) {
-                // increase displayed value by STEP, but never overshoot
-                displayedKYC = Math.min(displayedKYC + STEP, kyc);
-                kycSpan.innerText = Math.floor(displayedKYC);
-            } else if (displayedKYC > kyc) {
-                // just in case (shouldn't happen)
-                displayedKYC = kyc;
-                kycSpan.innerText = Math.floor(displayedKYC);
+        class Enemy {
+            constructor(levelData) {
+                this.path = levelData.path;
+                this.x = this.path[0].x;
+                this.y = this.path[0].y;
+                this.pathIndex = 0;
+                this.speed = levelData.speed;
+                this.health = levelData.enemyHealth;
+                this.maxHealth = levelData.enemyHealth;
+            }
+            update() {
+                let target = this.path[this.pathIndex + 1];
+                if (target) {
+                    let dx = target.x - this.x;
+                    let dy = target.y - this.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < this.speed) {
+                        this.pathIndex++;
+                    } else {
+                        this.x += (dx / dist) * this.speed;
+                        this.y += (dy / dist) * this.speed;
+                    }
+                }
+            }
+            draw() {
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                // Health bar
+                ctx.fillStyle = 'black';
+                ctx.fillRect(this.x-10, this.y-15, 20, 4);
+                ctx.fillStyle = 'green';
+                ctx.fillRect(this.x-10, this.y-15, 20 * (this.health/this.maxHealth), 4);
             }
         }
 
-        // refresh miner display and buttons (immediate)
-        function refreshStaticUI() {
-            minerSpan.innerText = miners;
-            minerCostSpan.innerText = 'cost: 25 KYC';
-            aiCostSpan.innerText = 'cost: 60 KYC';
-            buyMinerBtn.disabled = (kyc < 25);
-            buyAiBtn.disabled = (kyc < 60);
-        }
-
-        // --- manual click ---
-        function handleClick() {
-            kyc += 1;   // real value goes up
-            refreshStaticUI();
-        }
-
-        // --- miner rapid stream (adds to REAL kyc every 0.1s) ---
-        function minerTick() {
-            if (miners > 0) {
-                kyc += miners;   // real value increases by number of miners each 0.1s
-                refreshStaticUI();
+        class Tower {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.range = 150;
+                this.cooldown = 0;
+            }
+            draw() {
+                ctx.fillStyle = 'cyan';
+                ctx.fillRect(this.x-15, this.y-15, 30, 30);
+                // Range circle
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            update() {
+                if (this.cooldown > 0) this.cooldown--;
+                if (this.cooldown === 0) {
+                    // Find target
+                    let target = enemies.find(e => Math.hypot(e.x - this.x, e.y - this.y) < this.range);
+                    if (target) {
+                        projectiles.push({x: this.x, y: this.y, target: target, speed: 5});
+                        this.cooldown = 30; // Frames between shots
+                    }
+                }
             }
         }
 
-        // --- buy miner (cost 25) ---
-        function buyMiner() {
-            if (kyc >= 25) {
-                kyc -= 25;
-                miners++;
-                refreshStaticUI();
+        // Click to build
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            if (money >= 50) {
+                towers.push(new Tower(x, y));
+                money -= 50;
+                moneyEl.innerText = money;
+            }
+        });
+
+        // Spawn Wave
+        function spawnWave() {
+            for(let i=0; i<10; i++) {
+                setTimeout(() => {
+                    enemies.push(new Enemy(levels[currentLevel]));
+                }, i * 1000);
             }
         }
 
-        // --- buy AI (cosmetic) ---
-        function buyAi() {
-            if (kyc >= 60) {
-                kyc -= 60;
-                aiLevel++;
-                refreshStaticUI();
+        // Game Loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Path
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 30;
+            ctx.beginPath();
+            ctx.moveTo(levels[currentLevel].path[0].x, levels[currentLevel].path[0].y);
+            levels[currentLevel].path.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.stroke();
+
+            towers.forEach(t => { t.update(); t.draw(); });
+            
+            projectiles.forEach((p, i) => {
+                let dx = p.target.x - p.x;
+                let dy = p.target.y - p.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < p.speed) {
+                    p.target.health -= 5;
+                    projectiles.splice(i, 1);
+                } else {
+                    p.x += (dx / dist) * p.speed;
+                    p.y += (dy / dist) * p.speed;
+                    ctx.fillStyle = 'yellow';
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+                }
+            });
+
+            enemies.forEach((enemy, index) => {
+                enemy.update();
+                enemy.draw();
+                if (enemy.health <= 0) {
+                    enemies.splice(index, 1);
+                    money += 10;
+                    moneyEl.innerText = money;
+                }
+                if (enemy.pathIndex >= levels[currentLevel].path.length - 1) {
+                    // Enemy reached end - simple loss condition
+                    enemies.splice(index, 1);
+                }
+            });
+
+            if (enemies.length === 0) {
+                // Next level logic could go here
             }
+
+            requestAnimationFrame(gameLoop);
         }
 
-        // --- event listeners ---
-        clickBtn.addEventListener('click', handleClick);
-        buyMinerBtn.addEventListener('click', buyMiner);
-        buyAiBtn.addEventListener('click', buyAi);
-
-        // start miner real ticks (10Hz)
-        setInterval(minerTick, 100);
-
-        // start display animation (60fps smooth streaming)
-        setInterval(animateDisplay, 16);  // ~60fps
-
-        // initial UI
-        refreshStaticUI();
-        kycSpan.innerText = '0';
-    })();
-</script>
+        spawnWave();
+        gameLoop();
+    </script>
 </body>
 </html>
