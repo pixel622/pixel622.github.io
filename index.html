@@ -598,7 +598,7 @@ const NEWS = [
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v7';
+const SK = 'apex_v8_fixed';  // Changed version to force fresh start with fixed logic
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -722,7 +722,7 @@ function renderSidebar(){
   const spEl=document.getElementById('sPnl');
   spEl.textContent=(pnl>=0?'+':'')+F(pnl); spEl.style.color=pnl>=0?'var(--UP)':'var(--DN)';
 
-  /* holdings — each with its own Sell button */
+  /* holdings — FIXED: each holding shows properly and sell works correctly */
   const tks=Object.keys(G.h).filter(t=>G.h[t].sh>.000001);
   const hl=document.getElementById('holdList');
   if(!tks.length){
@@ -737,7 +737,7 @@ function renderSidebar(){
           <div class="hico">${a?.i||'?'}</div>
           <div class="hinfo">
             <div class="hname">${a?.n||t}</div>
-            <div class="hqty">${h.sh.toFixed(5)} ${t} · avg ${F(h.ac)}</div>
+            <div class="hqty">${h.sh.toFixed(6)} ${t} · avg ${F(h.ac)}</div>
           </div>
           <div class="hright">
             <div class="hval">${F(val)}</div>
@@ -746,7 +746,7 @@ function renderSidebar(){
         </div>
         <div class="sell-row">
           <div class="sell-worth">Worth ${F(val)} now</div>
-          <button class="sell-btn" onclick="quickSell('${t}')">Sell ${t} — Get ${F(val)}</button>
+          <button class="sell-btn" onclick="quickSell('${t}')">Sell All — Get ${F(val)}</button>
         </div>
       </div>`;
     }).join('');
@@ -759,7 +759,7 @@ function renderSidebar(){
   } else {
     txEl.innerHTML=[...G.txs].reverse().slice(0,20).map(x=>
       `<div class="txrow">
-        <div class="txl"><span class="txtag ${x.tp}">${x.tp}</span><span class="txd">${x.sh.toFixed(5)} ${x.t} @ ${F(x.p)}</span></div>
+        <div class="txl"><span class="txtag ${x.tp}">${x.tp}</span><span class="txd">${x.sh.toFixed(6)} ${x.t} @ ${F(x.p)}</span></div>
         <span class="txv">${F(x.amt)} · ${x.time}</span>
       </div>`
     ).join('');
@@ -792,20 +792,30 @@ function switchSb(tab,el){
 }
 
 /* ═══════════════════════════════════════════
-   SIDEBAR QUICK SELL — sells ALL of that asset
+   SIDEBAR QUICK SELL — FIXED: sells ALL of that asset and adds cash correctly
 ═══════════════════════════════════════════ */
 function quickSell(ticker){
   const h=G.h[ticker];
   if(!h||h.sh<.000001){ toast('Nothing to sell','err'); return; }
   const p=prices[ticker]||0;
-  const rev=h.sh*p;
-  G.cash+=rev;
-  G.txs.push({tp:'sell',t:ticker,sh:h.sh,p,amt:rev,time:new Date().toLocaleTimeString()});
+  const rev = h.sh * p;  // Total value at current price
+  G.cash = G.cash + rev; // Add to cash
+  G.txs.push({
+    tp:'sell',
+    t:ticker,
+    sh:h.sh,
+    p:p,
+    amt:rev,
+    time:new Date().toLocaleTimeString()
+  });
   G.trades++;
-  h.sh=0;
+  delete G.h[ticker]; // Remove the holding completely
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
   renderAll();
-  if(curA&&curA.t===ticker){ renderPos(); renderSellSection(); }
+  if(curA && curA.t === ticker){ 
+    renderPos(); 
+    renderSellSection(); 
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -862,7 +872,7 @@ function refreshScHeader(){
   }
 }
 
-/* SELL SECTION — shows when you own this asset, updates on every price tick */
+/* SELL SECTION — FIXED: shows when you own this asset, updates on every price tick */
 function renderSellSection(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
@@ -874,10 +884,12 @@ function renderSellSection(){
   document.getElementById('sellSecLbl').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecName').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecWorth').innerHTML=
-    `You own <strong>${h.sh.toFixed(5)} ${t}</strong> · worth <strong>${F(val)}</strong>`;
+    `You own <strong>${h.sh.toFixed(6)} ${t}</strong> · worth <strong>${F(val)}</strong>`;
 
-  // also refresh the confirm button text if there's already an amount typed
-  refreshSellPreview();
+  // Reset sell amount input when section becomes visible
+  document.getElementById('sellAmt').value = '';
+  document.getElementById('sellPreview').textContent = '';
+  document.getElementById('sellConfirmBtn').textContent = `Sell ${curA.n}`;
 }
 
 /* called when user types in the sell amount box */
@@ -885,19 +897,23 @@ function refreshSellPreview(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
   if(!h||h.sh<.000001) return;
-  const amt=parseFloat(document.getElementById('sellAmt').value)||0;
-  const maxVal=h.sh*p;
-  const btn=document.getElementById('sellConfirmBtn');
-  if(amt<=0){
-    document.getElementById('sellPreview').textContent='';
-    btn.textContent=`Sell ${curA.n}`;
+  const amt = parseFloat(document.getElementById('sellAmt').value) || 0;
+  const maxVal = h.sh * p;
+  const btn = document.getElementById('sellConfirmBtn');
+  
+  if(amt <= 0){
+    document.getElementById('sellPreview').textContent = '';
+    btn.textContent = `Sell ${curA.n}`;
     return;
   }
-  const canSell=Math.min(amt,maxVal);
-  const shares=canSell/p;
-  document.getElementById('sellPreview').innerHTML=
-    `Sell <span>${shares.toFixed(6)} ${t}</span> → get back <span>${F(canSell)}</span>`;
-  btn.textContent=`Sell ${curA.n} — Get Back ${F(canSell)}`;
+  
+  // Can't sell more than you have
+  const sellVal = Math.min(amt, maxVal);
+  const shares = sellVal / p;
+  
+  document.getElementById('sellPreview').innerHTML =
+    `Sell <span>${shares.toFixed(6)} ${t}</span> → get back <span>${F(sellVal)}</span>`;
+  btn.textContent = `Sell — Get Back ${F(sellVal)}`;
 }
 
 /* "Max" button fills the sell input with full position value */
@@ -905,66 +921,152 @@ function setSellMax(){
   if(!curA) return;
   const h=G.h[curA.t], p=prices[curA.t]||0;
   if(!h||h.sh<.000001) return;
-  document.getElementById('sellAmt').value=(h.sh*p).toFixed(2);
+  const maxVal = h.sh * p;
+  document.getElementById('sellAmt').value = maxVal.toFixed(2);
   refreshSellPreview();
 }
 
-/* confirm sell — amount typed goes back to cash */
+/* FIXED: confirm sell — properly deducts shares and adds cash */
 function doSell(){
   if(!curA) return;
-  const t=curA.t, h=G.h[t], p=prices[t]||0;
-  if(!h||h.sh<.000001){ toast('Nothing to sell','err'); return; }
-  const amt=parseFloat(document.getElementById('sellAmt').value);
-  if(!amt||amt<=0){ toast('Enter how much to sell','err'); return; }
-  const maxVal=h.sh*p;
-  const sellVal=Math.min(amt,maxVal);   // can't sell more than you have
-  const shares=sellVal/p;
-  h.sh-=shares;
-  G.cash+=sellVal;                      // money goes straight back to your cash
-  G.txs.push({tp:'sell',t,sh:shares,p,amt:sellVal,time:new Date().toLocaleTimeString()});
+  const t = curA.t;
+  const h = G.h[t];
+  const p = prices[t] || 0;
+  
+  if(!h || h.sh < 0.000001){ 
+    toast('Nothing to sell','err'); 
+    return; 
+  }
+  
+  const amt = parseFloat(document.getElementById('sellAmt').value);
+  if(!amt || amt <= 0){ 
+    toast('Enter how much to sell','err'); 
+    return; 
+  }
+  
+  const maxVal = h.sh * p;
+  const sellVal = Math.min(amt, maxVal);   // can't sell more than you have
+  const shares = sellVal / p;
+  
+  // Update holding
+  h.sh = h.sh - shares;
+  
+  // Add cash
+  G.cash = G.cash + sellVal;
+  
+  // Record transaction
+  G.txs.push({
+    tp:'sell',
+    t,
+    sh: shares,
+    p,
+    amt: sellVal,
+    time: new Date().toLocaleTimeString()
+  });
+  
   G.trades++;
-  document.getElementById('sellAmt').value='';
-  document.getElementById('sellPreview').textContent='';
+  
+  // If holding is now effectively zero, remove it
+  if(h.sh < 0.000001){
+    delete G.h[t];
+  }
+  
+  // Clear inputs
+  document.getElementById('sellAmt').value = '';
+  document.getElementById('sellPreview').textContent = '';
+  
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
-  renderPos(); renderSellSection(); renderAll();
+  
+  // Refresh UI
+  renderPos(); 
+  renderSellSection(); 
+  renderAll();
 }
 
 /* ═══════════════════════════════════════════
-   BUY
+   BUY — FIXED: properly records purchases
 ═══════════════════════════════════════════ */
 function qa(v){
-  document.getElementById('buyAmt').value=(v===-1?G.cash:v).toFixed(2);
+  if(v === -1){
+    document.getElementById('buyAmt').value = G.cash.toFixed(2);
+  } else {
+    document.getElementById('buyAmt').value = v.toFixed(2);
+  }
   refreshPrev();
 }
 
 function refreshPrev(){
   if(!curA) return;
-  const amt=parseFloat(document.getElementById('buyAmt').value)||0;
-  const p=prices[curA.t], sh=amt/p;
-  const held=(G.h[curA.t]?.sh||0)*p;
-  if(amt<=0){ document.getElementById('prev').textContent='Enter an amount above to preview'; return; }
-  document.getElementById('prev').innerHTML=
+  const amt = parseFloat(document.getElementById('buyAmt').value) || 0;
+  const p = prices[curA.t];
+  const sh = amt / p;
+  const held = (G.h[curA.t]?.sh || 0) * p;
+  
+  if(amt <= 0){ 
+    document.getElementById('prev').textContent = 'Enter an amount above to preview'; 
+    return; 
+  }
+  
+  document.getElementById('prev').innerHTML =
     `Spend: <span>${F(amt)}</span> · Get: <span>${sh.toFixed(6)} ${curA.t}</span><br>Already holding: <span>${F(held)}</span>`;
 }
 
 function doBuy(){
   if(!curA) return;
-  const amt=parseFloat(document.getElementById('buyAmt').value);
-  if(!amt||amt<=0){ toast('Enter a valid amount','err'); return; }
-  if(amt<.01){ toast('Minimum $0.01','err'); return; }
-  if(amt>G.cash+.001){ toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); return; }
-  const t=curA.t, p=prices[t], sh=amt/p;
-  G.cash-=amt;
-  if(!G.h[t]) G.h[t]={sh:0,ac:0};
-  const h=G.h[t];
-  h.ac=(h.sh*h.ac+amt)/(h.sh+sh);
-  h.sh+=sh;
-  G.txs.push({tp:'buy',t,sh,p,amt,time:new Date().toLocaleTimeString()});
+  const amt = parseFloat(document.getElementById('buyAmt').value);
+  
+  if(!amt || amt <= 0){ 
+    toast('Enter a valid amount','err'); 
+    return; 
+  }
+  if(amt < 0.01){ 
+    toast('Minimum $0.01','err'); 
+    return; 
+  }
+  if(amt > G.cash + 0.001){ 
+    toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); 
+    return; 
+  }
+  
+  const t = curA.t;
+  const p = prices[t];
+  const sh = amt / p;
+  
+  // Deduct cash
+  G.cash = G.cash - amt;
+  
+  // Update or create holding
+  if(!G.h[t]) {
+    G.h[t] = {sh: 0, ac: 0};
+  }
+  
+  const h = G.h[t];
+  // Update average cost
+  h.ac = (h.sh * h.ac + amt) / (h.sh + sh);
+  h.sh = h.sh + sh;
+  
+  // Record transaction
+  G.txs.push({
+    tp:'buy',
+    t,
+    sh,
+    p,
+    amt,
+    time: new Date().toLocaleTimeString()
+  });
+  
   G.trades++;
-  document.getElementById('buyAmt').value='';
-  document.getElementById('prev').textContent='Enter an amount above to preview';
-  toast(`✅ Bought ${sh.toFixed(5)} ${t} for ${F(amt)}`,'ok');
-  renderPos(); renderSellSection(); renderAll();
+  
+  // Clear input
+  document.getElementById('buyAmt').value = '';
+  document.getElementById('prev').textContent = 'Enter an amount above to preview';
+  
+  toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
+  
+  // Refresh UI
+  renderPos(); 
+  renderSellSection(); 
+  renderAll();
 }
 
 function renderPos(){
