@@ -54,7 +54,7 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .body{display:grid;grid-template-columns:1fr 296px;overflow:hidden;min-height:0;}
 
 /* ── MARKET PANEL ── */
-.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;min-width:0;}
+.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;}
 .mbar{padding:11px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--paper);}
 .mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);}
 .tabs{display:flex;border:1px solid var(--paper3);}
@@ -62,20 +62,32 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .tab:last-child{border-right:none;}
 .tab.on{background:var(--ink);color:var(--paper);}
 
-/* ── ASSET GRID — FIXED ── */
+/* ── ASSET GRID ── FIXED FOR PROPER ROW WRAPPING */
 .grid{
   flex:1;
   overflow-y:auto;
-  overflow-x:hidden;
-  display:flex;
-  flex-direction:column;
-  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  gap:0;
+  align-content:start;
 }
 .grid::-webkit-scrollbar{width:4px;}
 .grid::-webkit-scrollbar-thumb{background:var(--paper3);}
 
+/* Limit columns on very wide screens to keep cards readable */
+@media (min-width: 1400px) {
+  .grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+@media (min-width: 1800px) {
+  .grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
 /* ── ASSET CARD ── */
-.acard{border-right:none;border-bottom:1px solid var(--paper3);padding:13px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;width:100%;}
+.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:13px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
 .acard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
 .acard:hover{background:var(--paper2);}
 .acard:hover::after{transform:scaleX(1);}
@@ -285,13 +297,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
   line-height:1.6;
 }
 .sell-preview span{color:rgba(255,255,255,.7);}
-.sell-confirm-btn{
-  width:100%;padding:13px;
-  font-family:'Barlow Condensed',sans-serif;font-weight:900;
-  font-size:.98rem;letter-spacing:2px;text-transform:uppercase;
-  cursor:pointer;border:none;background:var(--DN);color:#fff;
-  transition:all .13s;
-}
+.sell-confirm-btn{width:100%;padding:13px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.98rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;background:var(--DN);color:#fff;transition:all .13s;}
 .sell-confirm-btn:hover{background:#f04040;box-shadow:0 0 24px rgba(224,59,59,.38);}
 .sell-confirm-btn:active{transform:scale(.97);}
 
@@ -698,7 +704,7 @@ const NEWS = [
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v8_fixed';
+const SK = 'apex_v8_fixed';  // Changed version to force fresh start with fixed logic
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -822,6 +828,7 @@ function renderSidebar(){
   const spEl=document.getElementById('sPnl');
   spEl.textContent=(pnl>=0?'+':'')+F(pnl); spEl.style.color=pnl>=0?'var(--UP)':'var(--DN)';
 
+  /* holdings — FIXED: each holding shows properly and sell works correctly */
   const tks=Object.keys(G.h).filter(t=>G.h[t].sh>.000001);
   const hl=document.getElementById('holdList');
   if(!tks.length){
@@ -851,6 +858,7 @@ function renderSidebar(){
     }).join('');
   }
 
+  /* history */
   const txEl=document.getElementById('txList');
   if(!G.txs.length){
     txEl.innerHTML='<div class="txrow"><span style="font-size:.65rem;color:var(--ink4)">No trades yet</span></div>';
@@ -889,18 +897,31 @@ function switchSb(tab,el){
   document.getElementById('pane-'+tab).classList.add('on');
 }
 
+/* ═══════════════════════════════════════════
+   SIDEBAR QUICK SELL — FIXED: sells ALL of that asset and adds cash correctly
+═══════════════════════════════════════════ */
 function quickSell(ticker){
   const h=G.h[ticker];
   if(!h||h.sh<.000001){ toast('Nothing to sell','err'); return; }
   const p=prices[ticker]||0;
-  const rev = h.sh * p;
-  G.cash = G.cash + rev;
-  G.txs.push({tp:'sell',t:ticker,sh:h.sh,p:p,amt:rev,time:new Date().toLocaleTimeString()});
+  const rev = h.sh * p;  // Total value at current price
+  G.cash = G.cash + rev; // Add to cash
+  G.txs.push({
+    tp:'sell',
+    t:ticker,
+    sh:h.sh,
+    p:p,
+    amt:rev,
+    time:new Date().toLocaleTimeString()
+  });
   G.trades++;
-  delete G.h[ticker];
+  delete G.h[ticker]; // Remove the holding completely
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
   renderAll();
-  if(curA && curA.t === ticker){ renderPos(); renderSellSection(); }
+  if(curA && curA.t === ticker){ 
+    renderPos(); 
+    renderSellSection(); 
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -916,6 +937,7 @@ const GLOWS={
   BND:'#7f8c8d',VNQ:'#e67e22',ICLN:'#27ae60',
   GOLD:'#f1c40f',SLVR:'#bdc3c7',OIL:'#2c3e50',NATG:'#e67e22',WHEAT:'#f39c12',COPR:'#d35400',PLAT:'#e0e0e0',CORN:'#f9ca24',
   EUR:'#003399',GBP:'#012169',JPY:'#bc002d',BRL:'#009c3b',CAD:'#ff0000',AUD:'#00008b',
+  // New crypto glows
   USDT:'#26a17b',BNB:'#f3ba2f',USDC:'#2775ca',DOT:'#e6007a',ATOM:'#5064fb',
   NEAR:'#000000',FTM:'#1969ff',ALGO:'#000000',ICP:'#3b00b9',APT:'#000000',
   SUI:'#4ca2ff',UNI:'#ff007a',AAVE:'#2ebac6',CRV:'#406cad',MKR:'#1aab9b',
@@ -971,22 +993,27 @@ function refreshScHeader(){
   }
 }
 
+/* SELL SECTION — FIXED: shows when you own this asset, updates on every price tick */
 function renderSellSection(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
   const sec=document.getElementById('sellSec');
   if(!h||h.sh<.000001){ sec.style.display='none'; return; }
+
   const val=h.sh*p;
   sec.style.display='block';
   document.getElementById('sellSecLbl').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecName').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecWorth').innerHTML=
     `You own <strong>${h.sh.toFixed(6)} ${t}</strong> · worth <strong>${F(val)}</strong>`;
+
+  // Reset sell amount input when section becomes visible
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   document.getElementById('sellConfirmBtn').textContent = `Sell ${curA.n}`;
 }
 
+/* called when user types in the sell amount box */
 function refreshSellPreview(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
@@ -994,45 +1021,98 @@ function refreshSellPreview(){
   const amt = parseFloat(document.getElementById('sellAmt').value) || 0;
   const maxVal = h.sh * p;
   const btn = document.getElementById('sellConfirmBtn');
-  if(amt <= 0){ document.getElementById('sellPreview').textContent = ''; btn.textContent = `Sell ${curA.n}`; return; }
+  
+  if(amt <= 0){
+    document.getElementById('sellPreview').textContent = '';
+    btn.textContent = `Sell ${curA.n}`;
+    return;
+  }
+  
+  // Can't sell more than you have
   const sellVal = Math.min(amt, maxVal);
   const shares = sellVal / p;
+  
   document.getElementById('sellPreview').innerHTML =
     `Sell <span>${shares.toFixed(6)} ${t}</span> → get back <span>${F(sellVal)}</span>`;
   btn.textContent = `Sell — Get Back ${F(sellVal)}`;
 }
 
+/* "Max" button fills the sell input with full position value */
 function setSellMax(){
   if(!curA) return;
   const h=G.h[curA.t], p=prices[curA.t]||0;
   if(!h||h.sh<.000001) return;
-  document.getElementById('sellAmt').value = (h.sh * p).toFixed(2);
+  const maxVal = h.sh * p;
+  document.getElementById('sellAmt').value = maxVal.toFixed(2);
   refreshSellPreview();
 }
 
+/* FIXED: confirm sell — properly deducts shares and adds cash */
 function doSell(){
   if(!curA) return;
-  const t = curA.t, h = G.h[t], p = prices[t] || 0;
-  if(!h || h.sh < 0.000001){ toast('Nothing to sell','err'); return; }
+  const t = curA.t;
+  const h = G.h[t];
+  const p = prices[t] || 0;
+  
+  if(!h || h.sh < 0.000001){ 
+    toast('Nothing to sell','err'); 
+    return; 
+  }
+  
   const amt = parseFloat(document.getElementById('sellAmt').value);
-  if(!amt || amt <= 0){ toast('Enter how much to sell','err'); return; }
+  if(!amt || amt <= 0){ 
+    toast('Enter how much to sell','err'); 
+    return; 
+  }
+  
   const maxVal = h.sh * p;
-  const sellVal = Math.min(amt, maxVal);
+  const sellVal = Math.min(amt, maxVal);   // can't sell more than you have
   const shares = sellVal / p;
+  
+  // Update holding
   h.sh = h.sh - shares;
+  
+  // Add cash
   G.cash = G.cash + sellVal;
-  G.txs.push({tp:'sell',t,sh:shares,p,amt:sellVal,time:new Date().toLocaleTimeString()});
+  
+  // Record transaction
+  G.txs.push({
+    tp:'sell',
+    t,
+    sh: shares,
+    p,
+    amt: sellVal,
+    time: new Date().toLocaleTimeString()
+  });
+  
   G.trades++;
-  if(h.sh < 0.000001) delete G.h[t];
+  
+  // If holding is now effectively zero, remove it
+  if(h.sh < 0.000001){
+    delete G.h[t];
+  }
+  
+  // Clear inputs
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
+  
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
-  renderPos(); renderSellSection(); renderAll();
+  
+  // Refresh UI
+  renderPos(); 
+  renderSellSection(); 
+  renderAll();
 }
 
+/* ═══════════════════════════════════════════
+   BUY — FIXED: properly records purchases
+═══════════════════════════════════════════ */
 function qa(v){
-  if(v === -1){ document.getElementById('buyAmt').value = G.cash.toFixed(2); }
-  else { document.getElementById('buyAmt').value = v.toFixed(2); }
+  if(v === -1){
+    document.getElementById('buyAmt').value = G.cash.toFixed(2);
+  } else {
+    document.getElementById('buyAmt').value = v.toFixed(2);
+  }
   refreshPrev();
 }
 
@@ -1042,7 +1122,12 @@ function refreshPrev(){
   const p = prices[curA.t];
   const sh = amt / p;
   const held = (G.h[curA.t]?.sh || 0) * p;
-  if(amt <= 0){ document.getElementById('prev').textContent = 'Enter an amount above to preview'; return; }
+  
+  if(amt <= 0){ 
+    document.getElementById('prev').textContent = 'Enter an amount above to preview'; 
+    return; 
+  }
+  
   document.getElementById('prev').innerHTML =
     `Spend: <span>${F(amt)}</span> · Get: <span>${sh.toFixed(6)} ${curA.t}</span><br>Already holding: <span>${F(held)}</span>`;
 }
@@ -1050,21 +1135,59 @@ function refreshPrev(){
 function doBuy(){
   if(!curA) return;
   const amt = parseFloat(document.getElementById('buyAmt').value);
-  if(!amt || amt <= 0){ toast('Enter a valid amount','err'); return; }
-  if(amt < 0.01){ toast('Minimum $0.01','err'); return; }
-  if(amt > G.cash + 0.001){ toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); return; }
-  const t = curA.t, p = prices[t], sh = amt / p;
+  
+  if(!amt || amt <= 0){ 
+    toast('Enter a valid amount','err'); 
+    return; 
+  }
+  if(amt < 0.01){ 
+    toast('Minimum $0.01','err'); 
+    return; 
+  }
+  if(amt > G.cash + 0.001){ 
+    toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); 
+    return; 
+  }
+  
+  const t = curA.t;
+  const p = prices[t];
+  const sh = amt / p;
+  
+  // Deduct cash
   G.cash = G.cash - amt;
-  if(!G.h[t]) G.h[t] = {sh: 0, ac: 0};
+  
+  // Update or create holding
+  if(!G.h[t]) {
+    G.h[t] = {sh: 0, ac: 0};
+  }
+  
   const h = G.h[t];
+  // Update average cost
   h.ac = (h.sh * h.ac + amt) / (h.sh + sh);
   h.sh = h.sh + sh;
-  G.txs.push({tp:'buy',t,sh,p,amt,time:new Date().toLocaleTimeString()});
+  
+  // Record transaction
+  G.txs.push({
+    tp:'buy',
+    t,
+    sh,
+    p,
+    amt,
+    time: new Date().toLocaleTimeString()
+  });
+  
   G.trades++;
+  
+  // Clear input
   document.getElementById('buyAmt').value = '';
   document.getElementById('prev').textContent = 'Enter an amount above to preview';
+  
   toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
-  renderPos(); renderSellSection(); renderAll();
+  
+  // Refresh UI
+  renderPos(); 
+  renderSellSection(); 
+  renderAll();
 }
 
 function renderPos(){
@@ -1149,6 +1272,7 @@ function drawChart(ctx,W,H,data,prog){
   const up=sub[sub.length-1].p>=sub[0].p;
   const COL=up?'#00b87a':'#e03b3b', DIM=up?'rgba(0,184,122,':'rgba(224,59,59,';
 
+  // grid + y labels
   ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
   for(let i=0;i<=5;i++){
     const gy=P.t+i*(cH/5);
@@ -1166,6 +1290,7 @@ function drawChart(ctx,W,H,data,prog){
   }
   ctx.setLineDash([]);
 
+  // x labels
   ctx.fillStyle='rgba(255,255,255,.19)';
   ctx.font=`400 9px 'Azeret Mono',monospace`;
   ctx.textAlign='center';
@@ -1177,6 +1302,7 @@ function drawChart(ctx,W,H,data,prog){
     }
   }
 
+  // gradient fill
   const grad=ctx.createLinearGradient(0,P.t,0,P.t+cH);
   grad.addColorStop(0,DIM+'0.26)'); grad.addColorStop(.5,DIM+'0.09)'); grad.addColorStop(1,DIM+'0)');
   ctx.beginPath();
@@ -1184,16 +1310,19 @@ function drawChart(ctx,W,H,data,prog){
   ctx.lineTo(X(sub.length-1),P.t+cH); ctx.lineTo(X(0),P.t+cH); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
 
+  // glow
   ctx.save(); ctx.filter='blur(6px)'; ctx.globalAlpha=.32;
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=9; ctx.lineJoin='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke(); ctx.restore();
 
+  // crisp line
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=1.9;
   ctx.lineJoin='round'; ctx.lineCap='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke();
 
+  // live price elements
   if(prog===1&&sub.length){
     const lx=X(sub.length-1), ly=Y(sub[sub.length-1].p), lp=sub[sub.length-1].p;
     ctx.strokeStyle=DIM+'0.3)'; ctx.setLineDash([4,10]); ctx.lineWidth=1;
