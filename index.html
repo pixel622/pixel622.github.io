@@ -1,174 +1,499 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Full TD Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 $1 fake market – crypto & stocks simulator</title>
     <style>
-        body { background: #222; color: white; text-align: center; font-family: sans-serif; }
-        canvas { background: #333; display: block; margin: 10px auto; border: 2px solid #555; cursor: crosshair; }
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #0b1422 0%, #1a2639 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+        .sim-card {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(18, 28, 46, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 48px 48px 32px 32px;
+            padding: 28px 22px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 2px #2d3f5e inset;
+            border: 1px solid #6d8db0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding: 0 10px;
+        }
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f9e05e, #ffb347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px #ff9f0f40;
+        }
+        .logo span {
+            font-size: 0.9rem;
+            color: #a3c2ed;
+            display: block;
+            margin-top: -6px;
+            padding-left: 8px;
+        }
+        .cash-panel {
+            background: #0f1a2b;
+            border-radius: 120px;
+            padding: 12px 28px;
+            border: 2px solid #4f6f9f;
+            box-shadow: inset 0 3px 8px #00000055, 0 8px 0 #0b121e;
+            text-align: center;
+        }
+        .cash-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #8fb1df;
+        }
+        .cash-amount {
+            font-size: 2.3rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #f2ffd0;
+            text-shadow: 0 3px 0 #517e5b, 0 5px 10px #a7e0a0;
+        }
+        .cash-amount small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #bcd68d;
+        }
+        .market-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 30px 0 22px;
+        }
+        .asset-row {
+            background: #1d2a3f;
+            border-radius: 100px 30px 30px 100px;
+            display: flex;
+            align-items: center;
+            padding: 10px 16px 10px 10px;
+            border: 1px solid #4f6d94;
+            box-shadow: 0 6px 0 #0e1625, 0 8px 12px black;
+        }
+        .asset-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            background: #25344f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            border: 2px solid #90b0df;
+            box-shadow: inset 0 -3px 0 #232f41;
+        }
+        .asset-info {
+            flex: 2;
+        }
+        .asset-name {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: #e3efff;
+            line-height: 1.2;
+        }
+        .asset-price {
+            font-size: 1.2rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .price-btc {
+            color: #f7b45a;
+        }
+        .price-eth {
+            color: #b0bcf5;
+        }
+        .price-aapl {
+            color: #87c796;
+        }
+        .price-gld {
+            color: #efd474;
+        }
+        .price-change {
+            font-size: 0.9rem;
+            background: #17212b;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+        .green {
+            color: #9bffb0;
+        }
+        .red {
+            color: #ff9494;
+        }
+        .asset-holdings {
+            text-align: right;
+            min-width: 130px;
+        }
+        .holding-qty {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 3px black;
+        }
+        .holding-value {
+            font-size: 0.85rem;
+            color: #b6cde3;
+        }
+        .trade-buttons {
+            display: flex;
+            gap: 6px;
+            margin-left: 12px;
+        }
+        .trade-btn {
+            background: #314b6b;
+            border: none;
+            color: white;
+            font-weight: 800;
+            font-size: 1.3rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #172433, 0 6px 10px black;
+            transition: all 0.07s;
+            border: 1px solid #6b8fc0;
+        }
+        .trade-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #172433;
+        }
+        .buy-btn {
+            background: #287556;
+        }
+        .sell-btn {
+            background: #a54f4f;
+        }
+        .trade-btn.disabled {
+            opacity: 0.35;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+        .control-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f1929c9;
+            padding: 18px 20px;
+            border-radius: 70px;
+            margin: 20px 0 10px;
+            border: 1px solid #526f95;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .vol-label {
+            color: #bad2ff;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .update-btn {
+            background: #38658f;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1d3145, 0 6px 12px black;
+            transition: 0.07s;
+            border: 1px solid #94b7e2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .update-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 1px 0 #1d3145;
+        }
+        .reset-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 18px;
+        }
+        .reset-btn {
+            background: #363c4b;
+            border: none;
+            color: #f0dbb4;
+            padding: 8px 32px;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #212635;
+            transition: 0.07s;
+            border: 1px solid #7f8fa3;
+        }
+        .reset-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .footer-note {
+            color: #6082b0;
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.9rem;
+            border-top: 1px dashed #2f4464;
+            padding-top: 14px;
+        }
     </style>
 </head>
 <body>
-    <h1>Tower Defense: Levels</h1>
-    <p>Money: $<span id="money">100</span> | Level: <span id="level">1</span></p>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const moneyEl = document.getElementById('money');
-        const levelEl = document.getElementById('level');
+<div class="sim-card">
+    <div class="header">
+        <div class="logo">
+            <h1>¢1 · WIZARD</h1>
+            <span>real prices · fake money</span>
+        </div>
+        <div class="cash-panel" id="cashPanel">
+            <div class="cash-label">your fake cash</div>
+            <div class="cash-amount" id="cashDisplay">$1.00</div>
+        </div>
+    </div>
 
-        let money = 100;
-        let currentLevel = 0;
-        let enemies = [];
-        let towers = [];
-        let projectiles = [];
+    <!-- market assets injected via js -->
+    <div id="marketContainer" class="market-grid"></div>
 
-        // Define Levels
-        const levels = [
-            { path: [{x: 0, y: 300}, {x: 800, y: 300}], enemyHealth: 10, speed: 2 },
-            { path: [{x: 0, y: 100}, {x: 700, y: 100}, {x: 700, y: 500}, {x: 0, y: 500}], enemyHealth: 20, speed: 2.5 }
+    <div class="control-bar">
+        <span class="vol-label">⚡ market moves every click</span>
+        <button class="update-btn" id="refreshPricesBtn">📈 SHAKE MARKET</button>
+    </div>
+
+    <div class="reset-area">
+        <button class="reset-btn" id="resetBtn">⟲ start over ($1)</button>
+    </div>
+    <div class="footer-note">
+        ⚠️ fake paper trading · prices based on real assets (but random walk)
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- real inspired assets ----------
+        const INITIAL_ASSETS = [
+            { id: 'btc', name: 'Bitcoin', icon: '₿', basePrice: 61250, volatility: 0.06, price: 61250, holdings: 0, color: 'price-btc' },
+            { id: 'eth', name: 'Ethereum', icon: 'Ξ', basePrice: 2950, volatility: 0.07, price: 2950, holdings: 0, color: 'price-eth' },
+            { id: 'aapl', name: 'Apple', icon: '📱', basePrice: 175.4, volatility: 0.025, price: 175.4, holdings: 0, color: 'price-aapl' },
+            { id: 'gold', name: 'Gold', icon: '🪙', basePrice: 2030.0, volatility: 0.015, price: 2030.0, holdings: 0, color: 'price-gld' }
         ];
 
-        class Enemy {
-            constructor(levelData) {
-                this.path = levelData.path;
-                this.x = this.path[0].x;
-                this.y = this.path[0].y;
-                this.pathIndex = 0;
-                this.speed = levelData.speed;
-                this.health = levelData.enemyHealth;
-                this.maxHealth = levelData.enemyHealth;
-            }
-            update() {
-                let target = this.path[this.pathIndex + 1];
-                if (target) {
-                    let dx = target.x - this.x;
-                    let dy = target.y - this.y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < this.speed) {
-                        this.pathIndex++;
-                    } else {
-                        this.x += (dx / dist) * this.speed;
-                        this.y += (dy / dist) * this.speed;
-                    }
-                }
-            }
-            draw() {
-                ctx.fillStyle = 'red';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
-                ctx.fill();
-                // Health bar
-                ctx.fillStyle = 'black';
-                ctx.fillRect(this.x-10, this.y-15, 20, 4);
-                ctx.fillStyle = 'green';
-                ctx.fillRect(this.x-10, this.y-15, 20 * (this.health/this.maxHealth), 4);
-            }
+        // deep copy working array
+        let assets = JSON.parse(JSON.stringify(INITIAL_ASSETS));
+
+        // cash starts with 1 dollar
+        let cash = 1.00;    // one fake dollar
+
+        // DOM elements
+        const marketContainer = document.getElementById('marketContainer');
+        const cashDisplay = document.getElementById('cashDisplay');
+        const refreshBtn = document.getElementById('refreshPricesBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // helper: format money
+        function formatMoney(value) {
+            return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        class Tower {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.range = 150;
-                this.cooldown = 0;
-            }
-            draw() {
-                ctx.fillStyle = 'cyan';
-                ctx.fillRect(this.x-15, this.y-15, 30, 30);
-                // Range circle
-                ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            update() {
-                if (this.cooldown > 0) this.cooldown--;
-                if (this.cooldown === 0) {
-                    // Find target
-                    let target = enemies.find(e => Math.hypot(e.x - this.x, e.y - this.y) < this.range);
-                    if (target) {
-                        projectiles.push({x: this.x, y: this.y, target: target, speed: 5});
-                        this.cooldown = 30; // Frames between shots
-                    }
-                }
-            }
+        // update total cash view
+        function updateCashUI() {
+            cashDisplay.innerHTML = `$${formatMoney(cash)}<small> USD</small>`;
         }
 
-        // Click to build
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            if (money >= 50) {
-                towers.push(new Tower(x, y));
-                money -= 50;
-                moneyEl.innerText = money;
+        // get current total portfolio value (cash + holdings market value)
+        function getTotalValue() {
+            let holdingsValue = 0;
+            assets.forEach(asset => {
+                holdingsValue += asset.holdings * asset.price;
+            });
+            return cash + holdingsValue;
+        }
+
+        // render all rows from assets[]
+        function renderMarket() {
+            let html = '';
+            assets.forEach(asset => {
+                const priceClass = asset.color || '';
+                const changeSymbol = asset.prevPrice ? (asset.price >= asset.prevPrice ? '▲' : '▼') : ' ';
+                const changeClass = asset.prevPrice ? (asset.price >= asset.prevPrice ? 'green' : 'red') : '';
+                const changePercent = asset.prevPrice ? ((asset.price - asset.prevPrice) / asset.prevPrice * 100).toFixed(2) : '0.00';
+                const changeSign = asset.price >= asset.prevPrice ? '+' : '';
+
+                const holdingsValue = asset.holdings * asset.price;
+                // disable sell if holdings <= 0, disable buy if cash < price
+                const buyDisabled = cash < asset.price;
+                const sellDisabled = asset.holdings <= 0;
+
+                html += `
+                    <div class="asset-row" data-id="${asset.id}">
+                        <div class="asset-icon">${asset.icon}</div>
+                        <div class="asset-info">
+                            <div class="asset-name">${asset.name}</div>
+                            <div class="asset-price ${priceClass}">
+                                $${asset.price.toFixed(2)}
+                                <span class="price-change ${changeClass}">${changeSign}${changePercent}% ${changeSymbol}</span>
+                            </div>
+                        </div>
+                        <div class="asset-holdings">
+                            <div class="holding-qty">${asset.holdings} <span style="font-size:0.8rem;">units</span></div>
+                            <div class="holding-value">$${formatMoney(holdingsValue)}</div>
+                        </div>
+                        <div class="trade-buttons">
+                            <button class="trade-btn buy-btn ${buyDisabled ? 'disabled' : ''}" data-action="buy" data-id="${asset.id}">+</button>
+                            <button class="trade-btn sell-btn ${sellDisabled ? 'disabled' : ''}" data-action="sell" data-id="${asset.id}">−</button>
+                        </div>
+                    </div>
+                `;
+            });
+            marketContainer.innerHTML = html;
+        }
+
+        // random walk – update prices (volatility around base, keep realistic)
+        function shakePrices() {
+            assets.forEach(asset => {
+                // store previous price for change indicator
+                asset.prevPrice = asset.price;
+
+                // random walk with lognormal-ish vibe
+                const move = (Math.random() - 0.48) * asset.volatility * asset.price; // tiny drift neutral
+                let newPrice = asset.price + move;
+                // keep price > 0.01
+                if (newPrice < 0.01) newPrice = 0.01;
+                // avoid crazy deviation from base? but free market style — keep within 5x ~ 0.2x base
+                const maxAllowed = asset.basePrice * 8;
+                const minAllowed = asset.basePrice * 0.12;
+                if (newPrice > maxAllowed) newPrice = maxAllowed * 0.9 + asset.basePrice * 0.1;
+                if (newPrice < minAllowed) newPrice = minAllowed * 1.2;
+
+                asset.price = Math.round(newPrice * 100) / 100;
+            });
+
+            renderMarket();
+            updateCashUI(); // cash unchanged but rerender
+        }
+
+        // handle buy/sell
+        function handleTrade(assetId, action) {
+            const asset = assets.find(a => a.id === assetId);
+            if (!asset) return;
+
+            if (action === 'buy') {
+                if (cash >= asset.price) {
+                    cash -= asset.price;
+                    asset.holdings += 1;
+                } else {
+                    alert(`😬 need $${asset.price.toFixed(2)} to buy 1 ${asset.name} – you have $${cash.toFixed(2)}`);
+                    return;
+                }
+            } else if (action === 'sell') {
+                if (asset.holdings >= 1) {
+                    asset.holdings -= 1;
+                    cash += asset.price;
+                } else {
+                    alert(`you have zero ${asset.name} to sell`);
+                    return;
+                }
+            }
+
+            // update previous price for arrow? keep as is, just refresh
+            renderMarket();
+            updateCashUI();
+        }
+
+        // reset everything to $1 and zero holdings, base prices
+        function resetGame() {
+            cash = 1.00;
+            assets = INITIAL_ASSETS.map(a => ({
+                ...a,
+                price: a.basePrice,
+                holdings: 0,
+                prevPrice: a.basePrice   // avoid big change indicator after reset
+            }));
+            renderMarket();
+            updateCashUI();
+        }
+
+        // attach event listeners to dynamically created buttons
+        function attachTradeEvents() {
+            document.querySelectorAll('.trade-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (btn.classList.contains('disabled')) return;
+
+                    const action = btn.dataset.action; // 'buy' or 'sell'
+                    const assetId = btn.dataset.id;
+                    handleTrade(assetId, action);
+                });
+            });
+        }
+
+        // when we re-render, we must re-attach
+        const originalRender = renderMarket;
+        renderMarket = function() {
+            originalRender();
+            attachTradeEvents();
+        };
+
+        // refresh (shake) button
+        refreshBtn.addEventListener('click', () => {
+            shakePrices();
+        });
+
+        // reset button
+        resetBtn.addEventListener('click', () => {
+            resetGame();
+        });
+
+        // initial render
+        (function init() {
+            // set prevPrice so first render no big changes
+            assets.forEach(a => a.prevPrice = a.basePrice);
+            renderMarket();
+            updateCashUI();
+        })();
+
+        // optional: press 'shake' with keyboard 's' for fun
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                shakePrices();
             }
         });
 
-        // Spawn Wave
-        function spawnWave() {
-            for(let i=0; i<10; i++) {
-                setTimeout(() => {
-                    enemies.push(new Enemy(levels[currentLevel]));
-                }, i * 1000);
-            }
-        }
+        // also track total portfolio (hidden but can be seen in holdings sum)
+        // Not necessary but we can add a tiny extra stat if you want (but clean)
 
-        // Game Loop
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Path
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 30;
-            ctx.beginPath();
-            ctx.moveTo(levels[currentLevel].path[0].x, levels[currentLevel].path[0].y);
-            levels[currentLevel].path.forEach(p => ctx.lineTo(p.x, p.y));
-            ctx.stroke();
-
-            towers.forEach(t => { t.update(); t.draw(); });
-            
-            projectiles.forEach((p, i) => {
-                let dx = p.target.x - p.x;
-                let dy = p.target.y - p.y;
-                let dist = Math.hypot(dx, dy);
-                if (dist < p.speed) {
-                    p.target.health -= 5;
-                    projectiles.splice(i, 1);
-                } else {
-                    p.x += (dx / dist) * p.speed;
-                    p.y += (dy / dist) * p.speed;
-                    ctx.fillStyle = 'yellow';
-                    ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
-                }
-            });
-
-            enemies.forEach((enemy, index) => {
-                enemy.update();
-                enemy.draw();
-                if (enemy.health <= 0) {
-                    enemies.splice(index, 1);
-                    money += 10;
-                    moneyEl.innerText = money;
-                }
-                if (enemy.pathIndex >= levels[currentLevel].path.length - 1) {
-                    // Enemy reached end - simple loss condition
-                    enemies.splice(index, 1);
-                }
-            });
-
-            if (enemies.length === 0) {
-                // Next level logic could go here
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        spawnWave();
-        gameLoop();
-    </script>
+        // one extra: double tap protection, but fine
+    })();
+</script>
 </body>
 </html>
