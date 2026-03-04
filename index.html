@@ -154,9 +154,9 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 
 .empty{background:var(--paper);border:1px solid var(--paper3);padding:16px;text-align:center;font-size:.74rem;color:var(--ink4);line-height:1.7;}
 
-/* ═══════════════════════════════════════════
-   FULL-SCREEN ASSET DETAIL
-═══════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   FULL-SCREEN ASSET VIEW
+══════════════════════════════════════ */
 #screen{
   position:fixed;inset:0;z-index:500;
   background:var(--ink);color:var(--paper);
@@ -513,11 +513,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — MASSIVE CRYPTO SECTION (FILLS THE PAGE)
+   ASSET DEFINITIONS — 80+ CRYPTOS & COMPANIES
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
-    // ========== TIER 1: BLUE CHIP CRYPTOS (MARKET CAP KINGS) ==========
+    // ─── TOP 10 CRYPTOS (MARKET CAP LEADERS) ───
     {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
     {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
     {t:'USDT', n:'Tether', i:'💵', b:1.00, v:.001, band:'#26a17b', cat:'Stablecoin', about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
@@ -528,31 +528,19 @@ const DEFS = {
     {t:'ADA', n:'Cardano', i:'₳', b:0.65, v:.047, band:'#0033ad', cat:'Cryptocurrency', about:'Research-driven blockchain. Every feature is peer-reviewed by academics before launch.'},
     {t:'AVAX', n:'Avalanche', i:'🔺', b:38, v:.048, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain confirming transactions in under 2 seconds. Popular for DeFi apps.'},
     {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.18, v:.065, band:'#c3a634', cat:'Meme Coin', about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
-    {t:'TRX', n:'Tron', i:'🌞', b:0.13, v:.035, band:'#ef0027', cat:'Cryptocurrency', about:'High-throughput blockchain focused on entertainment and content sharing.'},
-    {t:'LINK', n:'Chainlink', i:'🔗', b:18, v:.044, band:'#375bd2', cat:'Oracle', about:'Connects blockchain smart contracts to real-world data like stock prices and weather. Most used oracle.'},
-    {t:'MATIC', n:'Polygon', i:'⬡', b:0.88, v:.052, band:'#8247e5', cat:'Cryptocurrency', about:'Makes Ethereum faster and much cheaper by processing transactions off the main chain.'},
-    {t:'DOT', n:'Polkadot', i:'⏣', b:9.20, v:.045, band:'#e6007a', cat:'Cryptocurrency', about:'Connects multiple blockchains into one unified network. Founded by one of Ethereum\'s co-founders.'},
-    {t:'LTC', n:'Litecoin', i:'⚡', b:84, v:.038, band:'#345d9d', cat:'Cryptocurrency', about:'Silver to Bitcoin\'s gold. Faster transactions and lower fees than BTC.'},
-    {t:'BCH', n:'Bitcoin Cash', i:'₿', b:385, v:.041, band:'#0ac18e', cat:'Cryptocurrency', about:'Bitcoin fork with larger blocks for faster, cheaper transactions.'},
-    {t:'SHIB', n:'Shiba Inu', i:'🦊', b:0.000025, v:.080, band:'#e02121', cat:'Meme Coin', about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
     
-    // ========== TIER 2: LAYER 1 & SMART CONTRACT PLATFORMS ==========
+    // ─── LAYER 1 & SMART CONTRACT PLATFORMS ───
+    {t:'DOT', n:'Polkadot', i:'⏣', b:9.20, v:.045, band:'#e6007a', cat:'Cryptocurrency', about:'Connects multiple blockchains into one unified network. Founded by one of Ethereum\'s co-founders.'},
+    {t:'MATIC', n:'Polygon', i:'⬡', b:0.88, v:.052, band:'#8247e5', cat:'Cryptocurrency', about:'Makes Ethereum faster and much cheaper by processing transactions off the main chain.'},
+    {t:'ATOM', n:'Cosmos', i:'⚛️', b:11.20, v:.043, band:'#5064fb', cat:'Cryptocurrency', about:'Internet of Blockchains. Allows different chains to communicate and transfer assets.'},
     {t:'NEAR', n:'Near Protocol', i:'🌟', b:7.50, v:.055, band:'#000000', cat:'Cryptocurrency', about:'Developer-friendly sharded blockchain. Uses human-readable account names instead of addresses.'},
     {t:'FTM', n:'Fantom', i:'👻', b:0.85, v:.058, band:'#1969ff', cat:'Cryptocurrency', about:'High-performance, scalable smart contract platform. Finality in 1-2 seconds.'},
     {t:'ALGO', n:'Algorand', i:'🔷', b:0.24, v:.049, band:'#000000', cat:'Cryptocurrency', about:'Pure proof-of-stake blockchain. Transactions finalize instantly with no forking.'},
     {t:'ICP', n:'Internet Computer', i:'🌐', b:12.50, v:.062, band:'#3b00b9', cat:'Cryptocurrency', about:'Builds web-speed blockchain that can run web apps directly on the network.'},
     {t:'APT', n:'Aptos', i:'⏺️', b:15.80, v:.067, band:'#000000', cat:'Cryptocurrency', about:'Layer 1 blockchain built by former Meta employees. Uses Move programming language.'},
     {t:'SUI', n:'Sui', i:'🌊', b:1.95, v:.071, band:'#4ca2ff', cat:'Cryptocurrency', about:'High-throughput L1 with horizontal scaling. Instant settlement for gaming and DeFi.'},
-    {t:'ATOM', n:'Cosmos', i:'⚛️', b:11.20, v:.043, band:'#5064fb', cat:'Cryptocurrency', about:'Internet of Blockchains. Allows different chains to communicate and transfer assets.'},
-    {t:'VET', n:'VeChain', i:'Ⓥ', b:0.038, v:.054, band:'#4bbd00', cat:'Enterprise', about:'Blockchain for supply chain logistics. Tracks real-world products from factory to store.'},
-    {t:'THETA', n:'Theta Network', i:'🎥', b:2.30, v:.059, band:'#2ab8e6', cat:'Media', about:'Decentralized video streaming. Users share bandwidth and get rewards.'},
-    {t:'XLM', n:'Stellar', i:'⭐', b:0.12, v:.036, band:'#000000', cat:'Cryptocurrency', about:'Fast, low-cost payments for cross-border transactions. Focus on financial inclusion.'},
-    {t:'EGLD', n:'MultiversX', i:'🌌', b:58, v:.063, band:'#23b4c8', cat:'Cryptocurrency', about:'Highly scalable blockchain with adaptive state sharding. Formerly Elrond.'},
-    {t:'HBAR', n:'Hedera', i:'🌿', b:0.11, v:.047, band:'#000000', cat:'Enterprise', about:'Hashgraph consensus. Fast, fair, and secure. Governed by Google, IBM, Boeing.'},
-    {t:'KAS', n:'Kaspa', i:'⏣', b:0.16, v:.072, band:'#33cc99', cat:'Cryptocurrency', about:'BlockDAG architecture. Multiple blocks per second with instant confirmation.'},
-    {t:'TON', n:'Toncoin', i:'📱', b:6.80, v:.058, band:'#0088cc', cat:'Cryptocurrency', about:'Telegram-associated blockchain. Fast payments and mini-apps within Telegram.'},
     
-    // ========== TIER 3: DEFI HEAVYWEIGHTS ==========
+    // ─── DEFI TOKENS ───
     {t:'UNI', n:'Uniswap', i:'🦄', b:11.50, v:.051, band:'#ff007a', cat:'DeFi', about:'Largest decentralized exchange. UNI holders govern the protocol and earn trading fees.'},
     {t:'AAVE', n:'Aave', i:'👻', b:140, v:.059, band:'#2ebac6', cat:'DeFi', about:'Lending and borrowing protocol. Users can deposit to earn interest or borrow assets.'},
     {t:'CRV', n:'Curve', i:'📈', b:0.79, v:.063, band:'#406cad', cat:'DeFi', about:'Stablecoin DEX optimized for low-slippage trades between pegged assets.'},
@@ -561,87 +549,58 @@ const DEFS = {
     {t:'LDO', n:'Lido', i:'🥩', b:2.85, v:.068, band:'#00a3ff', cat:'DeFi', about:'Largest liquid staking protocol. Stake ETH and receive stETH in return.'},
     {t:'RUNE', n:'THORChain', i:'⚡', b:6.30, v:.072, band:'#33cc99', cat:'DeFi', about:'Cross-chain DEX. Swap native BTC, ETH, and other assets without wrapping.'},
     {t:'CAKE', n:'PancakeSwap', i:'🥞', b:2.95, v:.064, band:'#d1884f', cat:'DeFi', about:'Leading DEX on BNB Chain. Known for low fees and yield farming opportunities.'},
-    {t:'SNX', n:'Synthetix', i:'⚙️', b:3.45, v:.066, band:'#00d4ff', cat:'DeFi', about:'Derivatives protocol. Create synthetic assets tracking real-world assets.'},
-    {t:'CVX', n:'Convex', i:'🔷', b:4.80, v:.069, band:'#4a6fa5', cat:'DeFi', about:'Boosts yields for Curve liquidity providers. Dominant in Curve ecosystem.'},
-    {t:'FXS', n:'Frax Share', i:'🏦', b:8.20, v:.061, band:'#000000', cat:'DeFi', about:'Fractional-algorithmic stablecoin protocol. FRAX is partially backed, partially algorithmic.'},
-    {t:'YFI', n:'Yearn Finance', i:'🧑‍🌾', b:8250, v:.073, band:'#006ae3', cat:'DeFi', about:'Yield optimizer. Automatically moves funds to highest-yielding strategies.'},
-    {t:'BAL', n:'Balancer', i:'⚖️', b:4.15, v:.065, band:'#1e1e1e', cat:'DeFi', about:'Automated market maker with customizable pools of up to 8 tokens.'},
-    {t:'1INCH', n:'1inch', i:'🔁', b:0.62, v:.062, band:'#1f2b5c', cat:'DeFi', about:'DEX aggregator. Finds best prices across multiple decentralized exchanges.'},
-    {t:'DYDX', n:'dYdX', i:'🔄', b:2.75, v:.071, band:'#6966ff', cat:'DeFi', about:'Decentralized exchange for perpetual futures. Built on StarkWare L2.'},
     
-    // ========== TIER 4: GAMING & METAVERSE ==========
+    // ─── ORACLES & INFRASTRUCTURE ───
+    {t:'LINK', n:'Chainlink', i:'🔗', b:18, v:.044, band:'#375bd2', cat:'Oracle', about:'Connects blockchain smart contracts to real-world data like stock prices and weather. Most used oracle.'},
+    {t:'GRT', n:'The Graph', i:'📊', b:0.34, v:.061, band:'#674b9c', cat:'Infrastructure', about:'Indexing protocol for querying blockchain data. Like Google for Web3.'},
+    {t:'AR', n:'Arweave', i:'💾', b:32, v:.069, band:'#222326', cat:'Storage', about:'Permanent data storage. Pay once, store forever. Used for NFT metadata and web apps.'},
+    {t:'FIL', n:'Filecoin', i:'📁', b:8.40, v:.053, band:'#0090ff', cat:'Storage', about:'Decentralized storage network. Users rent out hard drive space for FIL tokens.'},
+    
+    // ─── GAMING & METAVERSE ───
     {t:'AXS', n:'Axie Infinity', i:'⚔️', b:10.50, v:.076, band:'#0055d4', cat:'Gaming', about:'Play-to-earn gaming pioneer. Breed, raise, and battle fantasy creatures called Axies.'},
     {t:'SAND', n:'The Sandbox', i:'🏖️', b:0.65, v:.073, band:'#00bcd4', cat:'Metaverse', about:'Virtual world where players build, own, and monetize gaming experiences.'},
     {t:'MANA', n:'Decentraland', i:'🏛️', b:0.71, v:.070, band:'#ff2d55', cat:'Metaverse', about:'Virtual reality platform where users buy land and interact with digital assets.'},
     {t:'GALA', n:'Gala Games', i:'🎮', b:0.045, v:.082, band:'#0b1a30', cat:'Gaming', about:'Web3 gaming ecosystem with multiple play-to-earn titles. Focus on player ownership.'},
     {t:'IMX', n:'Immutable X', i:'⚡', b:2.80, v:.066, band:'#2081e2', cat:'Gaming', about:'Layer 2 for NFTs on Ethereum. Zero gas fees for minting and trading.'},
-    {t:'ENJ', n:'Enjin Coin', i:'🔷', b:0.38, v:.064, band:'#7866d5', cat:'Gaming', about:'Blockchain for gaming. Create, manage, and trade virtual goods and NFTs.'},
-    {t:'ILV', n:'Illuvium', i:'🦎', b:115, v:.079, band:'#2a2a44', cat:'Gaming', about:'AAA open-world RPG built on Immutable X. Collect and battle Illuvials.'},
-    {t:'YGG', n:'Yield Guild Games', i:'🏆', b:0.88, v:.077, band:'#f9a01b', cat:'Gaming', about:'Gaming guild. Scholars play games and share earnings with the guild.'},
-    {t:'MC', n:'Merit Circle', i:'⭕', b:2.45, v:.075, band:'#2b2b2b', cat:'Gaming', about:'DAO investing in play-to-earn gaming. Funds scholars and develops games.'},
-    {t:'PRIME', n:'Echelon Prime', i:'🎲', b:18.50, v:.081, band:'#00a6ff', cat:'Gaming', about:'Gaming ecosystem for Parallel TCG. AI-powered card game with deep strategy.'},
     
-    // ========== TIER 5: ORACLES & INFRASTRUCTURE ==========
-    {t:'GRT', n:'The Graph', i:'📊', b:0.34, v:.061, band:'#674b9c', cat:'Infrastructure', about:'Indexing protocol for querying blockchain data. Like Google for Web3.'},
-    {t:'AR', n:'Arweave', i:'💾', b:32, v:.069, band:'#222326', cat:'Storage', about:'Permanent data storage. Pay once, store forever. Used for NFT metadata and web apps.'},
-    {t:'FIL', n:'Filecoin', i:'📁', b:8.40, v:.053, band:'#0090ff', cat:'Storage', about:'Decentralized storage network. Users rent out hard drive space for FIL tokens.'},
-    {t:'STORJ', n:'Storj', i:'☁️', b:0.75, v:.058, band:'#2683ff', cat:'Storage', about:'Decentralized cloud storage. Encrypt and distribute files globally.'},
-    {t:'ANKR', n:'Ankr', i:'⛓️', b:0.045, v:.063, band:'#3182f5', cat:'Infrastructure', about:'Web3 infrastructure. Provides RPC nodes and staking services.'},
-    {t:'API3', n:'API3', i:'🔌', b:3.20, v:.067, band:'#0f1010', cat:'Oracle', about:'First-party oracles. APIs connect directly to blockchain without middlemen.'},
-    {t:'BAND', n:'Band Protocol', i:'🎭', b:2.15, v:.059, band:'#4f45e5', cat:'Oracle', about:'Cross-chain data oracle. Aggregates real-world data for smart contracts.'},
-    {t:'LPT', n:'Livepeer', i:'🎥', b:17.50, v:.063, band:'#00a651', cat:'Web3', about:'Decentralized video streaming network. Users share video transcoding power.'},
-    
-    // ========== TIER 6: MEME COINS & COMMUNITY ==========
+    // ─── MEME COINS & COMMUNITY ───
+    {t:'SHIB', n:'Shiba Inu', i:'🦊', b:0.000025, v:.080, band:'#e02121', cat:'Meme Coin', about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
     {t:'PEPE', n:'Pepe', i:'🐸', b:0.000008, v:.095, band:'#00a36c', cat:'Meme Coin', about:'Frog-themed meme coin. Known for extreme volatility and passionate community.'},
     {t:'WIF', n:'DogWifHat', i:'🧢', b:2.95, v:.088, band:'#f5a97f', cat:'Meme Coin', about:'Dog with a hat. Solana-based meme coin that gained massive community following.'},
     {t:'BONK', n:'Bonk', i:'🐕', b:0.00003, v:.091, band:'#ff9900', cat:'Meme Coin', about:'First dog-themed coin on Solana. Airdropped to Solana community.'},
     {t:'FLOKI', n:'Floki Inu', i:'🐶', b:0.00025, v:.086, band:'#cf5c5c', cat:'Meme Coin', about:'Viking dog-themed crypto named after Elon Musk\'s Shiba Inu.'},
-    {t:'MEME', n:'Memecoin', i:'😭', b:0.028, v:.089, band:'#f9a95d', cat:'Meme Coin', about:'Community-driven meme coin with NFT integrations.'},
-    {t:'COQ', n:'Coq Inu', i:'🐓', b:0.0000006, v:.094, band:'#e1523d', cat:'Meme Coin', about:'Avalanche-based meme coin. Fren of the Avax community.'},
-    {t:'MYRO', n:'Myro', i:'🐶', b:0.38, v:.087, band:'#5e2e53', cat:'Meme Coin', about:'Solana dog meme coin named after Solana co-founder\'s dog.'},
-    {t:'SLERF', n:'Slerf', i:'🦥', b:0.38, v:.092, band:'#43b3ae', cat:'Meme Coin', about:'Sloth-themed meme coin. Famous for burning millions in presale.'},
-    {t:'BOME', n:'Book of Meme', i:'📖', b:0.013, v:.090, band:'#d4af37', cat:'Meme Coin', about:'Meme coin combining memes, storage, and AI.'},
-    {t:'MEW', n:'MEW', i:'🐱', b:0.008, v:.088, band:'#ffcb2e', cat:'Meme Coin', about:'Cat-themed meme coin on Solana. MEW is the people\'s cat.'},
     
-    // ========== TIER 7: EXCHANGE TOKENS ==========
+    // ─── EXCHANGE & UTILITY TOKENS ───
     {t:'CRO', n:'Cronos', i:'🔴', b:0.13, v:.047, band:'#002d74', cat:'Exchange', about:'Crypto.com chain token. Powers the Cronos ecosystem and exchange.'},
     {t:'OKB', n:'OKB', i:'⭕', b:48, v:.042, band:'#0a0b0d', cat:'Exchange', about:'OKX exchange token. Used for fee discounts and governance.'},
     {t:'LEO', n:'LEO Token', i:'🦁', b:5.70, v:.036, band:'#ffcf40', cat:'Exchange', about:'Bitfinex exchange token. Used to reduce trading fees.'},
     {t:'KCS', n:'KuCoin Token', i:'💎', b:12.80, v:.041, band:'#0093e9', cat:'Exchange', about:'KuCoin exchange token. Holders get trading fee discounts and bonuses.'},
-    {t:'HT', n:'Huobi Token', i:'🔥', b:2.85, v:.044, band:'#0b1e33', cat:'Exchange', about:'Huobi exchange token. Benefits include fee discounts and voting rights.'},
-    {t:'BGB', n:'Bitget Token', i:'🅱️', b:1.15, v:.048, band:'#0a0e1c', cat:'Exchange', about:'Bitget exchange token. Used for fee discounts and launchpad access.'},
     
-    // ========== TIER 8: PRIVACY COINS ==========
+    // ─── PRIVACY COINS ───
     {t:'XMR', n:'Monero', i:'💎', b:168, v:.054, band:'#ff6600', cat:'Privacy', about:'Private, untraceable cryptocurrency. Transactions are completely anonymous.'},
     {t:'ZEC', n:'Zcash', i:'🛡️', b:31.50, v:.059, band:'#f4b728', cat:'Privacy', about:'Privacy-protecting coin. Users can choose between transparent and shielded transactions.'},
     {t:'DASH', n:'Dash', i:'🏦', b:31.50, v:.049, band:'#008ce7', cat:'Privacy', about:'Digital cash with instant transaction confirmation and optional privacy features.'},
-    {t:'ROSE', n:'Oasis', i:'🌹', b:0.15, v:.062, band:'#1a9cd7', cat:'Privacy', about:'Privacy-focused blockchain. Supports confidential smart contracts.'},
-    {t:'SCRT', n:'Secret', i:'🤫', b:0.42, v:.058, band:'#1b1b1b', cat:'Privacy', about:'Privacy-preserving smart contracts. Encrypted inputs and outputs.'},
     
-    // ========== TIER 9: AI & BIG DATA ==========
+    // ─── AI & BIG DATA ───
     {t:'FET', n:'Fetch.ai', i:'🤖', b:2.35, v:.077, band:'#1d2c3c', cat:'AI', about:'Decentralized machine learning platform for autonomous agents and AI services.'},
     {t:'AGIX', n:'SingularityNET', i:'🧠', b:0.89, v:.079, band:'#4a148c', cat:'AI', about:'Decentralized AI marketplace. Create, share, and monetize AI services.'},
     {t:'OCEAN', n:'Ocean Protocol', i:'🌊', b:0.97, v:.068, band:'#1b76de', cat:'Data', about:'Decentralized data exchange protocol. Unlock data for AI and sharing.'},
     {t:'RNDR', n:'Render', i:'🎨', b:7.80, v:.072, band:'#00a0d1', cat:'AI/GPU', about:'Distributed GPU rendering network. Connects artists with idle GPU power.'},
-    {t:'TAO', n:'Bittensor', i:'🧬', b:475, v:.083, band:'#000000', cat:'AI', about:'Decentralized machine learning network. Incentivizes AI model training.'},
-    {t:'AKT', n:'Akash', i:'☁️', b:5.60, v:.069, band:'#ed4c2b', cat:'Cloud', about:'Decentralized cloud marketplace. Cheaper cloud computing using idle resources.'},
     
-    // ========== TIER 10: LAYER 2 SOLUTIONS ==========
+    // ─── LAYER 2 SOLUTIONS ───
     {t:'OP', n:'Optimism', i:'⛓️', b:3.85, v:.064, band:'#ff0420', cat:'Layer 2', about:'Ethereum L2 scaling solution. Uses optimistic rollups for faster, cheaper txs.'},
     {t:'ARB', n:'Arbitrum', i:'🔄', b:2.15, v:.062, band:'#28a0f0', cat:'Layer 2', about:'Leading Ethereum L2. Offers instant transaction finality and low fees.'},
     {t:'STRK', n:'StarkNet', i:'⚡', b:2.45, v:.069, band:'#08a6ff', cat:'Layer 2', about:'ZK-rollup L2 for Ethereum. Higher security through validity proofs.'},
     {t:'METIS', n:'Metis', i:'🏔️', b:85, v:.073, band:'#00c897', cat:'Layer 2', about:'Decentralized L2 rollup. Focus on scalability and dApp migration.'},
-    {t:'BOBA', n:'Boba Network', i:'🧋', b:0.45, v:.066, band:'#c58a47', cat:'Layer 2', about:'Hybrid L2 with hybrid compute. Off-chain compute for dApps.'},
-    {t:'SKL', n:'SKALE', i:'⚙️', b:0.09, v:.061, band:'#29b6af', cat:'Layer 2', about:'Elastic sidechains. Developers rent dedicated chains for their apps.'},
     
-    // ========== TIER 11: WEB3 & SOCIAL ==========
+    // ─── WEB3 & SOCIAL ───
     {t:'ENS', n:'Ethereum Name Service', i:'📛', b:28, v:.058, band:'#276fba', cat:'Web3', about:'Decentralized domain names. Replace ETH addresses with human-readable names.'},
+    {t:'LPT', n:'Livepeer', i:'🎥', b:17.50, v:.063, band:'#00a651', cat:'Web3', about:'Decentralized video streaming network. Users share video transcoding power.'},
     {t:'AUDIO', n:'Audius', i:'🎵', b:0.29, v:.067, band:'#e456ff', cat:'Web3', about:'Decentralized music streaming. Artists upload and control their music.'},
-    {t:'HNT', n:'Helium', i:'📡', b:6.50, v:.059, band:'#4747ff', cat:'IoT', about:'Decentralized wireless network. Hotspots provide coverage and earn HNT.'},
-    {t:'MOB', n:'MobileCoin', i:'📱', b:0.78, v:.057, band:'#1a73e8', cat:'Payments', about:'Fast, private mobile payments. Integrated with Signal messenger.'},
-    {t:'GAL', n:'Galxe', i:'🌟', b:3.25, v:.064, band:'#1a4cff', cat:'Web3', about:'Web3 credential data network. Build and manage digital identities.'},
     
-    // ========== TIER 12: CRYPTO MINING COMPANIES ==========
+    // ─── CRYPTO COMPANIES (PUBLICLY TRADED) ───
+    {t:'COIN', n:'Coinbase', i:'🪙', b:225, v:.038, band:'#1652f0', cat:'Exchange', about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
+    {t:'MSTR', n:'MicroStrategy', i:'📈', b:1480, v:.044, band:'#ff6b35', cat:'Business Intelligence', about:'Holds over 200,000 BTC on its balance sheet. Acts as a Bitcoin proxy stock.'},
     {t:'MARA', n:'Marathon Digital', i:'⛏️', b:23.50, v:.068, band:'#00a1e4', cat:'Mining', about:'One of the largest Bitcoin mining companies in North America.'},
     {t:'RIOT', n:'Riot Platforms', i:'⚡', b:15.80, v:.071, band:'#f05b28', cat:'Mining', about:'Bitcoin mining company with massive mining facilities in Texas.'},
     {t:'CLSK', n:'CleanSpark', i:'🧹', b:16.20, v:.069, band:'#00b3b3', cat:'Mining', about:'Bitcoin mining using predominantly low-carbon and renewable energy.'},
@@ -653,61 +612,16 @@ const DEFS = {
     {t:'HIVE', n:'Hive Blockchain', i:'🐝', b:4.30, v:.073, band:'#ffcc00', cat:'Mining', about:'Green energy mining using hydro and solar power in Scandinavia.'},
     {t:'CAN', n:'Canaan', i:'📟', b:1.85, v:.065, band:'#e31b23', cat:'Hardware', about:'Manufactures Avalon miners. One of the oldest ASIC producers.'},
     {t:'SDIG', n:'Stronghold', i:'🏰', b:4.95, v:.081, band:'#8b4513', cat:'Mining', about:'Bitcoin mining with proprietary power generation assets in Pennsylvania.'},
-    {t:'ARBK', n:'Argo Blockchain', i:'⚓', b:2.15, v:.076, band:'#0f2350', cat:'Mining', about:'UK-based Bitcoin miner with facilities in Texas and Canada.'},
     
-    // ========== TIER 13: CRYPTO HOLDING COMPANIES ==========
-    {t:'MSTR', n:'MicroStrategy', i:'📈', b:1480, v:.044, band:'#ff6b35', cat:'Business Intelligence', about:'Holds over 200,000 BTC on its balance sheet. Acts as a Bitcoin proxy stock.'},
-    {t:'COIN', n:'Coinbase', i:'🪙', b:225, v:.038, band:'#1652f0', cat:'Exchange', about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
+    // ─── PAYMENT & FINTECH ───
+    {t:'PYPL', n:'PayPal', i:'💳', b:68, v:.019, band:'#003087', cat:'Fintech', about:'Digital payments giant now supporting crypto buying, selling, and transfers.'},
     {t:'SQ', n:'Block (Square)', i:'🔲', b:78, v:.023, band:'#00d4ff', cat:'Fintech', about:'Jack Dorsey\'s company. Building decentralized Bitcoin exchange TBD.'},
     {t:'HOOD', n:'Robinhood', i:'🍂', b:21.50, v:.032, band:'#00c805', cat:'Brokerage', about:'Commission-free trading platform with crypto trading and wallet features.'},
-    {t:'PYPL', n:'PayPal', i:'💳', b:68, v:.019, band:'#003087', cat:'Fintech', about:'Digital payments giant now supporting crypto buying, selling, and transfers.'},
     
-    // ========== TIER 14: DEFI 2.0 & LIQUID STAKING ==========
-    {t:'LIDO', n:'Lido DAO', i:'🥩', b:2.45, v:.067, band:'#00a3ff', cat:'DeFi', about:'Liquid staking for ETH, SOL, MATIC. Stake and receive tradable tokens.'},
-    {t:'RPL', n:'Rocket Pool', i:'🚀', b:32.50, v:.062, band:'#ff7100', cat:'DeFi', about:'Decentralized ETH staking pool. Run your own node or stake with others.'},
-    {t:'SWISE', n:'StakeWise', i:'🏦', b:0.18, v:.071, band:'#2a5c9a', cat:'DeFi', about:'Liquid staking with staked ETH derivatives and rewards.'},
-    {t:'FRAX', n:'Frax', i:'🏛️', b:1.00, v:.003, band:'#000000', cat:'Stablecoin', about:'Fractional-algorithmic stablecoin. Partially backed, partially algorithmic.'},
-    {t:'LQTY', n:'Liquity', i:'⚖️', b:1.25, v:.068, band:'#2b2b2b', cat:'DeFi', about:'Interest-free borrowing against ETH. Stability pool provides insurance.'},
-    {t:'ANGLE', n:'Angle', i:'📐', b:0.35, v:.070, band:'#2b7cd6', cat:'DeFi', about:'Overcollateralized stablecoin protocol. Borrow EURA against collateral.'},
-    
-    // ========== TIER 15: REAL WORLD ASSETS ==========
-    {t:'ONDO', n:'Ondo Finance', i:'🏦', b:1.05, v:.064, band:'#1a2b4c', cat:'RWA', about:'Tokenized real-world assets. Brings US Treasuries and bonds on-chain.'},
-    {t:'MPL', n:'Maple Finance', i:'🍁', b:25.80, v:.063, band:'#005f4e', cat:'Lending', about:'Institutional lending protocol. Undercollateralized loans for institutions.'},
-    {t:'GFI', n:'Goldfinch', i:'🌻', b:3.45, v:.069, band:'#f7b731', cat:'Lending', about:'Decentralized credit protocol. Lend to real-world businesses.'},
-    {t:'TRU', n:'TrueFi', i:'✅', b:0.14, v:.062, band:'#235789', cat:'Lending', about:'Uncollateralized lending. Credit scoring for DeFi borrowers.'},
-    {t:'CPOOL', n:'Clearpool', i:'🏊', b:0.32, v:.066, band:'#00b5e2', cat:'Lending', about:'Decentralized institutional lending. Single borrower pools.'},
-    
-    // ========== TIER 16: NFT FINANCE ==========
-    {t:'BLUR', n:'Blur', i:'🌀', b:0.68, v:.074, band:'#ff4d4d', cat:'NFT', about:'NFT marketplace and aggregator. Zero fees, rapid trading.'},
-    {t:'LOOKS', n:'LooksRare', i:'👀', b:0.12, v:.072, band:'#00aeef', cat:'NFT', about:'Community-first NFT marketplace. Rewards traders and stakers.'},
-    {t:'SUDO', n:'Sudoswap', i:'⚡', b:0.45, v:.076, band:'#8a2be2', cat:'NFT', about:'AMM for NFTs. Trade NFTs instantly with bonding curves.'},
-    {t:'NFTX', n:'NFTX', i:'📦', b:22.50, v:.068, band:'#1f2229', cat:'NFT', about:'NFT index funds. Buy floor NFTs through ERC-20 tokens.'},
-    
-    // ========== TIER 17: CROSS-CHAIN & INTEROPERABILITY ==========
-    {t:'AXL', n:'Axelar', i:'🌐', b:1.85, v:.065, band:'#4a7b9d', cat:'Interop', about:'Decentralized interoperability network. Connect multiple blockchains.'},
-    {t:'WORM', n:'Wormhole', i:'🐛', b:0.85, v:.067, band:'#7b2eda', cat:'Interop', about:'Cross-chain messaging protocol. Move assets between chains.'},
-    {t:'LAYER', n:'LayerZero', i:'🌍', b:3.20, v:.064, band:'#000000', cat:'Interop', about:'Omnichain interoperability protocol. Connect dApps across chains.'},
-    {t:'SYN', n:'Synapse', i:'🧠', b:0.78, v:.069, band:'#7b1fa2', cat:'Interop', about:'Cross-chain liquidity network. Swap assets between chains.'},
-    
-    // ========== TIER 18: DEPIN (DECENTRALIZED PHYSICAL INFRASTRUCTURE) ==========
-    {t:'HONEY', n:'Hivemapper', i:'🗺️', b:0.18, v:.071, band:'#f9b81b', cat:'DePIN', about:'Decentralized mapping. Drivers earn HONEY for recording dashcam footage.'},
-    {t:'DIMO', n:'DIMO', i:'🚗', b:0.28, v:.068, band:'#00b2a9', cat:'DePIN', about:'Connected vehicle data. Drivers earn for sharing telemetry data.'},
-    {t:'WIFI', n:'Wifi Map', i:'📶', b:0.45, v:.070, band:'#1e90ff', cat:'DePIN', about:'Decentralized WiFi sharing. Users earn for sharing hotspot access.'},
-    {t:'RENDER', n:'Render', i:'🎨', b:7.80, v:.072, band:'#00a0d1', cat:'DePIN', about:'Distributed GPU rendering. Artists pay RNDR for rendering power.'},
-    {t:'AKASH', n:'Akash', i:'☁️', b:5.60, v:.069, band:'#ed4c2b', cat:'DePIN', about:'Decentralized cloud marketplace. Cheaper cloud computing using idle resources.'},
-    
-    // ========== TIER 19: ZK & CRYPTOGRAPHY ==========
-    {t:'ZEC', n:'Zcash', i:'🛡️', b:31.50, v:.059, band:'#f4b728', cat:'Privacy', about:'Privacy-protecting coin. Users can choose between transparent and shielded transactions.'},
-    {t:'MINA', n:'Mina', i:'⚡', b:1.05, v:.058, band:'#e54857', cat:'ZK', about:'Lightweight blockchain. Constant size of 22KB, verifiable from phones.'},
-    {t:'ZEN', n:'Horizen', i:'🪙', b:11.80, v:.055, band:'#122b46', cat:'Privacy', about:'Privacy-focused blockchain with sidechain compatibility.'},
-    {t:'ZKF', n:'ZKFair', i:'⚖️', b:0.018, v:.073, band:'#2d5b9a', cat:'ZK', about:'Community-owned ZK L2. Fair launch with no VC allocation.'},
-    
-    // ========== TIER 20: MEME COINS PART 2 ==========
-    {t:'DOG', n:'DOG•GO•TO•THE•MOON', i:'🐕', b:0.008, v:.088, band:'#8b5a2b', cat:'Meme Coin', about:'Runestone meme coin. Ordinals-based Bitcoin meme.'},
-    {t:'PUPS', n:'Pups', i:'🐶', b:0.085, v:.089, band:'#6b4e3a', cat:'Meme Coin', about:'Bitcoin-based meme coin. Part of BRC-20 ecosystem.'},
-    {t:'MOG', n:'Mog Coin', i:'🐱', b:0.0000003, v:.096, band:'#9b6b9b', cat:'Meme Coin', about:'Cat-themed meme coin. Mog is a culture, not just a coin.'},
-    {t:'BRETT', n:'Brett', i:'🐸', b:0.19, v:.087, band:'#5ba38b', cat:'Meme Coin', about:'Base chain meme coin. Part of the Boy\'s Club universe.'},
-    {t:'ANDY', n:'Andy', i:'🐸', b:0.00015, v:.088, band:'#7c9d8e', cat:'Meme Coin', about:'Pepe\'s friend. Another frog-themed meme.'},
+    // ─── BLOCKCHAIN TECHNOLOGY ───
+    {t:'IBM', n:'IBM', i:'💙', b:185, v:.015, band:'#006699', cat:'Tech', about:'Enterprise blockchain solutions. Building Hyperledger and private networks.'},
+    {t:'ORCL', n:'Oracle', i:'☁️', b:127, v:.014, band:'#f80000', cat:'Tech', about:'Offers blockchain cloud services for enterprise supply chain and finance.'},
+    {t:'SAP', n:'SAP', i:'💼', b:186, v:.012, band:'#0f6db0', cat:'Tech', about:'Enterprise software giant with integrated blockchain solutions.'}
   ],
   stocks:[
     {t:'AAPL',n:'Apple',      i:'🍎',b:178,  v:.011,band:'#aaa',    cat:'Technology',     about:'Makes iPhone, Mac, iPad and the App Store. One of the most profitable companies in history.'},
@@ -1024,22 +938,7 @@ const GLOWS={
   MARA:'#00a1e4',RIOT:'#f05b28',CLSK:'#00b3b3',HUT:'#003366',WULF:'#7a7a7a',
   BITF:'#00a859',CIFR:'#4a90e2',BTBT:'#ff6b6b',HIVE:'#ffcc00',CAN:'#e31b23',
   SDIG:'#8b4513',SQ:'#00d4ff',HOOD:'#00c805',IBM:'#006699',ORCL:'#f80000',
-  SAP:'#0f6db0',LTC:'#345d9d',BCH:'#0ac18e',TRX:'#ef0027',VET:'#4bbd00',
-  THETA:'#2ab8e6',XLM:'#000000',EGLD:'#23b4c8',HBAR:'#000000',KAS:'#33cc99',
-  TON:'#0088cc',SNX:'#00d4ff',CVX:'#4a6fa5',FXS:'#000000',YFI:'#006ae3',
-  BAL:'#1e1e1e',1INCH:'#1f2b5c',DYDX:'#6966ff',ENJ:'#7866d5',ILV:'#2a2a44',
-  YGG:'#f9a01b',MC:'#2b2b2b',PRIME:'#00a6ff',STORJ:'#2683ff',ANKR:'#3182f5',
-  API3:'#0f1010',BAND:'#4f45e5',MEME:'#f9a95d',COQ:'#e1523d',MYRO:'#5e2e53',
-  SLERF:'#43b3ae',BOME:'#d4af37',MEW:'#ffcb2e',HT:'#0b1e33',BGB:'#0a0e1c',
-  ROSE:'#1a9cd7',SCRT:'#1b1b1b',TAO:'#000000',AKT:'#ed4c2b',BOBA:'#c58a47',
-  SKL:'#29b6af',HNT:'#4747ff',MOB:'#1a73e8',GAL:'#1a4cff',ARBK:'#0f2350',
-  LIDO:'#00a3ff',RPL:'#ff7100',SWISE:'#2a5c9a',FRAX:'#000000',LQTY:'#2b2b2b',
-  ANGLE:'#2b7cd6',ONDO:'#1a2b4c',MPL:'#005f4e',GFI:'#f7b731',TRU:'#235789',
-  CPOOL:'#00b5e2',BLUR:'#ff4d4d',LOOKS:'#00aeef',SUDO:'#8a2be2',NFTX:'#1f2229',
-  AXL:'#4a7b9d',WORM:'#7b2eda',LAYER:'#000000',SYN:'#7b1fa2',HONEY:'#f9b81b',
-  DIMO:'#00b2a9',WIFI:'#1e90ff',RENDER:'#00a0d1',AKASH:'#ed4c2b',MINA:'#e54857',
-  ZEN:'#122b46',ZKF:'#2d5b9a',DOG:'#8b5a2b',PUPS:'#6b4e3a',MOG:'#9b6b9b',
-  BRETT:'#5ba38b',ANDY:'#7c9d8e'
+  SAP:'#0f6db0'
 };
 
 function openScreen(ticker){
