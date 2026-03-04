@@ -513,113 +513,136 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — 45 CRYPTOCURRENCIES + other assets
+   ASSET DEFINITIONS — 73 assets across all markets
+   CRYPTO MARKET IS NOW MASSIVELY EXPANDED!
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
-    // Major Layer 1s (Original & Established)
-    {t:'BTC', n:'Bitcoin', i:'₿', b:67000, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
-    {t:'ETH', n:'Ethereum', i:'Ξ', b:3500, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
-    {t:'SOL', n:'Solana', i:'◎', b:185, v:.042, band:'#9945ff', cat:'Cryptocurrency', about:'Ultra-fast blockchain processing 65,000 TPS with near-zero fees. Favorite for NFTs and DeFi.'},
-    {t:'ADA', n:'Cardano', i:'₳', b:.65, v:.047, band:'#0033ad', cat:'Cryptocurrency', about:'Research-driven blockchain. Every feature is peer-reviewed by academics before launch.'},
-    {t:'AVAX', n:'Avalanche', i:'🔺', b:38, v:.048, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain confirming transactions in under 2 seconds. Popular for DeFi apps.'},
-    {t:'DOT', n:'Polkadot', i:'●', b:9.50, v:.045, band:'#e6007a', cat:'Cryptocurrency', about:'Connects multiple blockchains into one unified network. Created by one of Ethereum\'s co-founders.'},
-    {t:'NEAR', n:'Near Protocol', i:'⬡', b:7.80, v:.049, band:'#000000', cat:'Cryptocurrency', about:'Developer-friendly blockchain with human-readable account names and super-fast transactions.'},
-    {t:'FTM', n:'Fantom', i:'👻', b:.85, v:.055, band:'#1969ff', cat:'Cryptocurrency', about:'High-speed, low-cost blockchain for DeFi. Processes transactions in under 1 second.'},
-    {t:'ALGO', n:'Algorand', i:'🔷', b:.24, v:.041, band:'#000000', cat:'Cryptocurrency', about:'Pure proof-of-stake blockchain. Instant transaction finality with no forks.'},
-    {t:'ATOM', n:'Cosmos', i:'⚛️', b:11.50, v:.044, band:'#2E3148', cat:'Cryptocurrency', about:'Internet of Blockchains. Allows different chains to communicate and transfer assets.'},
+    // BLUE CHIPS (Top 10 by market cap)
+    {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Digital gold.'},
+    {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto.'},
+    {t:'SOL', n:'Solana', i:'◎', b:186, v:.042, band:'#9945ff', cat:'Cryptocurrency', about:'Ultra-fast blockchain processing 65,000 TPS with near-zero fees. Favorite for NFTs and DeFi.'},
+    {t:'XRP', n:'Ripple', i:'✕', b:0.53, v:.039, band:'#00aae4', cat:'Cryptocurrency', about:'Designed for fast international bank payments. Settles transfers in 3–5 seconds.'},
+    {t:'ADA', n:'Cardano', i:'₳', b:0.66, v:.047, band:'#0033ad', cat:'Cryptocurrency', about:'Research-driven blockchain. Every feature is peer-reviewed by academics before launch.'},
+    {t:'AVAX', n:'Avalanche', i:'🔺', b:38.50, v:.048, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain confirming transactions in under 2 seconds. Popular for DeFi apps.'},
+    {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.185, v:.065, band:'#c3a634', cat:'Meme Coin', about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
+    {t:'DOT', n:'Polkadot', i:'⏺️', b:9.55, v:.041, band:'#e6007a', cat:'Cryptocurrency', about:'Connects multiple blockchains into one unified network. Founded by Ethereum co-founder.'},
+    {t:'LINK', n:'Chainlink', i:'🔗', b:18.25, v:.044, band:'#375bd2', cat:'Oracle', about:'Connects blockchain smart contracts to real-world data like stock prices and weather.'},
+    {t:'MATIC', n:'Polygon', i:'⬡', b:0.89, v:.052, band:'#8247e5', cat:'Layer 2', about:'Makes Ethereum faster and much cheaper to use by processing transactions off the main chain.'},
     
-    // Major Meme Coins & Community Coins
-    {t:'DOGE', n:'Dogecoin', i:'🐕', b:.18, v:.065, band:'#c3a634', cat:'Meme Coin', about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
-    {t:'SHIB', n:'Shiba Inu', i:'🦊', b:.000025, v:.08, band:'#e02121', cat:'Meme Coin', about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
-    {t:'PEPE', n:'Pepe', i:'🐸', b:.0000015, v:.085, band:'#00ff00', cat:'Meme Coin', about:'Based on the famous Pepe the Frog meme. Known for extreme volatility and community hype.'},
-    {t:'WIF', n:'DogWifHat', i:'🧢', b:.0045, v:.075, band:'#ff69b4', cat:'Meme Coin', about:'A dog with a hat. Solana-based meme coin that took the internet by storm.'},
-    {t:'BONK', n:'Bonk', i:'🔫', b:.00003, v:.078, band:'#ff9900', cat:'Meme Coin', about:'First dog-themed coin on Solana. Airdropped to the Solana community.'},
-    {t:'FLOKI', n:'Floki Inu', i:'🐶', b:.00025, v:.072, band:'#cf1020', cat:'Meme Coin', about:'Named after Elon Musk\'s dog. Viking-themed meme coin with massive community.'},
+    // LAYER 1s & SMART CONTRACT PLATFORMS
+    {t:'ATOM', n:'Cosmos', i:'⚛️', b:11.30, v:.046, band:'#2e3148', cat:'Layer 1', about:'Internet of Blockchains - makes different blockchains talk to each other.'},
+    {t:'NEAR', n:'Near Protocol', i:'🌐', b:7.92, v:.055, band:'#000000', cat:'Layer 1', about:'Developer-friendly blockchain with human-readable account names.'},
+    {t:'FTM', n:'Fantom', i:'👻', b:0.88, v:.062, band:'#1969ff', cat:'Layer 1', about:'High-performance, scalable, and secure smart contract platform.'},
+    {t:'ALGO', n:'Algorand', i:'🔷', b:0.245, v:.044, band:'#000000', cat:'Layer 1', about:'Pure proof-of-stake blockchain. Finalizes transactions in under 4 seconds.'},
+    {t:'EGLD', n:'MultiversX', i:'🌌', b:58.40, v:.058, band:'#23b3e8', cat:'Layer 1', about:'Formerly Elrond. High-throughput blockchain with adaptive state sharding.'},
+    {t:'HBAR', n:'Hedera', i:'🌿', b:0.115, v:.049, band:'#000000', cat:'Layer 1', about:'Enterprise-grade public network governed by major corporations like Google and IBM.'},
+    {t:'ICP', n:'Internet Computer', i:'🌐', b:18.60, v:.056, band:'#29abe2', cat:'Layer 1', about:'Aims to rebuild the internet as a decentralized blockchain computer.'},
+    {t:'KAS', n:'Kaspa', i:'💎', b:0.185, v:.071, band:'#6b9eff', cat:'Layer 1', about:'GhostDAG protocol. Fastest block times in crypto with 1 block per second.'},
+    {t:'VET', n:'VeChain', i:'Ⓥ', b:0.048, v:.054, band:'#4bc0c0', cat:'Enterprise', about:'Supply chain focused blockchain. Tracks real-world products from factory to store.'},
+    {t:'XLM', n:'Stellar', i:'⭐', b:0.145, v:.043, band:'#000000', cat:'Payments', about:'Fast, low-cost payments network. Works with MoneyGram for global settlements.'},
     
-    // DeFi & Infrastructure
-    {t:'UNI', n:'Uniswap', i:'🦄', b:12.50, v:.051, band:'#ff007a', cat:'DeFi', about:'Largest DEX on Ethereum. UNI holders govern the protocol through voting.'},
-    {t:'AAVE', n:'Aave', i:'📊', b:110, v:.053, band:'#2b2f3b', cat:'DeFi', about:'Lending and borrowing protocol. Users can deposit crypto and earn interest.'},
-    {t:'LINK', n:'Chainlink', i:'🔗', b:18, v:.044, band:'#375bd2', cat:'Oracle', about:'Connects blockchain smart contracts to real-world data like stock prices and weather.'},
-    {t:'MKR', n:'Maker', i:'🏦', b:2850, v:.042, band:'#1aab9b', cat:'DeFi', about:'Governs DAI stablecoin. One of the oldest and most trusted DeFi protocols.'},
-    {t:'COMP', n:'Compound', i:'💊', b:85, v:.058, band:'#00d395', cat:'DeFi', about:'Algorithmic money market protocol. Earn interest on deposits or borrow assets.'},
-    {t:'CRV', n:'Curve', i:'🔄', b:.65, v:.054, band:'#ff5c00', cat:'DeFi', about:'Stablecoin exchange optimized for low slippage. Critical DeFi infrastructure.'},
-    {t:'YFI', n:'Yearn', i:'🌾', b:9800, v:.062, band:'#006ae3', cat:'DeFi', about:'Yield optimization protocol. Automatically moves your funds to highest yield.'},
-    {t:'SNX', n:'Synthetix', i:'⚡', b:3.80, v:.059, band:'#0b0b0f', cat:'DeFi', about:'Derivatives protocol. Trade synthetic assets like gold, stocks, and crypto.'},
+    // LAYER 2s & SCALING SOLUTIONS
+    {t:'OP', n:'Optimism', i:'✨', b:3.45, v:.053, band:'#ff0420', cat:'Layer 2', about:'Ethereum Layer 2 that processes transactions off-chain then settles on Ethereum.'},
+    {t:'ARB', n:'Arbitrum', i:'🔴', b:1.98, v:.049, band:'#28a0f0', cat:'Layer 2', about:'Leading Ethereum Layer 2 scaling solution. Makes Ethereum transactions cheap.'},
+    {t:'MNT', n:'Mantle', i:'🧊', b:1.28, v:.062, band:'#000000', cat:'Layer 2', about:'Ethereum Layer 2 built with modular architecture. Backed by BitDAO treasury.'},
+    {t:'STRK', n:'StarkNet', i:'⚡', b:2.45, v:.059, band:'#000000', cat:'Layer 2', about:'ZK-rollup Layer 2 for Ethereum. Uses STARK proofs for scalability.'},
+    {t:'ZK', n:'zkSync', i:'🔮', b:0.98, v:.067, band:'#000000', cat:'Layer 2', about:'ZK-rollup that scales Ethereum with zero-knowledge proofs.'},
+    {t:'METIS', n:'Metis', i:'⛰️', b:115.50, v:.064, band:'#00c6b9', cat:'Layer 2', about:'Decentralized Layer 2 for dApps. Focuses on Web3 infrastructure.'},
     
-    // Layer 2 & Scaling
-    {t:'MATIC', n:'Polygon', i:'⬡', b:.88, v:.052, band:'#8247e5', cat:'Layer 2', about:'Makes Ethereum faster and much cheaper to use by processing transactions off-chain.'},
-    {t:'ARB', n:'Arbitrum', i:'🔴', b:1.85, v:.049, band:'#28a0f0', cat:'Layer 2', about:'Leading Ethereum Layer 2. Uses optimistic rollups to scale Ethereum.'},
-    {t:'OP', n:'Optimism', i:'🔵', b:3.25, v:.048, band:'#ff0420', cat:'Layer 2', about:'Fast and cheap Ethereum Layer 2. Home to many popular DeFi apps.'},
-    {t:'STARK', n:'StarkNet', i:'⚪', b:2.40, v:.056, band:'#08a0e9', cat:'Layer 2', about:'ZK-rollup for Ethereum. Uses zero-knowledge proofs for maximum security.'},
-    {t:'IMX', n:'Immutable X', i:'🎮', b:2.15, v:.057, band:'#00a6c2', cat:'Gaming', about:'Layer 2 for NFTs and gaming on Ethereum. Zero gas fees for trading.'},
+    // MEME COINS (The Volatile Ones)
+    {t:'SHIB', n:'Shiba Inu', i:'🦊', b:0.000028, v:.080, band:'#e02121', cat:'Meme Coin', about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
+    {t:'PEPE', n:'Pepe', i:'🐸', b:0.000015, v:.095, band:'#00ff00', cat:'Meme Coin', about:'Frog-themed meme coin. Known for extreme volatility and community hype.'},
+    {t:'WIF', n:'Dogwifhat', i:'🎩', b:3.25, v:.088, band:'#ff69b4', cat:'Meme Coin', about:'Solana meme coin with a dog wearing a hat. Viral community.'},
+    {t:'BONK', n:'Bonk', i:'🐕', b:0.000035, v:.082, band:'#ff9900', cat:'Meme Coin', about:'First dog-themed coin on Solana. Airdropped to Solana community.'},
+    {t:'FLOKI', n:'Floki', i:'🐕', b:0.00032, v:.076, band:'#0033cc', cat:'Meme Coin', about:'Viking-themed meme coin named after Elon Musk\'s dog.'},
     
-    // Privacy & Cross-Chain
-    {t:'XRP', n:'Ripple', i:'✕', b:.52, v:.039, band:'#00aae4', cat:'Payments', about:'Designed for fast international bank payments. Settles transfers in 3–5 seconds.'},
-    {t:'XLM', n:'Stellar', i:'✨', b:.14, v:.043, band:'#000000', cat:'Payments', about:'Open network for money transfer. Connects banks, payments systems, and people.'},
-    {t:'XMR', n:'Monero', i:'💎', b:165, v:.046, band:'#ff6600', cat:'Privacy', about:'Privacy-focused crypto. Transactions are completely untraceable and anonymous.'},
-    {t:'ZEC', n:'Zcash', i:'⚡', b:32, v:.055, band:'#e5b13b', cat:'Privacy', about:'Privacy coin using zero-knowledge proofs. Users can choose transparent or shielded transactions.'},
-    {t:'DASH', n:'Dash', i:'📱', b:32, v:.048, band:'#008de4', cat:'Payments', about:'Digital cash focused on speed and ease of use. Instant transaction confirmation.'},
+    // DeFi & EXCHANGE TOKENS
+    {t:'UNI', n:'Uniswap', i:'🦄', b:12.95, v:.051, band:'#ff007a', cat:'DeFi', about:'Largest decentralized exchange on Ethereum. UNI holders govern the protocol.'},
+    {t:'AAVE', n:'Aave', i:'📊', b:125.80, v:.053, band:'#b6509e', cat:'DeFi', about:'Lending and borrowing protocol. Deposit crypto and earn interest or borrow.'},
+    {t:'MKR', n:'Maker', i:'🏛️', b:2350, v:.044, band:'#1aab9c', cat:'DeFi', about:'Creates DAI stablecoin. One of the oldest and most trusted DeFi protocols.'},
+    {t:'CRV', n:'Curve', i:'📈', b:0.75, v:.061, band:'#000000', cat:'DeFi', about:'Stablecoin exchange optimized for low-slippage trading.'},
+    {t:'LDO', n:'Lido', i:'🏊', b:3.15, v:.055, band:'#000000', cat:'Liquid Staking', about:'Liquid staking for Ethereum. Stake ETH and get stETH in return.'},
+    {t:'RUNE', n:'THORChain', i:'⚡', b:6.85, v:.058, band:'#00c853', cat:'DeFi', about:'Cross-chain liquidity protocol. Swap native assets across different blockchains.'},
     
-    // Exchange Tokens & CeFi
-    {t:'BNB', n:'Binance Coin', i:'🟡', b:610, v:.035, band:'#f3ba2f', cat:'Exchange', about:'Native token of Binance exchange. Used for fee discounts and BNB Chain.'},
-    {t:'CRO', n:'Cronos', i:'🔴', b:.12, v:.051, band:'#002d74', cat:'Exchange', about:'Crypto.com chain token. Powers the Cronos ecosystem.'},
-    {t:'OKB', n:'OKX Token', i:'🟢', b:58, v:.047, band:'#2d60e0', cat:'Exchange', about:'OKX exchange token. Used for fee discounts and voting rights.'},
-    {t:'KCS', n:'KuCoin', i:'🔷', b:12.80, v:.049, band:'#0093dd', cat:'Exchange', about:'KuCoin exchange token. Holders get trading fee discounts.'},
-    {t:'LEO', n:'UNUS SED LEO', i:'🦁', b:5.90, v:.032, band:'#faa61a', cat:'Exchange', about:'Bitfinex exchange token. Used to reduce exchange fees.'},
+    // GAMING & METAVERSE
+    {t:'IMX', n:'Immutable X', i:'🎮', b:2.85, v:.059, band:'#000000', cat:'Gaming', about:'Layer 2 for NFTs and gaming on Ethereum. Zero gas fees for minting.'},
+    {t:'AXS', n:'Axie Infinity', i:'🐉', b:9.95, v:.063, band:'#0055d4', cat:'Gaming', about:'Play-to-earn gaming pioneer. Battle, breed, and trade fantasy creatures.'},
+    {t:'SAND', n:'The Sandbox', i:'🏖️', b:0.65, v:.068, band:'#00ace0', cat:'Metaverse', about:'User-generated gaming metaverse. Buy land, build experiences.'},
+    {t:'MANA', n:'Decentraland', i:'🌎', b:0.58, v:.062, band:'#ff2d55', cat:'Metaverse', about:'Virtual reality platform where users buy land and socialize.'},
+    {t:'GALA', n:'Gala Games', i:'🎯', b:0.055, v:.074, band:'#000000', cat:'Gaming', about:'Blockchain gaming ecosystem with multiple play-to-earn games.'},
     
-    // Gaming & Metaverse
-    {t:'AXS', n:'Axie Infinity', i:'⚔️', b:8.75, v:.068, band:'#0055d4', cat:'Gaming', about:'Play-to-earn game where players battle fantasy creatures called Axies.'},
-    {t:'SAND', n:'The Sandbox', i:'🏖️', b:.65, v:.064, band:'#00acef', cat:'Metaverse', about:'Virtual world where players can build, own, and monetize gaming experiences.'},
-    {t:'MANA', n:'Decentraland', i:'👾', b:.58, v:.061, band:'#ff2d55', cat:'Metaverse', about:'Virtual reality platform. Users can buy land, build, and explore.'},
-    {t:'GALA', n:'Gala Games', i:'🎮', b:.045, v:.071, band:'#7b3fe4', cat:'Gaming', about:'Web3 gaming platform with multiple blockchain games.'},
-    {t:'ENJ', n:'Enjin Coin', i:'🔥', b:.38, v:.059, band:'#1862bc', cat:'Gaming', about:'Makes NFTs easy to create and manage. Used in many blockchain games.'},
-    {t:'ILV', n:'Illuvium', i:'🦎', b:115, v:.073, band:'#33ccff', cat:'Gaming', about:'Open-world RPG game on Ethereum. Collect and battle mythical creatures.'}
+    // AI & BIG DATA
+    {t:'RNDR', n:'Render', i:'🎨', b:12.10, v:.068, band:'#000000', cat:'AI/GPU', about:'Decentralized GPU rendering network. Powers AI and 3D rendering.'},
+    {t:'FET', n:'Fetch.ai', i:'🤖', b:2.95, v:.071, band:'#000000', cat:'AI', about:'AI-powered blockchain for automating tasks and machine learning.'},
+    {t:'AGIX', n:'SingularityNET', i:'🧠', b:1.15, v:.073, band:'#ff6600', cat:'AI', about:'Decentralized marketplace for AI services and algorithms.'},
+    {t:'OCEAN', n:'Ocean Protocol', i:'🌊', b:0.95, v:.064, band:'#32a1ff', cat:'Data', about:'Decentralized data exchange protocol. Monetize data while preserving privacy.'},
+    
+    // ORACLES & INFRASTRUCTURE
+    {t:'GRT', n:'The Graph', i:'📊', b:0.38, v:.057, band:'#9064ff', cat:'Infrastructure', about:'Indexing protocol for blockchain data. Like Google for blockchains.'},
+    {t:'AR', n:'Arweave', i:'💾', b:32.50, v:.052, band:'#222222', cat:'Storage', about:'Permanent data storage. Pay once, store forever.'},
+    {t:'FIL', n:'Filecoin', i:'💽', b:7.85, v:.055, band:'#0090ff', cat:'Storage', about:'Decentralized storage network. Rent out unused hard drive space.'},
+    
+    // PRIVACY COINS
+    {t:'XMR', n:'Monero', i:'💰', b:165.30, v:.049, band:'#ff6600', cat:'Privacy', about:'Untraceable privacy coin. Transactions are completely anonymous.'},
+    {t:'ZEC', n:'Zcash', i:'🛡️', b:32.80, v:.053, band:'#f4b728', cat:'Privacy', about:'Privacy-focused coin with shielded transactions.'},
+    
+    // MOVE ECOSYSTEM
+    {t:'APT', n:'Aptos', i:'⛓️', b:15.45, v:.058, band:'#000000', cat:'Layer 1', about:'Layer 1 blockchain built by former Meta engineers. Focuses on safety and scalability.'},
+    {t:'SUI', n:'Sui', i:'🌊', b:2.18, v:.067, band:'#4ca2cd', cat:'Layer 1', about:'High-performance L1 with parallel transaction execution. Great for gaming.'},
+    {t:'SEI', n:'Sei', i:'🌊', b:0.88, v:.072, band:'#9d6df2', cat:'Layer 1', about:'Trading-focused blockchain. Optimized for exchanges and DeFi applications.'},
+    
+    // NEW HOTNESS
+    {t:'INJ', n:'Injective', i:'⚡', b:38.90, v:.059, band:'#00c3f3', cat:'DeFi', about:'Blockchain built for finance. Offers derivatives trading and cross-chain bridges.'},
+    {t:'TIA', n:'Celestia', i:'🌌', b:19.85, v:.061, band:'#000000', cat:'Modular', about:'First modular blockchain network. Separate consensus from execution.'},
+    {t:'PYTH', n:'Pyth Network', i:'🔮', b:0.75, v:.064, band:'#000000', cat:'Oracle', about:'Next-gen oracle network bringing real-world data to blockchains.'},
+    {t:'JUP', n:'Jupiter', i:'🪐', b:1.95, v:.069, band:'#000000', cat:'DeFi', about:'Key liquidity aggregator on Solana. Essential DeFi infrastructure.'}
   ],
+  
   stocks:[
-    {t:'AAPL', n:'Apple',      i:'🍎',b:178,  v:.011,band:'#aaa',    cat:'Technology',     about:'Makes iPhone, Mac, iPad and the App Store. One of the most profitable companies in history.'},
-    {t:'TSLA', n:'Tesla',      i:'⚡',b:245,  v:.028,band:'#cc3333', cat:'EV & Energy',     about:'Electric vehicles and solar energy. CEO Elon Musk also runs SpaceX, X and xAI.'},
-    {t:'NVDA', n:'NVIDIA',     i:'🎮',b:875,  v:.022,band:'#76b900', cat:'Semiconductors', about:'Makes GPUs that power AI training, gaming and data centers. Crossed $1 trillion in 2023.'},
-    {t:'AMZN', n:'Amazon',     i:'📦',b:185,  v:.015,band:'#ff9900', cat:'E-Commerce',      about:"World's largest online retailer. AWS cloud service powers a huge chunk of the entire internet."},
-    {t:'GOOGL', n:'Google',    i:'🔍',b:158,  v:.013,band:'#4285f4', cat:'Technology',     about:'8.5 billion searches per day. Also owns YouTube, Android, Google Maps and Google Cloud.'},
-    {t:'META', n:'Meta',       i:'👓',b:505,  v:.018,band:'#0064e0', cat:'Social Media',   about:'Owns Facebook, Instagram and WhatsApp. Over 3.2 billion daily active users worldwide.'},
-    {t:'MSFT', n:'Microsoft',  i:'🪟',b:415,  v:.012,band:'#00a4ef', cat:'Technology',     about:'Makes Windows, Office 365, Xbox and Azure. One of the two most valuable companies on Earth.'},
-    {t:'NFLX', n:'Netflix',    i:'🎬',b:628,  v:.021,band:'#e50914', cat:'Entertainment', about:"World's largest streaming service with 260M+ subscribers. Produces its own movies and shows."},
-    {t:'DIS', n:'Disney',      i:'🏰',b:112,  v:.017,band:'#1868c3', cat:'Entertainment', about:'Owns Marvel, Star Wars, Pixar, ESPN and Disney+. Also runs the famous theme parks.'},
-    {t:'COIN', n:'Coinbase',   i:'🪙',b:225,  v:.038,band:'#1652f0', cat:'Fintech',        about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
-    {t:'PYPL', n:'PayPal',     i:'💳',b:68,   v:.019,band:'#003087', cat:'Fintech',        about:'Digital payments giant processing billions in transactions yearly. Also owns Venmo.'},
-    {t:'UBER', n:'Uber',       i:'🚗',b:74,   v:.023,band:'#444',    cat:'Transport',      about:"World's biggest ride-hailing and food delivery company, operating in 70+ countries."},
-    {t:'SPOT', n:'Spotify',    i:'🎵',b:302,  v:.022,band:'#1db954', cat:'Entertainment', about:"World's largest music streaming platform with 600M+ users and 240M+ paid subscribers."},
-    {t:'RBLX', n:'Roblox',     i:'🕹️',b:38,  v:.035,band:'#e52207', cat:'Gaming',         about:'Massive online gaming platform where users build and play their own games. Huge with teens.'},
-    {t:'AMD', n:'AMD',         i:'⚙️',b:168,  v:.024,band:'#ed1c24', cat:'Semiconductors', about:'Rivals NVIDIA and Intel. Makes CPUs for PCs and GPUs for gaming and AI workloads.'},
+    {t:'AAPL',n:'Apple',      i:'🍎',b:178,  v:.011,band:'#aaa',    cat:'Technology',     about:'Makes iPhone, Mac, iPad and the App Store. One of the most profitable companies in history.'},
+    {t:'TSLA',n:'Tesla',      i:'⚡',b:245,  v:.028,band:'#cc3333', cat:'EV & Energy',     about:'Electric vehicles and solar energy. CEO Elon Musk also runs SpaceX, X and xAI.'},
+    {t:'NVDA',n:'NVIDIA',     i:'🎮',b:875,  v:.022,band:'#76b900', cat:'Semiconductors', about:'Makes GPUs that power AI training, gaming and data centers. Crossed $1 trillion in 2023.'},
+    {t:'AMZN',n:'Amazon',     i:'📦',b:185,  v:.015,band:'#ff9900', cat:'E-Commerce',      about:"World's largest online retailer. AWS cloud service powers a huge chunk of the entire internet."},
+    {t:'GOOGL',n:'Google',    i:'🔍',b:158,  v:.013,band:'#4285f4', cat:'Technology',     about:'8.5 billion searches per day. Also owns YouTube, Android, Google Maps and Google Cloud.'},
+    {t:'META',n:'Meta',       i:'👓',b:505,  v:.018,band:'#0064e0', cat:'Social Media',   about:'Owns Facebook, Instagram and WhatsApp. Over 3.2 billion daily active users worldwide.'},
+    {t:'MSFT',n:'Microsoft',  i:'🪟',b:415,  v:.012,band:'#00a4ef', cat:'Technology',     about:'Makes Windows, Office 365, Xbox and Azure. One of the two most valuable companies on Earth.'},
+    {t:'NFLX',n:'Netflix',    i:'🎬',b:628,  v:.021,band:'#e50914', cat:'Entertainment', about:"World's largest streaming service with 260M+ subscribers. Produces its own movies and shows."},
+    {t:'DIS',n:'Disney',      i:'🏰',b:112,  v:.017,band:'#1868c3', cat:'Entertainment', about:'Owns Marvel, Star Wars, Pixar, ESPN and Disney+. Also runs the famous theme parks.'},
+    {t:'COIN',n:'Coinbase',   i:'🪙',b:225,  v:.038,band:'#1652f0', cat:'Fintech',        about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
+    {t:'PYPL',n:'PayPal',     i:'💳',b:68,   v:.019,band:'#003087', cat:'Fintech',        about:'Digital payments giant processing billions in transactions yearly. Also owns Venmo.'},
+    {t:'UBER',n:'Uber',       i:'🚗',b:74,   v:.023,band:'#444',    cat:'Transport',      about:"World's biggest ride-hailing and food delivery company, operating in 70+ countries."},
+    {t:'SPOT',n:'Spotify',    i:'🎵',b:302,  v:.022,band:'#1db954', cat:'Entertainment', about:"World's largest music streaming platform with 600M+ users and 240M+ paid subscribers."},
+    {t:'RBLX',n:'Roblox',     i:'🕹️',b:38,  v:.035,band:'#e52207', cat:'Gaming',         about:'Massive online gaming platform where users build and play their own games. Huge with teens.'},
+    {t:'AMD',n:'AMD',         i:'⚙️',b:168,  v:.024,band:'#ed1c24', cat:'Semiconductors', about:'Rivals NVIDIA and Intel. Makes CPUs for PCs and GPUs for gaming and AI workloads.'},
   ],
   etfs:[
-    {t:'SPY', n:'S&P 500',      i:'📊',b:510,v:.007,band:'#2ecc71',cat:'Index ETF',    about:'Tracks the 500 largest US companies. The most popular investment on Earth. ~10% avg annual return.'},
-    {t:'QQQ', n:'NASDAQ 100',   i:'💻',b:445,v:.010,band:'#3498db',cat:'Index ETF',    about:'Top 100 NASDAQ companies. Very tech-heavy: Apple, Microsoft, NVIDIA, Amazon, Meta.'},
-    {t:'VTI', n:'Total Market', i:'🌍',b:235,v:.007,band:'#1abc9c',cat:'Index ETF',    about:'A tiny piece of every publicly traded US company — over 3,700 stocks in one fund.'},
-    {t:'ARKK', n:'ARK Innovate',i:'🚀',b:48, v:.036,band:'#e74c3c',cat:'Active ETF',   about:'Managed by Cathie Wood. Bets on AI, genomics, robotics and fintech disruptors. High risk.'},
-    {t:'GLD', n:'Gold ETF',     i:'🥇',b:185,v:.009,band:'#f1c40f',cat:'Commodity ETF',about:'Tracks physical gold in vaults. Classic inflation hedge used for thousands of years.'},
-    {t:'BND', n:'Bond ETF',     i:'🏦',b:72, v:.003,band:'#7f8c8d',cat:'Bond ETF',     about:'Thousands of US government and corporate bonds. Very stable, low risk, slow growth.'},
-    {t:'VNQ', n:'Real Estate',  i:'🏠',b:88, v:.011,band:'#e67e22',cat:'REIT ETF',     about:'Invests in real estate companies: malls, apartments and office buildings.'},
-    {t:'ICLN', n:'Clean Energy',i:'♻️',b:17, v:.028,band:'#27ae60',cat:'Thematic ETF', about:'Solar, wind and clean energy companies worldwide. Bets on the green energy transition.'},
+    {t:'SPY',n:'S&P 500',      i:'📊',b:510,v:.007,band:'#2ecc71',cat:'Index ETF',    about:'Tracks the 500 largest US companies. The most popular investment on Earth. ~10% avg annual return.'},
+    {t:'QQQ',n:'NASDAQ 100',   i:'💻',b:445,v:.010,band:'#3498db',cat:'Index ETF',    about:'Top 100 NASDAQ companies. Very tech-heavy: Apple, Microsoft, NVIDIA, Amazon, Meta.'},
+    {t:'VTI',n:'Total Market', i:'🌍',b:235,v:.007,band:'#1abc9c',cat:'Index ETF',    about:'A tiny piece of every publicly traded US company — over 3,700 stocks in one fund.'},
+    {t:'ARKK',n:'ARK Innovate',i:'🚀',b:48, v:.036,band:'#e74c3c',cat:'Active ETF',   about:'Managed by Cathie Wood. Bets on AI, genomics, robotics and fintech disruptors. High risk.'},
+    {t:'GLD',n:'Gold ETF',     i:'🥇',b:185,v:.009,band:'#f1c40f',cat:'Commodity ETF',about:'Tracks physical gold in vaults. Classic inflation hedge used for thousands of years.'},
+    {t:'BND',n:'Bond ETF',     i:'🏦',b:72, v:.003,band:'#7f8c8d',cat:'Bond ETF',     about:'Thousands of US government and corporate bonds. Very stable, low risk, slow growth.'},
+    {t:'VNQ',n:'Real Estate',  i:'🏠',b:88, v:.011,band:'#e67e22',cat:'REIT ETF',     about:'Invests in real estate companies: malls, apartments and office buildings.'},
+    {t:'ICLN',n:'Clean Energy',i:'♻️',b:17, v:.028,band:'#27ae60',cat:'Thematic ETF', about:'Solar, wind and clean energy companies worldwide. Bets on the green energy transition.'},
   ],
   commodities:[
-    {t:'GOLD', n:'Gold',       i:'🥇',b:2320, v:.009,band:'#f1c40f',cat:'Precious Metal', about:'The classic safe-haven asset. Investors pile in when they fear an economic downturn.'},
-    {t:'SLVR', n:'Silver',     i:'🥈',b:29,   v:.018,band:'#bdc3c7',cat:'Precious Metal', about:'Used in electronics, solar panels and jewelry. More volatile than gold.'},
-    {t:'OIL', n:'Crude Oil',   i:'🛢️',b:82,  v:.022,band:'#2c3e50',cat:'Energy',         about:'The most-traded commodity in the world. Affects gas prices, plastics and almost everything.'},
-    {t:'NATG', n:'Natural Gas',i:'🔥',b:2.4,  v:.045,band:'#e67e22',cat:'Energy',         about:'Used for heating and power. Prices spike in cold winters and during energy supply crunches.'},
-    {t:'WHEAT', n:'Wheat',     i:'🌾',b:5.8,  v:.026,band:'#f39c12',cat:'Agricultural',   about:'One of the most essential food crops globally. Prices jump during droughts or wars.'},
-    {t:'COPR', n:'Copper',     i:'🪙',b:4.4,  v:.020,band:'#d35400',cat:'Industrial',     about:'Called "Dr. Copper" — its price is a real-time health check for the global economy.'},
-    {t:'PLAT', n:'Platinum',   i:'💿',b:975,  v:.016,band:'#e0e0e0',cat:'Precious Metal', about:'Rarer than gold. Used in catalytic converters and jewelry. Mainly mined in South Africa.'},
-    {t:'CORN', n:'Corn',       i:'🌽',b:4.6,  v:.024,band:'#f9ca24',cat:'Agricultural',   about:'Used for food, animal feed and ethanol fuel. One of the most widely grown crops on Earth.'},
+    {t:'GOLD',n:'Gold',       i:'🥇',b:2320, v:.009,band:'#f1c40f',cat:'Precious Metal', about:'The classic safe-haven asset. Investors pile in when they fear an economic downturn.'},
+    {t:'SLVR',n:'Silver',     i:'🥈',b:29,   v:.018,band:'#bdc3c7',cat:'Precious Metal', about:'Used in electronics, solar panels and jewelry. More volatile than gold.'},
+    {t:'OIL',n:'Crude Oil',   i:'🛢️',b:82,  v:.022,band:'#2c3e50',cat:'Energy',         about:'The most-traded commodity in the world. Affects gas prices, plastics and almost everything.'},
+    {t:'NATG',n:'Natural Gas',i:'🔥',b:2.4,  v:.045,band:'#e67e22',cat:'Energy',         about:'Used for heating and power. Prices spike in cold winters and during energy supply crunches.'},
+    {t:'WHEAT',n:'Wheat',     i:'🌾',b:5.8,  v:.026,band:'#f39c12',cat:'Agricultural',   about:'One of the most essential food crops globally. Prices jump during droughts or wars.'},
+    {t:'COPR',n:'Copper',     i:'🪙',b:4.4,  v:.020,band:'#d35400',cat:'Industrial',     about:'Called "Dr. Copper" — its price is a real-time health check for the global economy.'},
+    {t:'PLAT',n:'Platinum',   i:'💿',b:975,  v:.016,band:'#e0e0e0',cat:'Precious Metal', about:'Rarer than gold. Used in catalytic converters and jewelry. Mainly mined in South Africa.'},
+    {t:'CORN',n:'Corn',       i:'🌽',b:4.6,  v:.024,band:'#f9ca24',cat:'Agricultural',   about:'Used for food, animal feed and ethanol fuel. One of the most widely grown crops on Earth.'},
   ],
   forex:[
-    {t:'EUR', n:'EUR/USD',i:'€', b:1.085,v:.006,band:'#003399',cat:'Major Forex',  about:'Euro vs US Dollar — the most traded currency pair in the world. Moves on EU economic data.'},
-    {t:'GBP', n:'GBP/USD',i:'£', b:1.268,v:.007,band:'#012169',cat:'Major Forex',  about:'British Pound vs US Dollar. Affected by UK economic data and Bank of England policy.'},
-    {t:'JPY', n:'USD/JPY',i:'¥', b:149,  v:.005,band:'#bc002d',cat:'Major Forex',  about:'US Dollar vs Japanese Yen. Japan keeps rates very low, which keeps the Yen weaker.'},
-    {t:'BRL', n:'USD/BRL',i:'R$',b:5.05, v:.012,band:'#009c3b',cat:'Emerging FX',  about:'US Dollar vs Brazilian Real. Emerging market currency affected heavily by commodity prices.'},
-    {t:'CAD', n:'USD/CAD',i:'C$',b:1.36, v:.006,band:'#ff0000',cat:'Major Forex',  about:'US Dollar vs Canadian Dollar. Canada exports lots of oil, so CAD closely tracks crude.'},
-    {t:'AUD', n:'AUD/USD',i:'A$',b:.655, v:.007,band:'#00008b',cat:'Major Forex',  about:'Australian Dollar vs US Dollar. Australia mines gold and iron, so AUD tracks commodity prices.'},
+    {t:'EUR',n:'EUR/USD',i:'€', b:1.085,v:.006,band:'#003399',cat:'Major Forex',  about:'Euro vs US Dollar — the most traded currency pair in the world. Moves on EU economic data.'},
+    {t:'GBP',n:'GBP/USD',i:'£', b:1.268,v:.007,band:'#012169',cat:'Major Forex',  about:'British Pound vs US Dollar. Affected by UK economic data and Bank of England policy.'},
+    {t:'JPY',n:'USD/JPY',i:'¥', b:149,  v:.005,band:'#bc002d',cat:'Major Forex',  about:'US Dollar vs Japanese Yen. Japan keeps rates very low, which keeps the Yen weaker.'},
+    {t:'BRL',n:'USD/BRL',i:'R$',b:5.05, v:.012,band:'#009c3b',cat:'Emerging FX',  about:'US Dollar vs Brazilian Real. Emerging market currency affected heavily by commodity prices.'},
+    {t:'CAD',n:'USD/CAD',i:'C$',b:1.36, v:.006,band:'#ff0000',cat:'Major Forex',  about:'US Dollar vs Canadian Dollar. Canada exports lots of oil, so CAD closely tracks crude.'},
+    {t:'AUD',n:'AUD/USD',i:'A$',b:.655, v:.007,band:'#00008b',cat:'Major Forex',  about:'Australian Dollar vs US Dollar. Australia mines gold and iron, so AUD tracks commodity prices.'},
   ]
 };
 
@@ -641,12 +664,15 @@ const NEWS = [
   {s:'bull',h:'Amazon AWS growth re-accelerates above estimates',fx:'→ AMZN may surge'},
   {s:'bull',h:'Roblox daily users hit new all-time record',fx:'→ RBLX may climb'},
   {s:'bear',h:'Natural gas spikes on cold weather forecast',fx:'→ NATG very volatile'},
+  {s:'bull',h:'Ethereum Layer 2s hit record TVL',fx:'→ ARB, OP, MATIC bullish'},
+  {s:'bull',h:'AI coins rally as NVIDIA earnings beat',fx:'→ RNDR, FET, AGIX pumping'},
+  {s:'bear',h:'Fed signals fewer rate cuts in 2024',fx:'→ Risk assets under pressure'}
 ];
 
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v7';
+const SK = 'apex_v8';
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -861,7 +887,15 @@ function quickSell(ticker){
 ═══════════════════════════════════════════ */
 const GLOWS={
   BTC:'#f7931a',ETH:'#627eea',SOL:'#9945ff',ADA:'#0033ad',DOGE:'#c3a634',XRP:'#00aae4',
-  AVAX:'#e84142',MATIC:'#8247e5',LINK:'#375bd2',SHIB:'#e02121',
+  AVAX:'#e84142',MATIC:'#8247e5',LINK:'#375bd2',SHIB:'#e02121',DOT:'#e6007a',UNI:'#ff007a',
+  ATOM:'#2e3148',ALGO:'#000000',NEAR:'#000000',FTM:'#1969ff',APT:'#000000',ARB:'#28a0f0',
+  OP:'#ff0420',SUI:'#4ca2cd',SEI:'#9d6df2',INJ:'#00c3f3',RNDR:'#000000',FET:'#000000',
+  AGIX:'#ff6600',GRT:'#9064ff',AAVE:'#b6509e',MKR:'#1aab9c',CRV:'#000000',LDO:'#000000',
+  RUNE:'#00c853',IMX:'#000000',AXS:'#0055d4',SAND:'#00ace0',MANA:'#ff2d55',GALA:'#000000',
+  XMR:'#ff6600',ZEC:'#f4b728',ICP:'#29abe2',KAS:'#6b9eff',VET:'#4bc0c0',XLM:'#000000',
+  HBAR:'#000000',EGLD:'#23b3e8',TIA:'#000000',PYTH:'#000000',JUP:'#000000',PEPE:'#00ff00',
+  WIF:'#ff69b4',BONK:'#ff9900',FLOKI:'#0033cc',MNT:'#000000',STRK:'#000000',ZK:'#000000',
+  METIS:'#00c6b9',AR:'#222222',FIL:'#0090ff',OCEAN:'#32a1ff',
   AAPL:'#aaaaaa',TSLA:'#cc3333',NVDA:'#76b900',AMZN:'#ff9900',GOOGL:'#4285f4',
   META:'#0064e0',MSFT:'#00a4ef',NFLX:'#e50914',DIS:'#1868c3',COIN:'#1652f0',
   PYPL:'#003087',UBER:'#444444',SPOT:'#1db954',RBLX:'#e52207',AMD:'#ed1c24',
