@@ -513,65 +513,111 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — 48 assets, 5 categories
+   EXPANDED ASSET DEFINITIONS — 80+ assets, 5 categories
+   Added: More crypto, many more stocks (Apple, Google already there), 
+   more ETFs, more commodities, more forex
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
-    {t:'BTC', n:'Bitcoin',    i:'₿',  b:67000,    v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
-    {t:'ETH', n:'Ethereum',   i:'Ξ',  b:3500,     v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
-    {t:'SOL', n:'Solana',     i:'◎',  b:185,      v:.042, band:'#9945ff', cat:'Cryptocurrency', about:'Ultra-fast blockchain processing 65,000 TPS with near-zero fees. Favorite for NFTs and DeFi.'},
-    {t:'ADA', n:'Cardano',    i:'₳',  b:.65,      v:.047, band:'#0033ad', cat:'Cryptocurrency', about:'Research-driven blockchain. Every feature is peer-reviewed by academics before launch.'},
-    {t:'DOGE',n:'Dogecoin',   i:'🐕', b:.18,      v:.065, band:'#c3a634', cat:'Meme Coin',      about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
-    {t:'XRP', n:'Ripple',     i:'✕',  b:.52,      v:.039, band:'#00aae4', cat:'Cryptocurrency', about:'Designed for fast international bank payments. Settles transfers in 3–5 seconds.'},
-    {t:'AVAX',n:'Avalanche',  i:'🔺', b:38,       v:.048, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain confirming transactions in under 2 seconds. Popular for DeFi apps.'},
-    {t:'MATIC',n:'Polygon',   i:'⬡',  b:.88,      v:.052, band:'#8247e5', cat:'Cryptocurrency', about:'Makes Ethereum faster and much cheaper to use by processing transactions off the main chain.'},
-    {t:'LINK',n:'Chainlink',  i:'🔗', b:18,       v:.044, band:'#375bd2', cat:'Cryptocurrency', about:'Connects blockchain smart contracts to real-world data like stock prices and weather. Most used oracle.'},
-    {t:'SHIB',n:'Shiba Inu',  i:'🦊', b:.000025,  v:.08,  band:'#e02121', cat:'Meme Coin',      about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
+    {t:'BTC', n:'Bitcoin', i:'₿', b:67000, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
+    {t:'ETH', n:'Ethereum', i:'Ξ', b:3500, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
+    {t:'SOL', n:'Solana', i:'◎', b:185, v:.042, band:'#9945ff', cat:'Cryptocurrency', about:'Ultra-fast blockchain processing 65,000 TPS with near-zero fees. Favorite for NFTs and DeFi.'},
+    {t:'ADA', n:'Cardano', i:'₳', b:.65, v:.047, band:'#0033ad', cat:'Cryptocurrency', about:'Research-driven blockchain. Every feature is peer-reviewed by academics before launch.'},
+    {t:'DOGE', n:'Dogecoin', i:'🐕', b:.18, v:.065, band:'#c3a634', cat:'Meme Coin', about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
+    {t:'XRP', n:'Ripple', i:'✕', b:.52, v:.039, band:'#00aae4', cat:'Cryptocurrency', about:'Designed for fast international bank payments. Settles transfers in 3–5 seconds.'},
+    {t:'AVAX', n:'Avalanche', i:'🔺', b:38, v:.048, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain confirming transactions in under 2 seconds. Popular for DeFi apps.'},
+    {t:'MATIC', n:'Polygon', i:'⬡', b:.88, v:.052, band:'#8247e5', cat:'Cryptocurrency', about:'Makes Ethereum faster and much cheaper to use by processing transactions off the main chain.'},
+    {t:'LINK', n:'Chainlink', i:'🔗', b:18, v:.044, band:'#375bd2', cat:'Cryptocurrency', about:'Connects blockchain smart contracts to real-world data like stock prices and weather. Most used oracle.'},
+    {t:'SHIB', n:'Shiba Inu', i:'🦊', b:.000025, v:.08, band:'#e02121', cat:'Meme Coin', about:'Meme coin and Dogecoin rival. One of the most speculative and volatile assets you can trade.'},
+    {t:'DOT', n:'Polkadot', i:'●', b:9.50, v:.038, band:'#e6007a', cat:'Cryptocurrency', about:'Connects multiple blockchains into one unified network. Allows them to transfer data and assets.'},
+    {t:'UNI', n:'Uniswap', i:'🦄', b:12.50, v:.042, band:'#ff007a', cat:'DeFi', about:'Leading decentralized exchange protocol. UNI token gives governance rights over the protocol.'},
+    {t:'ATOM', n:'Cosmos', i:'⚛️', b:11.80, v:.035, band:'#2e3148', cat:'Cryptocurrency', about:'Internet of Blockchains. Makes it easy for different blockchains to communicate with each other.'},
+    {t:'LTC', n:'Litecoin', i:'Ł', b:84, v:.029, band:'#345d9d', cat:'Cryptocurrency', about:'One of the oldest cryptos, created in 2011. Faster transaction times than Bitcoin.'},
+    {t:'BCH', n:'Bitcoin Cash', i:'₿', b:380, v:.033, band:'#8dc351', cat:'Cryptocurrency', about:'Fork of Bitcoin with larger block size for faster, cheaper transactions.'}
   ],
   stocks:[
-    {t:'AAPL',n:'Apple',      i:'🍎',b:178,  v:.011,band:'#aaa',    cat:'Technology',     about:'Makes iPhone, Mac, iPad and the App Store. One of the most profitable companies in history.'},
-    {t:'TSLA',n:'Tesla',      i:'⚡',b:245,  v:.028,band:'#cc3333', cat:'EV & Energy',     about:'Electric vehicles and solar energy. CEO Elon Musk also runs SpaceX, X and xAI.'},
-    {t:'NVDA',n:'NVIDIA',     i:'🎮',b:875,  v:.022,band:'#76b900', cat:'Semiconductors', about:'Makes GPUs that power AI training, gaming and data centers. Crossed $1 trillion in 2023.'},
-    {t:'AMZN',n:'Amazon',     i:'📦',b:185,  v:.015,band:'#ff9900', cat:'E-Commerce',      about:"World's largest online retailer. AWS cloud service powers a huge chunk of the entire internet."},
-    {t:'GOOGL',n:'Google',    i:'🔍',b:158,  v:.013,band:'#4285f4', cat:'Technology',     about:'8.5 billion searches per day. Also owns YouTube, Android, Google Maps and Google Cloud.'},
-    {t:'META',n:'Meta',       i:'👓',b:505,  v:.018,band:'#0064e0', cat:'Social Media',   about:'Owns Facebook, Instagram and WhatsApp. Over 3.2 billion daily active users worldwide.'},
-    {t:'MSFT',n:'Microsoft',  i:'🪟',b:415,  v:.012,band:'#00a4ef', cat:'Technology',     about:'Makes Windows, Office 365, Xbox and Azure. One of the two most valuable companies on Earth.'},
-    {t:'NFLX',n:'Netflix',    i:'🎬',b:628,  v:.021,band:'#e50914', cat:'Entertainment', about:"World's largest streaming service with 260M+ subscribers. Produces its own movies and shows."},
-    {t:'DIS',n:'Disney',      i:'🏰',b:112,  v:.017,band:'#1868c3', cat:'Entertainment', about:'Owns Marvel, Star Wars, Pixar, ESPN and Disney+. Also runs the famous theme parks.'},
-    {t:'COIN',n:'Coinbase',   i:'🪙',b:225,  v:.038,band:'#1652f0', cat:'Fintech',        about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
-    {t:'PYPL',n:'PayPal',     i:'💳',b:68,   v:.019,band:'#003087', cat:'Fintech',        about:'Digital payments giant processing billions in transactions yearly. Also owns Venmo.'},
-    {t:'UBER',n:'Uber',       i:'🚗',b:74,   v:.023,band:'#444',    cat:'Transport',      about:"World's biggest ride-hailing and food delivery company, operating in 70+ countries."},
-    {t:'SPOT',n:'Spotify',    i:'🎵',b:302,  v:.022,band:'#1db954', cat:'Entertainment', about:"World's largest music streaming platform with 600M+ users and 240M+ paid subscribers."},
-    {t:'RBLX',n:'Roblox',     i:'🕹️',b:38,  v:.035,band:'#e52207', cat:'Gaming',         about:'Massive online gaming platform where users build and play their own games. Huge with teens.'},
-    {t:'AMD',n:'AMD',         i:'⚙️',b:168,  v:.024,band:'#ed1c24', cat:'Semiconductors', about:'Rivals NVIDIA and Intel. Makes CPUs for PCs and GPUs for gaming and AI workloads.'},
+    {t:'AAPL', n:'Apple', i:'🍎', b:178, v:.011, band:'#aaa', cat:'Technology', about:'Makes iPhone, Mac, iPad and the App Store. One of the most profitable companies in history.'},
+    {t:'GOOGL', n:'Google', i:'🔍', b:158, v:.013, band:'#4285f4', cat:'Technology', about:'8.5 billion searches per day. Also owns YouTube, Android, Google Maps and Google Cloud.'},
+    {t:'TSLA', n:'Tesla', i:'⚡', b:245, v:.028, band:'#cc3333', cat:'EV & Energy', about:'Electric vehicles and solar energy. CEO Elon Musk also runs SpaceX, X and xAI.'},
+    {t:'NVDA', n:'NVIDIA', i:'🎮', b:875, v:.022, band:'#76b900', cat:'Semiconductors', about:'Makes GPUs that power AI training, gaming and data centers. Crossed $1 trillion in 2023.'},
+    {t:'AMZN', n:'Amazon', i:'📦', b:185, v:.015, band:'#ff9900', cat:'E-Commerce', about:"World's largest online retailer. AWS cloud service powers a huge chunk of the entire internet."},
+    {t:'META', n:'Meta', i:'👓', b:505, v:.018, band:'#0064e0', cat:'Social Media', about:'Owns Facebook, Instagram and WhatsApp. Over 3.2 billion daily active users worldwide.'},
+    {t:'MSFT', n:'Microsoft', i:'🪟', b:415, v:.012, band:'#00a4ef', cat:'Technology', about:'Makes Windows, Office 365, Xbox and Azure. One of the two most valuable companies on Earth.'},
+    {t:'NFLX', n:'Netflix', i:'🎬', b:628, v:.021, band:'#e50914', cat:'Entertainment', about:"World's largest streaming service with 260M+ subscribers. Produces its own movies and shows."},
+    {t:'DIS', n:'Disney', i:'🏰', b:112, v:.017, band:'#1868c3', cat:'Entertainment', about:'Owns Marvel, Star Wars, Pixar, ESPN and Disney+. Also runs the famous theme parks.'},
+    {t:'COIN', n:'Coinbase', i:'🪙', b:225, v:.038, band:'#1652f0', cat:'Fintech', about:'Largest US crypto exchange. Its stock price moves closely with Bitcoin and crypto markets.'},
+    {t:'PYPL', n:'PayPal', i:'💳', b:68, v:.019, band:'#003087', cat:'Fintech', about:'Digital payments giant processing billions in transactions yearly. Also owns Venmo.'},
+    {t:'UBER', n:'Uber', i:'🚗', b:74, v:.023, band:'#444', cat:'Transport', about:"World's biggest ride-hailing and food delivery company, operating in 70+ countries."},
+    {t:'SPOT', n:'Spotify', i:'🎵', b:302, v:.022, band:'#1db954', cat:'Entertainment', about:"World's largest music streaming platform with 600M+ users and 240M+ paid subscribers."},
+    {t:'RBLX', n:'Roblox', i:'🕹️', b:38, v:.035, band:'#e52207', cat:'Gaming', about:'Massive online gaming platform where users build and play their own games. Huge with teens.'},
+    {t:'AMD', n:'AMD', i:'⚙️', b:168, v:.024, band:'#ed1c24', cat:'Semiconductors', about:'Rivals NVIDIA and Intel. Makes CPUs for PCs and GPUs for gaming and AI workloads.'},
+    {t:'JPM', n:'JPMorgan', i:'🏦', b:195, v:.014, band:'#0d6b9e', cat:'Banking', about:'Largest bank in the US by assets. Provides investment banking, asset management and consumer banking.'},
+    {t:'V', n:'Visa', i:'💳', b:275, v:.012, band:'#1a1f71', cat:'Financial', about:'Global payments technology connecting consumers, merchants and banks in over 200 countries.'},
+    {t:'WMT', n:'Walmart', i:'🛒', b:68, v:.009, band:'#0071ce', cat:'Retail', about:'Worlds largest retailer with over 10,500 stores worldwide and massive e-commerce presence.'},
+    {t:'JNJ', n:'Johnson & Johnson', i:'💊', b:155, v:.008, band:'#d81c28', cat:'Healthcare', about:'Diversified healthcare giant making pharmaceuticals, medical devices and consumer health products.'},
+    {t:'PG', n:'Procter & Gamble', i:'🧼', b:165, v:.007, band:'#003da5', cat:'Consumer Goods', about:'Makes household brands like Tide, Pampers, Gillette, Crest and dozens more.'},
+    {t:'MA', n:'Mastercard', i:'💳', b:465, v:.011, band:'#eb001b', cat:'Financial', about:'Global payment network connecting cardholders, merchants and financial institutions.'},
+    {t:'HD', n:'Home Depot', i:'🔨', b:380, v:.013, band:'#f96305', cat:'Retail', about:'Largest home improvement retailer in the world, serving DIY customers and professionals.'},
+    {t:'BAC', n:'Bank of America', i:'🏦', b:38, v:.016, band:'#012169', cat:'Banking', about:'One of the largest financial institutions in the US serving individuals and corporations.'},
+    {t:'NKE', n:'Nike', i:'👟', b:92, v:.018, band:'#040404', cat:'Apparel', about:'Worlds largest athletic footwear and apparel company with iconic swoosh logo.'},
+    {t:'KO', n:'Coca-Cola', i:'🥤', b:68, v:.008, band:'#f40000', cat:'Beverages', about:'Global beverage giant with over 500 brands including Coke, Sprite, Fanta and Dasani.'},
+    {t:'PEP', n:'PepsiCo', i:'🥤', b:175, v:.007, band:'#004b93', cat:'Beverages & Snacks', about:'Owns Pepsi, Mountain Dew, Gatorade, Frito-Lay, Quaker and many other food brands.'},
+    {t:'MCD', n:'McDonalds', i:'🍔', b:285, v:.011, band:'#da291c', cat:'Fast Food', about:'Worlds largest fast food chain with over 38,000 locations serving 69 million customers daily.'},
+    {t:'CRM', n:'Salesforce', i:'☁️', b:298, v:.017, band:'#00a1e0', cat:'Software', about:'Leading cloud-based customer relationship management (CRM) software provider.'},
+    {t:'INTC', n:'Intel', i:'💻', b:41, v:.019, band:'#0071c5', cat:'Semiconductors', about:'Worlds largest manufacturer of PC chips, though facing competition from AMD and NVIDIA.'},
+    {t:'CSCO', n:'Cisco', i:'🌐', b:49, v:.013, band:'#1ba0d7', cat:'Networking', about:'Largest networking hardware company making routers, switches and cybersecurity solutions.'},
+    {t:'VZ', n:'Verizon', i:'📱', b:41, v:.008, band:'#cd040b', cat:'Telecom', about:'One of the largest wireless carriers in the US with extensive 5G network coverage.'}
   ],
   etfs:[
-    {t:'SPY',n:'S&P 500',      i:'📊',b:510,v:.007,band:'#2ecc71',cat:'Index ETF',    about:'Tracks the 500 largest US companies. The most popular investment on Earth. ~10% avg annual return.'},
-    {t:'QQQ',n:'NASDAQ 100',   i:'💻',b:445,v:.010,band:'#3498db',cat:'Index ETF',    about:'Top 100 NASDAQ companies. Very tech-heavy: Apple, Microsoft, NVIDIA, Amazon, Meta.'},
-    {t:'VTI',n:'Total Market', i:'🌍',b:235,v:.007,band:'#1abc9c',cat:'Index ETF',    about:'A tiny piece of every publicly traded US company — over 3,700 stocks in one fund.'},
-    {t:'ARKK',n:'ARK Innovate',i:'🚀',b:48, v:.036,band:'#e74c3c',cat:'Active ETF',   about:'Managed by Cathie Wood. Bets on AI, genomics, robotics and fintech disruptors. High risk.'},
-    {t:'GLD',n:'Gold ETF',     i:'🥇',b:185,v:.009,band:'#f1c40f',cat:'Commodity ETF',about:'Tracks physical gold in vaults. Classic inflation hedge used for thousands of years.'},
-    {t:'BND',n:'Bond ETF',     i:'🏦',b:72, v:.003,band:'#7f8c8d',cat:'Bond ETF',     about:'Thousands of US government and corporate bonds. Very stable, low risk, slow growth.'},
-    {t:'VNQ',n:'Real Estate',  i:'🏠',b:88, v:.011,band:'#e67e22',cat:'REIT ETF',     about:'Invests in real estate companies: malls, apartments and office buildings.'},
-    {t:'ICLN',n:'Clean Energy',i:'♻️',b:17, v:.028,band:'#27ae60',cat:'Thematic ETF', about:'Solar, wind and clean energy companies worldwide. Bets on the green energy transition.'},
+    {t:'SPY', n:'S&P 500', i:'📊', b:510, v:.007, band:'#2ecc71', cat:'Index ETF', about:'Tracks the 500 largest US companies. The most popular investment on Earth. ~10% avg annual return.'},
+    {t:'QQQ', n:'NASDAQ 100', i:'💻', b:445, v:.010, band:'#3498db', cat:'Index ETF', about:'Top 100 NASDAQ companies. Very tech-heavy: Apple, Microsoft, NVIDIA, Amazon, Meta.'},
+    {t:'VTI', n:'Total Market', i:'🌍', b:235, v:.007, band:'#1abc9c', cat:'Index ETF', about:'A tiny piece of every publicly traded US company — over 3,700 stocks in one fund.'},
+    {t:'ARKK', n:'ARK Innovate', i:'🚀', b:48, v:.036, band:'#e74c3c', cat:'Active ETF', about:'Managed by Cathie Wood. Bets on AI, genomics, robotics and fintech disruptors. High risk.'},
+    {t:'GLD', n:'Gold ETF', i:'🥇', b:185, v:.009, band:'#f1c40f', cat:'Commodity ETF', about:'Tracks physical gold in vaults. Classic inflation hedge used for thousands of years.'},
+    {t:'BND', n:'Bond ETF', i:'🏦', b:72, v:.003, band:'#7f8c8d', cat:'Bond ETF', about:'Thousands of US government and corporate bonds. Very stable, low risk, slow growth.'},
+    {t:'VNQ', n:'Real Estate', i:'🏠', b:88, v:.011, band:'#e67e22', cat:'REIT ETF', about:'Invests in real estate companies: malls, apartments and office buildings.'},
+    {t:'ICLN', n:'Clean Energy', i:'♻️', b:17, v:.028, band:'#27ae60', cat:'Thematic ETF', about:'Solar, wind and clean energy companies worldwide. Bets on the green energy transition.'},
+    {t:'IVV', n:'iShares Core S&P 500', i:'📈', b:548, v:.007, band:'#1e4b7a', cat:'Index ETF', about:'Another major S&P 500 ETF, nearly identical to SPY but slightly lower fees.'},
+    {t:'VOO', n:'Vanguard S&P 500', i:'📉', b:485, v:.007, band:'#005a9c', cat:'Index ETF', about:'Vanguards S&P 500 ETF, known for extremely low expense ratios.'},
+    {t:'SCHD', n:'Schwab Dividend', i:'💰', b:78, v:.008, band:'#00a3e0', cat:'Dividend ETF', about:'Focuses on high-dividend US stocks. Popular with income-focused investors.'},
+    {t:'VXUS', n:'Total International', i:'🌎', b:61, v:.009, band:'#2ecc71', cat:'International ETF', about:'Invests in thousands of companies outside the US, from Europe to emerging markets.'},
+    {t:'SMH', n:'Semiconductors', i:'🔌', b:226, v:.019, band:'#00b5e2', cat:'Sector ETF', about:'Tracks the semiconductor industry including NVIDIA, Intel, AMD and TSMC.'},
+    {t:'XLE', n:'Energy Sector', i:'⛽', b:92, v:.015, band:'#f39c12', cat:'Sector ETF', about:'Energy companies involved in oil, gas and consumable fuels. Tracks XLE index.'},
+    {t:'XLF', n:'Financial Sector', i:'🏛️', b:42, v:.012, band:'#3498db', cat:'Sector ETF', about:'Financial companies including banks, insurance and real estate firms.'}
   ],
   commodities:[
-    {t:'GOLD',n:'Gold',       i:'🥇',b:2320, v:.009,band:'#f1c40f',cat:'Precious Metal', about:'The classic safe-haven asset. Investors pile in when they fear an economic downturn.'},
-    {t:'SLVR',n:'Silver',     i:'🥈',b:29,   v:.018,band:'#bdc3c7',cat:'Precious Metal', about:'Used in electronics, solar panels and jewelry. More volatile than gold.'},
-    {t:'OIL',n:'Crude Oil',   i:'🛢️',b:82,  v:.022,band:'#2c3e50',cat:'Energy',         about:'The most-traded commodity in the world. Affects gas prices, plastics and almost everything.'},
-    {t:'NATG',n:'Natural Gas',i:'🔥',b:2.4,  v:.045,band:'#e67e22',cat:'Energy',         about:'Used for heating and power. Prices spike in cold winters and during energy supply crunches.'},
-    {t:'WHEAT',n:'Wheat',     i:'🌾',b:5.8,  v:.026,band:'#f39c12',cat:'Agricultural',   about:'One of the most essential food crops globally. Prices jump during droughts or wars.'},
-    {t:'COPR',n:'Copper',     i:'🪙',b:4.4,  v:.020,band:'#d35400',cat:'Industrial',     about:'Called "Dr. Copper" — its price is a real-time health check for the global economy.'},
-    {t:'PLAT',n:'Platinum',   i:'💿',b:975,  v:.016,band:'#e0e0e0',cat:'Precious Metal', about:'Rarer than gold. Used in catalytic converters and jewelry. Mainly mined in South Africa.'},
-    {t:'CORN',n:'Corn',       i:'🌽',b:4.6,  v:.024,band:'#f9ca24',cat:'Agricultural',   about:'Used for food, animal feed and ethanol fuel. One of the most widely grown crops on Earth.'},
+    {t:'GOLD', n:'Gold', i:'🥇', b:2320, v:.009, band:'#f1c40f', cat:'Precious Metal', about:'The classic safe-haven asset. Investors pile in when they fear an economic downturn.'},
+    {t:'SLVR', n:'Silver', i:'🥈', b:29, v:.018, band:'#bdc3c7', cat:'Precious Metal', about:'Used in electronics, solar panels and jewelry. More volatile than gold.'},
+    {t:'OIL', n:'Crude Oil', i:'🛢️', b:82, v:.022, band:'#2c3e50', cat:'Energy', about:'The most-traded commodity in the world. Affects gas prices, plastics and almost everything.'},
+    {t:'NATG', n:'Natural Gas', i:'🔥', b:2.4, v:.045, band:'#e67e22', cat:'Energy', about:'Used for heating and power. Prices spike in cold winters and during energy supply crunches.'},
+    {t:'WHEAT', n:'Wheat', i:'🌾', b:5.8, v:.026, band:'#f39c12', cat:'Agricultural', about:'One of the most essential food crops globally. Prices jump during droughts or wars.'},
+    {t:'COPR', n:'Copper', i:'🪙', b:4.4, v:.020, band:'#d35400', cat:'Industrial', about:'Called "Dr. Copper" — its price is a real-time health check for the global economy.'},
+    {t:'PLAT', n:'Platinum', i:'💿', b:975, v:.016, band:'#e0e0e0', cat:'Precious Metal', about:'Rarer than gold. Used in catalytic converters and jewelry. Mainly mined in South Africa.'},
+    {t:'CORN', n:'Corn', i:'🌽', b:4.6, v:.024, band:'#f9ca24', cat:'Agricultural', about:'Used for food, animal feed and ethanol fuel. One of the most widely grown crops on Earth.'},
+    {t:'SOY', n:'Soybeans', i:'🫘', b:12.8, v:.019, band:'#6b8e23', cat:'Agricultural', about:'Critical protein source for animal feed and food products. Major export of the Americas.'},
+    {t:'COFF', n:'Coffee', i:'☕', b:1.95, v:.028, band:'#6f4e37', cat:'Soft Commodity', about:'Second most traded commodity in the world by volume. Arabica and Robusta varieties.'},
+    {t:'SUGR', n:'Sugar', i:'🍬', b:.23, v:.022, band:'#f0e68c', cat:'Soft Commodity', about:'Used in food and increasingly for ethanol production. Subject to weather volatility.'},
+    {t:'COTT', n:'Cotton', i:'👕', b:.84, v:.018, band:'#ffffff', cat:'Textile', about:'Natural fiber used in clothing. Prices affected by weather, demand and synthetic alternatives.'},
+    {t:'LIVE', n:'Live Cattle', i:'🐄', b:1.82, v:.011, band:'#8b4513', cat:'Livestock', about:'Cattle raised for beef production. Affected by feed costs and consumer demand.'},
+    {t:'HOG', n:'Lean Hogs', i:'🐖', b:.78, v:.014, band:'#ff69b4', cat:'Livestock', about:'Pigs raised for pork production. Influenced by disease outbreaks and trade policies.'},
+    {t:'URAN', n:'Uranium', i:'☢️', b:58, v:.031, band:'#39ff14', cat:'Energy', about:'Nuclear fuel. Demand growing for clean energy, but supply constrained and volatile.'}
   ],
   forex:[
-    {t:'EUR',n:'EUR/USD',i:'€', b:1.085,v:.006,band:'#003399',cat:'Major Forex',  about:'Euro vs US Dollar — the most traded currency pair in the world. Moves on EU economic data.'},
-    {t:'GBP',n:'GBP/USD',i:'£', b:1.268,v:.007,band:'#012169',cat:'Major Forex',  about:'British Pound vs US Dollar. Affected by UK economic data and Bank of England policy.'},
-    {t:'JPY',n:'USD/JPY',i:'¥', b:149,  v:.005,band:'#bc002d',cat:'Major Forex',  about:'US Dollar vs Japanese Yen. Japan keeps rates very low, which keeps the Yen weaker.'},
-    {t:'BRL',n:'USD/BRL',i:'R$',b:5.05, v:.012,band:'#009c3b',cat:'Emerging FX',  about:'US Dollar vs Brazilian Real. Emerging market currency affected heavily by commodity prices.'},
-    {t:'CAD',n:'USD/CAD',i:'C$',b:1.36, v:.006,band:'#ff0000',cat:'Major Forex',  about:'US Dollar vs Canadian Dollar. Canada exports lots of oil, so CAD closely tracks crude.'},
-    {t:'AUD',n:'AUD/USD',i:'A$',b:.655, v:.007,band:'#00008b',cat:'Major Forex',  about:'Australian Dollar vs US Dollar. Australia mines gold and iron, so AUD tracks commodity prices.'},
+    {t:'EUR', n:'EUR/USD', i:'€', b:1.085, v:.006, band:'#003399', cat:'Major Forex', about:'Euro vs US Dollar — the most traded currency pair in the world. Moves on EU economic data.'},
+    {t:'GBP', n:'GBP/USD', i:'£', b:1.268, v:.007, band:'#012169', cat:'Major Forex', about:'British Pound vs US Dollar. Affected by UK economic data and Bank of England policy.'},
+    {t:'JPY', n:'USD/JPY', i:'¥', b:149, v:.005, band:'#bc002d', cat:'Major Forex', about:'US Dollar vs Japanese Yen. Japan keeps rates very low, which keeps the Yen weaker.'},
+    {t:'BRL', n:'USD/BRL', i:'R$', b:5.05, v:.012, band:'#009c3b', cat:'Emerging FX', about:'US Dollar vs Brazilian Real. Emerging market currency affected heavily by commodity prices.'},
+    {t:'CAD', n:'USD/CAD', i:'C$', b:1.36, v:.006, band:'#ff0000', cat:'Major Forex', about:'US Dollar vs Canadian Dollar. Canada exports lots of oil, so CAD closely tracks crude.'},
+    {t:'AUD', n:'AUD/USD', i:'A$', b:.655, v:.007, band:'#00008b', cat:'Major Forex', about:'Australian Dollar vs US Dollar. Australia mines gold and iron, so AUD tracks commodity prices.'},
+    {t:'CHF', n:'USD/CHF', i:'🇨🇭', b:.875, v:.005, band:'#ff0000', cat:'Major Forex', about:'US Dollar vs Swiss Franc. Switzerland is a safe haven, so CHF strengthens during turmoil.'},
+    {t:'NZD', n:'NZD/USD', i:'NZ$', b:.595, v:.008, band:'#00247d', cat:'Major Forex', about:'New Zealand Dollar vs US Dollar. Closely tied to dairy prices and Chinese demand.'},
+    {t:'CNY', n:'USD/CNY', i:'¥', b:7.18, v:.004, band:'#de2910', cat:'Emerging FX', about:'US Dollar vs Chinese Yuan. Heavily managed by Peoples Bank of China.'},
+    {t:'INR', n:'USD/INR', i:'₹', b:83.5, v:.009, band:'#ff9933', cat:'Emerging FX', about:'US Dollar vs Indian Rupee. Affected by oil prices and foreign investment flows.'},
+    {t:'MXN', n:'USD/MXN', i:'$', b:16.9, v:.011, band:'#006341', cat:'Emerging FX', about:'US Dollar vs Mexican Peso. Tracks US economic health and trade relations.'},
+    {t:'ZAR', n:'USD/ZAR', i:'R', b:18.7, v:.015, band:'#007749', cat:'Emerging FX', about:'US Dollar vs South African Rand. Very volatile, linked to gold prices.'},
+    {t:'SGD', n:'USD/SGD', i:'S$', b:1.34, v:.004, band:'#ed2939', cat:'Asian FX', about:'US Dollar vs Singapore Dollar. Stable currency managed by Monetary Authority of Singapore.'},
+    {t:'HKD', n:'USD/HKD', i:'HK$', b:7.82, v:.001, band:'#c8102e', cat:'Asian FX', about:'US Dollar vs Hong Kong Dollar. Pegged to USD in narrow range of 7.75-7.85.'},
+    {t:'KRW', n:'USD/KRW', i:'₩', b:1330, v:.008, band:'#003478', cat:'Asian FX', about:'US Dollar vs South Korean Won. Tied to tech exports and global trade.'}
   ]
 };
 
@@ -593,12 +639,17 @@ const NEWS = [
   {s:'bull',h:'Amazon AWS growth re-accelerates above estimates',fx:'→ AMZN may surge'},
   {s:'bull',h:'Roblox daily users hit new all-time record',fx:'→ RBLX may climb'},
   {s:'bear',h:'Natural gas spikes on cold weather forecast',fx:'→ NATG very volatile'},
+  {s:'bull',h:'Google unveils new AI model, analysts bullish',fx:'→ GOOGL could rally'},
+  {s:'bull',h:'Microsoft cloud growth beats expectations',fx:'→ MSFT may surge'},
+  {s:'neut',h:'JPMorgan reports mixed quarterly earnings',fx:'→ JPM flat'},
+  {s:'bull',h:'Visa reports record transaction volume',fx:'→ V likely to rise'},
+  {s:'bear',h:'Intel delays next-gen chip production',fx:'→ INTC could fall'}
 ];
 
 /* ═══════════════════════════════════════════
-   STATE
+   STATE — Same exact mechanics, just more assets
 ═══════════════════════════════════════════ */
-const SK = 'apex_v8_fixed';  // Changed version to force fresh start with fixed logic
+const SK = 'apex_v8_expanded';
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -615,7 +666,7 @@ let cBuf=[], rafA=null, rafL=null;
 const DPR=window.devicePixelRatio||1;
 
 /* ═══════════════════════════════════════════
-   PRICE ENGINE
+   PRICE ENGINE — UNCHANGED MECHANICS
 ═══════════════════════════════════════════ */
 function initPrices(){
   ALL.forEach(a=>{
@@ -640,7 +691,7 @@ function tick(){
 }
 
 /* ═══════════════════════════════════════════
-   FORMAT
+   FORMAT — UNCHANGED
 ═══════════════════════════════════════════ */
 function F(n){
   if(!n&&n!==0) return '$—';
@@ -657,7 +708,7 @@ const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(p
 function save(){ try{localStorage.setItem(SK,JSON.stringify({g:G,px:prices,op:opens,hi:hist}));}catch{} }
 
 /* ═══════════════════════════════════════════
-   RENDER — ALL
+   RENDER — ALL (Same functions, just more assets)
 ═══════════════════════════════════════════ */
 function renderAll(){ renderGrid(); renderTicker(); renderNav(); renderSidebar(); save(); }
 
@@ -722,7 +773,7 @@ function renderSidebar(){
   const spEl=document.getElementById('sPnl');
   spEl.textContent=(pnl>=0?'+':'')+F(pnl); spEl.style.color=pnl>=0?'var(--UP)':'var(--DN)';
 
-  /* holdings — FIXED: each holding shows properly and sell works correctly */
+  /* holdings */
   const tks=Object.keys(G.h).filter(t=>G.h[t].sh>.000001);
   const hl=document.getElementById('holdList');
   if(!tks.length){
@@ -792,14 +843,14 @@ function switchSb(tab,el){
 }
 
 /* ═══════════════════════════════════════════
-   SIDEBAR QUICK SELL — FIXED: sells ALL of that asset and adds cash correctly
+   SIDEBAR QUICK SELL — FIXED LOGIC (unchanged from fixed version)
 ═══════════════════════════════════════════ */
 function quickSell(ticker){
   const h=G.h[ticker];
   if(!h||h.sh<.000001){ toast('Nothing to sell','err'); return; }
   const p=prices[ticker]||0;
-  const rev = h.sh * p;  // Total value at current price
-  G.cash = G.cash + rev; // Add to cash
+  const rev = h.sh * p;
+  G.cash = G.cash + rev;
   G.txs.push({
     tp:'sell',
     t:ticker,
@@ -809,7 +860,7 @@ function quickSell(ticker){
     time:new Date().toLocaleTimeString()
   });
   G.trades++;
-  delete G.h[ticker]; // Remove the holding completely
+  delete G.h[ticker];
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
   renderAll();
   if(curA && curA.t === ticker){ 
@@ -819,18 +870,27 @@ function quickSell(ticker){
 }
 
 /* ═══════════════════════════════════════════
-   FULL-SCREEN DETAIL
+   FULL-SCREEN DETAIL — Expanded GLOWS for all new assets
 ═══════════════════════════════════════════ */
 const GLOWS={
   BTC:'#f7931a',ETH:'#627eea',SOL:'#9945ff',ADA:'#0033ad',DOGE:'#c3a634',XRP:'#00aae4',
-  AVAX:'#e84142',MATIC:'#8247e5',LINK:'#375bd2',SHIB:'#e02121',
-  AAPL:'#aaaaaa',TSLA:'#cc3333',NVDA:'#76b900',AMZN:'#ff9900',GOOGL:'#4285f4',
+  AVAX:'#e84142',MATIC:'#8247e5',LINK:'#375bd2',SHIB:'#e02121',DOT:'#e6007a',UNI:'#ff007a',
+  ATOM:'#2e3148',LTC:'#345d9d',BCH:'#8dc351',
+  AAPL:'#aaaaaa',GOOGL:'#4285f4',TSLA:'#cc3333',NVDA:'#76b900',AMZN:'#ff9900',
   META:'#0064e0',MSFT:'#00a4ef',NFLX:'#e50914',DIS:'#1868c3',COIN:'#1652f0',
   PYPL:'#003087',UBER:'#444444',SPOT:'#1db954',RBLX:'#e52207',AMD:'#ed1c24',
+  JPM:'#0d6b9e',V:'#1a1f71',WMT:'#0071ce',JNJ:'#d81c28',PG:'#003da5',
+  MA:'#eb001b',HD:'#f96305',BAC:'#012169',NKE:'#040404',KO:'#f40000',
+  PEP:'#004b93',MCD:'#da291c',CRM:'#00a1e0',INTC:'#0071c5',CSCO:'#1ba0d7',VZ:'#cd040b',
   SPY:'#2ecc71',QQQ:'#3498db',VTI:'#1abc9c',ARKK:'#e74c3c',GLD:'#f1c40f',
-  BND:'#7f8c8d',VNQ:'#e67e22',ICLN:'#27ae60',
-  GOLD:'#f1c40f',SLVR:'#bdc3c7',OIL:'#2c3e50',NATG:'#e67e22',WHEAT:'#f39c12',COPR:'#d35400',PLAT:'#e0e0e0',CORN:'#f9ca24',
+  BND:'#7f8c8d',VNQ:'#e67e22',ICLN:'#27ae60',IVV:'#1e4b7a',VOO:'#005a9c',
+  SCHD:'#00a3e0',VXUS:'#2ecc71',SMH:'#00b5e2',XLE:'#f39c12',XLF:'#3498db',
+  GOLD:'#f1c40f',SLVR:'#bdc3c7',OIL:'#2c3e50',NATG:'#e67e22',WHEAT:'#f39c12',COPR:'#d35400',
+  PLAT:'#e0e0e0',CORN:'#f9ca24',SOY:'#6b8e23',COFF:'#6f4e37',SUGR:'#f0e68c',COTT:'#ffffff',
+  LIVE:'#8b4513',HOG:'#ff69b4',URAN:'#39ff14',
   EUR:'#003399',GBP:'#012169',JPY:'#bc002d',BRL:'#009c3b',CAD:'#ff0000',AUD:'#00008b',
+  CHF:'#ff0000',NZD:'#00247d',CNY:'#de2910',INR:'#ff9933',MXN:'#006341',ZAR:'#007749',
+  SGD:'#ed2939',HKD:'#c8102e',KRW:'#003478'
 };
 
 function openScreen(ticker){
@@ -872,7 +932,7 @@ function refreshScHeader(){
   }
 }
 
-/* SELL SECTION — FIXED: shows when you own this asset, updates on every price tick */
+/* SELL SECTION */
 function renderSellSection(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
@@ -886,13 +946,11 @@ function renderSellSection(){
   document.getElementById('sellSecWorth').innerHTML=
     `You own <strong>${h.sh.toFixed(6)} ${t}</strong> · worth <strong>${F(val)}</strong>`;
 
-  // Reset sell amount input when section becomes visible
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   document.getElementById('sellConfirmBtn').textContent = `Sell ${curA.n}`;
 }
 
-/* called when user types in the sell amount box */
 function refreshSellPreview(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
@@ -907,7 +965,6 @@ function refreshSellPreview(){
     return;
   }
   
-  // Can't sell more than you have
   const sellVal = Math.min(amt, maxVal);
   const shares = sellVal / p;
   
@@ -916,7 +973,6 @@ function refreshSellPreview(){
   btn.textContent = `Sell — Get Back ${F(sellVal)}`;
 }
 
-/* "Max" button fills the sell input with full position value */
 function setSellMax(){
   if(!curA) return;
   const h=G.h[curA.t], p=prices[curA.t]||0;
@@ -926,7 +982,6 @@ function setSellMax(){
   refreshSellPreview();
 }
 
-/* FIXED: confirm sell — properly deducts shares and adds cash */
 function doSell(){
   if(!curA) return;
   const t = curA.t;
@@ -945,16 +1000,12 @@ function doSell(){
   }
   
   const maxVal = h.sh * p;
-  const sellVal = Math.min(amt, maxVal);   // can't sell more than you have
+  const sellVal = Math.min(amt, maxVal);
   const shares = sellVal / p;
   
-  // Update holding
   h.sh = h.sh - shares;
-  
-  // Add cash
   G.cash = G.cash + sellVal;
   
-  // Record transaction
   G.txs.push({
     tp:'sell',
     t,
@@ -966,25 +1017,22 @@ function doSell(){
   
   G.trades++;
   
-  // If holding is now effectively zero, remove it
   if(h.sh < 0.000001){
     delete G.h[t];
   }
   
-  // Clear inputs
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
   
-  // Refresh UI
   renderPos(); 
   renderSellSection(); 
   renderAll();
 }
 
 /* ═══════════════════════════════════════════
-   BUY — FIXED: properly records purchases
+   BUY — FIXED LOGIC (unchanged from fixed version)
 ═══════════════════════════════════════════ */
 function qa(v){
   if(v === -1){
@@ -1032,20 +1080,16 @@ function doBuy(){
   const p = prices[t];
   const sh = amt / p;
   
-  // Deduct cash
   G.cash = G.cash - amt;
   
-  // Update or create holding
   if(!G.h[t]) {
     G.h[t] = {sh: 0, ac: 0};
   }
   
   const h = G.h[t];
-  // Update average cost
   h.ac = (h.sh * h.ac + amt) / (h.sh + sh);
   h.sh = h.sh + sh;
   
-  // Record transaction
   G.txs.push({
     tp:'buy',
     t,
@@ -1057,13 +1101,11 @@ function doBuy(){
   
   G.trades++;
   
-  // Clear input
   document.getElementById('buyAmt').value = '';
   document.getElementById('prev').textContent = 'Enter an amount above to preview';
   
   toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
   
-  // Refresh UI
   renderPos(); 
   renderSellSection(); 
   renderAll();
@@ -1087,7 +1129,7 @@ function renderPos(){
 }
 
 /* ═══════════════════════════════════════════
-   CANVAS CHART
+   CANVAS CHART — UNCHANGED
 ═══════════════════════════════════════════ */
 function buildChart(){
   if(!curA) return;
@@ -1151,7 +1193,6 @@ function drawChart(ctx,W,H,data,prog){
   const up=sub[sub.length-1].p>=sub[0].p;
   const COL=up?'#00b87a':'#e03b3b', DIM=up?'rgba(0,184,122,':'rgba(224,59,59,';
 
-  // grid + y labels
   ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
   for(let i=0;i<=5;i++){
     const gy=P.t+i*(cH/5);
@@ -1169,7 +1210,6 @@ function drawChart(ctx,W,H,data,prog){
   }
   ctx.setLineDash([]);
 
-  // x labels
   ctx.fillStyle='rgba(255,255,255,.19)';
   ctx.font=`400 9px 'Azeret Mono',monospace`;
   ctx.textAlign='center';
@@ -1181,7 +1221,6 @@ function drawChart(ctx,W,H,data,prog){
     }
   }
 
-  // gradient fill
   const grad=ctx.createLinearGradient(0,P.t,0,P.t+cH);
   grad.addColorStop(0,DIM+'0.26)'); grad.addColorStop(.5,DIM+'0.09)'); grad.addColorStop(1,DIM+'0)');
   ctx.beginPath();
@@ -1189,19 +1228,16 @@ function drawChart(ctx,W,H,data,prog){
   ctx.lineTo(X(sub.length-1),P.t+cH); ctx.lineTo(X(0),P.t+cH); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
 
-  // glow
   ctx.save(); ctx.filter='blur(6px)'; ctx.globalAlpha=.32;
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=9; ctx.lineJoin='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke(); ctx.restore();
 
-  // crisp line
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=1.9;
   ctx.lineJoin='round'; ctx.lineCap='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke();
 
-  // live price elements
   if(prog===1&&sub.length){
     const lx=X(sub.length-1), ly=Y(sub[sub.length-1].p), lp=sub[sub.length-1].p;
     ctx.strokeStyle=DIM+'0.3)'; ctx.setLineDash([4,10]); ctx.lineWidth=1;
