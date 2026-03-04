@@ -526,14 +526,18 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — ONLY BITCOIN, ETHEREUM, TETHER, BINANCE
+   ASSET DEFINITIONS — ORDERED AS REQUESTED
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
     {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
+    {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.18, v:.065, band:'#c3a634', cat:'Meme Coin', about:'Started as a meme in 2013. Now a top-10 crypto by market cap. Extremely volatile.'},
     {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
+    {t:'BNB', n:'BNB', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
     {t:'USDT', n:'Tether', i:'💵', b:1.00, v:.001, band:'#26a17b', cat:'Stablecoin', about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
-    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'}
+    {t:'USDC', n:'USD Coin', i:'💲', b:1.00, v:.001, band:'#2775ca', cat:'Stablecoin', about:'Stablecoin issued by Circle. Fully backed by cash and US treasuries. Major DeFi stablecoin.'},
+    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
+    {t:'XRP', n:'Ripple', i:'✕', b:0.52, v:.039, band:'#00aae4', cat:'Cryptocurrency', about:'Designed for fast international bank payments. Settles transfers in 3–5 seconds.'}
   ],
   stocks:[],
   etfs:[],
@@ -788,7 +792,7 @@ function quickSell(ticker){
    FULL-SCREEN DETAIL
 ═══════════════════════════════════════════ */
 const GLOWS={
-  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f'
+  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f',DOGE:'#c3a634',USDC:'#2775ca',XRP:'#00aae4'
 };
 
 function openScreen(ticker){
