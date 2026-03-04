@@ -526,21 +526,14 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — ROW 1 + ROW 2 CRYPTO
+   ASSET DEFINITIONS — ONLY BITCOIN, ETHEREUM, TETHER, BINANCE
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
-    // ROW 1 - Original four
     {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
     {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
     {t:'USDT', n:'Tether', i:'💵', b:1.00, v:.001, band:'#26a17b', cat:'Stablecoin', about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
-    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
-    
-    // ROW 2 - NEW CRYPTO! (automatically appears in second row)
-    {t:'SOL', n:'Solana', i:'◎', b:142.50, v:.042, band:'#9945FF', cat:'Cryptocurrency', about:'High-speed blockchain capable of 65,000 transactions per second. Known for low fees and growing ecosystem of DeFi and NFT projects.'},
-    {t:'XRP', n:'Ripple', i:'✕', b:0.52, v:.035, band:'#23292F', cat:'Cryptocurrency', about:'Digital payment protocol and currency. Focuses on fast, low-cost international money transfers for financial institutions.'},
-    {t:'ADA', n:'Cardano', i:'₳', b:0.35, v:.038, band:'#0033AD', cat:'Cryptocurrency', about:'Proof-of-stake blockchain platform founded by Charles Hoskinson. Focuses on security, sustainability, and academic research.'},
-    {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.12, v:.055, band:'#C2A633', cat:'Cryptocurrency', about:'The original meme coin. Started as a joke in 2013, now a community favorite with strong social media presence and low transaction fees.'}
+    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'}
   ],
   stocks:[],
   etfs:[],
@@ -795,8 +788,7 @@ function quickSell(ticker){
    FULL-SCREEN DETAIL
 ═══════════════════════════════════════════ */
 const GLOWS={
-  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f',
-  SOL:'#9945FF',XRP:'#23292F',ADA:'#0033AD',DOGE:'#C2A633'
+  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f'
 };
 
 function openScreen(ticker){
