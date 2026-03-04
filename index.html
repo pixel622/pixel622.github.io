@@ -526,14 +526,39 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — ONLY BITCOIN, ETHEREUM, TETHER, BINANCE
+   ASSET DEFINITIONS — 20+ CRYPTOCURRENCIES
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
+    // Original 4
     {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
     {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
     {t:'USDT', n:'Tether', i:'💵', b:1.00, v:.001, band:'#26a17b', cat:'Stablecoin', about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
-    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'}
+    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
+    
+    // Top 20 Cryptocurrencies
+    {t:'SOL', n:'Solana', i:'☀️', b:148.50, v:.035, band:'#00ffa3', cat:'Cryptocurrency', about:'High-performance blockchain supporting smart contracts. Known for fast transactions and low fees. Popular for DeFi and NFT projects.'},
+    {t:'XRP', n:'Ripple', i:'⚡', b:0.52, v:.022, band:'#23292f', cat:'Cryptocurrency', about:'Digital payment protocol and currency. Focuses on fast, low-cost international money transfers. Legal clarity improving.'},
+    {t:'ADA', n:'Cardano', i:'🌙', b:0.45, v:.019, band:'#0033ad', cat:'Cryptocurrency', about:'Proof-of-stake blockchain platform. Focuses on security, sustainability, and academic research. Smart contract enabled.'},
+    {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.12, v:.038, band:'#c2a633', cat:'Cryptocurrency', about:'Started as a meme coin, now a community favorite. Known for its friendly Shiba Inu mascot and Elon Musk tweets.'},
+    {t:'SHIB', n:'Shiba Inu', i:'🐕', b:0.000025, v:.042, band:'#ffa500', cat:'Cryptocurrency', about:'The "Dogecoin killer" meme coin. Built an entire ecosystem including ShibaSwap DEX and the BONE token.'},
+    {t:'AVAX', n:'Avalanche', i:'❄️', b:35.80, v:.029, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain platform with sub-second finality. Competes with Ethereum for DeFi applications.'},
+    {t:'DOT', n:'Polkadot', i:'●', b:7.25, v:.026, band:'#e6007a', cat:'Cryptocurrency', about:'Enables different blockchains to transfer messages and value. Created by Ethereum co-founder Gavin Wood.'},
+    {t:'MATIC', n:'Polygon', i:'🔷', b:0.85, v:.027, band:'#8247e5', cat:'Cryptocurrency', about:'Ethereum scaling solution. Provides faster and cheaper transactions while maintaining Ethereum security.'},
+    {t:'LINK', n:'Chainlink', i:'🔗', b:18.20, v:.025, band:'#2a5ada', cat:'Cryptocurrency', about:'Decentralized oracle network. Connects smart contracts with real-world data, APIs and payments.'},
+    {t:'UNI', n:'Uniswap', i:'🦄', b:7.40, v:.024, band:'#ff007a', cat:'Cryptocurrency', about:'Governance token for the largest DEX on Ethereum. Allows holders to vote on protocol changes.'},
+    {t:'ATOM', n:'Cosmos', i:'🌌', b:9.15, v:.021, band:'#2e3148', cat:'Cryptocurrency', about:'Internet of Blockchains. Aims to create an ecosystem of interoperable blockchains.'},
+    {t:'LTC', n:'Litecoin', i:'⚡', b:82.30, v:.020, band:'#345d9d', cat:'Cryptocurrency', about:'Silver to Bitcoin\'s gold. Faster block times and lower fees than Bitcoin. One of the oldest altcoins.'},
+    {t:'BCH', n:'Bitcoin Cash', i:'💰', b:380.50, v:.023, band:'#8dc351', cat:'Cryptocurrency', about:'Fork of Bitcoin with larger block size. Aims to be more usable for everyday transactions.'},
+    {t:'ALGO', n:'Algorand', i:'🔵', b:0.19, v:.018, band:'#000000', cat:'Cryptocurrency', about:'Pure proof-of-stake blockchain. Focuses on speed, security and decentralization for enterprise use.'},
+    {t:'XLM', n:'Stellar', i:'✨', b:0.11, v:.017, band:'#3f3f7a', cat:'Cryptocurrency', about:'Open network for money transfers. Focuses on connecting financial institutions and reducing costs.'},
+    {t:'VET', n:'VeChain', i:'🔋', b:0.032, v:.022, band:'#4bc0f2', cat:'Cryptocurrency', about:'Supply chain focused blockchain. Tracks products from manufacturing to consumer using RFID tags.'},
+    {t:'THETA', n:'Theta Network', i:'🎥', b:2.05, v:.026, band:'#2ab8e6', cat:'Cryptocurrency', about:'Decentralized video streaming network. Users share bandwidth and get rewarded with tokens.'},
+    {t:'FTM', n:'Fantom', i:'👻', b:0.65, v:.031, band:'#1969ff', cat:'Cryptocurrency', about:'High-performance, scalable smart contract platform. Uses DAG technology for fast finality.'},
+    {t:'NEAR', n:'Near Protocol', i:'⛰️', b:5.80, v:.025, band:'#000000', cat:'Cryptocurrency', about:'Developer-friendly proof-of-stake blockchain. Uses sharding technology for scalability.'},
+    {t:'APT', n:'Aptos', i:'⛓️', b:13.40, v:.030, band:'#000000', cat:'Cryptocurrency', about:'Layer 1 blockchain built by former Meta engineers. Focuses on safety and performance.'},
+    {t:'ARB', n:'Arbitrum', i:'🔷', b:1.85, v:.024, band:'#28a0f0', cat:'Cryptocurrency', about:'Leading Ethereum layer 2 scaling solution. Uses optimistic rollups for lower fees.'},
+    {t:'OP', n:'Optimism', i:'✨', b:2.95, v:.027, band:'#ff0420', cat:'Cryptocurrency', about:'Ethereum layer 2 scaling solution. Known for its Optimistic Rollup technology.'}
   ],
   stocks:[],
   etfs:[],
@@ -788,7 +813,13 @@ function quickSell(ticker){
    FULL-SCREEN DETAIL
 ═══════════════════════════════════════════ */
 const GLOWS={
-  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f'
+  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f',
+  SOL:'#00ffa3',XRP:'#23292f',ADA:'#0033ad',DOGE:'#c2a633',
+  SHIB:'#ffa500',AVAX:'#e84142',DOT:'#e6007a',MATIC:'#8247e5',
+  LINK:'#2a5ada',UNI:'#ff007a',ATOM:'#2e3148',LTC:'#345d9d',
+  BCH:'#8dc351',ALGO:'#000000',XLM:'#3f3f7a',VET:'#4bc0f2',
+  THETA:'#2ab8e6',FTM:'#1969ff',NEAR:'#000000',APT:'#000000',
+  ARB:'#28a0f0',OP:'#ff0420'
 };
 
 function openScreen(ticker){
