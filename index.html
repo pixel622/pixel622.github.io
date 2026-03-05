@@ -855,7 +855,18 @@ function loadUserData(name){
 }
 function saveUserData(){
   if(!currentUser) return;
-  try{ localStorage.setItem(userKey(currentUser), JSON.stringify(G)); }catch{}
+  try{
+    // Always snapshot the current G — never let a stale reference slip through
+    const snapshot = JSON.parse(JSON.stringify(G));
+    localStorage.setItem(userKey(currentUser), JSON.stringify(snapshot));
+  }catch(e){ console.error('Save failed',e); }
+}
+
+// Immediate save — called right after every trade mutation
+function saveNow(){
+  saveUserData();
+  saveMarket();
+  pushToGlobalLB();
 }
 function loadMarket(){
   try{
@@ -912,16 +923,24 @@ function avatarColor(name){
 
 function loginAs(name){
   currentUser = name;
-  G = loadUserData(name);
-  // update header pill
+  // Deep copy to prevent reference sharing bugs
+  const raw = loadUserData(name);
+  G = JSON.parse(JSON.stringify(raw));
+  // Ensure all required fields exist
+  if(typeof G.cash !== 'number') G.cash = 5;
+  if(!G.h || typeof G.h !== 'object') G.h = {};
+  if(!Array.isArray(G.txs)) G.txs = [];
+  if(typeof G.trades !== 'number') G.trades = 0;
+  if(typeof G.dep !== 'number') G.dep = 5;
+
   const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('upAvatar').textContent = initials;
   document.getElementById('upAvatar').style.background = avatarColor(name);
   document.getElementById('upName').textContent = name;
   document.getElementById('loginScreen').classList.add('hidden');
+  saveNow(); // stamp the profile immediately
   renderAll();
   renderNews();
-  pushToGlobalLB();
 }
 
 function loginCreate(){
@@ -1024,8 +1043,14 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
-// Save user progress + shared market prices + push to global leaderboard
+// Lightweight save called every tick — local only
 function save(){
+  saveUserData();
+  saveMarket();
+}
+
+// Full save with global LB push — called after trades and on login
+function saveNow(){
   saveUserData();
   saveMarket();
   pushToGlobalLB();
@@ -1379,6 +1404,7 @@ function quickSell(ticker){
   G.trades++;
   delete G.h[ticker];
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
+  saveNow();
   renderAll();
   if(curA && curA.t === ticker){ renderPos(); renderSellSection(); }
 }
@@ -1500,6 +1526,7 @@ function doSell(){
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
+  saveNow();
   renderPos(); renderSellSection(); renderAll();
 }
 
@@ -1538,6 +1565,7 @@ function doBuy(){
   document.getElementById('buyAmt').value = '';
   document.getElementById('prev').textContent = 'Enter an amount above to preview';
   toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
+  saveNow();
   renderPos(); renderSellSection(); renderAll();
 }
 
@@ -1746,6 +1774,7 @@ initPrices();
 renderLoginScreen();
 setInterval(tick,2500);
 setInterval(renderNews,8000);
+setInterval(()=>{ if(currentUser) pushToGlobalLB(); }, 30000);
 setInterval(()=>{
   if(document.getElementById('pane-leaderboard')?.classList.contains('on')) renderLeaderboard();
 }, 30000);
