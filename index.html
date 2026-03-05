@@ -542,10 +542,49 @@ const DEFS = {
     {t:'PEPE', n:'Pepe',          i:'🐸', b:0.0000118,v:.08,  band:'#00b200', cat:'Meme Coin',      about:'2023\'s most viral meme coin based on the Pepe the Frog internet meme. Extreme volatility — can 10x or crash 90% in days.'},
     {t:'WIF',  n:'dogwifhat',     i:'🐕', b:2.85,    v:.075,  band:'#f89c33', cat:'Meme Coin',      about:'Solana-based meme coin featuring a Shiba Inu with a hat. Skyrocketed in 2024, beloved by degens. Wild price swings daily.'},
   ],
-  stocks:[],
-  etfs:[],
-  commodities:[],
-  forex:[]
+  stocks:[
+    {t:'AAPL', n:'Apple',        i:'🍎', b:189,   v:.022, band:'#555555', cat:'Stock', about:'The world\'s most valuable company. Makes iPhone, Mac, iPad and runs the App Store. A staple of every major portfolio.'},
+    {t:'TSLA', n:'Tesla',        i:'⚡', b:177,   v:.048, band:'#cc0000', cat:'Stock', about:'Electric vehicle and clean energy company led by Elon Musk. Known for extreme volatility and passionate retail investor base.'},
+    {t:'NVDA', n:'NVIDIA',       i:'🟢', b:875,   v:.038, band:'#76b900', cat:'Stock', about:'The dominant maker of AI and gaming GPUs. Became one of the most valuable companies in the world on the back of the AI boom.'},
+    {t:'AMZN', n:'Amazon',       i:'📦', b:182,   v:.025, band:'#ff9900', cat:'Stock', about:'E-commerce and cloud computing giant. AWS is the world\'s largest cloud platform and generates most of Amazon\'s profit.'},
+    {t:'MSFT', n:'Microsoft',    i:'🪟', b:415,   v:.019, band:'#00a4ef', cat:'Stock', about:'Software giant behind Windows, Office and Azure cloud. Major investor in OpenAI. One of the most stable large-cap tech stocks.'},
+    {t:'GOOGL',n:'Alphabet',     i:'🔍', b:172,   v:.023, band:'#4285f4', cat:'Stock', about:'Parent company of Google, YouTube and DeepMind. Dominates online search and digital advertising globally.'},
+    {t:'META', n:'Meta',         i:'👤', b:505,   v:.031, band:'#0082fb', cat:'Stock', about:'Owns Facebook, Instagram and WhatsApp. Betting big on AI and the metaverse. Massive ad revenue machine with billions of users.'},
+    {t:'NFLX', n:'Netflix',      i:'🎬', b:628,   v:.034, band:'#e50914', cat:'Stock', about:'World\'s leading streaming platform. Shifted to ad-supported tiers and cracked down on password sharing to boost revenue.'},
+    {t:'AMD',  n:'AMD',          i:'🔴', b:164,   v:.042, band:'#ed1c24', cat:'Stock', about:'NVIDIA\'s main rival in GPUs and CPUs. Rapidly gaining data center market share with its MI300 AI chip lineup.'},
+    {t:'COIN', n:'Coinbase',     i:'🔵', b:225,   v:.055, band:'#1652f0', cat:'Stock', about:'The largest US crypto exchange. Stock price is highly correlated with Bitcoin — when crypto pumps, COIN usually follows.'},
+    {t:'RBLX', n:'Roblox',       i:'🎮', b:38,    v:.044, band:'#e2231a', cat:'Stock', about:'Gaming platform popular with Gen Z. Users create and play user-generated games. Monetizes through its virtual currency Robux.'},
+    {t:'SPOT', n:'Spotify',      i:'🎵', b:312,   v:.033, band:'#1db954', cat:'Stock', about:'World\'s largest music streaming platform. Expanding into podcasts and audiobooks. Has over 600 million monthly active users.'},
+  ],
+  etfs:[
+    {t:'SPY',  n:'S&P 500 ETF',  i:'📊', b:524,   v:.013, band:'#1a56db', cat:'ETF', about:'Tracks the S&P 500 index — 500 of the largest US companies. The most traded ETF in the world. The benchmark for all investing.'},
+    {t:'QQQ',  n:'Nasdaq 100',   i:'💹', b:448,   v:.018, band:'#7c3aed', cat:'ETF', about:'Tracks the top 100 non-financial Nasdaq stocks. Heavy on tech — Apple, Microsoft, NVIDIA, Google. High growth, higher volatility.'},
+    {t:'VTI',  n:'Total Market', i:'🌍', b:245,   v:.013, band:'#065f46', cat:'ETF', about:'Covers the entire US stock market — over 3,500 companies. The ultimate diversification play for passive long-term investors.'},
+    {t:'GLD',  n:'Gold ETF',     i:'🥇', b:213,   v:.014, band:'#c49a2a', cat:'ETF', about:'Tracks the price of physical gold. Popular safe-haven during market uncertainty. Holds actual gold bars in vaults.'},
+    {t:'ARKK', n:'ARK Innovation',i:'🚀',b:48,    v:.052, band:'#ff6b35', cat:'ETF', about:'Cathie Wood\'s flagship fund. Bets on disruptive tech: AI, robotics, genomics, crypto. Very high risk and high reward potential.'},
+    {t:'VXX',  n:'Volatility ETF',i:'⚡',b:19,    v:.065, band:'#991b1b', cat:'ETF', about:'Tracks the VIX volatility index — Wall Street\'s "fear gauge." Goes up when markets crash. Used as a hedge or speculation tool.'},
+    {t:'SOXL', n:'Semi 3x Bull', i:'🔬', b:34,   v:.085, band:'#7c2d12', cat:'ETF', about:'3x leveraged semiconductor ETF. Triples the daily gains AND losses of chip stocks like NVDA, AMD, TSMC. Extremely volatile.'},
+    {t:'DIA',  n:'Dow Jones ETF',i:'🏦', b:389,   v:.011, band:'#1e3a5f', cat:'ETF', about:'Tracks the Dow Jones Industrial Average — 30 blue-chip US companies. More conservative than QQQ, less tech-heavy.'},
+  ],
+  commodities:[
+    {t:'GOLD', n:'Gold',         i:'🥇', b:2320,  v:.012, band:'#c49a2a', cat:'Commodity', about:'The ultimate store of value for thousands of years. Surges during inflation, war and economic uncertainty. Digital gold\'s physical rival.'},
+    {t:'OIL',  n:'Crude Oil',    i:'🛢️', b:82,    v:.028, band:'#4a3728', cat:'Commodity', about:'The world\'s most traded commodity. Price driven by OPEC decisions, geopolitics and global demand. Affects everything from gas to plastics.'},
+    {t:'SILV', n:'Silver',       i:'🥈', b:27,    v:.022, band:'#94a3b8', cat:'Commodity', about:'Both a precious metal and industrial commodity. Used in solar panels, electronics and EV batteries. More volatile than gold.'},
+    {t:'NATG', n:'Natural Gas',  i:'🔥', b:2.1,   v:.055, band:'#3b82f6', cat:'Commodity', about:'Key energy source for heating and electricity. Extremely seasonal and weather-dependent. One of the most volatile commodities.'},
+    {t:'COPP', n:'Copper',       i:'🟤', b:4.2,   v:.024, band:'#b45309', cat:'Commodity', about:'The "PhD in economics" commodity. Demand signals global economic health. Essential for EVs, wiring and construction.'},
+    {t:'WHET', n:'Wheat',        i:'🌾', b:568,   v:.031, band:'#92400e', cat:'Commodity', about:'A global food staple. Price spikes during droughts, wars or supply disruptions. The Russia-Ukraine war caused historic price surges.'},
+    {t:'PLAT', n:'Platinum',     i:'⚪', b:965,   v:.019, band:'#e2e8f0', cat:'Commodity', about:'Rarer than gold and used heavily in catalytic converters and hydrogen fuel cells. Tied closely to auto industry demand.'},
+  ],
+  forex:[
+    {t:'EURUSD',n:'EUR / USD',   i:'🇪🇺', b:1.085, v:.006, band:'#003399', cat:'Forex', about:'The world\'s most traded currency pair. Represents the Eurozone vs the US. Highly sensitive to ECB and Fed interest rate decisions.'},
+    {t:'GBPUSD',n:'GBP / USD',   i:'🇬🇧', b:1.268, v:.007, band:'#012169', cat:'Forex', about:'Known as "Cable." British Pound vs US Dollar. Volatile around UK economic data, elections and post-Brexit developments.'},
+    {t:'USDJPY',n:'USD / JPY',   i:'🇯🇵', b:151.2, v:.005, band:'#bc002d', cat:'Forex', about:'US Dollar vs Japanese Yen. The Yen is a classic safe-haven currency. BOJ\'s ultra-low rate policy kept this pair at multi-decade highs.'},
+    {t:'AUDUSD',n:'AUD / USD',   i:'🇦🇺', b:0.654, v:.008, band:'#00008b', cat:'Forex', about:'Australian Dollar vs USD. The "commodity dollar" — closely tied to iron ore, coal and China\'s economic health.'},
+    {t:'USDCAD',n:'USD / CAD',   i:'🇨🇦', b:1.362, v:.006, band:'#ff0000', cat:'Forex', about:'US Dollar vs Canadian Dollar. The "Loonie" is tied to oil prices since Canada is a major oil exporter. Tracks crude closely.'},
+    {t:'USDCHF',n:'USD / CHF',   i:'🇨🇭', b:0.897, v:.005, band:'#ff0000', cat:'Forex', about:'US Dollar vs Swiss Franc. The Franc is the ultimate safe-haven currency. Switzerland\'s political neutrality makes it a crisis hedge.'},
+    {t:'USDINR',n:'USD / INR',   i:'🇮🇳', b:83.4,  v:.004, band:'#ff9933', cat:'Forex', about:'US Dollar vs Indian Rupee. India\'s booming economy makes this an increasingly watched pair. RBI actively manages the exchange rate.'},
+    {t:'BTCUSD',n:'BTC / USD',   i:'₿',  b:67250, v:.035, band:'#f7931a', cat:'Forex', about:'Bitcoin priced in US Dollars. Technically a crypto pair but widely traded in forex markets. Extreme volatility, 24/7 trading.'},
+  ]
 };
 
 const ALL = Object.values(DEFS).flat();
@@ -571,7 +610,7 @@ const NEWS = [
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v10_5dollars';
+const SK = 'apex_v11_allmarkets';
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -787,7 +826,16 @@ const GLOWS={
   SOL:'#9945ff', XRP:'#00aae4', ADA:'#0d1e7c',  DOGE:'#c2a633',
   AVAX:'#e84142',SHIB:'#e35b24',DOT:'#e6007a',  LINK:'#375bd2',
   MATIC:'#8247e5',LTC:'#bfbbbb',UNI:'#ff007a',  ATOM:'#2e3148',
-  NEAR:'#00ec97',ARB:'#28a0f0', PEPE:'#00b200',  WIF:'#f89c33'
+  NEAR:'#00ec97',ARB:'#28a0f0', PEPE:'#00b200',  WIF:'#f89c33',
+  AAPL:'#555555',TSLA:'#cc0000',NVDA:'#76b900',AMZN:'#ff9900',MSFT:'#00a4ef',
+  GOOGL:'#4285f4',META:'#0082fb',NFLX:'#e50914',AMD:'#ed1c24',COIN:'#1652f0',
+  RBLX:'#e2231a',SPOT:'#1db954',
+  SPY:'#1a56db',QQQ:'#7c3aed',VTI:'#065f46',GLD:'#c49a2a',ARKK:'#ff6b35',
+  VXX:'#991b1b',SOXL:'#7c2d12',DIA:'#1e3a5f',
+  GOLD:'#c49a2a',OIL:'#4a3728',SILV:'#94a3b8',NATG:'#3b82f6',COPP:'#b45309',
+  WHET:'#92400e',PLAT:'#e2e8f0',
+  EURUSD:'#003399',GBPUSD:'#012169',USDJPY:'#bc002d',AUDUSD:'#00008b',
+  USDCAD:'#ff0000',USDCHF:'#ff0000',USDINR:'#ff9933',BTCUSD:'#f7931a'
 };
 
 function openScreen(ticker){
