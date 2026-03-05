@@ -54,7 +54,7 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .body{display:grid;grid-template-columns:1fr 296px;overflow:hidden;min-height:0;}
 
 /* ── MARKET PANEL ── */
-.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;}
+.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;min-height:0;}
 .mbar{padding:11px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--paper);}
 .mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);}
 .tabs{display:flex;border:1px solid var(--paper3);}
@@ -62,29 +62,18 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .tab:last-child{border-right:none;}
 .tab.on{background:var(--ink);color:var(--paper);}
 
-/* ── ASSET GRID ── FIXED FOR PROPER ROW WRAPPING */
+/* ── ASSET GRID ── */
 .grid{
-  flex:1;
   overflow-y:auto;
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns:repeat(4, 1fr);
   gap:0;
   align-content:start;
 }
 .grid::-webkit-scrollbar{width:4px;}
 .grid::-webkit-scrollbar-thumb{background:var(--paper3);}
-
-/* Limit columns on very wide screens to keep cards readable */
-@media (min-width: 1400px) {
-  .grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-@media (min-width: 1800px) {
-  .grid {
-    grid-template-columns: repeat(8, 1fr);
-  }
-}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);}}
 
 /* ── ASSET CARD ── */
 .acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:13px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
@@ -526,41 +515,30 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <script>
 /* ═══════════════════════════════════════════
-   ASSET DEFINITIONS — ORIGINAL 4 + 20+ NEW CRYPTOS (NOTHING ELSE CHANGED)
+   ASSET DEFINITIONS
 ═══════════════════════════════════════════ */
 const DEFS = {
   crypto:[
-    // Original 4 (KEPT EXACTLY AS IS)
-    {t:'BTC', n:'Bitcoin', i:'₿', b:67250, v:.024, band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
-    {t:'ETH', n:'Ethereum', i:'Ξ', b:3520, v:.031, band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
-    {t:'USDT', n:'Tether', i:'💵', b:1.00, v:.001, band:'#26a17b', cat:'Stablecoin', about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
-    {t:'BNB', n:'Binance Coin', i:'Ⓜ️', b:602, v:.028, band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
-    
-    // NEW CRYPTOS ADDED BELOW (24 more)
-    {t:'SOL', n:'Solana', i:'☀️', b:148.50, v:.035, band:'#00ffa3', cat:'Cryptocurrency', about:'High-performance blockchain supporting smart contracts. Known for fast transactions and low fees.'},
-    {t:'XRP', n:'Ripple', i:'⚡', b:0.52, v:.022, band:'#23292f', cat:'Cryptocurrency', about:'Digital payment protocol and currency. Focuses on fast, low-cost international money transfers.'},
-    {t:'ADA', n:'Cardano', i:'🌙', b:0.45, v:.019, band:'#0033ad', cat:'Cryptocurrency', about:'Proof-of-stake blockchain platform. Focuses on security, sustainability, and academic research.'},
-    {t:'DOGE', n:'Dogecoin', i:'🐕', b:0.12, v:.038, band:'#c2a633', cat:'Cryptocurrency', about:'Started as a meme coin, now a community favorite. Known for its Shiba Inu mascot.'},
-    {t:'SHIB', n:'Shiba Inu', i:'🐕', b:0.000025, v:.042, band:'#ffa500', cat:'Cryptocurrency', about:'The "Dogecoin killer" meme coin. Built an entire ecosystem including ShibaSwap DEX.'},
-    {t:'AVAX', n:'Avalanche', i:'❄️', b:35.80, v:.029, band:'#e84142', cat:'Cryptocurrency', about:'High-speed blockchain platform with sub-second finality. Competes with Ethereum for DeFi.'},
-    {t:'DOT', n:'Polkadot', i:'●', b:7.25, v:.026, band:'#e6007a', cat:'Cryptocurrency', about:'Enables different blockchains to transfer messages and value. Created by Ethereum co-founder.'},
-    {t:'MATIC', n:'Polygon', i:'🔷', b:0.85, v:.027, band:'#8247e5', cat:'Cryptocurrency', about:'Ethereum scaling solution. Provides faster and cheaper transactions.'},
-    {t:'LINK', n:'Chainlink', i:'🔗', b:18.20, v:.025, band:'#2a5ada', cat:'Cryptocurrency', about:'Decentralized oracle network. Connects smart contracts with real-world data.'},
-    {t:'UNI', n:'Uniswap', i:'🦄', b:7.40, v:.024, band:'#ff007a', cat:'Cryptocurrency', about:'Governance token for the largest DEX on Ethereum. Allows holders to vote on protocol changes.'},
-    {t:'ATOM', n:'Cosmos', i:'🌌', b:9.15, v:.021, band:'#2e3148', cat:'Cryptocurrency', about:'Internet of Blockchains. Aims to create an ecosystem of interoperable blockchains.'},
-    {t:'LTC', n:'Litecoin', i:'⚡', b:82.30, v:.020, band:'#345d9d', cat:'Cryptocurrency', about:'Silver to Bitcoin\'s gold. Faster block times and lower fees than Bitcoin.'},
-    {t:'BCH', n:'Bitcoin Cash', i:'💰', b:380.50, v:.023, band:'#8dc351', cat:'Cryptocurrency', about:'Fork of Bitcoin with larger block size. Aims to be more usable for everyday transactions.'},
-    {t:'ALGO', n:'Algorand', i:'🔵', b:0.19, v:.018, band:'#000000', cat:'Cryptocurrency', about:'Pure proof-of-stake blockchain. Focuses on speed, security and decentralization.'},
-    {t:'XLM', n:'Stellar', i:'✨', b:0.11, v:.017, band:'#3f3f7a', cat:'Cryptocurrency', about:'Open network for money transfers. Focuses on connecting financial institutions.'},
-    {t:'VET', n:'VeChain', i:'🔋', b:0.032, v:.022, band:'#4bc0f2', cat:'Cryptocurrency', about:'Supply chain focused blockchain. Tracks products from manufacturing to consumer.'},
-    {t:'THETA', n:'Theta Network', i:'🎥', b:2.05, v:.026, band:'#2ab8e6', cat:'Cryptocurrency', about:'Decentralized video streaming network. Users share bandwidth and get rewarded.'},
-    {t:'FTM', n:'Fantom', i:'👻', b:0.65, v:.031, band:'#1969ff', cat:'Cryptocurrency', about:'High-performance, scalable smart contract platform. Uses DAG technology.'},
-    {t:'NEAR', n:'Near Protocol', i:'⛰️', b:5.80, v:.025, band:'#000000', cat:'Cryptocurrency', about:'Developer-friendly proof-of-stake blockchain. Uses sharding technology.'},
-    {t:'APT', n:'Aptos', i:'⛓️', b:13.40, v:.030, band:'#000000', cat:'Cryptocurrency', about:'Layer 1 blockchain built by former Meta engineers. Focuses on safety and performance.'},
-    {t:'ARB', n:'Arbitrum', i:'🔷', b:1.85, v:.024, band:'#28a0f0', cat:'Cryptocurrency', about:'Leading Ethereum layer 2 scaling solution. Uses optimistic rollups for lower fees.'},
-    {t:'OP', n:'Optimism', i:'✨', b:2.95, v:.027, band:'#ff0420', cat:'Cryptocurrency', about:'Ethereum layer 2 scaling solution. Known for its Optimistic Rollup technology.'},
-    {t:'SUI', n:'Sui', i:'🌊', b:1.65, v:.032, band:'#4f7bff', cat:'Cryptocurrency', about:'High-performance Layer 1 blockchain with parallel transaction execution.'},
-    {t:'SEI', n:'Sei', i:'⚡', b:0.62, v:.028, band:'#6b46c1', cat:'Cryptocurrency', about:'Specialized Layer 1 blockchain optimized for trading applications.'}
+    {t:'BTC',  n:'Bitcoin',       i:'₿',  b:67250,   v:.024,  band:'#f7931a', cat:'Cryptocurrency', about:'The original crypto, created in 2009. Hard-capped at 21 million coins ever. Increasingly treated as digital gold by major institutions.'},
+    {t:'ETH',  n:'Ethereum',      i:'Ξ',  b:3520,    v:.031,  band:'#627eea', cat:'Cryptocurrency', about:'Programmable blockchain powering DeFi, NFTs and smart contracts. The #2 largest crypto by market cap.'},
+    {t:'USDT', n:'Tether',        i:'💵', b:1.00,    v:.001,  band:'#26a17b', cat:'Stablecoin',     about:'The largest stablecoin, pegged 1:1 to the US Dollar. Used by traders to park funds without leaving crypto.'},
+    {t:'BNB',  n:'Binance Coin',  i:'Ⓜ️', b:602,     v:.028,  band:'#f3ba2f', cat:'Cryptocurrency', about:'Native token of Binance exchange. Used for trading fee discounts and powers the BNB Chain ecosystem.'},
+    {t:'SOL',  n:'Solana',        i:'◎',  b:178,     v:.045,  band:'#9945ff', cat:'Cryptocurrency', about:'High-speed layer-1 blockchain capable of 65,000 TPS. Popular for DeFi and NFTs due to its low fees and fast finality.'},
+    {t:'XRP',  n:'Ripple',        i:'✕',  b:0.62,    v:.038,  band:'#00aae4', cat:'Cryptocurrency', about:'Digital payment protocol focused on fast cross-border transactions for banks. One of the oldest top-10 cryptos.'},
+    {t:'ADA',  n:'Cardano',       i:'₳',  b:0.48,    v:.042,  band:'#0d1e7c', cat:'Cryptocurrency', about:'Proof-of-stake blockchain built on peer-reviewed research. Known for its methodical, academic development approach.'},
+    {t:'DOGE', n:'Dogecoin',      i:'🐶', b:0.165,   v:.055,  band:'#c2a633', cat:'Meme Coin',      about:'Started as a joke in 2013, DOGE became a cultural phenomenon. Beloved by retail traders and Elon Musk. Extremely volatile.'},
+    {t:'AVAX', n:'Avalanche',     i:'🔺', b:38,      v:.048,  band:'#e84142', cat:'Cryptocurrency', about:'Fast, low-fee smart contract platform with sub-second finality. Supports custom blockchains called subnets.'},
+    {t:'SHIB', n:'Shiba Inu',     i:'🦊', b:0.000025,v:.065,  band:'#e35b24', cat:'Meme Coin',      about:'The "Dogecoin killer" meme coin. Incredibly low price per token means massive unit quantities — very high volatility.'},
+    {t:'DOT',  n:'Polkadot',      i:'●',  b:7.8,     v:.041,  band:'#e6007a', cat:'Cryptocurrency', about:'Multi-chain protocol connecting different blockchains. Parachains allow specialized chains to share security and interoperability.'},
+    {t:'LINK', n:'Chainlink',     i:'🔗', b:15.4,    v:.039,  band:'#375bd2', cat:'Cryptocurrency', about:'Decentralized oracle network that feeds real-world data into smart contracts. Powers the DeFi ecosystem behind the scenes.'},
+    {t:'MATIC',n:'Polygon',       i:'⬟',  b:0.88,    v:.044,  band:'#8247e5', cat:'Cryptocurrency', about:'Ethereum scaling solution (Layer 2). Enables fast, cheap transactions while inheriting Ethereum security.'},
+    {t:'LTC',  n:'Litecoin',      i:'Ł',  b:88,      v:.032,  band:'#bfbbbb', cat:'Cryptocurrency', about:'One of the earliest Bitcoin alternatives. Often called "digital silver" — faster block times and lower fees than Bitcoin.'},
+    {t:'UNI',  n:'Uniswap',       i:'🦄', b:8.9,     v:.047,  band:'#ff007a', cat:'DeFi',           about:'Governance token of the largest decentralized exchange. Allows users to swap any ERC-20 token without a centralized intermediary.'},
+    {t:'ATOM', n:'Cosmos',        i:'⚛️', b:9.2,     v:.043,  band:'#2e3148', cat:'Cryptocurrency', about:'The "Internet of Blockchains." ATOM enables sovereign blockchains to communicate and transact with each other via IBC protocol.'},
+    {t:'NEAR', n:'NEAR Protocol', i:'Ⓝ',  b:5.1,     v:.049,  band:'#00ec97', cat:'Cryptocurrency', about:'Developer-friendly Layer 1 with human-readable account names and sharding for high scalability. Fast growing ecosystem.'},
+    {t:'ARB',  n:'Arbitrum',      i:'🔷', b:1.12,    v:.052,  band:'#28a0f0', cat:'Layer 2',        about:'Leading Ethereum Layer 2 using optimistic rollups. Dramatically reduces gas costs while keeping Ethereum security guarantees.'},
+    {t:'PEPE', n:'Pepe',          i:'🐸', b:0.0000118,v:.08,  band:'#00b200', cat:'Meme Coin',      about:'2023\'s most viral meme coin based on the Pepe the Frog internet meme. Extreme volatility — can 10x or crash 90% in days.'},
+    {t:'WIF',  n:'dogwifhat',     i:'🐕', b:2.85,    v:.075,  band:'#f89c33', cat:'Meme Coin',      about:'Solana-based meme coin featuring a Shiba Inu with a hat. Skyrocketed in 2024, beloved by degens. Wild price swings daily.'},
   ],
   stocks:[],
   etfs:[],
@@ -589,9 +567,9 @@ const NEWS = [
 ];
 
 /* ═══════════════════════════════════════════
-   STATE (EVERYTHING BELOW IS EXACTLY THE SAME)
+   STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v8_fixed';
+const SK = 'apex_v9_20coins';
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -715,7 +693,6 @@ function renderSidebar(){
   const spEl=document.getElementById('sPnl');
   spEl.textContent=(pnl>=0?'+':'')+F(pnl); spEl.style.color=pnl>=0?'var(--UP)':'var(--DN)';
 
-  /* holdings */
   const tks=Object.keys(G.h).filter(t=>G.h[t].sh>.000001);
   const hl=document.getElementById('holdList');
   if(!tks.length){
@@ -745,7 +722,6 @@ function renderSidebar(){
     }).join('');
   }
 
-  /* history */
   const txEl=document.getElementById('txList');
   if(!G.txs.length){
     txEl.innerHTML='<div class="txrow"><span style="font-size:.65rem;color:var(--ink4)">No trades yet</span></div>';
@@ -793,35 +769,23 @@ function quickSell(ticker){
   const p=prices[ticker]||0;
   const rev = h.sh * p;
   G.cash = G.cash + rev;
-  G.txs.push({
-    tp:'sell',
-    t:ticker,
-    sh:h.sh,
-    p:p,
-    amt:rev,
-    time:new Date().toLocaleTimeString()
-  });
+  G.txs.push({tp:'sell',t:ticker,sh:h.sh,p:p,amt:rev,time:new Date().toLocaleTimeString()});
   G.trades++;
   delete G.h[ticker];
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
   renderAll();
-  if(curA && curA.t === ticker){ 
-    renderPos(); 
-    renderSellSection(); 
-  }
+  if(curA && curA.t === ticker){ renderPos(); renderSellSection(); }
 }
 
 /* ═══════════════════════════════════════════
    FULL-SCREEN DETAIL
 ═══════════════════════════════════════════ */
 const GLOWS={
-  BTC:'#f7931a',ETH:'#627eea',USDT:'#26a17b',BNB:'#f3ba2f',
-  SOL:'#00ffa3',XRP:'#23292f',ADA:'#0033ad',DOGE:'#c2a633',
-  SHIB:'#ffa500',AVAX:'#e84142',DOT:'#e6007a',MATIC:'#8247e5',
-  LINK:'#2a5ada',UNI:'#ff007a',ATOM:'#2e3148',LTC:'#345d9d',
-  BCH:'#8dc351',ALGO:'#000000',XLM:'#3f3f7a',VET:'#4bc0f2',
-  THETA:'#2ab8e6',FTM:'#1969ff',NEAR:'#000000',APT:'#000000',
-  ARB:'#28a0f0',OP:'#ff0420',SUI:'#4f7bff',SEI:'#6b46c1'
+  BTC:'#f7931a', ETH:'#627eea', USDT:'#26a17b', BNB:'#f3ba2f',
+  SOL:'#9945ff', XRP:'#00aae4', ADA:'#0d1e7c',  DOGE:'#c2a633',
+  AVAX:'#e84142',SHIB:'#e35b24',DOT:'#e6007a',  LINK:'#375bd2',
+  MATIC:'#8247e5',LTC:'#bfbbbb',UNI:'#ff007a',  ATOM:'#2e3148',
+  NEAR:'#00ec97',ARB:'#28a0f0', PEPE:'#00b200',  WIF:'#f89c33'
 };
 
 function openScreen(ticker){
@@ -863,20 +827,17 @@ function refreshScHeader(){
   }
 }
 
-/* SELL SECTION */
 function renderSellSection(){
   if(!curA) return;
   const t=curA.t, h=G.h[t], p=prices[t]||0;
   const sec=document.getElementById('sellSec');
   if(!h||h.sh<.000001){ sec.style.display='none'; return; }
-
   const val=h.sh*p;
   sec.style.display='block';
   document.getElementById('sellSecLbl').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecName').textContent=`Sell ${curA.n}`;
   document.getElementById('sellSecWorth').innerHTML=
     `You own <strong>${h.sh.toFixed(6)} ${t}</strong> · worth <strong>${F(val)}</strong>`;
-
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   document.getElementById('sellConfirmBtn').textContent = `Sell ${curA.n}`;
@@ -889,18 +850,10 @@ function refreshSellPreview(){
   const amt = parseFloat(document.getElementById('sellAmt').value) || 0;
   const maxVal = h.sh * p;
   const btn = document.getElementById('sellConfirmBtn');
-  
-  if(amt <= 0){
-    document.getElementById('sellPreview').textContent = '';
-    btn.textContent = `Sell ${curA.n}`;
-    return;
-  }
-  
+  if(amt <= 0){ document.getElementById('sellPreview').textContent = ''; btn.textContent = `Sell ${curA.n}`; return; }
   const sellVal = Math.min(amt, maxVal);
   const shares = sellVal / p;
-  
-  document.getElementById('sellPreview').innerHTML =
-    `Sell <span>${shares.toFixed(6)} ${t}</span> → get back <span>${F(sellVal)}</span>`;
+  document.getElementById('sellPreview').innerHTML=`Sell <span>${shares.toFixed(6)} ${t}</span> → get back <span>${F(sellVal)}</span>`;
   btn.textContent = `Sell — Get Back ${F(sellVal)}`;
 }
 
@@ -908,69 +861,35 @@ function setSellMax(){
   if(!curA) return;
   const h=G.h[curA.t], p=prices[curA.t]||0;
   if(!h||h.sh<.000001) return;
-  const maxVal = h.sh * p;
-  document.getElementById('sellAmt').value = maxVal.toFixed(2);
+  document.getElementById('sellAmt').value = (h.sh * p).toFixed(2);
   refreshSellPreview();
 }
 
 function doSell(){
   if(!curA) return;
-  const t = curA.t;
-  const h = G.h[t];
-  const p = prices[t] || 0;
-  
-  if(!h || h.sh < 0.000001){ 
-    toast('Nothing to sell','err'); 
-    return; 
-  }
-  
+  const t = curA.t, h = G.h[t], p = prices[t] || 0;
+  if(!h || h.sh < 0.000001){ toast('Nothing to sell','err'); return; }
   const amt = parseFloat(document.getElementById('sellAmt').value);
-  if(!amt || amt <= 0){ 
-    toast('Enter how much to sell','err'); 
-    return; 
-  }
-  
+  if(!amt || amt <= 0){ toast('Enter how much to sell','err'); return; }
   const maxVal = h.sh * p;
   const sellVal = Math.min(amt, maxVal);
   const shares = sellVal / p;
-  
   h.sh = h.sh - shares;
   G.cash = G.cash + sellVal;
-  
-  G.txs.push({
-    tp:'sell',
-    t,
-    sh: shares,
-    p,
-    amt: sellVal,
-    time: new Date().toLocaleTimeString()
-  });
-  
+  G.txs.push({tp:'sell',t,sh:shares,p,amt:sellVal,time:new Date().toLocaleTimeString()});
   G.trades++;
-  
-  if(h.sh < 0.000001){
-    delete G.h[t];
-  }
-  
+  if(h.sh < 0.000001) delete G.h[t];
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
-  
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
-  
-  renderPos(); 
-  renderSellSection(); 
-  renderAll();
+  renderPos(); renderSellSection(); renderAll();
 }
 
 /* ═══════════════════════════════════════════
    BUY
 ═══════════════════════════════════════════ */
 function qa(v){
-  if(v === -1){
-    document.getElementById('buyAmt').value = G.cash.toFixed(2);
-  } else {
-    document.getElementById('buyAmt').value = v.toFixed(2);
-  }
+  document.getElementById('buyAmt').value = v === -1 ? G.cash.toFixed(2) : v.toFixed(2);
   refreshPrev();
 }
 
@@ -980,66 +899,28 @@ function refreshPrev(){
   const p = prices[curA.t];
   const sh = amt / p;
   const held = (G.h[curA.t]?.sh || 0) * p;
-  
-  if(amt <= 0){ 
-    document.getElementById('prev').textContent = 'Enter an amount above to preview'; 
-    return; 
-  }
-  
-  document.getElementById('prev').innerHTML =
-    `Spend: <span>${F(amt)}</span> · Get: <span>${sh.toFixed(6)} ${curA.t}</span><br>Already holding: <span>${F(held)}</span>`;
+  if(amt <= 0){ document.getElementById('prev').textContent = 'Enter an amount above to preview'; return; }
+  document.getElementById('prev').innerHTML=`Spend: <span>${F(amt)}</span> · Get: <span>${sh.toFixed(6)} ${curA.t}</span><br>Already holding: <span>${F(held)}</span>`;
 }
 
 function doBuy(){
   if(!curA) return;
   const amt = parseFloat(document.getElementById('buyAmt').value);
-  
-  if(!amt || amt <= 0){ 
-    toast('Enter a valid amount','err'); 
-    return; 
-  }
-  if(amt < 0.01){ 
-    toast('Minimum $0.01','err'); 
-    return; 
-  }
-  if(amt > G.cash + 0.001){ 
-    toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); 
-    return; 
-  }
-  
-  const t = curA.t;
-  const p = prices[t];
-  const sh = amt / p;
-  
+  if(!amt || amt <= 0){ toast('Enter a valid amount','err'); return; }
+  if(amt < 0.01){ toast('Minimum $0.01','err'); return; }
+  if(amt > G.cash + 0.001){ toast(`Need ${F(amt)} — only have ${F(G.cash)}`,'err'); return; }
+  const t = curA.t, p = prices[t], sh = amt / p;
   G.cash = G.cash - amt;
-  
-  if(!G.h[t]) {
-    G.h[t] = {sh: 0, ac: 0};
-  }
-  
+  if(!G.h[t]) G.h[t] = {sh:0, ac:0};
   const h = G.h[t];
   h.ac = (h.sh * h.ac + amt) / (h.sh + sh);
   h.sh = h.sh + sh;
-  
-  G.txs.push({
-    tp:'buy',
-    t,
-    sh,
-    p,
-    amt,
-    time: new Date().toLocaleTimeString()
-  });
-  
+  G.txs.push({tp:'buy',t,sh,p,amt,time:new Date().toLocaleTimeString()});
   G.trades++;
-  
   document.getElementById('buyAmt').value = '';
   document.getElementById('prev').textContent = 'Enter an amount above to preview';
-  
   toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
-  
-  renderPos(); 
-  renderSellSection(); 
-  renderAll();
+  renderPos(); renderSellSection(); renderAll();
 }
 
 function renderPos(){
@@ -1124,7 +1005,6 @@ function drawChart(ctx,W,H,data,prog){
   const up=sub[sub.length-1].p>=sub[0].p;
   const COL=up?'#00b87a':'#e03b3b', DIM=up?'rgba(0,184,122,':'rgba(224,59,59,';
 
-  // grid + y labels
   ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
   for(let i=0;i<=5;i++){
     const gy=P.t+i*(cH/5);
@@ -1142,7 +1022,6 @@ function drawChart(ctx,W,H,data,prog){
   }
   ctx.setLineDash([]);
 
-  // x labels
   ctx.fillStyle='rgba(255,255,255,.19)';
   ctx.font=`400 9px 'Azeret Mono',monospace`;
   ctx.textAlign='center';
@@ -1154,7 +1033,6 @@ function drawChart(ctx,W,H,data,prog){
     }
   }
 
-  // gradient fill
   const grad=ctx.createLinearGradient(0,P.t,0,P.t+cH);
   grad.addColorStop(0,DIM+'0.26)'); grad.addColorStop(.5,DIM+'0.09)'); grad.addColorStop(1,DIM+'0)');
   ctx.beginPath();
@@ -1162,19 +1040,16 @@ function drawChart(ctx,W,H,data,prog){
   ctx.lineTo(X(sub.length-1),P.t+cH); ctx.lineTo(X(0),P.t+cH); ctx.closePath();
   ctx.fillStyle=grad; ctx.fill();
 
-  // glow
   ctx.save(); ctx.filter='blur(6px)'; ctx.globalAlpha=.32;
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=9; ctx.lineJoin='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke(); ctx.restore();
 
-  // crisp line
   ctx.beginPath(); ctx.strokeStyle=COL; ctx.lineWidth=1.9;
   ctx.lineJoin='round'; ctx.lineCap='round';
   sub.forEach((d,i)=>{ i===0?ctx.moveTo(X(i),Y(d.p)):ctx.lineTo(X(i),Y(d.p)); });
   ctx.stroke();
 
-  // live price elements
   if(prog===1&&sub.length){
     const lx=X(sub.length-1), ly=Y(sub[sub.length-1].p), lp=sub[sub.length-1].p;
     ctx.strokeStyle=DIM+'0.3)'; ctx.setLineDash([4,10]); ctx.lineWidth=1;
