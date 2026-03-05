@@ -522,6 +522,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <button class="tab" onclick="switchTab('etfs',this)">ETFs</button>
         <button class="tab" onclick="switchTab('commodities',this)">Commodities</button>
         <button class="tab" onclick="switchTab('forex',this)">Forex</button>
+        <button class="tab" onclick="switchTab('pokecards',this)">🎴 PokéCards</button>
       </div>
     </div>
     <div class="grid" id="assetGrid"></div>
@@ -741,7 +742,21 @@ const DEFS = {
     {t:'USDCHF',n:'USD / CHF',   i:'🇨🇭', b:0.897, v:.005, band:'#ff0000', cat:'Forex', about:'US Dollar vs Swiss Franc. The Franc is the ultimate safe-haven currency. Switzerland\'s political neutrality makes it a crisis hedge.'},
     {t:'USDINR',n:'USD / INR',   i:'🇮🇳', b:83.4,  v:.004, band:'#ff9933', cat:'Forex', about:'US Dollar vs Indian Rupee. India\'s booming economy makes this an increasingly watched pair. RBI actively manages the exchange rate.'},
     {t:'BTCUSD',n:'BTC / USD',   i:'₿',  b:67250, v:.035, band:'#f7931a', cat:'Forex', about:'Bitcoin priced in US Dollars. Technically a crypto pair but widely traded in forex markets. Extreme volatility, 24/7 trading.'},
-  ]
+  ],
+  pokecards:[
+    {t:'CHARIZARD',  n:'Charizard',   i:'🔥', b:8200,  v:.085, band:'#e8572a', cat:'Pokémon Card', about:'The holy grail of Pokémon TCG. Charizard cards have sold for over $300K at auction and remain the most coveted card on earth. Every new set that includes Charizard causes an immediate market frenzy.'},
+    {t:'PIKACHU',    n:'Pikachu',     i:'⚡', b:3500,  v:.072, band:'#f5c542', cat:'Pokémon Card', about:'The face of Pokémon. Pikachu cards are the most recognisable in the hobby and hold value across all eras. First Edition copies are extremely sought after by collectors worldwide.'},
+    {t:'LUGIA',      n:'Lugia',       i:'🌊', b:1800,  v:.068, band:'#3498db', cat:'Pokémon Card', about:'Arguably the most beautiful Pokémon card ever printed. Lugia has massive crossover appeal between TCG collectors and video game fans, driving prices to wild highs.'},
+    {t:'ESPEON',     n:'Espeon',      i:'🌟', b:2400,  v:.082, band:'#f1c40f', cat:'Pokémon Card', about:'One of the rarest Pokémon cards ever produced. Espeon Gold Star was only obtainable through exclusive Japanese promos, making raw copies nearly impossible to find.'},
+    {t:'MEWTWO',     n:'Mewtwo',      i:'🟣', b:420,   v:.061, band:'#9b59b6', cat:'Pokémon Card', about:'The original villain Pokémon. Mewtwo cards carry perennial demand from both competitive players and collectors. Vintage holos in high grade command massive premiums.'},
+    {t:'GENGAR',     n:'Gengar',      i:'👻', b:680,   v:.074, band:'#8e44ad', cat:'Pokémon Card', about:'The fan-favourite Ghost type. Gengar cards spike every time the Pokémon appears in a new game or anime arc. One of the most emotionally driven assets in the hobby.'},
+    {t:'UMBREON',    n:'Umbreon',     i:'🌙', b:310,   v:.076, band:'#2c3e50', cat:'Pokémon Card', about:'The most beloved Eeveelution. Umbreon cards consistently top modern market charts. Crossover appeal between art collectors, competitive players, and nostalgic fans keeps demand explosive.'},
+    {t:'DRAGONITE',  n:'Dragonite',   i:'🐉', b:520,   v:.071, band:'#16a085', cat:'Pokémon Card', about:'The original dragon king. Dragonite cards carry huge emotional premiums from older collectors. Vintage holos are scarce and values have climbed steadily for years.'},
+    {t:'MEW',        n:'Mew',         i:'✨', b:145,   v:.069, band:'#e74c3c', cat:'Pokémon Card', about:'The mythical ancestor of all Pokémon. Mew cards reignited massive nostalgia when the 151 set launched. Ultra-volatile due to heavy collector and speculator crossover.'},
+    {t:'SYLVEON',    n:'Sylveon',     i:'🎀', b:95,    v:.066, band:'#e91e8c', cat:'Pokémon Card', about:'The Fairy-type fan favourite. When Pokémon discontinued the Fairy type in 2023, all Sylveon cards surged as supply became permanently capped. No new Fairy cards will ever be printed.'},
+    {t:'RAIKOU',     n:'Raikou',      i:'🌩️', b:185,   v:.078, band:'#f39c12', cat:'Pokémon Card', about:'The legendary electric beast. Raikou cards see heavy competitive demand which destroys supply in played condition. Near-mint copies become increasingly rare after each tournament season.'},
+    {t:'EEVEE',      n:'Eevee',       i:'🦊', b:75,    v:.063, band:'#c8a46e', cat:'Pokémon Card', about:'The most versatile Pokémon. Eevee cards act as a gateway to all Eeveelution collectors, creating a permanently wide demand base. Cheap entry point with steady long-term appreciation.'},
+  ],
 };
 
 const ALL = Object.values(DEFS).flat();
@@ -762,6 +777,14 @@ const NEWS = [
   {s:'bull',h:'Amazon AWS growth re-accelerates above estimates',fx:'→ AMZN may surge'},
   {s:'bull',h:'Roblox daily users hit new all-time record',fx:'→ RBLX may climb'},
   {s:'bear',h:'Natural gas spikes on cold weather forecast',fx:'→ NATG very volatile'},
+  {s:'bull',h:'PSA grading backlog clears — collectors rush to submit cards',fx:'→ All Pokémon cards may rise'},
+  {s:'bear',h:'Counterfeit Charizard scandal rocks TCG market',fx:'→ CHARZ-SH could dump hard'},
+  {s:'bull',h:'Pokémon World Championship breaks attendance record',fx:'→ Modern Pokémon cards pumping'},
+  {s:'bull',h:'Logan Paul opens vintage Pokémon box on stream — viral',fx:'→ Sealed product demand surging'},
+  {s:'bear',h:'TCGPlayer reports massive influx of Pokémon card supply',fx:'→ Modern prices may correct'},
+  {s:'bull',h:'New Pokémon anime season announced — nostalgia wave incoming',fx:'→ OG Base Set cards may spike'},
+  {s:'bear',h:'PSA lowers grading standards — PSA 10 supply increases',fx:'→ Graded cards could fall'},
+  {s:'bull',h:'Rare 1st Edition collection surfaces at auction house',fx:'→ Vintage Pokémon cards surging'},
 ];
 
 /* ═══════════════════════════════════════════
@@ -1130,7 +1153,10 @@ const GLOWS={
   GOLD:'#c49a2a',OIL:'#4a3728',SILV:'#94a3b8',NATG:'#3b82f6',COPP:'#b45309',
   WHET:'#92400e',PLAT:'#e2e8f0',
   EURUSD:'#003399',GBPUSD:'#012169',USDJPY:'#bc002d',AUDUSD:'#00008b',
-  USDCAD:'#ff0000',USDCHF:'#ff0000',USDINR:'#ff9933',BTCUSD:'#f7931a'
+  USDCAD:'#ff0000',USDCHF:'#ff0000',USDINR:'#ff9933',BTCUSD:'#f7931a',
+  CHARIZARD:'#e8572a',PIKACHU:'#f5c542',LUGIA:'#3498db',ESPEON:'#f1c40f',
+  MEWTWO:'#9b59b6',GENGAR:'#8e44ad',UMBREON:'#2c3e50',DRAGONITE:'#16a085',
+  MEW:'#e74c3c',SYLVEON:'#e91e8c',RAIKOU:'#f39c12',EEVEE:'#c8a46e',
 };
 
 function openScreen(ticker){
