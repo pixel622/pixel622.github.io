@@ -87,21 +87,21 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .search-clear.vis{display:block;}
 
 /* ── ASSET GRID ── */
-/* The grid must fill remaining height of .market and scroll internally */
-.grid{
+.grid-scroll-wrap{
   flex:1;
   min-height:0;
   overflow-y:auto;
   overflow-x:hidden;
+}
+.grid-scroll-wrap::-webkit-scrollbar{width:5px;}
+.grid-scroll-wrap::-webkit-scrollbar-track{background:var(--paper2);}
+.grid-scroll-wrap::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:2px;}
+.grid-scroll-wrap::-webkit-scrollbar-thumb:hover{background:var(--ink5);}
+.grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:0;
-  align-content:start;
 }
-.grid::-webkit-scrollbar{width:5px;}
-.grid::-webkit-scrollbar-track{background:var(--paper2);}
-.grid::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:2px;}
-.grid::-webkit-scrollbar-thumb:hover{background:var(--ink5);}
 .grid-empty{grid-column:1/-1;padding:32px 16px;text-align:center;font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--ink4);border-bottom:1px solid var(--paper3);}
 
 /* ── ASSET CARD ── */
@@ -127,8 +127,8 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .sbtab{flex:1;padding:9px 4px;font-family:'Barlow Condensed',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--ink4);transition:all .15s;border-right:1px solid var(--paper3);}
 .sbtab:last-child{border-right:none;}
 .sbtab.on{background:var(--paper);color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc);}
-.sbpane{display:none;flex:1;overflow-y:auto;padding:12px;min-height:0;}
-.sbpane.on{display:block;}
+.sbpane{display:none;overflow-y:auto;padding:12px;}
+.sbpane.on{display:block;flex:1;min-height:0;}
 .sbpane::-webkit-scrollbar{width:3px;}
 .sbpane::-webkit-scrollbar-thumb{background:var(--paper3);}
 .sbh{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink4);margin:12px 0 8px;}
@@ -558,7 +558,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
       </div>
     </div>
-    <div class="grid" id="assetGrid"></div>
+    <div class="grid-scroll-wrap">
+      <div class="grid" id="assetGrid"></div>
+    </div>
   </div>
 
   <!-- SIDEBAR -->
@@ -904,6 +906,13 @@ function generateNews(){
 
 function renderNews(){
   const items = generateNews();
+  if(!items || !items.length){
+    document.getElementById('newsList').innerHTML = `
+      <div class="nitem neut"><span class="ntag">➡️ Loading</span>
+      <div class="ntitle">Market data initialising…</div>
+      <div class="nhint">→ News will appear shortly</div></div>`;
+    return;
+  }
   document.getElementById('newsList').innerHTML = items.map(n => `
     <div class="nitem ${n.s}">
       <span class="ntag">${n.s==='bull'?'📈 Bullish':n.s==='bear'?'📉 Bearish':'➡️ Neutral'}</span>
@@ -1088,6 +1097,8 @@ function tick(){
   });
   renderAll();
   if(curA){ refreshScHeader(); liveDraw(); renderPos(); renderSellSection(); }
+  // Refresh news if the news pane is currently visible
+  if(document.getElementById('pane-news')?.classList.contains('on')) renderNews();
 }
 
 /* ═══════════════════════════════════════════
@@ -1115,7 +1126,7 @@ function save(){
 /* ═══════════════════════════════════════════
    RENDER — ALL
 ═══════════════════════════════════════════ */
-function renderAll(){ if(!currentUser) return; renderGrid(); renderTicker(); renderNav(); renderSidebar(); save(); }
+function renderAll(){ if(!currentUser) return; renderGrid(); renderTicker(); renderNav(); renderSidebar(); renderNews(); save(); }
 
 /* asset grid */
 function renderGrid(){
@@ -1271,6 +1282,7 @@ function switchSb(tab,el){
   document.querySelectorAll('.sbpane').forEach(p=>p.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('pane-'+tab).classList.add('on');
+  if(tab==='news') renderNews();
 }
 
 /* ═══════════════════════════════════════════
