@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +39,10 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .pt-lbl{font-family:'Azeret Mono',monospace;font-size:.41rem;letter-spacing:2px;color:rgba(255,255,255,.26);margin-bottom:2px;}
 .pt-val{font-family:'Azeret Mono',monospace;font-size:1.08rem;font-weight:700;color:var(--UP);}
 .pt-chg{font-family:'Azeret Mono',monospace;font-size:.54rem;}
+.save-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);padding:5px 11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap;}
+.save-btn:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28);}
+.save-btn:active{transform:scale(.96);}
+.save-btn.saved{background:rgba(0,184,122,.18);border-color:rgba(0,184,122,.5);color:var(--UP);}
 
 /* ── TICKER ── */
 .ticker-bar{height:24px;background:rgba(255,255,255,.04);display:flex;align-items:center;overflow:hidden;position:relative;}
@@ -550,6 +555,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <div class="up-avatar" id="upAvatar">?</div>
         <div class="up-name" id="upName">—</div>
       </div>
+      <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save progress">
+        <span id="saveBtnIcon">💾</span><span id="saveBtnTxt">Save</span>
+      </button>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
         <div class="pt-lbl">Portfolio</div>
@@ -867,6 +875,28 @@ function saveNow(){
   saveUserData();
   saveMarket();
   pushToGlobalLB();
+}
+
+async function manualSave(){
+  if(!currentUser) return;
+  const btn = document.getElementById('saveBtn');
+  const icon = document.getElementById('saveBtnIcon');
+  const txt = document.getElementById('saveBtnTxt');
+  btn.disabled = true;
+  icon.textContent = '⏳';
+  txt.textContent = 'Saving…';
+  saveUserData();
+  saveMarket();
+  await pushToGlobalLB();
+  btn.classList.add('saved');
+  icon.textContent = '✅';
+  txt.textContent = 'Saved!';
+  setTimeout(()=>{
+    btn.classList.remove('saved');
+    icon.textContent = '💾';
+    txt.textContent = 'Save';
+    btn.disabled = false;
+  }, 2000);
 }
 function loadMarket(){
   try{
