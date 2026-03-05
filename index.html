@@ -55,12 +55,37 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 
 /* ── MARKET PANEL ── */
 .market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;min-height:0;flex:1;}
-.mbar{padding:11px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--paper);}
-.mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);}
-.tabs{display:flex;border:1px solid var(--paper3);}
+.mbar{padding:10px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--paper);flex-wrap:wrap;}
+.mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);flex-shrink:0;}
+.tabs{display:flex;border:1px solid var(--paper3);flex-wrap:wrap;}
 .tab{padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--ink4);transition:all .15s;border-right:1px solid var(--paper3);}
 .tab:last-child{border-right:none;}
 .tab.on{background:var(--ink);color:var(--paper);}
+
+/* ── SEARCH BAR ── */
+.search-wrap{
+  margin-left:auto;position:relative;flex-shrink:0;
+}
+.search-wrap::before{
+  content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  font-size:.7rem;pointer-events:none;opacity:.45;
+}
+.search-input{
+  background:var(--paper2);border:1px solid var(--paper3);
+  padding:5px 10px 5px 28px;
+  font-family:'Azeret Mono',monospace;font-size:.65rem;
+  color:var(--ink);outline:none;width:180px;
+  transition:border-color .15s,width .2s;
+}
+.search-input::placeholder{color:var(--ink5);}
+.search-input:focus{border-color:var(--ink4);width:220px;}
+.search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;
+  font-size:.7rem;color:var(--ink4);padding:0;line-height:1;
+  display:none;
+}
+.search-clear.vis{display:block;}
 
 /* ── ASSET GRID ── */
 .grid{
@@ -75,23 +100,28 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 }
 .grid::-webkit-scrollbar{width:4px;}
 .grid::-webkit-scrollbar-thumb{background:var(--paper3);}
+.grid-empty{
+  grid-column:1/-1;padding:32px 16px;text-align:center;
+  font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--ink4);
+  border-bottom:1px solid var(--paper3);
+}
 
 /* ── ASSET CARD ── */
-.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:9px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
+.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:12px 12px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
 .acard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
 .acard:hover{background:var(--paper2);}
 .acard:hover::after{transform:scaleX(1);}
 .acard:active{background:var(--paper3);}
 .acard.owned{border-left:2px solid var(--UP);}
-.ac-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.ac-icon{font-size:1rem;line-height:1;}
-.ac-pct{font-family:'Azeret Mono',monospace;font-size:.52rem;font-weight:600;padding:1px 4px;}
+.ac-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.ac-icon{font-size:1.15rem;line-height:1;}
+.ac-pct{font-family:'Azeret Mono',monospace;font-size:.52rem;font-weight:600;padding:2px 5px;}
 .ac-pct.g{background:var(--UP2);color:var(--UP);}
 .ac-pct.r{background:var(--DN2);color:var(--DN);}
-.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ac-sym{font-family:'Azeret Mono',monospace;font-size:.46rem;letter-spacing:1.5px;color:var(--ink4);}
-.ac-price{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;color:var(--ink2);margin-top:5px;margin-bottom:4px;}
-.ac-spark{display:block;width:100%;height:26px;}
+.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ac-sym{font-family:'Azeret Mono',monospace;font-size:.46rem;letter-spacing:1.5px;color:var(--ink4);margin-bottom:2px;}
+.ac-price{font-family:'Azeret Mono',monospace;font-size:.82rem;font-weight:600;color:var(--ink2);margin-top:6px;margin-bottom:5px;}
+.ac-spark{display:block;width:100%;height:32px;}
 
 /* ── SIDEBAR ── */
 .sidebar{display:flex;flex-direction:column;background:var(--paper2);overflow:hidden;}
@@ -523,6 +553,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <button class="tab" onclick="switchTab('commodities',this)">Commodities</button>
         <button class="tab" onclick="switchTab('forex',this)">Forex</button>
         <button class="tab" onclick="switchTab('pokecards',this)">🎴 PokéCards</button>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" id="searchInput" type="text" placeholder="Search assets…"
+          oninput="onSearch(this.value)" autocomplete="off" spellcheck="false">
+        <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
       </div>
     </div>
     <div class="grid" id="assetGrid"></div>
@@ -1008,7 +1043,7 @@ function logoutUser(){
    STATE (per-user save)
 ═══════════════════════════════════════════ */
 
-let curTab='crypto', curA=null, curTf=25;
+let curTab='crypto', curA=null, curTf=25, curSearch='';
 let cBuf=[], rafA=null, rafL=null;
 const DPR=window.devicePixelRatio||1;
 
@@ -1086,8 +1121,20 @@ function renderAll(){ if(!currentUser) return; renderGrid(); renderTicker(); ren
 
 /* asset grid */
 function renderGrid(){
-  const list=DEFS[curTab];
-  document.getElementById('assetGrid').innerHTML=list.map(a=>{
+  const q = curSearch.toLowerCase().trim();
+  // If searching, scan ALL assets; otherwise just current tab
+  const list = q ? ALL.filter(a =>
+    a.n.toLowerCase().includes(q) ||
+    a.t.toLowerCase().includes(q) ||
+    a.cat.toLowerCase().includes(q)
+  ) : DEFS[curTab];
+
+  const grid = document.getElementById('assetGrid');
+  if(!list.length){
+    grid.innerHTML = `<div class="grid-empty">No assets match "<strong>${q}</strong>"</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(a=>{
     const p=prices[a.t], o=opens[a.t], c=pct(p,o), up=c>=0;
     const owned=G.h[a.t]?.sh>.000001;
     return `<div class="acard${owned?' owned':''}" onclick="openScreen('${a.t}')">
@@ -1096,11 +1143,24 @@ function renderGrid(){
         <span class="ac-pct ${up?'g':'r'}">${up?'▲':'▼'}${Math.abs(c).toFixed(2)}%</span>
       </div>
       <div class="ac-name">${a.n}</div>
-      <div class="ac-sym">${a.t}</div>
+      <div class="ac-sym">${a.t}${q?' <span style="font-size:.4rem;opacity:.5">· '+a.cat+'</span>':''}</div>
       <div class="ac-price">${F(p)}</div>
       <svg class="ac-spark" viewBox="0 0 140 32" preserveAspectRatio="none">${sparkSVG(hist[a.t]?.slice(-50)||[],up)}</svg>
     </div>`;
   }).join('');
+}
+
+function onSearch(val){
+  curSearch = val;
+  document.getElementById('searchClear').classList.toggle('vis', val.length > 0);
+  renderGrid();
+}
+
+function clearSearch(){
+  curSearch = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').classList.remove('vis');
+  renderGrid();
 }
 
 function sparkSVG(h,up){
@@ -1200,6 +1260,9 @@ function renderNews(){
 
 function switchTab(tab,el){
   curTab=tab;
+  curSearch='';
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').classList.remove('vis');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
   renderGrid();
@@ -1593,7 +1656,13 @@ renderLoginScreen(); // show login — game starts after loginAs()
 setInterval(tick,2500);
 setInterval(renderNews,8000); // refresh news every 8s — now reflects live prices
 window.addEventListener('resize',()=>{ if(curA) buildChart(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&curA) closeScreen(); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&curA) closeScreen();
+  if(e.key==='/'&&!curA&&document.activeElement.tagName!=='INPUT'){
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+});
 </script>
 </body>
 </html>
