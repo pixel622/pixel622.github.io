@@ -761,31 +761,123 @@ const DEFS = {
 
 const ALL = Object.values(DEFS).flat();
 
-const NEWS = [
-  {s:'bull',h:'Bitcoin tops monthly high as institutions pile in',fx:'→ BTC may surge'},
-  {s:'bear',h:'SEC announces sweeping new crypto regulation',fx:'→ Crypto could dip'},
-  {s:'bull',h:'NVIDIA obliterates earnings — AI demand explosive',fx:'→ NVDA likely climbs'},
-  {s:'neut',h:'Federal Reserve holds rates unchanged',fx:'→ Markets stay flat'},
-  {s:'bull',h:'Tesla unveils entry-level model — demand raised',fx:'→ TSLA may rally'},
-  {s:'bear',h:'Global inflation rises — risk-off mood spreads',fx:'→ Stocks could fall'},
-  {s:'bull',h:'Solana breaks TPS world record on mainnet',fx:'→ SOL may pump'},
-  {s:'neut',h:'Apple WWDC: new hardware and AI features revealed',fx:'→ AAPL reaction mixed'},
-  {s:'bull',h:'Record $40B ETF inflows signal strong buying',fx:'→ SPY looks bullish'},
-  {s:'bear',h:'Dogecoin whale moves 1B coins to exchange',fx:'→ DOGE may dump'},
-  {s:'bull',h:'Gold hits all-time high on safe-haven demand',fx:'→ GOLD, GLD rising'},
-  {s:'bear',h:'Oil supply glut pushes crude prices lower',fx:'→ OIL may fall'},
-  {s:'bull',h:'Amazon AWS growth re-accelerates above estimates',fx:'→ AMZN may surge'},
-  {s:'bull',h:'Roblox daily users hit new all-time record',fx:'→ RBLX may climb'},
-  {s:'bear',h:'Natural gas spikes on cold weather forecast',fx:'→ NATG very volatile'},
-  {s:'bull',h:'PSA grading backlog clears — collectors rush to submit cards',fx:'→ All Pokémon cards may rise'},
-  {s:'bear',h:'Counterfeit Charizard scandal rocks TCG market',fx:'→ CHARZ-SH could dump hard'},
-  {s:'bull',h:'Pokémon World Championship breaks attendance record',fx:'→ Modern Pokémon cards pumping'},
-  {s:'bull',h:'Logan Paul opens vintage Pokémon box on stream — viral',fx:'→ Sealed product demand surging'},
-  {s:'bear',h:'TCGPlayer reports massive influx of Pokémon card supply',fx:'→ Modern prices may correct'},
-  {s:'bull',h:'New Pokémon anime season announced — nostalgia wave incoming',fx:'→ OG Base Set cards may spike'},
-  {s:'bear',h:'PSA lowers grading standards — PSA 10 supply increases',fx:'→ Graded cards could fall'},
-  {s:'bull',h:'Rare 1st Edition collection surfaces at auction house',fx:'→ Vintage Pokémon cards surging'},
-];
+/* ═══════════════════════════════════════════
+   DYNAMIC NEWS ENGINE
+   Headlines are generated based on actual
+   current price movements in the simulation.
+═══════════════════════════════════════════ */
+
+// Template library — {n}=name, {t}=ticker, {pct}=percent, {px}=price
+const NEWS_TPLS = {
+  bull: [
+    '{n} surges {pct}% as buyers step in — momentum building',
+    '{n} breaks above key resistance level, up {pct}% today',
+    'Strong volume drives {n} up {pct}% — traders eye higher highs',
+    '{n} rallies {pct}% on renewed institutional interest',
+    'Bulls take control of {n} — up {pct}% in today\'s session',
+    '{n} jumps {pct}% following positive market sentiment',
+    'Buyers flood into {n}, pushing price up {pct}%',
+    '{n} prints new session high, now up {pct}% on the day',
+  ],
+  bear: [
+    '{n} slides {pct}% as sellers take over — support at risk',
+    '{n} drops {pct}% amid broad market weakness',
+    'Heavy selling hits {n}, down {pct}% in today\'s session',
+    '{n} breaks below support, falling {pct}% on high volume',
+    'Bears dominate {n} — down {pct}% with no relief in sight',
+    '{n} tumbles {pct}% as risk-off mood grips markets',
+    'Sell pressure mounts on {n}, now down {pct}% today',
+    '{n} underperforms — off {pct}% as traders book profits',
+  ],
+  neut: [
+    '{n} trades sideways near {px} — market awaiting catalyst',
+    '{n} consolidates around {px} after recent volatility',
+    'Low volume session for {n} — price holds near {px}',
+    '{n} in tight range near {px}, traders on the sidelines',
+  ],
+  bigmove: [
+    '🚨 {n} SPIKES {pct}% — one of today\'s biggest movers',
+    '🚨 {n} CRASHES {pct}% — extreme volatility alert',
+    '⚠️ Unusual activity in {n}: {pct}% move in minutes',
+  ],
+};
+
+// Extra flavour lines per category
+const CATEGORY_FX = {
+  'Cryptocurrency': ['→ High volatility — trade carefully', '→ Crypto markets open 24/7', '→ Watch BTC for direction'],
+  'Stablecoin':     ['→ Minor depeg detected — monitor closely', '→ Near $1.00 peg as expected'],
+  'Meme Coin':      ['→ Meme coins can move 50%+ in hours', '→ Extreme risk — size positions small'],
+  'DeFi':           ['→ DeFi volumes may follow', '→ Protocol TVL likely affected'],
+  'Layer 2':        ['→ L2 activity often mirrors ETH', '→ Gas fees and bridge volume may shift'],
+  'Stock':          ['→ Earnings season in focus', '→ Watch broader indices for context', '→ Options market may be pricing this in'],
+  'ETF':            ['→ Broad basket move — check components', '→ Index rebalancing may amplify this'],
+  'Commodity':      ['→ Macro conditions driving this move', '→ Watch USD strength as a counter-signal'],
+  'Forex':          ['→ Central bank policy in focus', '→ Position sizing critical in FX', '→ Spread widens during volatility'],
+  'Pokémon Card':   ['→ Card markets can be illiquid — be patient', '→ PSA grading volumes affect supply', '→ Collector sentiment drives these moves'],
+};
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function generateNews(){
+  // Score all assets by absolute % move from open
+  const scored = ALL.map(a => {
+    const p = prices[a.t], o = opens[a.t];
+    if(!p || !o) return null;
+    const c = (p - o) / o * 100;
+    return { a, p, c };
+  }).filter(Boolean);
+
+  // Sort by absolute move, take top movers + a few random ones
+  scored.sort((x,y) => Math.abs(y.c) - Math.abs(x.c));
+  const top = scored.slice(0, 6);
+  const rest = scored.slice(6);
+  // Pick 1-2 from rest for variety
+  for(let i = 0; i < 2 && rest.length; i++){
+    const idx = Math.floor(Math.random() * rest.length);
+    top.push(rest.splice(idx, 1)[0]);
+  }
+  // Shuffle and take 4
+  top.sort(() => Math.random() - 0.5);
+  const chosen = top.slice(0, 4);
+
+  return chosen.map(({a, p, c}) => {
+    const absPct = Math.abs(c).toFixed(2);
+    const isBig = Math.abs(c) > 3.5;
+    let s, tpl, fx;
+
+    if(isBig && Math.abs(c) > 5){
+      s = c > 0 ? 'bull' : 'bear';
+      tpl = pick(NEWS_TPLS.bigmove).replace('{pct}', (c>0?'+':'-') + absPct + '%');
+    } else if(Math.abs(c) < 0.3){
+      s = 'neut';
+      tpl = pick(NEWS_TPLS.neut);
+    } else {
+      s = c > 0 ? 'bull' : 'bear';
+      tpl = pick(NEWS_TPLS[s]);
+    }
+
+    const fxPool = CATEGORY_FX[a.cat] || ['→ Monitor closely'];
+    fx = pick(fxPool);
+
+    const headline = tpl
+      .replace(/{n}/g, a.n)
+      .replace(/{t}/g, a.t)
+      .replace(/{pct}/g, (c > 0 ? '+' : '-') + absPct + '%')
+      .replace(/{px}/g, F(p));
+
+    return { s, h: headline, fx };
+  });
+}
+
+function renderNews(){
+  const items = generateNews();
+  document.getElementById('newsList').innerHTML = items.map(n => `
+    <div class="nitem ${n.s}">
+      <span class="ntag">${n.s==='bull'?'📈 Bullish':n.s==='bear'?'📉 Bearish':'➡️ Neutral'}</span>
+      <div class="ntitle">${n.h}</div>
+      <div class="nhint">${n.fx}</div>
+    </div>`).join('');
+}
 
 /* ═══════════════════════════════════════════
    USER / LOGIN SYSTEM
@@ -880,6 +972,7 @@ function loginAs(name){
   document.getElementById('upName').textContent = name;
   document.getElementById('loginScreen').classList.add('hidden');
   renderAll();
+  renderNews();
 }
 
 function loginCreate(){
@@ -1497,9 +1590,8 @@ function toast(msg,type='ok'){
 loadMarket();      // load shared market prices first (so profile values show correctly)
 initPrices();      // generate fresh chart history
 renderLoginScreen(); // show login — game starts after loginAs()
-renderNews();
 setInterval(tick,2500);
-setInterval(renderNews,42000);
+setInterval(renderNews,8000); // refresh news every 8s — now reflects live prices
 window.addEventListener('resize',()=>{ if(curA) buildChart(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&curA) closeScreen(); });
 </script>
