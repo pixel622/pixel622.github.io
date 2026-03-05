@@ -308,6 +308,136 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 .toast.err{border-color:rgba(224,59,59,.4);color:var(--DN);}
 @keyframes tpop{from{transform:translateX(60px) scale(.9);opacity:0}to{transform:translateX(0) scale(1);opacity:1}}
 
+/* ══════════════════════════════════════
+   LOGIN SCREEN
+══════════════════════════════════════ */
+#loginScreen{
+  position:fixed;inset:0;z-index:9000;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;
+}
+#loginScreen.hidden{display:none;}
+.login-noise{position:absolute;inset:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+}
+.login-accent{position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc);}
+.login-box{
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  padding:0 24px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.login-logo{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:3.2rem;letter-spacing:10px;text-transform:uppercase;
+  color:var(--paper);line-height:1;margin-bottom:4px;
+}
+.login-sub{
+  font-family:'Azeret Mono',monospace;font-size:.5rem;
+  letter-spacing:4px;color:rgba(255,255,255,.22);
+  text-transform:uppercase;margin-bottom:48px;
+}
+.login-section-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:.65rem;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,.28);margin-bottom:12px;
+  align-self:flex-start;
+}
+
+/* existing users list */
+.login-profiles{width:100%;display:flex;flex-direction:column;gap:6px;margin-bottom:28px;}
+.login-profile-btn{
+  width:100%;display:flex;align-items:center;gap:12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  padding:11px 14px;cursor:pointer;
+  transition:all .15s;text-align:left;
+}
+.login-profile-btn:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.18);}
+.login-profile-btn:active{background:rgba(255,255,255,.13);}
+.lp-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--acc);display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.9rem;
+  color:#fff;flex-shrink:0;
+}
+.lp-info{flex:1;min-width:0;}
+.lp-name{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:.9rem;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--paper);
+}
+.lp-meta{
+  font-family:'Azeret Mono',monospace;font-size:.5rem;
+  color:rgba(255,255,255,.28);margin-top:2px;
+}
+.lp-val{
+  font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;
+  flex-shrink:0;
+}
+.lp-del{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.18);font-size:.9rem;padding:4px 6px;
+  transition:color .12s;flex-shrink:0;
+}
+.lp-del:hover{color:var(--DN);}
+
+/* divider */
+.login-divider{
+  width:100%;display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.login-divider::before,.login-divider::after{
+  content:'';flex:1;height:1px;background:rgba(255,255,255,.08);
+}
+.login-divider span{
+  font-family:'Azeret Mono',monospace;font-size:.48rem;
+  letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;
+}
+
+/* new user form */
+.login-new{width:100%;display:flex;gap:6px;}
+.login-input{
+  flex:1;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  padding:11px 14px;outline:none;
+  font-family:'Azeret Mono',monospace;font-size:.82rem;
+  color:var(--paper);transition:border-color .15s;
+}
+.login-input::placeholder{color:rgba(255,255,255,.18);}
+.login-input:focus{border-color:rgba(255,255,255,.3);}
+.login-create-btn{
+  background:var(--acc);border:none;padding:11px 18px;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:.8rem;letter-spacing:1.5px;text-transform:uppercase;
+  color:#fff;cursor:pointer;transition:all .13s;white-space:nowrap;flex-shrink:0;
+}
+.login-create-btn:hover{background:#ff6a3a;box-shadow:0 0 20px rgba(232,87,42,.4);}
+.login-create-btn:active{transform:scale(.97);}
+.login-hint{
+  font-family:'Azeret Mono',monospace;font-size:.48rem;
+  color:rgba(255,255,255,.18);margin-top:10px;align-self:flex-start;
+}
+
+/* user pill in header */
+.user-pill{
+  display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  padding:5px 10px 5px 7px;cursor:pointer;
+  transition:all .13s;
+}
+.user-pill:hover{background:rgba(255,255,255,.11);}
+.up-avatar{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--acc);display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.65rem;color:#fff;
+}
+.up-name{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--paper);
+}
+
 @media(max-width:860px){
   .body{grid-template-columns:1fr;}
   .sidebar{display:none;}
@@ -324,6 +454,29 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 </style>
 </head>
 <body>
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="loginScreen">
+  <div class="login-noise"></div>
+  <div class="login-accent"></div>
+  <div class="login-box">
+    <div class="login-logo">APEX</div>
+    <div class="login-sub">Paper Trading</div>
+
+    <div class="login-section-title" id="loginProfilesTitle" style="display:none;">Select your profile</div>
+    <div class="login-profiles" id="loginProfiles"></div>
+
+    <div class="login-divider" id="loginDivider" style="display:none;"><span>or</span></div>
+
+    <div class="login-section-title">New trader</div>
+    <div class="login-new">
+      <input class="login-input" id="loginNameInput" type="text" placeholder="Enter your name…" maxlength="24" autocomplete="off"
+        onkeydown="if(event.key==='Enter') loginCreate()">
+      <button class="login-create-btn" onclick="loginCreate()">Start →</button>
+    </div>
+    <div class="login-hint">Each trader gets $5.00 to start · progress auto-saves</div>
+  </div>
+</div>
+
 <div class="shell">
 
 <!-- ═══ HEADER ═══ -->
@@ -341,6 +494,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <div class="hst"><div class="hst-l">Trades</div><div class="hst-v" id="hTrades" style="color:var(--gold)">0</div></div>
     </div>
     <div class="hdr-right">
+      <div class="user-pill" onclick="logoutUser()" title="Switch user">
+        <div class="up-avatar" id="upAvatar">?</div>
+        <div class="up-name" id="upName">—</div>
+      </div>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
         <div class="pt-lbl">Portfolio</div>
@@ -608,24 +765,132 @@ const NEWS = [
 ];
 
 /* ═══════════════════════════════════════════
-   STATE
-   FIX: hist is NEVER saved to or loaded from localStorage.
-        It is always freshly generated on each page load,
-        so charts look different every time.
+   USER / LOGIN SYSTEM
+   Each user gets their own localStorage key.
+   Prices & opens are shared (global market),
+   history is always freshly generated.
 ═══════════════════════════════════════════ */
-const SK = 'apex_v12_allmarkets'; // bumped version key to clear old cached hist
-let prices={}, hist={}, opens={};
+const PROFILES_KEY = 'apex_v12_profiles'; // list of user names
+const MARKET_KEY   = 'apex_v12_market';   // shared prices & opens
+const userKey = name => 'apex_v12_user_' + name.toLowerCase().replace(/\s+/g,'_');
 
-let G = (()=>{
+let currentUser = null; // set on login
+let prices={}, hist={}, opens={};
+let G = {cash:5, h:{}, txs:[], trades:0, dep:5};
+
+function getProfiles(){
+  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }catch{ return []; }
+}
+function saveProfiles(arr){
+  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify(arr)); }catch{}
+}
+function loadUserData(name){
   try{
-    const d=JSON.parse(localStorage.getItem(SK));
-    if(!d) return null;
-    // Only restore prices and opens — never history
-    prices=d.px||{};
-    opens=d.op||{};
-    return d.g;
-  }catch{return null;}
-})() || {cash:5, h:{}, txs:[], trades:0, dep:5};
+    const d = JSON.parse(localStorage.getItem(userKey(name)));
+    return d || {cash:5, h:{}, txs:[], trades:0, dep:5};
+  }catch{ return {cash:5, h:{}, txs:[], trades:0, dep:5}; }
+}
+function saveUserData(){
+  if(!currentUser) return;
+  try{ localStorage.setItem(userKey(currentUser), JSON.stringify(G)); }catch{}
+}
+function loadMarket(){
+  try{
+    const d = JSON.parse(localStorage.getItem(MARKET_KEY));
+    if(d){ prices=d.px||{}; opens=d.op||{}; }
+  }catch{}
+}
+function saveMarket(){
+  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
+}
+
+/* ── RENDER LOGIN SCREEN ── */
+function renderLoginScreen(){
+  const profiles = getProfiles();
+  const pList = document.getElementById('loginProfiles');
+  const pTitle = document.getElementById('loginProfilesTitle');
+  const divider = document.getElementById('loginDivider');
+
+  if(profiles.length){
+    pTitle.style.display = 'block';
+    divider.style.display = 'flex';
+    pList.innerHTML = profiles.map(name => {
+      const ud = loadUserData(name);
+      // calc portfolio value using current prices (may be 0 if market not loaded yet)
+      let tv = ud.cash;
+      Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += v.sh*(prices[t]||0); });
+      const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const pnl = tv - ud.dep;
+      const pnlStr = (pnl>=0?'+':'')+F(pnl);
+      return `<div style="display:flex;align-items:center;gap:6px;">
+        <button class="login-profile-btn" style="flex:1;" onclick="loginAs('${name.replace(/'/g,"\\'")}')">
+          <div class="lp-avatar" style="background:${avatarColor(name)}">${initials}</div>
+          <div class="lp-info">
+            <div class="lp-name">${name}</div>
+            <div class="lp-meta">${ud.trades} trade${ud.trades!==1?'s':''} · started with ${F(ud.dep)}</div>
+          </div>
+          <div class="lp-val" style="color:${pnl>=0?'var(--UP)':'var(--DN)'}">${F(tv)}<br><span style="font-size:.5rem;opacity:.6">${pnlStr}</span></div>
+        </button>
+        <button class="lp-del" title="Delete profile" onclick="deleteProfile('${name.replace(/'/g,"\\'")}')">✕</button>
+      </div>`;
+    }).join('');
+  } else {
+    pTitle.style.display = 'none';
+    divider.style.display = 'none';
+    pList.innerHTML = '';
+  }
+}
+
+function avatarColor(name){
+  const colors=['#e8572a','#9945ff','#00b87a','#627eea','#f7931a','#e84142','#1652f0','#c49a2a'];
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%colors.length;
+  return colors[Math.abs(h)%colors.length];
+}
+
+function loginAs(name){
+  currentUser = name;
+  G = loadUserData(name);
+  // update header pill
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('upAvatar').textContent = initials;
+  document.getElementById('upAvatar').style.background = avatarColor(name);
+  document.getElementById('upName').textContent = name;
+  document.getElementById('loginScreen').classList.add('hidden');
+  renderAll();
+}
+
+function loginCreate(){
+  const input = document.getElementById('loginNameInput');
+  const name = input.value.trim();
+  if(!name){ input.focus(); return; }
+  if(name.length < 2){ toast('Name too short','err'); return; }
+  const profiles = getProfiles();
+  if(profiles.includes(name)){ loginAs(name); input.value=''; return; }
+  profiles.push(name);
+  saveProfiles(profiles);
+  input.value = '';
+  loginAs(name);
+}
+
+function deleteProfile(name){
+  if(!confirm(`Delete "${name}"? This permanently erases their progress.`)) return;
+  const profiles = getProfiles().filter(p=>p!==name);
+  saveProfiles(profiles);
+  try{ localStorage.removeItem(userKey(name)); }catch{}
+  renderLoginScreen();
+}
+
+function logoutUser(){
+  if(!confirm('Switch user? Your progress is saved.')) return;
+  saveUserData();
+  currentUser = null;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  renderLoginScreen();
+}
+
+/* ═══════════════════════════════════════════
+   STATE (per-user save)
+═══════════════════════════════════════════ */
 
 let curTab='crypto', curA=null, curTf=25;
 let cBuf=[], rafA=null, rafL=null;
@@ -692,15 +957,16 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
-// FIX: save no longer includes hist — history is always ephemeral
+// Save user progress + shared market prices
 function save(){
-  try{ localStorage.setItem(SK, JSON.stringify({g:G, px:prices, op:opens})); }catch{}
+  saveUserData();
+  saveMarket();
 }
 
 /* ═══════════════════════════════════════════
    RENDER — ALL
 ═══════════════════════════════════════════ */
-function renderAll(){ renderGrid(); renderTicker(); renderNav(); renderSidebar(); save(); }
+function renderAll(){ if(!currentUser) return; renderGrid(); renderTicker(); renderNav(); renderSidebar(); save(); }
 
 /* asset grid */
 function renderGrid(){
@@ -1202,8 +1468,9 @@ function toast(msg,type='ok'){
 /* ═══════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════ */
-initPrices();
-renderAll();
+loadMarket();      // load shared market prices first (so profile values show correctly)
+initPrices();      // generate fresh chart history
+renderLoginScreen(); // show login — game starts after loginAs()
 renderNews();
 setInterval(tick,2500);
 setInterval(renderNews,42000);
