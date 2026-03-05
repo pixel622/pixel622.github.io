@@ -921,6 +921,7 @@ function loginAs(name){
   document.getElementById('loginScreen').classList.add('hidden');
   renderAll();
   renderNews();
+  pushToGlobalLB();
 }
 
 function loginCreate(){
@@ -1023,10 +1024,11 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
-// Save user progress + shared market prices
+// Save user progress + shared market prices + push to global leaderboard
 function save(){
   saveUserData();
   saveMarket();
+  pushToGlobalLB();
 }
 
 /* ═══════════════════════════════════════════
@@ -1244,44 +1246,105 @@ function renderNews(){
 }
 
 /* ── LEADERBOARD ── */
-function renderLeaderboard(){
+/* ═══════════════════════════════════════════
+   GLOBAL LEADERBOARD — shared across all users
+   Uses window.storage (shared=true) so every
+   player's score is visible to everyone.
+═══════════════════════════════════════════ */
+const LB_PREFIX = 'apex_lb_';
+
+async function pushToGlobalLB(){
+  if(!currentUser) return;
+  try{
+    const tv = totalVal();
+    const pnl = tv - G.dep;
+    const entry = {
+      name: currentUser,
+      tv,
+      pnl,
+      trades: G.trades,
+      dep: G.dep,
+      ts: Date.now()
+    };
+    await window.storage.set(LB_PREFIX + currentUser, JSON.stringify(entry), true);
+  }catch(e){ console.warn('LB push failed',e); }
+}
+
+async function renderLeaderboard(){
   const el = document.getElementById('leaderList');
   if(!el) return;
-  const profiles = getProfiles();
-  if(!profiles.length){
-    el.innerHTML='<div class="empty">No other traders yet 🌱<br>Create more profiles to compete!</div>';
-    return;
+  el.innerHTML = '<div class="empty" style="text-align:center;padding:20px">⏳ Loading global scores…</div>';
+
+  try{
+    const keyResult = await window.storage.list(LB_PREFIX, true);
+    const keys = keyResult?.keys || [];
+
+    if(!keys.length){
+      el.innerHTML='<div class="empty">No traders on the board yet!<br>Keep playing to appear here 🌱</div>';
+      return;
+    }
+
+    // Fetch all entries in parallel
+    const entries = await Promise.all(keys.map(async k=>{
+      try{
+        const r = await window.storage.get(k, true);
+        return r ? JSON.parse(r.value) : null;
+      }catch{ return null; }
+    }));
+
+    const ranked = entries
+      .filter(Boolean)
+      .sort((a,b)=>b.tv-a.tv);
+
+    if(!ranked.length){
+      el.innerHTML='<div class="empty">No traders yet — you\'ll be first! 🚀</div>';
+      return;
+    }
+
+    const best = Math.max(...ranked.map(r=>r.tv), 0.01);
+    const medals = ['🥇','🥈','🥉'];
+
+    // Find current user rank
+    const myRank = ranked.findIndex(r=>r.name===currentUser);
+
+    el.innerHTML = `
+      <div style="font-family:'Azeret Mono',monospace;font-size:.48rem;color:var(--ink4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;">
+        <span>${ranked.length} trader${ranked.length!==1?'s':''} worldwide</span>
+        ${myRank>=0?`<span style="color:var(--acc)">You: #${myRank+1}</span>`:''}
+      </div>
+    ` + ranked.map((r,i)=>{
+      const isMe = r.name===currentUser;
+      const initials = r.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const barW = Math.round((r.tv/best)*100);
+      const pnlStr = (r.pnl>=0?'+':'')+F(r.pnl);
+      const ago = timeAgo(r.ts);
+      return `<div class="lb-row${isMe?' lb-me':''}${i<3?' lb-'+i:''}">
+        <div class="lb-rank">${medals[i]||(i+1)}</div>
+        <div class="lb-avatar" style="background:${avatarColor(r.name)}">${initials}</div>
+        <div class="lb-info">
+          <div class="lb-name">${r.name}${isMe?' <span class="lb-you">YOU</span>':''}</div>
+          <div class="lb-meta">${r.trades} trade${r.trades!==1?'s':''} · ${ago}</div>
+        </div>
+        <div class="lb-val">
+          <div class="lb-tv" style="color:${r.tv>=r.dep?'var(--UP)':'var(--DN)'}">${F(r.tv)}</div>
+          <div class="lb-pnl ${r.pnl>=0?'g':'r'}">${pnlStr}</div>
+        </div>
+        <div class="lb-bar" style="width:${barW}%"></div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML='<div class="empty">Could not load leaderboard.<br>Check your connection.</div>';
+    console.warn('LB render failed',e);
   }
-  const ranked = profiles.map(name=>{
-    const ud = loadUserData(name);
-    let tv = ud.cash||0;
-    Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += (v.sh||0)*(prices[t]||0); });
-    const pnl = tv-(ud.dep||5);
-    return {name, tv, pnl, trades:ud.trades||0, dep:ud.dep||5};
-  }).sort((a,b)=>b.tv-a.tv);
+}
 
-  const best = Math.max(...ranked.map(r=>r.tv), 0.01);
-  const medals = ['🥇','🥈','🥉'];
-
-  el.innerHTML = ranked.map((r,i)=>{
-    const isMe = r.name===currentUser;
-    const initials = r.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const barW = Math.round((r.tv/best)*100);
-    const pnlStr = (r.pnl>=0?'+':'')+F(r.pnl);
-    return `<div class="lb-row${isMe?' lb-me':''}${i<3?' lb-'+i:''}">
-      <div class="lb-rank">${medals[i]||('#'+(i+1))}</div>
-      <div class="lb-avatar" style="background:${avatarColor(r.name)}">${initials}</div>
-      <div class="lb-info">
-        <div class="lb-name">${r.name}${isMe?' <span class="lb-you">YOU</span>':''}</div>
-        <div class="lb-meta">${r.trades} trade${r.trades!==1?'s':''}</div>
-      </div>
-      <div class="lb-val">
-        <div class="lb-tv" style="color:${r.tv>=r.dep?'var(--UP)':'var(--DN)'}">${F(r.tv)}</div>
-        <div class="lb-pnl ${r.pnl>=0?'g':'r'}">${pnlStr}</div>
-      </div>
-      <div class="lb-bar" style="width:${barW}%"></div>
-    </div>`;
-  }).join('');
+function timeAgo(ts){
+  if(!ts) return '';
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
 }
 
 function switchTab(tab,el){
@@ -1678,11 +1741,14 @@ function toast(msg,type='ok'){
 /* ═══════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════ */
-loadMarket();      // load shared market prices first (so profile values show correctly)
-initPrices();      // generate fresh chart history
-renderLoginScreen(); // show login — game starts after loginAs()
+loadMarket();
+initPrices();
+renderLoginScreen();
 setInterval(tick,2500);
-setInterval(renderNews,8000); // refresh news every 8s — now reflects live prices
+setInterval(renderNews,8000);
+setInterval(()=>{
+  if(document.getElementById('pane-leaderboard')?.classList.contains('on')) renderLeaderboard();
+}, 30000);
 window.addEventListener('resize',()=>{ if(curA) buildChart(); });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&curA) closeScreen();
