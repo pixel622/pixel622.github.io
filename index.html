@@ -66,31 +66,29 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .grid{
   overflow-y:auto;
   display:grid;
-  grid-template-columns:repeat(4, 1fr);
+  grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
   gap:0;
   align-content:start;
 }
 .grid::-webkit-scrollbar{width:4px;}
 .grid::-webkit-scrollbar-thumb{background:var(--paper3);}
-@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);}}
 
 /* ── ASSET CARD ── */
-.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:13px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
+.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:9px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
 .acard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
 .acard:hover{background:var(--paper2);}
 .acard:hover::after{transform:scaleX(1);}
 .acard:active{background:var(--paper3);}
 .acard.owned{border-left:2px solid var(--UP);}
-.ac-r1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;}
-.ac-icon{font-size:1.4rem;line-height:1;}
-.ac-pct{font-family:'Azeret Mono',monospace;font-size:.58rem;font-weight:600;padding:2px 5px;}
+.ac-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ac-icon{font-size:1rem;line-height:1;}
+.ac-pct{font-family:'Azeret Mono',monospace;font-size:.52rem;font-weight:600;padding:1px 4px;}
 .ac-pct.g{background:var(--UP2);color:var(--UP);}
 .ac-pct.r{background:var(--DN2);color:var(--DN);}
-.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.5px;text-transform:uppercase;}
-.ac-sym{font-family:'Azeret Mono',monospace;font-size:.52rem;letter-spacing:1.5px;color:var(--ink4);}
-.ac-price{font-family:'Azeret Mono',monospace;font-size:.84rem;font-weight:600;color:var(--ink2);margin-top:7px;margin-bottom:5px;}
-.ac-spark{display:block;width:100%;height:32px;}
+.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ac-sym{font-family:'Azeret Mono',monospace;font-size:.46rem;letter-spacing:1.5px;color:var(--ink4);}
+.ac-price{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;color:var(--ink2);margin-top:5px;margin-bottom:4px;}
+.ac-spark{display:block;width:100%;height:26px;}
 
 /* ── SIDEBAR ── */
 .sidebar{display:flex;flex-direction:column;background:var(--paper2);overflow:hidden;}
@@ -314,9 +312,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
   .chart-col{border-right:none;border-bottom:1px solid rgba(255,255,255,.07);}
   .trade-col{max-height:45vh;}
   .hdr-stats .hst:nth-child(n+4){display:none;}
+  .grid{grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));}
 }
 @media(max-width:560px){
-  .grid{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));}
   .tabs .tab{padding:5px 7px;font-size:.6rem;}
 }
 </style>
