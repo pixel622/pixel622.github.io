@@ -571,7 +571,7 @@ const NEWS = [
 /* ═══════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════ */
-const SK = 'apex_v9_20coins';
+const SK = 'apex_v10_5dollars';
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
@@ -581,7 +581,7 @@ let G = (()=>{
     prices=d.px||{}; opens=d.op||{}; hist=d.hi||{};
     return d.g;
   }catch{return null;}
-})() || {cash:1, h:{}, txs:[], trades:0, dep:1};
+})() || {cash:5, h:{}, txs:[], trades:0, dep:5};
 
 let curTab='crypto', curA=null, curTf=25;
 let cBuf=[], rafA=null, rafL=null;
