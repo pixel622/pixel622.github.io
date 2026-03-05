@@ -19,7 +19,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");opacity:.7;}
 
 /* ── SHELL ── */
-.shell{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.shell{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
 
 /* ── HEADER ── */
 header{background:var(--ink);color:var(--paper);flex-shrink:0;}
@@ -50,11 +50,26 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .ti-s{color:rgba(255,255,255,.26);} .ti-p{color:rgba(255,255,255,.58);}
 .ti-c{font-weight:600;} .ti-c.g{color:var(--UP);} .ti-c.r{color:var(--DN);}
 
-/* ── BODY GRID ── */
-.body{display:grid;grid-template-columns:1fr 296px;min-height:0;flex:1;overflow:hidden;}
+/* ── BODY ── */
+/* flex:1 + min-height:0 lets it shrink within the shell flex column.
+   We use flex (not grid) so children reliably fill the height. */
+.body{
+  display:flex;
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+}
 
 /* ── MARKET PANEL ── */
-.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);min-height:0;overflow:hidden;}
+.market{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-height:0;
+  min-width:0;
+  border-right:1px solid var(--paper3);
+  overflow:hidden;
+}
 .mbar{padding:10px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--paper);flex-wrap:wrap;}
 .mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);flex-shrink:0;}
 .tabs{display:flex;border:1px solid var(--paper3);flex-wrap:wrap;}
@@ -63,31 +78,16 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .tab.on{background:var(--ink);color:var(--paper);}
 
 /* ── SEARCH BAR ── */
-.search-wrap{
-  margin-left:auto;position:relative;flex-shrink:0;
-}
-.search-wrap::before{
-  content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);
-  font-size:.7rem;pointer-events:none;opacity:.45;
-}
-.search-input{
-  background:var(--paper2);border:1px solid var(--paper3);
-  padding:5px 10px 5px 28px;
-  font-family:'Azeret Mono',monospace;font-size:.65rem;
-  color:var(--ink);outline:none;width:180px;
-  transition:border-color .15s,width .2s;
-}
+.search-wrap{margin-left:auto;position:relative;flex-shrink:0;}
+.search-wrap::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.7rem;pointer-events:none;opacity:.45;}
+.search-input{background:var(--paper2);border:1px solid var(--paper3);padding:5px 10px 5px 28px;font-family:'Azeret Mono',monospace;font-size:.65rem;color:var(--ink);outline:none;width:180px;transition:border-color .15s,width .2s;}
 .search-input::placeholder{color:var(--ink5);}
 .search-input:focus{border-color:var(--ink4);width:220px;}
-.search-clear{
-  position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;
-  font-size:.7rem;color:var(--ink4);padding:0;line-height:1;
-  display:none;
-}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.7rem;color:var(--ink4);padding:0;line-height:1;display:none;}
 .search-clear.vis{display:block;}
 
 /* ── ASSET GRID ── */
+/* The grid must fill remaining height of .market and scroll internally */
 .grid{
   flex:1;
   min-height:0;
@@ -102,11 +102,7 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .grid::-webkit-scrollbar-track{background:var(--paper2);}
 .grid::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:2px;}
 .grid::-webkit-scrollbar-thumb:hover{background:var(--ink5);}
-.grid-empty{
-  grid-column:1/-1;padding:32px 16px;text-align:center;
-  font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--ink4);
-  border-bottom:1px solid var(--paper3);
-}
+.grid-empty{grid-column:1/-1;padding:32px 16px;text-align:center;font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--ink4);border-bottom:1px solid var(--paper3);}
 
 /* ── ASSET CARD ── */
 .acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:12px 12px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
@@ -126,7 +122,7 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .ac-spark{display:block;width:100%;height:32px;}
 
 /* ── SIDEBAR ── */
-.sidebar{display:flex;flex-direction:column;background:var(--paper2);overflow:hidden;min-height:0;}
+.sidebar{display:flex;flex-direction:column;width:296px;flex-shrink:0;background:var(--paper2);overflow:hidden;min-height:0;border-left:1px solid var(--paper3);}
 .sbtabs{display:flex;border-bottom:1px solid var(--paper3);flex-shrink:0;}
 .sbtab{flex:1;padding:9px 4px;font-family:'Barlow Condensed',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--ink4);transition:all .15s;border-right:1px solid var(--paper3);}
 .sbtab:last-child{border-right:none;}
