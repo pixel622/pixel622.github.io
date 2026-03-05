@@ -609,15 +609,20 @@ const NEWS = [
 
 /* ═══════════════════════════════════════════
    STATE
+   FIX: hist is NEVER saved to or loaded from localStorage.
+        It is always freshly generated on each page load,
+        so charts look different every time.
 ═══════════════════════════════════════════ */
-const SK = 'apex_v11_allmarkets';
+const SK = 'apex_v12_allmarkets'; // bumped version key to clear old cached hist
 let prices={}, hist={}, opens={};
 
 let G = (()=>{
   try{
     const d=JSON.parse(localStorage.getItem(SK));
     if(!d) return null;
-    prices=d.px||{}; opens=d.op||{}; hist=d.hi||{};
+    // Only restore prices and opens — never history
+    prices=d.px||{};
+    opens=d.op||{};
     return d.g;
   }catch{return null;}
 })() || {cash:5, h:{}, txs:[], trades:0, dep:5};
@@ -628,15 +633,35 @@ const DPR=window.devicePixelRatio||1;
 
 /* ═══════════════════════════════════════════
    PRICE ENGINE
+   FIX: initPrices now ALWAYS generates fresh random history,
+        regardless of whether prices already exist.
+        Prices are preserved from localStorage, but history
+        is always newly randomized so charts differ each load.
 ═══════════════════════════════════════════ */
 function initPrices(){
+  const now = Date.now();
   ALL.forEach(a=>{
+    // Restore saved price or generate a fresh starting price
     if(!prices[a.t]){
-      prices[a.t]=a.b*(.88+Math.random()*.24);
-      opens[a.t]=prices[a.t];
-      const now=Date.now();
-      hist[a.t]=Array.from({length:400},(_,i)=>({t:now-(400-i)*2600, p:prices[a.t]*(.9+Math.random()*.2)}));
+      prices[a.t] = a.b * (.88 + Math.random() * .24);
+      opens[a.t]  = prices[a.t];
     }
+
+    // ALWAYS regenerate history fresh — never load from storage
+    // Use a random walk seeded from the current price so it ends near it
+    const startPrice = prices[a.t] * (.85 + Math.random() * .3);
+    const steps = 400;
+    let p = startPrice;
+    hist[a.t] = Array.from({length: steps}, (_, i) => {
+      // Random walk with slight mean-reversion toward current price
+      const target = prices[a.t];
+      const revert = (target - p) * 0.008;
+      const noise  = p * (Math.random() - 0.499) * a.v * 0.6;
+      p = Math.max(0.0001, p + revert + noise);
+      return { t: now - (steps - i) * 2600, p };
+    });
+    // Force the last point to match the actual current price for continuity
+    hist[a.t][steps - 1].p = prices[a.t];
   });
 }
 
@@ -666,7 +691,11 @@ function F(n){
 const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
-function save(){ try{localStorage.setItem(SK,JSON.stringify({g:G,px:prices,op:opens,hi:hist}));}catch{} }
+
+// FIX: save no longer includes hist — history is always ephemeral
+function save(){
+  try{ localStorage.setItem(SK, JSON.stringify({g:G, px:prices, op:opens})); }catch{}
+}
 
 /* ═══════════════════════════════════════════
    RENDER — ALL
