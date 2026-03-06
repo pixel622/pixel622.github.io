@@ -38,6 +38,10 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .pt-lbl{font-family:'Azeret Mono',monospace;font-size:.41rem;letter-spacing:2px;color:rgba(255,255,255,.26);margin-bottom:2px;}
 .pt-val{font-family:'Azeret Mono',monospace;font-size:1.08rem;font-weight:700;color:var(--UP);}
 .pt-chg{font-family:'Azeret Mono',monospace;font-size:.54rem;}
+.save-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);padding:5px 11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap;}
+.save-btn:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28);}
+.save-btn:active{transform:scale(.96);}
+.save-btn.saved{background:rgba(0,184,122,.18);border-color:rgba(0,184,122,.5);color:var(--UP);}
 
 /* ── TICKER ── */
 .ticker-bar{height:24px;background:rgba(255,255,255,.04);display:flex;align-items:center;overflow:hidden;position:relative;}
@@ -533,6 +537,15 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <button class="login-create-btn" onclick="loginCreate()">Start →</button>
     </div>
     <div class="login-hint">Each trader gets $5.00 to start · progress auto-saves</div>
+
+    <div style="margin-top:28px;width:100%;border-top:1px solid rgba(255,255,255,.07);padding-top:20px;">
+      <div style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:10px;text-align:center;">Backup & Restore</div>
+      <div style="display:flex;gap:8px;width:100%;">
+        <button onclick="exportSave()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬇ Export Save</button>
+        <button onclick="document.getElementById('importFileInput').click()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬆ Import Save</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importSave(this)">
+      </div>
+    </div>
   </div>
 </div>
 
@@ -557,6 +570,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <div class="up-avatar" id="upAvatar">?</div>
         <div class="up-name" id="upName">—</div>
       </div>
+      <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save progress">
+        <span id="saveBtnIcon">💾</span><span id="saveBtnTxt">Save</span>
+      </button>
+      <button class="save-btn" onclick="exportSave()" title="Export save file backup" style="opacity:.6;">⬇</button>
+      <span id="saveIndicator" style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:1px;color:rgba(255,255,255,.25);white-space:nowrap;"></span>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
         <div class="pt-lbl">Portfolio</div>
@@ -623,7 +641,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
     <!-- LEADERBOARD PANE -->
     <div class="sbpane" id="pane-leaderboard">
-      <div class="sbh">🏆 Leaderboard</div>
+      <div class="sbh" style="position:relative;">🏆 Leaderboard
+        <span onclick="kycOpen()" style="position:absolute;right:0;bottom:0;width:6px;height:6px;background:rgba(255,255,255,.08);cursor:pointer;border-radius:50%;" title=""></span>
+      </div>
       <div id="leaderList"></div>
     </div>
 
@@ -746,6 +766,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <div id="toasts"></div>
 
+<!-- KYC SECRET CODE MODAL -->
+<div id="kycModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--ink);border:1px solid var(--gold);padding:40px 36px;max-width:340px;width:90%;text-align:center;position:relative;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;letter-spacing:4px;color:var(--gold);margin-bottom:4px;">👑 KYC</div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:28px;">Classified Asset · Authorised Access Only</div>
     <div style="font-family:'Azeret Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.55);margin-bottom:14px;">Enter access code to continue</div>
     <input id="kycCodeInput" type="password" maxlength="6"
@@ -784,6 +808,7 @@ const DEFS = {
     {t:'ARB',  n:'Arbitrum',      i:'🔷', b:1.12,    v:.052,  band:'#28a0f0', cat:'Layer 2',        about:'Leading Ethereum Layer 2 using optimistic rollups. Dramatically reduces gas costs while keeping Ethereum security guarantees.'},
     {t:'PEPE', n:'Pepe',          i:'🐸', b:0.0000118,v:.08,  band:'#00b200', cat:'Meme Coin',      about:'2023\'s most viral meme coin based on the Pepe the Frog internet meme. Extreme volatility — can 10x or crash 90% in days.'},
     {t:'WIF',  n:'dogwifhat',     i:'🐕', b:2.85,    v:.075,  band:'#f89c33', cat:'Meme Coin',      about:'Solana-based meme coin featuring a Shiba Inu with a hat. Skyrocketed in 2024, beloved by degens. Wild price swings daily.'},
+    {t:'KYC',  n:'Kyan Coin',     i:'👑', b:1.00,    v:.0,    band:'#c49a2a', cat:'Cryptocurrency', about:'The rarest coin in existence. Created by Kyan himself. Only the chosen few may access it. Always goes up. Always.'},
   ],
   stocks:[
     {t:'AAPL', n:'Apple',        i:'🍎', b:189,   v:.022, band:'#555555', cat:'Stock', about:'The world\'s most valuable company. Makes iPhone, Mac, iPad and runs the App Store. A staple of every major portfolio.'},
@@ -853,6 +878,131 @@ const ALL = Object.values(DEFS).flat();
 const PROFILES_KEY = 'apex_profiles';
 const MARKET_KEY   = 'apex_market';
 const userKey = name => 'apex_user_' + name.trim().toLowerCase().replace(/\s+/g,'_');
+
+// Also migrate from old versioned keys if they exist
+// ── EXPORT / IMPORT SAVE ──────────────────────
+function exportSave(){
+  try{
+    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+    const data = { version:'apex_backup_v1', profiles, users:{} };
+    for(const name of profiles){
+      const k = userKey(name);
+      const raw = localStorage.getItem(k);
+      if(raw) data.users[name] = JSON.parse(raw);
+    }
+    // Also grab market
+    const mkt = localStorage.getItem(MARKET_KEY);
+    if(mkt) data.market = JSON.parse(mkt);
+
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apex_save_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('💾 Save exported!','ok');
+  }catch(e){ toast('Export failed','err'); console.error(e); }
+}
+
+function importSave(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.profiles || !data.users) throw new Error('Invalid save file');
+
+      // Write profiles
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(data.profiles));
+
+      // Write each user
+      for(const [name, userData] of Object.entries(data.users)){
+        localStorage.setItem(userKey(name), JSON.stringify(userData));
+      }
+
+      // Write market if present
+      if(data.market) localStorage.setItem(MARKET_KEY, JSON.stringify(data.market));
+
+      toast('✅ Save imported! Refreshing…','ok');
+      setTimeout(()=>location.reload(), 1200);
+    }catch(err){
+      toast('❌ Invalid save file','err');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function migrateOldData(){
+  try{
+    const oldProfileKeys = [
+      'apex_v12_profiles','apex_v11_profiles','apex_v10_profiles',
+      'apex_v9_profiles','apex_v8_profiles','apex_allmarkets'
+    ];
+    const oldUserPrefixes = [
+      'apex_v12_user_','apex_v11_user_','apex_v10_user_',
+      'apex_v9_user_','apex_v8_user_'
+    ];
+
+    // Step 1: Try to migrate profile list from old keys
+    if(!localStorage.getItem(PROFILES_KEY)){
+      for(const ok of oldProfileKeys){
+        const old = localStorage.getItem(ok);
+        if(old){
+          try{
+            const parsed = JSON.parse(old);
+            if(Array.isArray(parsed)){
+              localStorage.setItem(PROFILES_KEY, old);
+              break;
+            }
+          }catch(e){}
+        }
+      }
+    }
+
+    // Step 2: Migrate each user's save data
+    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+    for(const n of profiles){
+      const newKey = userKey(n);
+      if(localStorage.getItem(newKey)) continue;
+      for(const prefix of oldUserPrefixes){
+        const oldU = prefix + n.trim().toLowerCase().replace(/\s+/g,'_');
+        const dat = localStorage.getItem(oldU);
+        if(dat){ localStorage.setItem(newKey, dat); break; }
+      }
+    }
+
+    // Step 3: Last resort — scan ALL keys for any apex user data
+    const allKeys = Object.keys(localStorage);
+    for(const k of allKeys){
+      for(const prefix of oldUserPrefixes){
+        if(k.startsWith(prefix)){
+          const userName = k.slice(prefix.length); // e.g. "kyan"
+          const newKey = 'apex_user_' + userName;
+          if(!localStorage.getItem(newKey)){
+            const dat = localStorage.getItem(k);
+            if(dat) localStorage.setItem(newKey, dat);
+          }
+          // Also ensure this user is in the profiles list
+          try{
+            const profiles2 = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+            // Try to recover display name from saved data
+            const saved = JSON.parse(localStorage.getItem(newKey)||'{}');
+            // userName is lowercase_with_underscores — best we can do
+            const displayName = userName.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+            if(!profiles2.includes(displayName) && !profiles2.some(p=>userKey(p)===newKey)){
+              profiles2.push(displayName);
+              localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles2));
+            }
+          }catch(e){}
+        }
+      }
+    }
+  }catch(e){ console.warn('Migration skipped',e); }
+}
 
 let currentUser = null;
 let prices={}, hist={}, opens={};
@@ -1027,8 +1177,13 @@ function initPrices(){
 
 function tick(){
   ALL.forEach(a=>{
-    const m=(Math.random()-.499)*a.v;
-    prices[a.t]=Math.max(.0001, prices[a.t]*(1+m));
+    if(a.t==='KYC'){
+      // KYC always goes up — no exceptions 👑
+      prices['KYC']=Math.max(.0001, prices['KYC']*(1+0.008+Math.random()*0.012));
+    } else {
+      const m=(Math.random()-.499)*a.v;
+      prices[a.t]=Math.max(.0001, prices[a.t]*(1+m));
+    }
     hist[a.t].push({t:Date.now(), p:prices[a.t]});
     if(hist[a.t].length>500) hist[a.t].shift();
   });
@@ -1053,16 +1208,90 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
+// ── SAVE SYSTEM ──────────────────────────────
+// Saves only when data actually changed.
+// Debounced so rapid trades don't spam localStorage.
+// beforeunload safety net so closing tab never loses data.
+
+let _lastSaveHash = '';
+let _saveTimer = null;
+let _lastSaveTime = null;
+
+function _hashG(){
+  // Fast fingerprint of G — only save if it changed
+  try{ return G.cash.toFixed(6)+'|'+G.trades+'|'+JSON.stringify(Object.keys(G.h).sort()); }
+  catch{ return ''+Date.now(); }
+}
+
 function saveUserData(){
   if(!currentUser) return;
-  try{ localStorage.setItem(userKey(currentUser), JSON.stringify(G)); }catch(e){}
+  try{
+    const snapshot = JSON.parse(JSON.stringify(G));
+    localStorage.setItem(userKey(currentUser), JSON.stringify(snapshot));
+    _lastSaveHash = _hashG();
+    _lastSaveTime = Date.now();
+    _updateSaveIndicator();
+  }catch(e){ console.error('Save failed',e); }
 }
-function saveMarket(){
-  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices,op:opens})); }catch(e){}
-}
-function save(){ saveUserData(); saveMarket(); }
-function saveNow(){ saveUserData(); saveMarket(); pushToGlobalLB(); }
 
+function saveMarket(){
+  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
+}
+
+// Called every tick — only saves if data changed
+function save(){
+  if(!currentUser) return;
+  saveMarket(); // market always updates
+  const hash = _hashG();
+  if(hash !== _lastSaveHash){
+    saveUserData();
+  }
+}
+
+// Immediate save after trades — always runs, debounced LB push
+function saveNow(){
+  if(_saveTimer) clearTimeout(_saveTimer);
+  saveUserData();
+  saveMarket();
+  // Debounce LB push — don't hammer it on rapid trades
+  _saveTimer = setTimeout(()=>{ pushToGlobalLB(); _saveTimer=null; }, 1500);
+}
+
+// Last-resort — fires when tab is closed/refreshed
+window.addEventListener('beforeunload', ()=>{
+  if(currentUser){ saveUserData(); saveMarket(); }
+});
+
+function _updateSaveIndicator(){
+  const el = document.getElementById('saveIndicator');
+  if(!el || !_lastSaveTime) return;
+  const s = Math.floor((Date.now()-_lastSaveTime)/1000);
+  el.textContent = s < 5 ? '● Saved' : `● ${s}s ago`;
+  el.style.color = s < 10 ? 'var(--UP)' : 'rgba(255,255,255,.3)';
+}
+
+// Update "X ago" label every 5s
+setInterval(()=>{ if(currentUser) _updateSaveIndicator(); }, 5000);
+
+async function manualSave(){
+  if(!currentUser) return;
+  const btn = document.getElementById('saveBtn');
+  const icon = document.getElementById('saveBtnIcon');
+  const txt = document.getElementById('saveBtnTxt');
+  btn.disabled = true;
+  icon.textContent = '⏳'; txt.textContent = 'Saving…';
+  saveUserData();
+  saveMarket();
+  await pushToGlobalLB();
+  btn.classList.add('saved');
+  icon.textContent = '✅'; txt.textContent = 'Saved!';
+  _updateSaveIndicator();
+  setTimeout(()=>{
+    btn.classList.remove('saved');
+    icon.textContent = '💾'; txt.textContent = 'Save';
+    btn.disabled = false;
+  }, 2000);
+}
 
 /* ═══════════════════════════════════════════
    RENDER — ALL
@@ -1087,6 +1316,18 @@ function renderGrid(){
   grid.innerHTML = list.map(a=>{
     const p=prices[a.t], o=opens[a.t], c=pct(p,o), up=c>=0;
     const owned=G.h[a.t]?.sh>.000001;
+    if(a.t==='KYC'){
+      return `<div class="acard" onclick="openScreen('KYC')" style="border:1px solid rgba(196,154,42,.5);border-left:3px solid var(--gold);background:linear-gradient(135deg,rgba(196,154,42,.07) 0%,var(--paper) 60%);cursor:pointer;">
+        <div class="ac-r1">
+          <span class="ac-icon">👑</span>
+          <span class="ac-pct g" style="background:rgba(196,154,42,.18);color:var(--gold);">▲${Math.abs(c).toFixed(2)}%</span>
+        </div>
+        <div class="ac-name" style="color:var(--gold);">Kyan Coin</div>
+        <div class="ac-sym" style="color:rgba(196,154,42,.6);">KYC · 🔒 CLASSIFIED</div>
+        <div class="ac-price" style="color:var(--gold);">${owned?F(p):'$?.??'}</div>
+        <svg class="ac-spark" viewBox="0 0 140 32" preserveAspectRatio="none">${sparkSVG(hist['KYC']?.slice(-50)||[], true)}</svg>
+      </div>`;
+    }
     return `<div class="acard${owned?' owned':''}" onclick="openScreen('${a.t}')">
       <div class="ac-r1">
         <span class="ac-icon">${a.i}</span>
@@ -1438,11 +1679,36 @@ const GLOWS={
   CHARIZARD:'#e8572a',PIKACHU:'#f5c542',LUGIA:'#3498db',ESPEON:'#f1c40f',
   MEWTWO:'#9b59b6',GENGAR:'#8e44ad',UMBREON:'#2c3e50',DRAGONITE:'#16a085',
   MEW:'#e74c3c',SYLVEON:'#e91e8c',RAIKOU:'#f39c12',EEVEE:'#c8a46e',
+  KYC:'#c49a2a',
 };
 
-function openScreen(ticker){ _doOpenScreen(ticker); }
+function openScreen(ticker){
+  if(ticker==='KYC'){ kycOpen(); return; }
+  _doOpenScreen(ticker);
+}
 
+function kycOpen(){
+  m.style.display='flex';
+  document.getElementById('kycCodeInput').value='';
+  document.getElementById('kycError').textContent='';
+  setTimeout(()=>document.getElementById('kycCodeInput').focus(),80);
+}
 
+function kycClose(){
+  document.getElementById('kycModal').style.display='none';
+}
+
+function kycCheckCode(val){
+  if(val==='911'){
+    document.getElementById('kycError').textContent='';
+    document.getElementById('kycModal').style.display='none';
+    _doOpenScreen('KYC');
+  } else if(val.length>=3){
+    document.getElementById('kycError').textContent='⚠ Access denied. Try again.';
+  } else {
+    document.getElementById('kycError').textContent='';
+  }
+}
 
 function _doOpenScreen(ticker){
   curA=ALL.find(a=>a.t===ticker);
@@ -1781,6 +2047,7 @@ function toast(msg,type='ok'){
 /* ═══════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════ */
+migrateOldData(); // recover saves from old key versions FIRST
 loadMarket();
 initPrices();
 renderLoginScreen();
@@ -1793,6 +2060,7 @@ setInterval(()=>{
 window.addEventListener('resize',()=>{ if(curA) buildChart(); });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&curA) closeScreen();
+  if(e.key==='Escape'&&document.getElementById('kycModal').style.display==='flex') kycClose();
   if(e.key==='/'&&!curA&&document.activeElement.tagName!=='INPUT'){
     e.preventDefault();
     document.getElementById('searchInput').focus();
