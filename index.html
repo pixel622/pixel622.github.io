@@ -1038,68 +1038,6 @@ function loadMarket(){
   }catch(e){}
 }
 
-/* ── SAVE SYSTEM ── */
-let _lastSaveHash='', _saveTimer=null, _lastSaveTime=null;
-
-function _hashG(){
-  try{ return G.cash.toFixed(4)+'|'+G.trades+'|'+JSON.stringify(Object.keys(G.h||{}).sort()); }
-  catch{ return ''+Date.now(); }
-}
-
-function saveUserData(){
-  if(!currentUser) return;
-  try{
-    const snap = JSON.stringify(G);
-    localStorage.setItem(userKey(currentUser), snap);
-    _lastSaveHash = _hashG();
-    _lastSaveTime = Date.now();
-    _updateSaveIndicator();
-  }catch(e){ console.error('saveUserData failed',e); }
-}
-
-function saveMarket(){
-  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices,op:opens})); }catch(e){}
-}
-
-function save(){
-  if(!currentUser) return;
-  saveMarket();
-  if(_hashG() !== _lastSaveHash) saveUserData();
-}
-
-function saveNow(){
-  if(_saveTimer) clearTimeout(_saveTimer);
-  saveUserData();
-  saveMarket();
-  _saveTimer = setTimeout(()=>{ pushToGlobalLB(); _saveTimer=null; }, 1500);
-}
-
-window.addEventListener('beforeunload', ()=>{
-  if(currentUser){ saveUserData(); saveMarket(); }
-});
-
-function _updateSaveIndicator(){
-  const el = document.getElementById('saveIndicator');
-  if(!el||!_lastSaveTime) return;
-  const s = Math.floor((Date.now()-_lastSaveTime)/1000);
-  el.textContent = s<5 ? '● Saved' : `● ${s}s ago`;
-  el.style.color  = s<10 ? 'var(--UP)' : 'rgba(255,255,255,.3)';
-}
-setInterval(()=>{ if(currentUser) _updateSaveIndicator(); }, 5000);
-
-async function manualSave(){
-  if(!currentUser) return;
-  const btn=document.getElementById('saveBtn');
-  const icon=document.getElementById('saveBtnIcon');
-  const txt=document.getElementById('saveBtnTxt');
-  btn.disabled=true; icon.textContent='⏳'; txt.textContent='Saving…';
-  saveUserData(); saveMarket();
-  await pushToGlobalLB();
-  btn.classList.add('saved'); icon.textContent='✅'; txt.textContent='Saved!';
-  _updateSaveIndicator();
-  setTimeout(()=>{ btn.classList.remove('saved'); icon.textContent='💾'; txt.textContent='Save'; btn.disabled=false; },2000);
-}
-
 /* ── LOGIN SCREEN ── */
 function renderLoginScreen(){
   const profiles = getProfiles();
@@ -1165,36 +1103,6 @@ function loginAs(name){
     console.error('loginAs error',e);
     alert('Login error — please refresh and try again.');
   }
-}
-
-function loginCreate(){
-  const input=document.getElementById('loginNameInput');
-  const name=input.value.trim();
-  if(!name){ input.focus(); return; }
-  if(name.length<2){ toast('Name too short','err'); return; }
-  const profiles=getProfiles();
-  if(!profiles.includes(name)){
-    profiles.push(name);
-    saveProfiles(profiles);
-  }
-  input.value='';
-  loginAs(name);
-}
-
-function deleteProfile(name){
-  if(!confirm(`Delete "${name}"? This permanently erases their progress.`)) return;
-  saveProfiles(getProfiles().filter(p=>p!==name));
-  try{ localStorage.removeItem(userKey(name)); }catch(e){}
-  renderLoginScreen();
-}
-
-function logoutUser(){
-  if(!confirm('Switch user? Your progress is saved.')) return;
-  saveUserData();
-  currentUser=null;
-  document.getElementById('loginScreen').classList.remove('hidden');
-  renderLoginScreen();
-}
 }
 
 function loginCreate(){
@@ -1784,7 +1692,8 @@ function kycTabClick(){
     _kycTimer = setTimeout(()=>{ _kycClicks = 0; }, 600);
   }
 }
-  const m=document.getElementById('kycModal');
+
+function kycOpen(){
   m.style.display='flex';
   document.getElementById('kycCodeInput').value='';
   document.getElementById('kycError').textContent='';
