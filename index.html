@@ -19,7 +19,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");opacity:.7;}
 
 /* ── SHELL ── */
-.shell{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;}
+.shell{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
 /* ── HEADER ── */
 header{background:var(--ink);color:var(--paper);flex-shrink:0;}
@@ -38,10 +38,6 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .pt-lbl{font-family:'Azeret Mono',monospace;font-size:.41rem;letter-spacing:2px;color:rgba(255,255,255,.26);margin-bottom:2px;}
 .pt-val{font-family:'Azeret Mono',monospace;font-size:1.08rem;font-weight:700;color:var(--UP);}
 .pt-chg{font-family:'Azeret Mono',monospace;font-size:.54rem;}
-.save-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);padding:5px 11px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);transition:all .15s;white-space:nowrap;}
-.save-btn:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.28);}
-.save-btn:active{transform:scale(.96);}
-.save-btn.saved{background:rgba(0,184,122,.18);border-color:rgba(0,184,122,.5);color:var(--UP);}
 
 /* ── TICKER ── */
 .ticker-bar{height:24px;background:rgba(255,255,255,.04);display:flex;align-items:center;overflow:hidden;position:relative;}
@@ -54,85 +50,57 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .ti-s{color:rgba(255,255,255,.26);} .ti-p{color:rgba(255,255,255,.58);}
 .ti-c{font-weight:600;} .ti-c.g{color:var(--UP);} .ti-c.r{color:var(--DN);}
 
-/* ── BODY ── */
-/* flex:1 + min-height:0 lets it shrink within the shell flex column.
-   We use flex (not grid) so children reliably fill the height. */
-.body{
-  display:flex;
-  flex:1;
-  min-height:0;
-  overflow:hidden;
-}
+/* ── BODY GRID ── */
+.body{display:grid;grid-template-columns:1fr 296px;overflow:hidden;min-height:0;flex:1;height:0;}
 
 /* ── MARKET PANEL ── */
-.market{
-  display:flex;
-  flex-direction:column;
-  flex:1;
-  min-height:0;
-  min-width:0;
-  border-right:1px solid var(--paper3);
-  overflow:hidden;
-}
-.mbar{padding:10px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--paper);flex-wrap:wrap;}
-.mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);flex-shrink:0;}
-.tabs{display:flex;border:1px solid var(--paper3);flex-wrap:wrap;}
+.market{display:flex;flex-direction:column;border-right:1px solid var(--paper3);overflow:hidden;min-height:0;flex:1;}
+.mbar{padding:11px 16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--paper);}
+.mbar-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);}
+.tabs{display:flex;border:1px solid var(--paper3);}
 .tab{padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--ink4);transition:all .15s;border-right:1px solid var(--paper3);}
 .tab:last-child{border-right:none;}
 .tab.on{background:var(--ink);color:var(--paper);}
 
-/* ── SEARCH BAR ── */
-.search-wrap{margin-left:auto;position:relative;flex-shrink:0;}
-.search-wrap::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.7rem;pointer-events:none;opacity:.45;}
-.search-input{background:var(--paper2);border:1px solid var(--paper3);padding:5px 10px 5px 28px;font-family:'Azeret Mono',monospace;font-size:.65rem;color:var(--ink);outline:none;width:180px;transition:border-color .15s,width .2s;}
-.search-input::placeholder{color:var(--ink5);}
-.search-input:focus{border-color:var(--ink4);width:220px;}
-.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:.7rem;color:var(--ink4);padding:0;line-height:1;display:none;}
-.search-clear.vis{display:block;}
-
 /* ── ASSET GRID ── */
-.grid-scroll-wrap{
+.grid{
   flex:1;
   min-height:0;
   overflow-y:auto;
   overflow-x:hidden;
-}
-.grid-scroll-wrap::-webkit-scrollbar{width:5px;}
-.grid-scroll-wrap::-webkit-scrollbar-track{background:var(--paper2);}
-.grid-scroll-wrap::-webkit-scrollbar-thumb{background:var(--paper3);border-radius:2px;}
-.grid-scroll-wrap::-webkit-scrollbar-thumb:hover{background:var(--ink5);}
-.grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:0;
+  align-content:start;
 }
-.grid-empty{grid-column:1/-1;padding:32px 16px;text-align:center;font-family:'Azeret Mono',monospace;font-size:.72rem;color:var(--ink4);border-bottom:1px solid var(--paper3);}
+.grid::-webkit-scrollbar{width:4px;}
+.grid::-webkit-scrollbar-thumb{background:var(--paper3);}
 
 /* ── ASSET CARD ── */
-.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:12px 12px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
+.acard{border-right:1px solid var(--paper3);border-bottom:1px solid var(--paper3);padding:9px 10px;cursor:pointer;position:relative;background:var(--paper);transition:background .14s;overflow:hidden;}
 .acard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .2s;}
 .acard:hover{background:var(--paper2);}
 .acard:hover::after{transform:scaleX(1);}
 .acard:active{background:var(--paper3);}
 .acard.owned{border-left:2px solid var(--UP);}
-.ac-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
-.ac-icon{font-size:1.15rem;line-height:1;}
-.ac-pct{font-family:'Azeret Mono',monospace;font-size:.52rem;font-weight:600;padding:2px 5px;}
+.ac-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ac-icon{font-size:1rem;line-height:1;}
+.ac-pct{font-family:'Azeret Mono',monospace;font-size:.52rem;font-weight:600;padding:1px 4px;}
 .ac-pct.g{background:var(--UP2);color:var(--UP);}
 .ac-pct.r{background:var(--DN2);color:var(--DN);}
-.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ac-sym{font-family:'Azeret Mono',monospace;font-size:.46rem;letter-spacing:1.5px;color:var(--ink4);margin-bottom:2px;}
-.ac-price{font-family:'Azeret Mono',monospace;font-size:.82rem;font-weight:600;color:var(--ink2);margin-top:6px;margin-bottom:5px;}
-.ac-spark{display:block;width:100%;height:32px;}
+.ac-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ac-sym{font-family:'Azeret Mono',monospace;font-size:.46rem;letter-spacing:1.5px;color:var(--ink4);}
+.ac-price{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;color:var(--ink2);margin-top:5px;margin-bottom:4px;}
+.ac-spark{display:block;width:100%;height:26px;}
 
 /* ── SIDEBAR ── */
-.sidebar{display:flex;flex-direction:column;width:296px;flex-shrink:0;background:var(--paper2);overflow:hidden;min-height:0;border-left:1px solid var(--paper3);}
+.sidebar{display:flex;flex-direction:column;background:var(--paper2);overflow:hidden;}
 .sbtabs{display:flex;border-bottom:1px solid var(--paper3);flex-shrink:0;}
 .sbtab{flex:1;padding:9px 4px;font-family:'Barlow Condensed',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--ink4);transition:all .15s;border-right:1px solid var(--paper3);}
 .sbtab:last-child{border-right:none;}
 .sbtab.on{background:var(--paper);color:var(--ink);box-shadow:inset 0 -2px 0 var(--acc);}
-.sbpane{display:none;overflow-y:auto;padding:12px;}
-.sbpane.on{display:block;flex:1;min-height:0;}
+.sbpane{display:none;flex:1;overflow-y:auto;padding:12px;}
+.sbpane.on{display:block;}
 .sbpane::-webkit-scrollbar{width:3px;}
 .sbpane::-webkit-scrollbar-thumb{background:var(--paper3);}
 .sbh{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--ink4);margin:12px 0 8px;}
@@ -176,36 +144,12 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .sell-btn:active{background:#c02020;}
 
 /* news */
-.nitem{border-left:3px solid var(--paper3);padding:8px 10px;margin-bottom:7px;background:var(--paper);}
-.nitem.bull{border-color:var(--UP);background:rgba(0,184,122,.03);}
-.nitem.bear{border-color:var(--DN);background:rgba(224,59,59,.03);}
+.nitem{border-left:3px solid var(--paper3);padding:7px 9px;margin-bottom:6px;background:var(--paper);}
+.nitem.bull{border-color:var(--UP);} .nitem.bear{border-color:var(--DN);}
 .ntag{font-family:'Barlow Condensed',sans-serif;font-size:.55rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;display:block;}
 .nitem.bull .ntag{color:var(--UP);} .nitem.bear .ntag{color:var(--DN);} .nitem.neut .ntag{color:var(--ink4);}
-.ntitle{font-size:.72rem;font-weight:500;color:var(--ink2);line-height:1.45;margin-bottom:3px;}
-.nhint{font-size:.62rem;color:var(--ink4);}
-
-/* leaderboard */
-.lb-row{
-  display:flex;align-items:center;gap:8px;
-  padding:9px 10px 11px;background:var(--paper);
-  border:1px solid var(--paper3);border-left:3px solid var(--paper3);
-  margin-bottom:6px;position:relative;overflow:hidden;
-}
-.lb-row.lb-me{border-left-color:var(--acc);}
-.lb-row.lb-0{border-left-color:var(--gold);}
-.lb-row.lb-1{border-left-color:#94a3b8;}
-.lb-row.lb-2{border-left-color:#b45309;}
-.lb-rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;width:22px;flex-shrink:0;text-align:center;}
-.lb-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.72rem;color:#fff;}
-.lb-info{flex:1;min-width:0;}
-.lb-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
-.lb-you{font-family:'Azeret Mono',monospace;font-size:.42rem;background:var(--acc);color:#fff;padding:1px 4px;letter-spacing:1px;}
-.lb-meta{font-family:'Azeret Mono',monospace;font-size:.46rem;color:var(--ink4);margin-top:2px;}
-.lb-val{text-align:right;flex-shrink:0;}
-.lb-tv{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;}
-.lb-pnl{font-family:'Azeret Mono',monospace;font-size:.5rem;margin-top:1px;}
-.lb-pnl.g{color:var(--UP);} .lb-pnl.r{color:var(--DN);}
-.lb-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--ink2);opacity:.07;}
+.ntitle{font-size:.71rem;font-weight:500;color:var(--ink2);line-height:1.4;margin-bottom:2px;}
+.nhint{font-size:.61rem;color:var(--ink4);}
 
 /* tx */
 .txbox{background:var(--paper);border:1px solid var(--paper3);}
@@ -257,17 +201,10 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .ov{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;color:rgba(255,255,255,.78);}
 .tfs{display:flex;gap:2px;}
 .tf{padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid transparent;background:rgba(255,255,255,.04);color:rgba(255,255,255,.28);transition:all .13s;}
-.tf:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.09);}
-.tf.on{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.12);}
-.chart-mode-btn{margin-left:8px;border-left:1px solid rgba(255,255,255,.1)!important;padding-left:14px;color:rgba(255,255,255,.5)!important;}
-.chart-mode-btn:hover{color:#fff!important;}
 .tf.on{background:rgba(255,255,255,.1);color:var(--paper);border-color:rgba(255,255,255,.13);}
 .cvwrap{flex:1;position:relative;min-height:0;}
 canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 .ctip{position:absolute;background:var(--ink);border:1px solid rgba(255,255,255,.15);padding:9px 13px;font-family:'Azeret Mono',monospace;font-size:.67rem;pointer-events:none;opacity:0;transition:opacity .1s;white-space:nowrap;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.7);}
-.ctip.on{opacity:1;}
-.ctip-ohlc{display:grid;grid-template-columns:auto auto;gap:1px 10px;margin-top:5px;font-size:.58rem;color:rgba(255,255,255,.5);}
-.ctip-ohlc span{color:rgba(255,255,255,.85);}
 .ctip.on{opacity:1;}
 .ctip-t{color:rgba(255,255,255,.28);font-size:.54rem;margin-bottom:4px;}
 .ctip-p{font-size:.84rem;font-weight:600;}
@@ -537,15 +474,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <button class="login-create-btn" onclick="loginCreate()">Start →</button>
     </div>
     <div class="login-hint">Each trader gets $5.00 to start · progress auto-saves</div>
-
-    <div style="margin-top:28px;width:100%;border-top:1px solid rgba(255,255,255,.07);padding-top:20px;">
-      <div style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:10px;text-align:center;">Backup & Restore</div>
-      <div style="display:flex;gap:8px;width:100%;">
-        <button onclick="exportSave()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬇ Export Save</button>
-        <button onclick="document.getElementById('importFileInput').click()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬆ Import Save</button>
-        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importSave(this)">
-      </div>
-    </div>
   </div>
 </div>
 
@@ -570,11 +498,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <div class="up-avatar" id="upAvatar">?</div>
         <div class="up-name" id="upName">—</div>
       </div>
-      <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save progress">
-        <span id="saveBtnIcon">💾</span><span id="saveBtnTxt">Save</span>
-      </button>
-      <button class="save-btn" onclick="exportSave()" title="Export save file backup" style="opacity:.6;">⬇</button>
-      <span id="saveIndicator" style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:1px;color:rgba(255,255,255,.25);white-space:nowrap;"></span>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
         <div class="pt-lbl">Portfolio</div>
@@ -599,17 +522,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
         <button class="tab" onclick="switchTab('etfs',this)">ETFs</button>
         <button class="tab" onclick="switchTab('commodities',this)">Commodities</button>
         <button class="tab" onclick="switchTab('forex',this)">Forex</button>
-        <button class="tab" onclick="switchTab('pokecards',this)">🎴 PokéCards</button>
-      </div>
-      <div class="search-wrap">
-        <input class="search-input" id="searchInput" type="text" placeholder="Search assets…"
-          oninput="onSearch(this.value)" autocomplete="off" spellcheck="false">
-        <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
       </div>
     </div>
-    <div class="grid-scroll-wrap">
-      <div class="grid" id="assetGrid"></div>
-    </div>
+    <div class="grid" id="assetGrid"></div>
   </div>
 
   <!-- SIDEBAR -->
@@ -617,7 +532,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
     <div class="sbtabs">
       <button class="sbtab on" onclick="switchSb('portfolio',this)">Portfolio</button>
       <button class="sbtab" onclick="switchSb('news',this)">News</button>
-      <button class="sbtab" onclick="switchSb('leaderboard',this)">🏆</button>
       <button class="sbtab" onclick="switchSb('history',this)">History</button>
     </div>
 
@@ -636,15 +550,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
     <!-- NEWS PANE -->
     <div class="sbpane" id="pane-news">
       <div class="sbh">Market News</div>
-      <div id="newsList"><div class="empty">Click News tab to load…</div></div>
-    </div>
-
-    <!-- LEADERBOARD PANE -->
-    <div class="sbpane" id="pane-leaderboard">
-      <div class="sbh" style="position:relative;">🏆 Leaderboard
-        <span onclick="kycOpen()" style="position:absolute;right:0;bottom:0;width:6px;height:6px;background:rgba(255,255,255,.08);cursor:pointer;border-radius:50%;" title=""></span>
-      </div>
-      <div id="leaderList"></div>
+      <div id="newsList"></div>
     </div>
 
     <!-- HISTORY PANE -->
@@ -766,22 +672,6 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 
 <div id="toasts"></div>
 
-<!-- KYC SECRET CODE MODAL -->
-<div id="kycModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;">
-  <div style="background:var(--ink);border:1px solid var(--gold);padding:40px 36px;max-width:340px;width:90%;text-align:center;position:relative;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:2.8rem;font-weight:900;letter-spacing:4px;color:var(--gold);margin-bottom:4px;">👑 KYC</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:28px;">Classified Asset · Authorised Access Only</div>
-    <div style="font-family:'Azeret Mono',monospace;font-size:.72rem;color:rgba(255,255,255,.55);margin-bottom:14px;">Enter access code to continue</div>
-    <input id="kycCodeInput" type="password" maxlength="6"
-      style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-bottom:2px solid var(--gold);padding:12px 16px;font-family:'Azeret Mono',monospace;font-size:1.4rem;letter-spacing:8px;color:var(--gold);text-align:center;outline:none;margin-bottom:10px;"
-      placeholder="• • • •"
-      oninput="kycCheckCode(this.value)"
-      onkeydown="if(event.key==='Escape')kycClose()">
-    <div id="kycError" style="font-family:'Azeret Mono',monospace;font-size:.6rem;color:var(--DN);height:16px;margin-bottom:16px;"></div>
-    <button onclick="kycClose()" style="background:none;border:1px solid rgba(255,255,255,.12);padding:7px 20px;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35);cursor:pointer;">Cancel</button>
-  </div>
-</div>
-
 <script>
 /* ═══════════════════════════════════════════
    ASSET DEFINITIONS
@@ -808,7 +698,6 @@ const DEFS = {
     {t:'ARB',  n:'Arbitrum',      i:'🔷', b:1.12,    v:.052,  band:'#28a0f0', cat:'Layer 2',        about:'Leading Ethereum Layer 2 using optimistic rollups. Dramatically reduces gas costs while keeping Ethereum security guarantees.'},
     {t:'PEPE', n:'Pepe',          i:'🐸', b:0.0000118,v:.08,  band:'#00b200', cat:'Meme Coin',      about:'2023\'s most viral meme coin based on the Pepe the Frog internet meme. Extreme volatility — can 10x or crash 90% in days.'},
     {t:'WIF',  n:'dogwifhat',     i:'🐕', b:2.85,    v:.075,  band:'#f89c33', cat:'Meme Coin',      about:'Solana-based meme coin featuring a Shiba Inu with a hat. Skyrocketed in 2024, beloved by degens. Wild price swings daily.'},
-    {t:'KYC',  n:'Kyan Coin',     i:'👑', b:1.00,    v:.0,    band:'#c49a2a', cat:'Cryptocurrency', about:'The rarest coin in existence. Created by Kyan himself. Only the chosen few may access it. Always goes up. Always.'},
   ],
   stocks:[
     {t:'AAPL', n:'Apple',        i:'🍎', b:189,   v:.022, band:'#555555', cat:'Stock', about:'The world\'s most valuable company. Makes iPhone, Mac, iPad and runs the App Store. A staple of every major portfolio.'},
@@ -852,256 +741,122 @@ const DEFS = {
     {t:'USDCHF',n:'USD / CHF',   i:'🇨🇭', b:0.897, v:.005, band:'#ff0000', cat:'Forex', about:'US Dollar vs Swiss Franc. The Franc is the ultimate safe-haven currency. Switzerland\'s political neutrality makes it a crisis hedge.'},
     {t:'USDINR',n:'USD / INR',   i:'🇮🇳', b:83.4,  v:.004, band:'#ff9933', cat:'Forex', about:'US Dollar vs Indian Rupee. India\'s booming economy makes this an increasingly watched pair. RBI actively manages the exchange rate.'},
     {t:'BTCUSD',n:'BTC / USD',   i:'₿',  b:67250, v:.035, band:'#f7931a', cat:'Forex', about:'Bitcoin priced in US Dollars. Technically a crypto pair but widely traded in forex markets. Extreme volatility, 24/7 trading.'},
-  ],
-  pokecards:[
-    {t:'CHARIZARD',  n:'Charizard',   i:'🔥', b:8200,  v:.085, band:'#e8572a', cat:'Pokémon Card', about:'The holy grail of Pokémon TCG. Charizard cards have sold for over $300K at auction and remain the most coveted card on earth. Every new set that includes Charizard causes an immediate market frenzy.'},
-    {t:'PIKACHU',    n:'Pikachu',     i:'⚡', b:3500,  v:.072, band:'#f5c542', cat:'Pokémon Card', about:'The face of Pokémon. Pikachu cards are the most recognisable in the hobby and hold value across all eras. First Edition copies are extremely sought after by collectors worldwide.'},
-    {t:'LUGIA',      n:'Lugia',       i:'🌊', b:1800,  v:.068, band:'#3498db', cat:'Pokémon Card', about:'Arguably the most beautiful Pokémon card ever printed. Lugia has massive crossover appeal between TCG collectors and video game fans, driving prices to wild highs.'},
-    {t:'ESPEON',     n:'Espeon',      i:'🌟', b:2400,  v:.082, band:'#f1c40f', cat:'Pokémon Card', about:'One of the rarest Pokémon cards ever produced. Espeon Gold Star was only obtainable through exclusive Japanese promos, making raw copies nearly impossible to find.'},
-    {t:'MEWTWO',     n:'Mewtwo',      i:'🟣', b:420,   v:.061, band:'#9b59b6', cat:'Pokémon Card', about:'The original villain Pokémon. Mewtwo cards carry perennial demand from both competitive players and collectors. Vintage holos in high grade command massive premiums.'},
-    {t:'GENGAR',     n:'Gengar',      i:'👻', b:680,   v:.074, band:'#8e44ad', cat:'Pokémon Card', about:'The fan-favourite Ghost type. Gengar cards spike every time the Pokémon appears in a new game or anime arc. One of the most emotionally driven assets in the hobby.'},
-    {t:'UMBREON',    n:'Umbreon',     i:'🌙', b:310,   v:.076, band:'#2c3e50', cat:'Pokémon Card', about:'The most beloved Eeveelution. Umbreon cards consistently top modern market charts. Crossover appeal between art collectors, competitive players, and nostalgic fans keeps demand explosive.'},
-    {t:'DRAGONITE',  n:'Dragonite',   i:'🐉', b:520,   v:.071, band:'#16a085', cat:'Pokémon Card', about:'The original dragon king. Dragonite cards carry huge emotional premiums from older collectors. Vintage holos are scarce and values have climbed steadily for years.'},
-    {t:'MEW',        n:'Mew',         i:'✨', b:145,   v:.069, band:'#e74c3c', cat:'Pokémon Card', about:'The mythical ancestor of all Pokémon. Mew cards reignited massive nostalgia when the 151 set launched. Ultra-volatile due to heavy collector and speculator crossover.'},
-    {t:'SYLVEON',    n:'Sylveon',     i:'🎀', b:95,    v:.066, band:'#e91e8c', cat:'Pokémon Card', about:'The Fairy-type fan favourite. When Pokémon discontinued the Fairy type in 2023, all Sylveon cards surged as supply became permanently capped. No new Fairy cards will ever be printed.'},
-    {t:'RAIKOU',     n:'Raikou',      i:'🌩️', b:185,   v:.078, band:'#f39c12', cat:'Pokémon Card', about:'The legendary electric beast. Raikou cards see heavy competitive demand which destroys supply in played condition. Near-mint copies become increasingly rare after each tournament season.'},
-    {t:'EEVEE',      n:'Eevee',       i:'🦊', b:75,    v:.063, band:'#c8a46e', cat:'Pokémon Card', about:'The most versatile Pokémon. Eevee cards act as a gateway to all Eeveelution collectors, creating a permanently wide demand base. Cheap entry point with steady long-term appreciation.'},
-  ],
+  ]
 };
 
 const ALL = Object.values(DEFS).flat();
 
+const NEWS = [
+  {s:'bull',h:'Bitcoin tops monthly high as institutions pile in',fx:'→ BTC may surge'},
+  {s:'bear',h:'SEC announces sweeping new crypto regulation',fx:'→ Crypto could dip'},
+  {s:'bull',h:'NVIDIA obliterates earnings — AI demand explosive',fx:'→ NVDA likely climbs'},
+  {s:'neut',h:'Federal Reserve holds rates unchanged',fx:'→ Markets stay flat'},
+  {s:'bull',h:'Tesla unveils entry-level model — demand raised',fx:'→ TSLA may rally'},
+  {s:'bear',h:'Global inflation rises — risk-off mood spreads',fx:'→ Stocks could fall'},
+  {s:'bull',h:'Solana breaks TPS world record on mainnet',fx:'→ SOL may pump'},
+  {s:'neut',h:'Apple WWDC: new hardware and AI features revealed',fx:'→ AAPL reaction mixed'},
+  {s:'bull',h:'Record $40B ETF inflows signal strong buying',fx:'→ SPY looks bullish'},
+  {s:'bear',h:'Dogecoin whale moves 1B coins to exchange',fx:'→ DOGE may dump'},
+  {s:'bull',h:'Gold hits all-time high on safe-haven demand',fx:'→ GOLD, GLD rising'},
+  {s:'bear',h:'Oil supply glut pushes crude prices lower',fx:'→ OIL may fall'},
+  {s:'bull',h:'Amazon AWS growth re-accelerates above estimates',fx:'→ AMZN may surge'},
+  {s:'bull',h:'Roblox daily users hit new all-time record',fx:'→ RBLX may climb'},
+  {s:'bear',h:'Natural gas spikes on cold weather forecast',fx:'→ NATG very volatile'},
+];
+
 /* ═══════════════════════════════════════════
    USER / LOGIN SYSTEM
+   Each user gets their own localStorage key.
+   Prices & opens are shared (global market),
+   history is always freshly generated.
 ═══════════════════════════════════════════ */
-// Use a version-independent key so old saves are always found
-const PROFILES_KEY = 'apex_profiles';
-const MARKET_KEY   = 'apex_market';
-const userKey = name => 'apex_user_' + name.trim().toLowerCase().replace(/\s+/g,'_');
+const PROFILES_KEY = 'apex_v12_profiles'; // list of user names
+const MARKET_KEY   = 'apex_v12_market';   // shared prices & opens
+const userKey = name => 'apex_v12_user_' + name.toLowerCase().replace(/\s+/g,'_');
 
-// Also migrate from old versioned keys if they exist
-// ── EXPORT / IMPORT SAVE ──────────────────────
-function exportSave(){
-  try{
-    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
-    const data = { version:'apex_backup_v1', profiles, users:{} };
-    for(const name of profiles){
-      const k = userKey(name);
-      const raw = localStorage.getItem(k);
-      if(raw) data.users[name] = JSON.parse(raw);
-    }
-    // Also grab market
-    const mkt = localStorage.getItem(MARKET_KEY);
-    if(mkt) data.market = JSON.parse(mkt);
-
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `apex_save_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('💾 Save exported!','ok');
-  }catch(e){ toast('Export failed','err'); console.error(e); }
-}
-
-function importSave(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try{
-      const data = JSON.parse(e.target.result);
-      if(!data.profiles || !data.users) throw new Error('Invalid save file');
-
-      // Write profiles
-      localStorage.setItem(PROFILES_KEY, JSON.stringify(data.profiles));
-
-      // Write each user
-      for(const [name, userData] of Object.entries(data.users)){
-        localStorage.setItem(userKey(name), JSON.stringify(userData));
-      }
-
-      // Write market if present
-      if(data.market) localStorage.setItem(MARKET_KEY, JSON.stringify(data.market));
-
-      toast('✅ Save imported! Refreshing…','ok');
-      setTimeout(()=>location.reload(), 1200);
-    }catch(err){
-      toast('❌ Invalid save file','err');
-      console.error(err);
-    }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
-
-function migrateOldData(){
-  try{
-    const oldProfileKeys = [
-      'apex_v12_profiles','apex_v11_profiles','apex_v10_profiles',
-      'apex_v9_profiles','apex_v8_profiles','apex_allmarkets'
-    ];
-    const oldUserPrefixes = [
-      'apex_v12_user_','apex_v11_user_','apex_v10_user_',
-      'apex_v9_user_','apex_v8_user_'
-    ];
-
-    // Step 1: Try to migrate profile list from old keys
-    if(!localStorage.getItem(PROFILES_KEY)){
-      for(const ok of oldProfileKeys){
-        const old = localStorage.getItem(ok);
-        if(old){
-          try{
-            const parsed = JSON.parse(old);
-            if(Array.isArray(parsed)){
-              localStorage.setItem(PROFILES_KEY, old);
-              break;
-            }
-          }catch(e){}
-        }
-      }
-    }
-
-    // Step 2: Migrate each user's save data
-    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
-    for(const n of profiles){
-      const newKey = userKey(n);
-      if(localStorage.getItem(newKey)) continue;
-      for(const prefix of oldUserPrefixes){
-        const oldU = prefix + n.trim().toLowerCase().replace(/\s+/g,'_');
-        const dat = localStorage.getItem(oldU);
-        if(dat){ localStorage.setItem(newKey, dat); break; }
-      }
-    }
-
-    // Step 3: Last resort — scan ALL keys for any apex user data
-    const allKeys = Object.keys(localStorage);
-    for(const k of allKeys){
-      for(const prefix of oldUserPrefixes){
-        if(k.startsWith(prefix)){
-          const userName = k.slice(prefix.length); // e.g. "kyan"
-          const newKey = 'apex_user_' + userName;
-          if(!localStorage.getItem(newKey)){
-            const dat = localStorage.getItem(k);
-            if(dat) localStorage.setItem(newKey, dat);
-          }
-          // Also ensure this user is in the profiles list
-          try{
-            const profiles2 = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
-            // Try to recover display name from saved data
-            const saved = JSON.parse(localStorage.getItem(newKey)||'{}');
-            // userName is lowercase_with_underscores — best we can do
-            const displayName = userName.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
-            if(!profiles2.includes(displayName) && !profiles2.some(p=>userKey(p)===newKey)){
-              profiles2.push(displayName);
-              localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles2));
-            }
-          }catch(e){}
-        }
-      }
-    }
-  }catch(e){ console.warn('Migration skipped',e); }
-}
-
-let currentUser = null;
+let currentUser = null; // set on login
 let prices={}, hist={}, opens={};
 let G = {cash:5, h:{}, txs:[], trades:0, dep:5};
 
 function getProfiles(){
-  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }
-  catch{ return []; }
+  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }catch{ return []; }
 }
 function saveProfiles(arr){
-  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify(arr)); }catch(e){}
+  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify(arr)); }catch{}
 }
 function loadUserData(name){
   try{
-    const raw = localStorage.getItem(userKey(name));
-    if(!raw) return null;
-    const d = JSON.parse(raw);
-    // Validate and fill missing fields
-    return {
-      cash:   typeof d.cash==='number'   ? d.cash   : 5,
-      h:      (d.h && typeof d.h==='object') ? d.h  : {},
-      txs:    Array.isArray(d.txs)       ? d.txs    : [],
-      trades: typeof d.trades==='number' ? d.trades  : 0,
-      dep:    typeof d.dep==='number'    ? d.dep     : 5,
-    };
-  }catch(e){ return null; }
+    const d = JSON.parse(localStorage.getItem(userKey(name)));
+    return d || {cash:5, h:{}, txs:[], trades:0, dep:5};
+  }catch{ return {cash:5, h:{}, txs:[], trades:0, dep:5}; }
+}
+function saveUserData(){
+  if(!currentUser) return;
+  try{ localStorage.setItem(userKey(currentUser), JSON.stringify(G)); }catch{}
 }
 function loadMarket(){
   try{
     const d = JSON.parse(localStorage.getItem(MARKET_KEY));
-    if(d && d.px){ prices=d.px; opens=d.op||{}; }
-  }catch(e){}
+    if(d){ prices=d.px||{}; opens=d.op||{}; }
+  }catch{}
+}
+function saveMarket(){
+  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
 }
 
-/* ── LOGIN SCREEN ── */
+/* ── RENDER LOGIN SCREEN ── */
 function renderLoginScreen(){
   const profiles = getProfiles();
-  const pList  = document.getElementById('loginProfiles');
+  const pList = document.getElementById('loginProfiles');
   const pTitle = document.getElementById('loginProfilesTitle');
-  const div    = document.getElementById('loginDivider');
-  if(!profiles.length){
-    pTitle.style.display='none'; div.style.display='none'; pList.innerHTML=''; return;
+  const divider = document.getElementById('loginDivider');
+
+  if(profiles.length){
+    pTitle.style.display = 'block';
+    divider.style.display = 'flex';
+    pList.innerHTML = profiles.map(name => {
+      const ud = loadUserData(name);
+      // calc portfolio value using current prices (may be 0 if market not loaded yet)
+      let tv = ud.cash;
+      Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += v.sh*(prices[t]||0); });
+      const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const pnl = tv - ud.dep;
+      const pnlStr = (pnl>=0?'+':'')+F(pnl);
+      return `<div style="display:flex;align-items:center;gap:6px;">
+        <button class="login-profile-btn" style="flex:1;" onclick="loginAs('${name.replace(/'/g,"\\'")}')">
+          <div class="lp-avatar" style="background:${avatarColor(name)}">${initials}</div>
+          <div class="lp-info">
+            <div class="lp-name">${name}</div>
+            <div class="lp-meta">${ud.trades} trade${ud.trades!==1?'s':''} · started with ${F(ud.dep)}</div>
+          </div>
+          <div class="lp-val" style="color:${pnl>=0?'var(--UP)':'var(--DN)'}">${F(tv)}<br><span style="font-size:.5rem;opacity:.6">${pnlStr}</span></div>
+        </button>
+        <button class="lp-del" title="Delete profile" onclick="deleteProfile('${name.replace(/'/g,"\\'")}')">✕</button>
+      </div>`;
+    }).join('');
+  } else {
+    pTitle.style.display = 'none';
+    divider.style.display = 'none';
+    pList.innerHTML = '';
   }
-  pTitle.style.display='block'; div.style.display='flex';
-  pList.innerHTML = profiles.map(name=>{
-    const ud = loadUserData(name) || {cash:5,h:{},txs:[],trades:0,dep:5};
-    let tv = ud.cash;
-    Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += (v.sh||0)*(prices[t]||0); });
-    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const pnl = tv-(ud.dep||5);
-    return `<div style="display:flex;align-items:center;gap:6px;">
-      <button class="login-profile-btn" style="flex:1;" onclick="loginAs('${name.replace(/'/g,"\\'")}')">
-        <div class="lp-avatar" style="background:${avatarColor(name)}">${initials}</div>
-        <div class="lp-info">
-          <div class="lp-name">${name}</div>
-          <div class="lp-meta">${ud.trades} trade${ud.trades!==1?'s':''} · ${F(tv)}</div>
-        </div>
-        <div class="lp-val" style="color:${pnl>=0?'var(--UP)':'var(--DN)'}">${pnl>=0?'+':''}${F(pnl)}</div>
-      </button>
-      <button class="lp-del" onclick="deleteProfile('${name.replace(/'/g,"\\'")}')">✕</button>
-    </div>`;
-  }).join('');
 }
 
 function avatarColor(name){
-  const c=['#e8572a','#9945ff','#00b87a','#627eea','#f7931a','#e84142','#1652f0','#c49a2a'];
-  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%c.length;
-  return c[Math.abs(h)%c.length];
+  const colors=['#e8572a','#9945ff','#00b87a','#627eea','#f7931a','#e84142','#1652f0','#c49a2a'];
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%colors.length;
+  return colors[Math.abs(h)%colors.length];
 }
 
 function loginAs(name){
-  try{
-    currentUser = name;
-    const raw = loadUserData(name);
-    G = raw ? JSON.parse(JSON.stringify(raw)) : {cash:5,h:{},txs:[],trades:0,dep:5};
-    // Guarantee all fields
-    if(typeof G.cash!=='number') G.cash=5;
-    if(!G.h||typeof G.h!=='object') G.h={};
-    if(!Array.isArray(G.txs)) G.txs=[];
-    if(typeof G.trades!=='number') G.trades=0;
-    if(typeof G.dep!=='number') G.dep=5;
-
-    const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    document.getElementById('upAvatar').textContent=initials;
-    document.getElementById('upAvatar').style.background=avatarColor(name);
-    document.getElementById('upName').textContent=name;
-    document.getElementById('loginScreen').classList.add('hidden');
-
-    // Save immediately to stamp the profile, but DON'T await LB push (non-blocking)
-    saveUserData();
-    saveMarket();
-    pushToGlobalLB().catch(()=>{});
-
-    renderAll();
-    renderNews();
-  }catch(e){
-    console.error('loginAs error',e);
-    alert('Login error — please refresh and try again.');
-  }
+  currentUser = name;
+  G = loadUserData(name);
+  // update header pill
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('upAvatar').textContent = initials;
+  document.getElementById('upAvatar').style.background = avatarColor(name);
+  document.getElementById('upName').textContent = name;
+  document.getElementById('loginScreen').classList.add('hidden');
+  renderAll();
 }
 
 function loginCreate(){
@@ -1137,7 +892,7 @@ function logoutUser(){
    STATE (per-user save)
 ═══════════════════════════════════════════ */
 
-let curTab='crypto', curA=null, curTf=25, curSearch='';
+let curTab='crypto', curA=null, curTf=25;
 let cBuf=[], rafA=null, rafL=null;
 const DPR=window.devicePixelRatio||1;
 
@@ -1177,19 +932,13 @@ function initPrices(){
 
 function tick(){
   ALL.forEach(a=>{
-    if(a.t==='KYC'){
-      // KYC always goes up — no exceptions 👑
-      prices['KYC']=Math.max(.0001, prices['KYC']*(1+0.008+Math.random()*0.012));
-    } else {
-      const m=(Math.random()-.499)*a.v;
-      prices[a.t]=Math.max(.0001, prices[a.t]*(1+m));
-    }
+    const m=(Math.random()-.499)*a.v;
+    prices[a.t]=Math.max(.0001, prices[a.t]*(1+m));
     hist[a.t].push({t:Date.now(), p:prices[a.t]});
     if(hist[a.t].length>500) hist[a.t].shift();
   });
   renderAll();
   if(curA){ refreshScHeader(); liveDraw(); renderPos(); renderSellSection(); }
-  if(document.getElementById('pane-news')?.classList.contains('on')) renderNews();
 }
 
 /* ═══════════════════════════════════════════
@@ -1208,89 +957,10 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
-// ── SAVE SYSTEM ──────────────────────────────
-// Saves only when data actually changed.
-// Debounced so rapid trades don't spam localStorage.
-// beforeunload safety net so closing tab never loses data.
-
-let _lastSaveHash = '';
-let _saveTimer = null;
-let _lastSaveTime = null;
-
-function _hashG(){
-  // Fast fingerprint of G — only save if it changed
-  try{ return G.cash.toFixed(6)+'|'+G.trades+'|'+JSON.stringify(Object.keys(G.h).sort()); }
-  catch{ return ''+Date.now(); }
-}
-
-function saveUserData(){
-  if(!currentUser) return;
-  try{
-    const snapshot = JSON.parse(JSON.stringify(G));
-    localStorage.setItem(userKey(currentUser), JSON.stringify(snapshot));
-    _lastSaveHash = _hashG();
-    _lastSaveTime = Date.now();
-    _updateSaveIndicator();
-  }catch(e){ console.error('Save failed',e); }
-}
-
-function saveMarket(){
-  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
-}
-
-// Called every tick — only saves if data changed
+// Save user progress + shared market prices
 function save(){
-  if(!currentUser) return;
-  saveMarket(); // market always updates
-  const hash = _hashG();
-  if(hash !== _lastSaveHash){
-    saveUserData();
-  }
-}
-
-// Immediate save after trades — always runs, debounced LB push
-function saveNow(){
-  if(_saveTimer) clearTimeout(_saveTimer);
   saveUserData();
   saveMarket();
-  // Debounce LB push — don't hammer it on rapid trades
-  _saveTimer = setTimeout(()=>{ pushToGlobalLB(); _saveTimer=null; }, 1500);
-}
-
-// Last-resort — fires when tab is closed/refreshed
-window.addEventListener('beforeunload', ()=>{
-  if(currentUser){ saveUserData(); saveMarket(); }
-});
-
-function _updateSaveIndicator(){
-  const el = document.getElementById('saveIndicator');
-  if(!el || !_lastSaveTime) return;
-  const s = Math.floor((Date.now()-_lastSaveTime)/1000);
-  el.textContent = s < 5 ? '● Saved' : `● ${s}s ago`;
-  el.style.color = s < 10 ? 'var(--UP)' : 'rgba(255,255,255,.3)';
-}
-
-// Update "X ago" label every 5s
-setInterval(()=>{ if(currentUser) _updateSaveIndicator(); }, 5000);
-
-async function manualSave(){
-  if(!currentUser) return;
-  const btn = document.getElementById('saveBtn');
-  const icon = document.getElementById('saveBtnIcon');
-  const txt = document.getElementById('saveBtnTxt');
-  btn.disabled = true;
-  icon.textContent = '⏳'; txt.textContent = 'Saving…';
-  saveUserData();
-  saveMarket();
-  await pushToGlobalLB();
-  btn.classList.add('saved');
-  icon.textContent = '✅'; txt.textContent = 'Saved!';
-  _updateSaveIndicator();
-  setTimeout(()=>{
-    btn.classList.remove('saved');
-    icon.textContent = '💾'; txt.textContent = 'Save';
-    btn.disabled = false;
-  }, 2000);
 }
 
 /* ═══════════════════════════════════════════
@@ -1300,58 +970,21 @@ function renderAll(){ if(!currentUser) return; renderGrid(); renderTicker(); ren
 
 /* asset grid */
 function renderGrid(){
-  const q = curSearch.toLowerCase().trim();
-  // If searching, scan ALL assets; otherwise just current tab
-  const list = q ? ALL.filter(a =>
-    a.n.toLowerCase().includes(q) ||
-    a.t.toLowerCase().includes(q) ||
-    a.cat.toLowerCase().includes(q)
-  ) : DEFS[curTab];
-
-  const grid = document.getElementById('assetGrid');
-  if(!list.length){
-    grid.innerHTML = `<div class="grid-empty">No assets match "<strong>${q}</strong>"</div>`;
-    return;
-  }
-  grid.innerHTML = list.map(a=>{
+  const list=DEFS[curTab];
+  document.getElementById('assetGrid').innerHTML=list.map(a=>{
     const p=prices[a.t], o=opens[a.t], c=pct(p,o), up=c>=0;
     const owned=G.h[a.t]?.sh>.000001;
-    if(a.t==='KYC'){
-      return `<div class="acard" onclick="openScreen('KYC')" style="border:1px solid rgba(196,154,42,.5);border-left:3px solid var(--gold);background:linear-gradient(135deg,rgba(196,154,42,.07) 0%,var(--paper) 60%);cursor:pointer;">
-        <div class="ac-r1">
-          <span class="ac-icon">👑</span>
-          <span class="ac-pct g" style="background:rgba(196,154,42,.18);color:var(--gold);">▲${Math.abs(c).toFixed(2)}%</span>
-        </div>
-        <div class="ac-name" style="color:var(--gold);">Kyan Coin</div>
-        <div class="ac-sym" style="color:rgba(196,154,42,.6);">KYC · 🔒 CLASSIFIED</div>
-        <div class="ac-price" style="color:var(--gold);">${owned?F(p):'$?.??'}</div>
-        <svg class="ac-spark" viewBox="0 0 140 32" preserveAspectRatio="none">${sparkSVG(hist['KYC']?.slice(-50)||[], true)}</svg>
-      </div>`;
-    }
     return `<div class="acard${owned?' owned':''}" onclick="openScreen('${a.t}')">
       <div class="ac-r1">
         <span class="ac-icon">${a.i}</span>
         <span class="ac-pct ${up?'g':'r'}">${up?'▲':'▼'}${Math.abs(c).toFixed(2)}%</span>
       </div>
       <div class="ac-name">${a.n}</div>
-      <div class="ac-sym">${a.t}${q?' <span style="font-size:.4rem;opacity:.5">· '+a.cat+'</span>':''}</div>
+      <div class="ac-sym">${a.t}</div>
       <div class="ac-price">${F(p)}</div>
       <svg class="ac-spark" viewBox="0 0 140 32" preserveAspectRatio="none">${sparkSVG(hist[a.t]?.slice(-50)||[],up)}</svg>
     </div>`;
   }).join('');
-}
-
-function onSearch(val){
-  curSearch = val;
-  document.getElementById('searchClear').classList.toggle('vis', val.length > 0);
-  renderGrid();
-}
-
-function clearSearch(){
-  curSearch = '';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchClear').classList.remove('vis');
-  renderGrid();
 }
 
 function sparkSVG(h,up){
@@ -1438,80 +1071,10 @@ function renderSidebar(){
   }
 }
 
-/* ── NEWS ── */
-const NEWS_TPLS = {
-  bull: [
-    '{n} surges {pct} as buyers step in',
-    '{n} breaks resistance, up {pct} today',
-    'Strong buying drives {n} up {pct}',
-    '{n} rallies {pct} on fresh demand',
-    'Bulls take {n} higher — up {pct}',
-  ],
-  bear: [
-    '{n} slides {pct} as sellers take over',
-    '{n} drops {pct} amid broad weakness',
-    'Heavy selling hits {n}, down {pct}',
-    '{n} breaks support, falling {pct}',
-    'Bears dominate {n} — down {pct}',
-  ],
-  neut: [
-    '{n} consolidates near {px} — no clear direction',
-    '{n} trades flat around {px}',
-    'Low volume for {n} — holding near {px}',
-  ],
-  big: [
-    '🚨 {n} SPIKES {pct} — biggest mover right now',
-    '🚨 {n} CRASHES {pct} — extreme volatility',
-    '⚠️ Unusual move in {n}: {pct} in minutes',
-  ],
-};
-const CAT_HINT = {
-  'Cryptocurrency':['→ Crypto open 24/7','→ Watch BTC for direction','→ High volatility'],
-  'Stablecoin':    ['→ Watching for depeg','→ Should stay near $1'],
-  'Meme Coin':     ['→ Extreme risk','→ Meme coins can move 50%+ fast'],
-  'DeFi':          ['→ Protocol TVL may follow','→ DeFi volumes shifting'],
-  'Layer 2':       ['→ Often mirrors ETH moves'],
-  'Stock':         ['→ Watch broader indices','→ Earnings season factor'],
-  'ETF':           ['→ Basket move — check components'],
-  'Commodity':     ['→ Watch USD strength','→ Macro driven'],
-  'Forex':         ['→ Central bank policy key','→ Position size carefully'],
-  'Pokémon Card':  ['→ Illiquid market — be patient','→ Collector sentiment rules'],
-};
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-function generateNews(){
-  const scored = ALL.map(a=>{
-    const p=prices[a.t], o=opens[a.t];
-    if(!p||!o) return null;
-    return {a, p, c:(p-o)/o*100};
-  }).filter(Boolean);
-  if(!scored.length) return [];
-  scored.sort((x,y)=>Math.abs(y.c)-Math.abs(x.c));
-  // Take top 5 movers + 2 random for variety
-  const pool = scored.slice(0,5);
-  scored.slice(5).sort(()=>Math.random()-.5).slice(0,2).forEach(x=>pool.push(x));
-  pool.sort(()=>Math.random()-.5);
-  return pool.slice(0,5).map(({a,p,c})=>{
-    const abs=Math.abs(c), pctStr=(c>0?'+':'-')+abs.toFixed(2)+'%';
-    let tpl, s;
-    if(abs>5)      { s=c>0?'bull':'bear'; tpl=pick(NEWS_TPLS.big); }
-    else if(abs<.3){ s='neut';             tpl=pick(NEWS_TPLS.neut); }
-    else           { s=c>0?'bull':'bear'; tpl=pick(NEWS_TPLS[s]); }
-    const h = tpl.replace('{n}',a.n).replace('{pct}',pctStr).replace('{px}',F(p));
-    const fx = pick(CAT_HINT[a.cat]||['→ Monitor closely']);
-    return {s, h, fx};
-  });
-}
-
 function renderNews(){
-  const el = document.getElementById('newsList');
-  if(!el) return;
-  const items = generateNews();
-  if(!items.length){
-    el.innerHTML='<div class="empty">Waiting for market data…</div>';
-    return;
-  }
-  el.innerHTML = items.map(n=>`
+  const pool=[...NEWS], out=[];
+  for(let i=0;i<4;i++) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+  document.getElementById('newsList').innerHTML=out.map(n=>`
     <div class="nitem ${n.s}">
       <span class="ntag">${n.s==='bull'?'📈 Bullish':n.s==='bear'?'📉 Bearish':'➡️ Neutral'}</span>
       <div class="ntitle">${n.h}</div>
@@ -1519,113 +1082,8 @@ function renderNews(){
     </div>`).join('');
 }
 
-/* ── LEADERBOARD ── */
-/* ═══════════════════════════════════════════
-   GLOBAL LEADERBOARD — shared across all users
-   Uses window.storage (shared=true) so every
-   player's score is visible to everyone.
-═══════════════════════════════════════════ */
-const LB_PREFIX = 'apex_lb_';
-
-async function pushToGlobalLB(){
-  if(!currentUser) return;
-  try{
-    const tv = totalVal();
-    const pnl = tv - G.dep;
-    const entry = {
-      name: currentUser,
-      tv,
-      pnl,
-      trades: G.trades,
-      dep: G.dep,
-      ts: Date.now()
-    };
-    await window.storage.set(LB_PREFIX + currentUser, JSON.stringify(entry), true);
-  }catch(e){ console.warn('LB push failed',e); }
-}
-
-async function renderLeaderboard(){
-  const el = document.getElementById('leaderList');
-  if(!el) return;
-  el.innerHTML = '<div class="empty" style="text-align:center;padding:20px">⏳ Loading global scores…</div>';
-
-  try{
-    const keyResult = await window.storage.list(LB_PREFIX, true);
-    const keys = keyResult?.keys || [];
-
-    if(!keys.length){
-      el.innerHTML='<div class="empty">No traders on the board yet!<br>Keep playing to appear here 🌱</div>';
-      return;
-    }
-
-    // Fetch all entries in parallel
-    const entries = await Promise.all(keys.map(async k=>{
-      try{
-        const r = await window.storage.get(k, true);
-        return r ? JSON.parse(r.value) : null;
-      }catch{ return null; }
-    }));
-
-    const ranked = entries
-      .filter(Boolean)
-      .sort((a,b)=>b.tv-a.tv);
-
-    if(!ranked.length){
-      el.innerHTML='<div class="empty">No traders yet — you\'ll be first! 🚀</div>';
-      return;
-    }
-
-    const best = Math.max(...ranked.map(r=>r.tv), 0.01);
-    const medals = ['🥇','🥈','🥉'];
-
-    // Find current user rank
-    const myRank = ranked.findIndex(r=>r.name===currentUser);
-
-    el.innerHTML = `
-      <div style="font-family:'Azeret Mono',monospace;font-size:.48rem;color:var(--ink4);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;">
-        <span>${ranked.length} trader${ranked.length!==1?'s':''} worldwide</span>
-        ${myRank>=0?`<span style="color:var(--acc)">You: #${myRank+1}</span>`:''}
-      </div>
-    ` + ranked.map((r,i)=>{
-      const isMe = r.name===currentUser;
-      const initials = r.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const barW = Math.round((r.tv/best)*100);
-      const pnlStr = (r.pnl>=0?'+':'')+F(r.pnl);
-      const ago = timeAgo(r.ts);
-      return `<div class="lb-row${isMe?' lb-me':''}${i<3?' lb-'+i:''}">
-        <div class="lb-rank">${medals[i]||(i+1)}</div>
-        <div class="lb-avatar" style="background:${avatarColor(r.name)}">${initials}</div>
-        <div class="lb-info">
-          <div class="lb-name">${r.name}${isMe?' <span class="lb-you">YOU</span>':''}</div>
-          <div class="lb-meta">${r.trades} trade${r.trades!==1?'s':''} · ${ago}</div>
-        </div>
-        <div class="lb-val">
-          <div class="lb-tv" style="color:${r.tv>=r.dep?'var(--UP)':'var(--DN)'}">${F(r.tv)}</div>
-          <div class="lb-pnl ${r.pnl>=0?'g':'r'}">${pnlStr}</div>
-        </div>
-        <div class="lb-bar" style="width:${barW}%"></div>
-      </div>`;
-    }).join('');
-  }catch(e){
-    el.innerHTML='<div class="empty">Could not load leaderboard.<br>Check your connection.</div>';
-    console.warn('LB render failed',e);
-  }
-}
-
-function timeAgo(ts){
-  if(!ts) return '';
-  const s = Math.floor((Date.now()-ts)/1000);
-  if(s<60) return 'just now';
-  if(s<3600) return Math.floor(s/60)+'m ago';
-  if(s<86400) return Math.floor(s/3600)+'h ago';
-  return Math.floor(s/86400)+'d ago';
-}
-
 function switchTab(tab,el){
   curTab=tab;
-  curSearch='';
-  document.getElementById('searchInput').value='';
-  document.getElementById('searchClear').classList.remove('vis');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
   renderGrid();
@@ -1636,8 +1094,6 @@ function switchSb(tab,el){
   document.querySelectorAll('.sbpane').forEach(p=>p.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('pane-'+tab).classList.add('on');
-  if(tab==='news') renderNews();
-  if(tab==='leaderboard') renderLeaderboard();
 }
 
 /* ═══════════════════════════════════════════
@@ -1653,7 +1109,6 @@ function quickSell(ticker){
   G.trades++;
   delete G.h[ticker];
   toast(`💰 Sold all ${ticker} — got back ${F(rev)}`,'ok');
-  saveNow();
   renderAll();
   if(curA && curA.t === ticker){ renderPos(); renderSellSection(); }
 }
@@ -1675,42 +1130,10 @@ const GLOWS={
   GOLD:'#c49a2a',OIL:'#4a3728',SILV:'#94a3b8',NATG:'#3b82f6',COPP:'#b45309',
   WHET:'#92400e',PLAT:'#e2e8f0',
   EURUSD:'#003399',GBPUSD:'#012169',USDJPY:'#bc002d',AUDUSD:'#00008b',
-  USDCAD:'#ff0000',USDCHF:'#ff0000',USDINR:'#ff9933',BTCUSD:'#f7931a',
-  CHARIZARD:'#e8572a',PIKACHU:'#f5c542',LUGIA:'#3498db',ESPEON:'#f1c40f',
-  MEWTWO:'#9b59b6',GENGAR:'#8e44ad',UMBREON:'#2c3e50',DRAGONITE:'#16a085',
-  MEW:'#e74c3c',SYLVEON:'#e91e8c',RAIKOU:'#f39c12',EEVEE:'#c8a46e',
-  KYC:'#c49a2a',
+  USDCAD:'#ff0000',USDCHF:'#ff0000',USDINR:'#ff9933',BTCUSD:'#f7931a'
 };
 
 function openScreen(ticker){
-  if(ticker==='KYC'){ kycOpen(); return; }
-  _doOpenScreen(ticker);
-}
-
-function kycOpen(){
-  m.style.display='flex';
-  document.getElementById('kycCodeInput').value='';
-  document.getElementById('kycError').textContent='';
-  setTimeout(()=>document.getElementById('kycCodeInput').focus(),80);
-}
-
-function kycClose(){
-  document.getElementById('kycModal').style.display='none';
-}
-
-function kycCheckCode(val){
-  if(val==='911'){
-    document.getElementById('kycError').textContent='';
-    document.getElementById('kycModal').style.display='none';
-    _doOpenScreen('KYC');
-  } else if(val.length>=3){
-    document.getElementById('kycError').textContent='⚠ Access denied. Try again.';
-  } else {
-    document.getElementById('kycError').textContent='';
-  }
-}
-
-function _doOpenScreen(ticker){
   curA=ALL.find(a=>a.t===ticker);
   document.getElementById('cband').style.background=GLOWS[ticker]||'var(--acc)';
   document.getElementById('scIcon').textContent=curA.i;
@@ -1804,7 +1227,6 @@ function doSell(){
   document.getElementById('sellAmt').value = '';
   document.getElementById('sellPreview').textContent = '';
   toast(`💰 Sold ${curA.n} — got back ${F(sellVal)}`,'ok');
-  saveNow();
   renderPos(); renderSellSection(); renderAll();
 }
 
@@ -1843,7 +1265,6 @@ function doBuy(){
   document.getElementById('buyAmt').value = '';
   document.getElementById('prev').textContent = 'Enter an amount above to preview';
   toast(`✅ Bought ${sh.toFixed(6)} ${t} for ${F(amt)}`,'ok');
-  saveNow();
   renderPos(); renderSellSection(); renderAll();
 }
 
@@ -2047,25 +1468,14 @@ function toast(msg,type='ok'){
 /* ═══════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════ */
-migrateOldData(); // recover saves from old key versions FIRST
-loadMarket();
-initPrices();
-renderLoginScreen();
+loadMarket();      // load shared market prices first (so profile values show correctly)
+initPrices();      // generate fresh chart history
+renderLoginScreen(); // show login — game starts after loginAs()
+renderNews();
 setInterval(tick,2500);
-setInterval(renderNews,8000);
-setInterval(()=>{ if(currentUser) pushToGlobalLB(); }, 30000);
-setInterval(()=>{
-  if(document.getElementById('pane-leaderboard')?.classList.contains('on')) renderLeaderboard();
-}, 30000);
+setInterval(renderNews,42000);
 window.addEventListener('resize',()=>{ if(curA) buildChart(); });
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&curA) closeScreen();
-  if(e.key==='Escape'&&document.getElementById('kycModal').style.display==='flex') kycClose();
-  if(e.key==='/'&&!curA&&document.activeElement.tagName!=='INPUT'){
-    e.preventDefault();
-    document.getElementById('searchInput').focus();
-  }
-});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&curA) closeScreen(); });
 </script>
 </body>
 </html>
