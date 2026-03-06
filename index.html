@@ -584,7 +584,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
     <div class="mbar">
       <div class="mbar-label">Markets</div>
       <div class="tabs">
-        <button class="tab on" onclick="switchTab('crypto',this)">Crypto</button>
+        <button class="tab on" id="cryptoTab" onclick="switchTab('crypto',this);kycTabClick()">Crypto</button>
         <button class="tab" onclick="switchTab('stocks',this)">Stocks</button>
         <button class="tab" onclick="switchTab('etfs',this)">ETFs</button>
         <button class="tab" onclick="switchTab('commodities',this)">Commodities</button>
@@ -796,7 +796,6 @@ const DEFS = {
     {t:'ARB',  n:'Arbitrum',      i:'🔷', b:1.12,    v:.052,  band:'#28a0f0', cat:'Layer 2',        about:'Leading Ethereum Layer 2 using optimistic rollups. Dramatically reduces gas costs while keeping Ethereum security guarantees.'},
     {t:'PEPE', n:'Pepe',          i:'🐸', b:0.0000118,v:.08,  band:'#00b200', cat:'Meme Coin',      about:'2023\'s most viral meme coin based on the Pepe the Frog internet meme. Extreme volatility — can 10x or crash 90% in days.'},
     {t:'WIF',  n:'dogwifhat',     i:'🐕', b:2.85,    v:.075,  band:'#f89c33', cat:'Meme Coin',      about:'Solana-based meme coin featuring a Shiba Inu with a hat. Skyrocketed in 2024, beloved by degens. Wild price swings daily.'},
-    {t:'KYC',  n:'Kyan Coin',     i:'👑', b:1.00,    v:.0,    band:'#c49a2a', cat:'Cryptocurrency', about:'The rarest coin in existence. Created by Kyan himself. Only the chosen few may access it. Always goes up. Always.', secret:true},
   ],
   stocks:[
     {t:'AAPL', n:'Apple',        i:'🍎', b:189,   v:.022, band:'#555555', cat:'Stock', about:'The world\'s most valuable company. Makes iPhone, Mac, iPad and runs the App Store. A staple of every major portfolio.'},
@@ -858,6 +857,10 @@ const DEFS = {
 };
 
 const ALL = Object.values(DEFS).flat();
+
+// KYC — secret asset, never shown in grid, only accessible via triple-click
+const KYC_ASSET = {t:'KYC', n:'Kyan Coin', i:'👑', b:1.00, v:.0, band:'#c49a2a', cat:'Cryptocurrency', about:'The rarest coin in existence. Created by Kyan himself. Only the chosen few may access it. Always goes up. Always.'};
+ALL.push(KYC_ASSET);
 
 /* ═══════════════════════════════════════════
    USER / LOGIN SYSTEM
@@ -1169,22 +1172,6 @@ function renderGrid(){
   grid.innerHTML = list.map(a=>{
     const p=prices[a.t], o=opens[a.t], c=pct(p,o), up=c>=0;
     const owned=G.h[a.t]?.sh>.000001;
-    const isKyc = a.t==='KYC';
-    if(isKyc){
-      return `<div class="acard acard-kyc${owned?' owned':''}" onclick="openScreen('KYC')" style="border-left:3px solid #333;background:#0d0b09;cursor:pointer;">
-        <div class="ac-r1">
-          <span class="ac-icon" style="filter:brightness(0)">👑</span>
-          <span class="ac-pct" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.15)">🔒</span>
-        </div>
-        <div class="ac-name" style="color:rgba(255,255,255,.12);letter-spacing:6px">██████</div>
-        <div class="ac-sym" style="color:rgba(255,255,255,.08)">??? · CLASSIFIED</div>
-        <div class="ac-price" style="color:rgba(255,255,255,.1)">$?.??</div>
-        <svg class="ac-spark" viewBox="0 0 140 32" preserveAspectRatio="none">
-          <rect width="140" height="32" fill="rgba(255,255,255,.03)"/>
-          <text x="70" y="20" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.1)" font-family="monospace">ACCESS REQUIRED</text>
-        </svg>
-      </div>`;
-    }
     return `<div class="acard${owned?' owned':''}" onclick="openScreen('${a.t}')">
       <div class="ac-r1">
         <span class="ac-icon">${a.i}</span>
@@ -1548,7 +1535,18 @@ function openScreen(ticker){
   _doOpenScreen(ticker);
 }
 
-function kycOpen(){
+// ── KYC TRIPLE-CLICK SECRET ──
+let _kycClicks = 0, _kycTimer = null;
+function kycTabClick(){
+  _kycClicks++;
+  if(_kycTimer) clearTimeout(_kycTimer);
+  if(_kycClicks >= 3){
+    _kycClicks = 0;
+    kycOpen();
+  } else {
+    _kycTimer = setTimeout(()=>{ _kycClicks = 0; }, 600);
+  }
+}
   const m=document.getElementById('kycModal');
   m.style.display='flex';
   document.getElementById('kycCodeInput').value='';
