@@ -537,6 +537,15 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <button class="login-create-btn" onclick="loginCreate()">Start →</button>
     </div>
     <div class="login-hint">Each trader gets $5.00 to start · progress auto-saves</div>
+
+    <div style="margin-top:28px;width:100%;border-top:1px solid rgba(255,255,255,.07);padding-top:20px;">
+      <div style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:2px;color:rgba(255,255,255,.2);text-transform:uppercase;margin-bottom:10px;text-align:center;">Backup & Restore</div>
+      <div style="display:flex;gap:8px;width:100%;">
+        <button onclick="exportSave()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬇ Export Save</button>
+        <button onclick="document.getElementById('importFileInput').click()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);padding:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;">⬆ Import Save</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importSave(this)">
+      </div>
+    </div>
   </div>
 </div>
 
@@ -564,6 +573,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save progress">
         <span id="saveBtnIcon">💾</span><span id="saveBtnTxt">Save</span>
       </button>
+      <button class="save-btn" onclick="exportSave()" title="Export save file backup" style="opacity:.6;">⬇</button>
       <span id="saveIndicator" style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:1px;color:rgba(255,255,255,.25);white-space:nowrap;"></span>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
@@ -864,100 +874,327 @@ ALL.push(KYC_ASSET);
 
 /* ═══════════════════════════════════════════
    USER / LOGIN SYSTEM
-   Each user gets their own localStorage key.
-   Prices & opens are shared (global market),
-   history is always freshly generated.
 ═══════════════════════════════════════════ */
-const PROFILES_KEY = 'apex_v12_profiles'; // list of user names
-const MARKET_KEY   = 'apex_v12_market';   // shared prices & opens
-const userKey = name => 'apex_v12_user_' + name.toLowerCase().replace(/\s+/g,'_');
+// Use a version-independent key so old saves are always found
+const PROFILES_KEY = 'apex_profiles';
+const MARKET_KEY   = 'apex_market';
+const userKey = name => 'apex_user_' + name.trim().toLowerCase().replace(/\s+/g,'_');
 
-let currentUser = null; // set on login
+// Also migrate from old versioned keys if they exist
+// ── EXPORT / IMPORT SAVE ──────────────────────
+function exportSave(){
+  try{
+    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+    const data = { version:'apex_backup_v1', profiles, users:{} };
+    for(const name of profiles){
+      const k = userKey(name);
+      const raw = localStorage.getItem(k);
+      if(raw) data.users[name] = JSON.parse(raw);
+    }
+    // Also grab market
+    const mkt = localStorage.getItem(MARKET_KEY);
+    if(mkt) data.market = JSON.parse(mkt);
+
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apex_save_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('💾 Save exported!','ok');
+  }catch(e){ toast('Export failed','err'); console.error(e); }
+}
+
+function importSave(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data.profiles || !data.users) throw new Error('Invalid save file');
+
+      // Write profiles
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(data.profiles));
+
+      // Write each user
+      for(const [name, userData] of Object.entries(data.users)){
+        localStorage.setItem(userKey(name), JSON.stringify(userData));
+      }
+
+      // Write market if present
+      if(data.market) localStorage.setItem(MARKET_KEY, JSON.stringify(data.market));
+
+      toast('✅ Save imported! Refreshing…','ok');
+      setTimeout(()=>location.reload(), 1200);
+    }catch(err){
+      toast('❌ Invalid save file','err');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function migrateOldData(){
+  try{
+    const oldProfileKeys = [
+      'apex_v12_profiles','apex_v11_profiles','apex_v10_profiles',
+      'apex_v9_profiles','apex_v8_profiles','apex_allmarkets'
+    ];
+    const oldUserPrefixes = [
+      'apex_v12_user_','apex_v11_user_','apex_v10_user_',
+      'apex_v9_user_','apex_v8_user_'
+    ];
+
+    // Step 1: Try to migrate profile list from old keys
+    if(!localStorage.getItem(PROFILES_KEY)){
+      for(const ok of oldProfileKeys){
+        const old = localStorage.getItem(ok);
+        if(old){
+          try{
+            const parsed = JSON.parse(old);
+            if(Array.isArray(parsed)){
+              localStorage.setItem(PROFILES_KEY, old);
+              break;
+            }
+          }catch(e){}
+        }
+      }
+    }
+
+    // Step 2: Migrate each user's save data
+    const profiles = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+    for(const n of profiles){
+      const newKey = userKey(n);
+      if(localStorage.getItem(newKey)) continue;
+      for(const prefix of oldUserPrefixes){
+        const oldU = prefix + n.trim().toLowerCase().replace(/\s+/g,'_');
+        const dat = localStorage.getItem(oldU);
+        if(dat){ localStorage.setItem(newKey, dat); break; }
+      }
+    }
+
+    // Step 3: Last resort — scan ALL keys for any apex user data
+    const allKeys = Object.keys(localStorage);
+    for(const k of allKeys){
+      for(const prefix of oldUserPrefixes){
+        if(k.startsWith(prefix)){
+          const userName = k.slice(prefix.length); // e.g. "kyan"
+          const newKey = 'apex_user_' + userName;
+          if(!localStorage.getItem(newKey)){
+            const dat = localStorage.getItem(k);
+            if(dat) localStorage.setItem(newKey, dat);
+          }
+          // Also ensure this user is in the profiles list
+          try{
+            const profiles2 = JSON.parse(localStorage.getItem(PROFILES_KEY)||'[]');
+            // Try to recover display name from saved data
+            const saved = JSON.parse(localStorage.getItem(newKey)||'{}');
+            // userName is lowercase_with_underscores — best we can do
+            const displayName = userName.split('_').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+            if(!profiles2.includes(displayName) && !profiles2.some(p=>userKey(p)===newKey)){
+              profiles2.push(displayName);
+              localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles2));
+            }
+          }catch(e){}
+        }
+      }
+    }
+  }catch(e){ console.warn('Migration skipped',e); }
+}
+
+let currentUser = null;
 let prices={}, hist={}, opens={};
 let G = {cash:5, h:{}, txs:[], trades:0, dep:5};
 
 function getProfiles(){
-  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }catch{ return []; }
+  try{ return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; }
+  catch{ return []; }
 }
 function saveProfiles(arr){
-  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify(arr)); }catch{}
+  try{ localStorage.setItem(PROFILES_KEY, JSON.stringify(arr)); }catch(e){}
 }
 function loadUserData(name){
   try{
-    const d = JSON.parse(localStorage.getItem(userKey(name)));
-    return d || {cash:5, h:{}, txs:[], trades:0, dep:5};
-  }catch{ return {cash:5, h:{}, txs:[], trades:0, dep:5}; }
+    const raw = localStorage.getItem(userKey(name));
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    // Validate and fill missing fields
+    return {
+      cash:   typeof d.cash==='number'   ? d.cash   : 5,
+      h:      (d.h && typeof d.h==='object') ? d.h  : {},
+      txs:    Array.isArray(d.txs)       ? d.txs    : [],
+      trades: typeof d.trades==='number' ? d.trades  : 0,
+      dep:    typeof d.dep==='number'    ? d.dep     : 5,
+    };
+  }catch(e){ return null; }
 }
 function loadMarket(){
   try{
     const d = JSON.parse(localStorage.getItem(MARKET_KEY));
-    if(d){ prices=d.px||{}; opens=d.op||{}; }
-  }catch{}
+    if(d && d.px){ prices=d.px; opens=d.op||{}; }
+  }catch(e){}
 }
 
-/* ── RENDER LOGIN SCREEN ── */
+/* ── SAVE SYSTEM ── */
+let _lastSaveHash='', _saveTimer=null, _lastSaveTime=null;
+
+function _hashG(){
+  try{ return G.cash.toFixed(4)+'|'+G.trades+'|'+JSON.stringify(Object.keys(G.h||{}).sort()); }
+  catch{ return ''+Date.now(); }
+}
+
+function saveUserData(){
+  if(!currentUser) return;
+  try{
+    const snap = JSON.stringify(G);
+    localStorage.setItem(userKey(currentUser), snap);
+    _lastSaveHash = _hashG();
+    _lastSaveTime = Date.now();
+    _updateSaveIndicator();
+  }catch(e){ console.error('saveUserData failed',e); }
+}
+
+function saveMarket(){
+  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices,op:opens})); }catch(e){}
+}
+
+function save(){
+  if(!currentUser) return;
+  saveMarket();
+  if(_hashG() !== _lastSaveHash) saveUserData();
+}
+
+function saveNow(){
+  if(_saveTimer) clearTimeout(_saveTimer);
+  saveUserData();
+  saveMarket();
+  _saveTimer = setTimeout(()=>{ pushToGlobalLB(); _saveTimer=null; }, 1500);
+}
+
+window.addEventListener('beforeunload', ()=>{
+  if(currentUser){ saveUserData(); saveMarket(); }
+});
+
+function _updateSaveIndicator(){
+  const el = document.getElementById('saveIndicator');
+  if(!el||!_lastSaveTime) return;
+  const s = Math.floor((Date.now()-_lastSaveTime)/1000);
+  el.textContent = s<5 ? '● Saved' : `● ${s}s ago`;
+  el.style.color  = s<10 ? 'var(--UP)' : 'rgba(255,255,255,.3)';
+}
+setInterval(()=>{ if(currentUser) _updateSaveIndicator(); }, 5000);
+
+async function manualSave(){
+  if(!currentUser) return;
+  const btn=document.getElementById('saveBtn');
+  const icon=document.getElementById('saveBtnIcon');
+  const txt=document.getElementById('saveBtnTxt');
+  btn.disabled=true; icon.textContent='⏳'; txt.textContent='Saving…';
+  saveUserData(); saveMarket();
+  await pushToGlobalLB();
+  btn.classList.add('saved'); icon.textContent='✅'; txt.textContent='Saved!';
+  _updateSaveIndicator();
+  setTimeout(()=>{ btn.classList.remove('saved'); icon.textContent='💾'; txt.textContent='Save'; btn.disabled=false; },2000);
+}
+
+/* ── LOGIN SCREEN ── */
 function renderLoginScreen(){
   const profiles = getProfiles();
-  const pList = document.getElementById('loginProfiles');
+  const pList  = document.getElementById('loginProfiles');
   const pTitle = document.getElementById('loginProfilesTitle');
-  const divider = document.getElementById('loginDivider');
-
-  if(profiles.length){
-    pTitle.style.display = 'block';
-    divider.style.display = 'flex';
-    pList.innerHTML = profiles.map(name => {
-      const ud = loadUserData(name);
-      // calc portfolio value using current prices (may be 0 if market not loaded yet)
-      let tv = ud.cash;
-      Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += v.sh*(prices[t]||0); });
-      const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const pnl = tv - ud.dep;
-      const pnlStr = (pnl>=0?'+':'')+F(pnl);
-      return `<div style="display:flex;align-items:center;gap:6px;">
-        <button class="login-profile-btn" style="flex:1;" onclick="loginAs('${name.replace(/'/g,"\\'")}')">
-          <div class="lp-avatar" style="background:${avatarColor(name)}">${initials}</div>
-          <div class="lp-info">
-            <div class="lp-name">${name}</div>
-            <div class="lp-meta">${ud.trades} trade${ud.trades!==1?'s':''} · started with ${F(ud.dep)}</div>
-          </div>
-          <div class="lp-val" style="color:${pnl>=0?'var(--UP)':'var(--DN)'}">${F(tv)}<br><span style="font-size:.5rem;opacity:.6">${pnlStr}</span></div>
-        </button>
-        <button class="lp-del" title="Delete profile" onclick="deleteProfile('${name.replace(/'/g,"\\'")}')">✕</button>
-      </div>`;
-    }).join('');
-  } else {
-    pTitle.style.display = 'none';
-    divider.style.display = 'none';
-    pList.innerHTML = '';
+  const div    = document.getElementById('loginDivider');
+  if(!profiles.length){
+    pTitle.style.display='none'; div.style.display='none'; pList.innerHTML=''; return;
   }
+  pTitle.style.display='block'; div.style.display='flex';
+  pList.innerHTML = profiles.map(name=>{
+    const ud = loadUserData(name) || {cash:5,h:{},txs:[],trades:0,dep:5};
+    let tv = ud.cash;
+    Object.entries(ud.h||{}).forEach(([t,v])=>{ tv += (v.sh||0)*(prices[t]||0); });
+    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const pnl = tv-(ud.dep||5);
+    return `<div style="display:flex;align-items:center;gap:6px;">
+      <button class="login-profile-btn" style="flex:1;" onclick="loginAs('${name.replace(/'/g,"\\'")}')">
+        <div class="lp-avatar" style="background:${avatarColor(name)}">${initials}</div>
+        <div class="lp-info">
+          <div class="lp-name">${name}</div>
+          <div class="lp-meta">${ud.trades} trade${ud.trades!==1?'s':''} · ${F(tv)}</div>
+        </div>
+        <div class="lp-val" style="color:${pnl>=0?'var(--UP)':'var(--DN)'}">${pnl>=0?'+':''}${F(pnl)}</div>
+      </button>
+      <button class="lp-del" onclick="deleteProfile('${name.replace(/'/g,"\\'")}')">✕</button>
+    </div>`;
+  }).join('');
 }
 
 function avatarColor(name){
-  const colors=['#e8572a','#9945ff','#00b87a','#627eea','#f7931a','#e84142','#1652f0','#c49a2a'];
-  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%colors.length;
-  return colors[Math.abs(h)%colors.length];
+  const c=['#e8572a','#9945ff','#00b87a','#627eea','#f7931a','#e84142','#1652f0','#c49a2a'];
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%c.length;
+  return c[Math.abs(h)%c.length];
 }
 
 function loginAs(name){
-  currentUser = name;
-  // Deep copy to prevent reference sharing bugs
-  const raw = loadUserData(name);
-  G = JSON.parse(JSON.stringify(raw));
-  // Ensure all required fields exist
-  if(typeof G.cash !== 'number') G.cash = 5;
-  if(!G.h || typeof G.h !== 'object') G.h = {};
-  if(!Array.isArray(G.txs)) G.txs = [];
-  if(typeof G.trades !== 'number') G.trades = 0;
-  if(typeof G.dep !== 'number') G.dep = 5;
+  try{
+    currentUser = name;
+    const raw = loadUserData(name);
+    G = raw ? JSON.parse(JSON.stringify(raw)) : {cash:5,h:{},txs:[],trades:0,dep:5};
+    // Guarantee all fields
+    if(typeof G.cash!=='number') G.cash=5;
+    if(!G.h||typeof G.h!=='object') G.h={};
+    if(!Array.isArray(G.txs)) G.txs=[];
+    if(typeof G.trades!=='number') G.trades=0;
+    if(typeof G.dep!=='number') G.dep=5;
 
-  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('upAvatar').textContent = initials;
-  document.getElementById('upAvatar').style.background = avatarColor(name);
-  document.getElementById('upName').textContent = name;
-  document.getElementById('loginScreen').classList.add('hidden');
-  saveNow(); // stamp the profile immediately
-  renderAll();
-  renderNews();
+    const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('upAvatar').textContent=initials;
+    document.getElementById('upAvatar').style.background=avatarColor(name);
+    document.getElementById('upName').textContent=name;
+    document.getElementById('loginScreen').classList.add('hidden');
+
+    // Save immediately to stamp the profile, but DON'T await LB push (non-blocking)
+    saveUserData();
+    saveMarket();
+    pushToGlobalLB().catch(()=>{});
+
+    renderAll();
+    renderNews();
+  }catch(e){
+    console.error('loginAs error',e);
+    alert('Login error — please refresh and try again.');
+  }
+}
+
+function loginCreate(){
+  const input=document.getElementById('loginNameInput');
+  const name=input.value.trim();
+  if(!name){ input.focus(); return; }
+  if(name.length<2){ toast('Name too short','err'); return; }
+  const profiles=getProfiles();
+  if(!profiles.includes(name)){
+    profiles.push(name);
+    saveProfiles(profiles);
+  }
+  input.value='';
+  loginAs(name);
+}
+
+function deleteProfile(name){
+  if(!confirm(`Delete "${name}"? This permanently erases their progress.`)) return;
+  saveProfiles(getProfiles().filter(p=>p!==name));
+  try{ localStorage.removeItem(userKey(name)); }catch(e){}
+  renderLoginScreen();
+}
+
+function logoutUser(){
+  if(!confirm('Switch user? Your progress is saved.')) return;
+  saveUserData();
+  currentUser=null;
+  document.getElementById('loginScreen').classList.remove('hidden');
+  renderLoginScreen();
+}
 }
 
 function loginCreate(){
@@ -1907,6 +2144,7 @@ function toast(msg,type='ok'){
 /* ═══════════════════════════════════════════
    BOOT
 ═══════════════════════════════════════════ */
+migrateOldData(); // recover saves from old key versions FIRST
 loadMarket();
 initPrices();
 renderLoginScreen();
