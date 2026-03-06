@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -258,10 +257,17 @@ header{background:var(--ink);color:var(--paper);flex-shrink:0;}
 .ov{font-family:'Azeret Mono',monospace;font-size:.76rem;font-weight:600;color:rgba(255,255,255,.78);}
 .tfs{display:flex;gap:2px;}
 .tf{padding:4px 12px;font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:1px solid transparent;background:rgba(255,255,255,.04);color:rgba(255,255,255,.28);transition:all .13s;}
+.tf:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.09);}
+.tf.on{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.12);}
+.chart-mode-btn{margin-left:8px;border-left:1px solid rgba(255,255,255,.1)!important;padding-left:14px;color:rgba(255,255,255,.5)!important;}
+.chart-mode-btn:hover{color:#fff!important;}
 .tf.on{background:rgba(255,255,255,.1);color:var(--paper);border-color:rgba(255,255,255,.13);}
 .cvwrap{flex:1;position:relative;min-height:0;}
 canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
 .ctip{position:absolute;background:var(--ink);border:1px solid rgba(255,255,255,.15);padding:9px 13px;font-family:'Azeret Mono',monospace;font-size:.67rem;pointer-events:none;opacity:0;transition:opacity .1s;white-space:nowrap;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.7);}
+.ctip.on{opacity:1;}
+.ctip-ohlc{display:grid;grid-template-columns:auto auto;gap:1px 10px;margin-top:5px;font-size:.58rem;color:rgba(255,255,255,.5);}
+.ctip-ohlc span{color:rgba(255,255,255,.85);}
 .ctip.on{opacity:1;}
 .ctip-t{color:rgba(255,255,255,.28);font-size:.54rem;margin-bottom:4px;}
 .ctip-p{font-size:.84rem;font-weight:600;}
@@ -558,6 +564,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
       <button class="save-btn" id="saveBtn" onclick="manualSave()" title="Save progress">
         <span id="saveBtnIcon">💾</span><span id="saveBtnTxt">Save</span>
       </button>
+      <span id="saveIndicator" style="font-family:'Azeret Mono',monospace;font-size:.48rem;letter-spacing:1px;color:rgba(255,255,255,.25);white-space:nowrap;"></span>
       <div class="lvl-tag" id="lvl">⭐ Beginner</div>
       <div class="pt-block">
         <div class="pt-lbl">Portfolio</div>
@@ -861,51 +868,11 @@ function loadUserData(name){
     return d || {cash:5, h:{}, txs:[], trades:0, dep:5};
   }catch{ return {cash:5, h:{}, txs:[], trades:0, dep:5}; }
 }
-function saveUserData(){
-  if(!currentUser) return;
-  try{
-    // Always snapshot the current G — never let a stale reference slip through
-    const snapshot = JSON.parse(JSON.stringify(G));
-    localStorage.setItem(userKey(currentUser), JSON.stringify(snapshot));
-  }catch(e){ console.error('Save failed',e); }
-}
-
-// Immediate save — called right after every trade mutation
-function saveNow(){
-  saveUserData();
-  saveMarket();
-  pushToGlobalLB();
-}
-
-async function manualSave(){
-  if(!currentUser) return;
-  const btn = document.getElementById('saveBtn');
-  const icon = document.getElementById('saveBtnIcon');
-  const txt = document.getElementById('saveBtnTxt');
-  btn.disabled = true;
-  icon.textContent = '⏳';
-  txt.textContent = 'Saving…';
-  saveUserData();
-  saveMarket();
-  await pushToGlobalLB();
-  btn.classList.add('saved');
-  icon.textContent = '✅';
-  txt.textContent = 'Saved!';
-  setTimeout(()=>{
-    btn.classList.remove('saved');
-    icon.textContent = '💾';
-    txt.textContent = 'Save';
-    btn.disabled = false;
-  }, 2000);
-}
 function loadMarket(){
   try{
     const d = JSON.parse(localStorage.getItem(MARKET_KEY));
     if(d){ prices=d.px||{}; opens=d.op||{}; }
   }catch{}
-}
-function saveMarket(){
-  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
 }
 
 /* ── RENDER LOGIN SCREEN ── */
@@ -1073,17 +1040,89 @@ const pct=(p,o)=>(p-o)/o*100;
 const totalVal=()=>{ let t=G.cash; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 const investedVal=()=>{ let t=0; Object.entries(G.h).forEach(([k,v])=>t+=v.sh*(prices[k]||0)); return t; };
 
-// Lightweight save called every tick — local only
-function save(){
-  saveUserData();
-  saveMarket();
+// ── SAVE SYSTEM ──────────────────────────────
+// Saves only when data actually changed.
+// Debounced so rapid trades don't spam localStorage.
+// beforeunload safety net so closing tab never loses data.
+
+let _lastSaveHash = '';
+let _saveTimer = null;
+let _lastSaveTime = null;
+
+function _hashG(){
+  // Fast fingerprint of G — only save if it changed
+  try{ return G.cash.toFixed(6)+'|'+G.trades+'|'+JSON.stringify(Object.keys(G.h).sort()); }
+  catch{ return ''+Date.now(); }
 }
 
-// Full save with global LB push — called after trades and on login
+function saveUserData(){
+  if(!currentUser) return;
+  try{
+    const snapshot = JSON.parse(JSON.stringify(G));
+    localStorage.setItem(userKey(currentUser), JSON.stringify(snapshot));
+    _lastSaveHash = _hashG();
+    _lastSaveTime = Date.now();
+    _updateSaveIndicator();
+  }catch(e){ console.error('Save failed',e); }
+}
+
+function saveMarket(){
+  try{ localStorage.setItem(MARKET_KEY, JSON.stringify({px:prices, op:opens})); }catch{}
+}
+
+// Called every tick — only saves if data changed
+function save(){
+  if(!currentUser) return;
+  saveMarket(); // market always updates
+  const hash = _hashG();
+  if(hash !== _lastSaveHash){
+    saveUserData();
+  }
+}
+
+// Immediate save after trades — always runs, debounced LB push
 function saveNow(){
+  if(_saveTimer) clearTimeout(_saveTimer);
   saveUserData();
   saveMarket();
-  pushToGlobalLB();
+  // Debounce LB push — don't hammer it on rapid trades
+  _saveTimer = setTimeout(()=>{ pushToGlobalLB(); _saveTimer=null; }, 1500);
+}
+
+// Last-resort — fires when tab is closed/refreshed
+window.addEventListener('beforeunload', ()=>{
+  if(currentUser){ saveUserData(); saveMarket(); }
+});
+
+function _updateSaveIndicator(){
+  const el = document.getElementById('saveIndicator');
+  if(!el || !_lastSaveTime) return;
+  const s = Math.floor((Date.now()-_lastSaveTime)/1000);
+  el.textContent = s < 5 ? '● Saved' : `● ${s}s ago`;
+  el.style.color = s < 10 ? 'var(--UP)' : 'rgba(255,255,255,.3)';
+}
+
+// Update "X ago" label every 5s
+setInterval(()=>{ if(currentUser) _updateSaveIndicator(); }, 5000);
+
+async function manualSave(){
+  if(!currentUser) return;
+  const btn = document.getElementById('saveBtn');
+  const icon = document.getElementById('saveBtnIcon');
+  const txt = document.getElementById('saveBtnTxt');
+  btn.disabled = true;
+  icon.textContent = '⏳'; txt.textContent = 'Saving…';
+  saveUserData();
+  saveMarket();
+  await pushToGlobalLB();
+  btn.classList.add('saved');
+  icon.textContent = '✅'; txt.textContent = 'Saved!';
+  _updateSaveIndicator();
+  setTimeout(()=>{
+    btn.classList.remove('saved');
+    icon.textContent = '💾'; txt.textContent = 'Save';
+    btn.disabled = false;
+  }, 2000);
 }
 
 /* ═══════════════════════════════════════════
