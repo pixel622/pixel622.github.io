@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSA Label Generator</title>
+    <title>CGC Custom Label Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f0f0;
             display: flex;
             flex-direction: column;
@@ -17,169 +17,189 @@
             margin: 0;
         }
 
-        /* BIG RED BORDER AREA (Restored thickness) */
+        /* BLACK OUTER BORDER */
         .label-outer {
             width: 700px;
-            height: 200px;
-            background-color: #D32F2F;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            box-sizing: border-box;
-            padding: 15px; /* Big thick red lines like before */
-        }
-
-        /* Inner White Area */
-        .label-inner {
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
-            background-image: linear-gradient(0deg, #f0f9ff 1px, transparent 1px);
-            background-size: 100% 12px;
+            height: 250px;
+            background-color: #000000;
             display: flex;
             flex-direction: column;
-            padding: 8px 15px;
+            position: relative;
             box-sizing: border-box;
+            padding: 12px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        /* HEADER SECTION (CGC LOGO & NAME) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            padding: 0 10px 8px 10px;
+        }
+
+        .cgc-brand {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cgc-brand span { font-weight: 300; margin-right: 5px; font-size: 22px; }
+
+        .header-text {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* SILVER GRADIENT INNER AREA */
+        .label-inner {
+            flex-grow: 1;
+            background: linear-gradient(135deg, #bdc3c7 0%, #ffffff 40%, #ffffff 100%);
+            border-radius: 2px;
+            display: flex;
+            padding: 15px;
+            box-sizing: border-box;
+            color: #000;
             position: relative;
         }
 
-        /* Normal Writing */
+        /* LEFT SIDE TEXT */
+        .content-left {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
         input[type="text"] {
             border: none;
             background: transparent;
-            font-family: "Helvetica", "Arial", sans-serif;
+            font-family: inherit;
             color: #111;
-            text-transform: uppercase;
-            padding: 0;
+            padding: 2px 0;
             margin: 0;
-            font-weight: 400; 
-            letter-spacing: 0.5px;
-        }
-
-        input[type="text"]:focus { outline: none; }
-
-        .row {
-            display: flex;
+            font-weight: 700;
             width: 100%;
-            height: 38px;
-            align-items: center;
         }
 
-        .main-text { flex: 1; font-size: 26px; }
-        .right-aligned { text-align: right; }
+        input[type="text"]:focus { outline: none; background: rgba(0,0,0,0.05); }
 
-        /* REALISTIC BARCODE (Smaller and irregular widths) */
-        .barcode-sim {
-            width: 180px; /* Made smaller */
-            height: 32px;
-            background: #fff;
-            position: relative;
-            background-image: linear-gradient(90deg, 
-                #000 0% 1%, #fff 1% 2%, 
-                #000 2% 4%, #fff 4% 5%, 
-                #000 5% 5.5%, #fff 5.5% 7%, 
-                #000 7% 10%, #fff 10% 11%,
-                #000 11% 12%, #fff 12% 15%,
-                #000 15% 18%, #fff 18% 19%,
-                #000 19% 20%, #fff 20% 25%,
-                #000 25% 26%, #fff 26% 28%,
-                #000 28% 32%, #fff 32% 35%,
-                #000 35% 36%, #fff 36% 40%,
-                #000 40% 45%, #fff 45% 46%,
-                #000 46% 48%, #fff 48% 55%,
-                #000 55% 58%, #fff 58% 60%,
-                #000 60% 61%, #fff 61% 65%,
-                #000 65% 70%, #fff 70% 72%,
-                #000 72% 75%, #fff 75% 80%,
-                #000 80% 82%, #fff 82% 85%,
-                #000 85% 90%, #fff 90% 92%,
-                #000 92% 100%);
-            margin-right: 15px;
-        }
+        .card-title { font-size: 26px; line-height: 1.1; }
+        .card-sub { font-size: 22px; }
 
-        /* PSA Logo - Overlapping the thick red line */
-        .psa-logo-container {
-            position: absolute;
-            bottom: 0px; /* Sitting directly on bottom */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 130px; 
-            height: 45px;
-            background-color: #e5e7eb;
+        /* RIGHT SIDE GRADE */
+        .content-right {
+            flex: 1;
+            border-left: 2px solid #555;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            border: 1px solid #999;
-            z-index: 100;
+            justify-content: center;
+            margin-left: 10px;
         }
 
-        .psa-logo {
-            font-size: 32px;
-            font-weight: 900;
-            letter-spacing: -2px;
-            font-style: italic;
+        .grade-label {
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: -5px;
         }
 
-        .p { color: #00448d; }
-        .s { color: #cc0000; }
-        .a { color: #00448d; }
+        .grade-number {
+            font-size: 85px;
+            font-weight: 800;
+            line-height: 1;
+        }
 
+        /* BARCODE SECTION */
+        .footer-barcode {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .barcode-sim {
+            width: 280px;
+            height: 25px;
+            background-image: linear-gradient(90deg, 
+                #000 0% 1%, #fff 1% 2%, #000 2% 4%, #fff 4% 5%, 
+                #000 5% 5.5%, #fff 5.5% 7%, #000 7% 10%, #fff 10% 11%,
+                #000 11% 14%, #fff 14% 15%, #000 15% 18%, #fff 18% 22%,
+                #000 22% 24%, #fff 24% 28%, #000 28% 35%, #fff 35% 38%,
+                #000 38% 45%, #fff 45% 50%, #000 50% 55%, #fff 55% 60%);
+            background-size: cover;
+            margin-right: 10px;
+        }
+
+        .cert-number {
+            font-size: 18px;
+            font-weight: 400;
+            color: #444;
+        }
+
+        /* DOWNLOAD BUTTON */
         #download-btn {
-            margin-top: 40px;
-            padding: 15px 30px;
-            background: #222;
-            color: white;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background-color: #000;
+            color: #fff;
             border: none;
+            border-radius: 5px;
+            font-weight: bold;
             cursor: pointer;
             font-size: 16px;
-            border-radius: 4px;
         }
+
+        #download-btn:hover { background-color: #333; }
     </style>
 </head>
 <body>
 
     <div id="capture-area" class="label-outer">
+        <div class="header">
+            <div class="cgc-brand"><span>⚖️</span>CGC</div>
+            <div class="header-text">Certified Guaranty Company</div>
+        </div>
+        
         <div class="label-inner">
-            <div class="row">
-                <input type="text" class="main-text" value="1999 POKÉMON JPN. GYM 2">
-                <input type="text" class="right-aligned" style="width: 100px; font-size: 24px;" value="#150">
-            </div>
-
-            <div class="row">
-                <input type="text" class="main-text" value="GIOVANNI'S MEWTWO">
-                <input type="text" class="right-aligned" style="width: 150px; font-size: 24px;" value="GEM MT">
-            </div>
-
-            <div class="row">
-                <input type="text" class="main-text" value="HOLO"> 
-                <input type="text" class="right-aligned" style="width: 80px; font-size: 38px;" value="10">
-            </div>
-
-            <div class="row" style="margin-top: 5px;">
-                <div class="barcode-sim"></div>
-                <input type="text" class="right-aligned" style="flex: 1; font-size: 22px;" value="45729103">
-            </div>
-
-            <div class="psa-logo-container">
-                <div class="psa-logo">
-                    <span class="p">P</span><span class="s">S</span><span class="a">A</span>
+            <div class="content-left">
+                <input type="text" class="card-title" value="Pokémon Illustrator">
+                <input type="text" class="card-sub" value="Pokémon (1998) Japanese">
+                <input type="text" class="card-sub" value="CoroCoro Comics">
+                <input type="text" class="card-sub" value="Illustration Contest">
+                
+                <div class="footer-barcode">
+                    <div class="barcode-sim"></div>
+                    <input type="text" class="cert-number" style="width: 150px;" value="1400294317663">
                 </div>
+            </div>
+
+            <div class="content-right">
+                <div class="grade-label">Gem Mint</div>
+                <input type="text" class="grade-number" value="10" style="text-align: center;">
             </div>
         </div>
     </div>
 
-    <button id="download-btn">DOWNLOAD TO PHOTOS</button>
+    <button id="download-btn">DOWNLOAD CGC LABEL</button>
 
     <script>
         document.getElementById('download-btn').addEventListener('click', function() {
             const label = document.getElementById('capture-area');
             html2canvas(label, {
-                scale: 4,
+                scale: 4, 
                 backgroundColor: null,
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'custom-psa-label.png';
+                link.download = 'cgc-custom-label.png';
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
