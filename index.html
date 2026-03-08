@@ -2,198 +2,146 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom PSA Pokémon Label Generator</title>
+    <title>PSA Style Label Generator</title>
     <style>
+        /* Importing a font that mimics the PSA blocky condensed style */
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&display=swap');
+
         body {
-            font-family: Arial, sans-serif; /* A generic sans-serif for wide compatibility */
-            background-color: #f0f0f0;
+            background-color: #2c2c2c;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            font-family: 'Archivo Narrow', sans-serif;
         }
 
-        /* Outer Red Border Area */
-        .label-outer {
-            width: 700px;
-            height: 200px;
-            background-color: #D32F2F; /* Closest vintage PSA label red */
-            padding: 2px; /* Small outer border effect */
+        /* The Red Outer Border */
+        .psa-card {
+            width: 750px;
+            height: 220px;
+            background-color: #e31e24; /* Authentic PSA Red */
             display: flex;
             justify-content: center;
             align-items: center;
-            box-sizing: border-box;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        /* Inner White Lined Area */
-        .label-inner {
-            width: calc(100% - 30px); /* 15px margin on left and right */
-            height: calc(100% - 16px); /* 8px margin on top and bottom */
+        /* The White Inner Label */
+        .psa-label {
+            width: 710px;
+            height: 180px;
             background-color: #ffffff;
-            /* Subtle blue faint line watermark */
-            background-image: linear-gradient(0deg, #e6f7ff 1px, transparent 1px);
+            /* Blue horizontal security lines */
+            background-image: linear-gradient(#e1f1f8 1px, transparent 1px);
             background-size: 100% 12px;
+            position: relative;
+            padding: 15px 25px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 10px;
-            box-sizing: border-box;
-            position: relative;
         }
 
-        /* Text Input Styling (makes inputs look like flat text) */
-        input[type="text"] {
-            border: none;
-            background: transparent;
-            font-family: inherit;
-            color: #333333;
+        /* Styling for the editable text lines */
+        .line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
             text-transform: uppercase;
+        }
+
+        input {
+            border: none;
+            background: transparent;
+            font-family: 'Archivo Narrow', sans-serif;
+            color: #222;
             padding: 0;
             margin: 0;
-            box-sizing: border-box;
-        }
-
-        /* Focused input (when editing) - small visual cue */
-        input[type="text"]:focus {
             outline: none;
-            background-color: #e0f2f1;
         }
 
-        /* Row Container */
-        .row {
-            display: flex;
-            width: 100%;
-            height: 38px; /* Fixed height per row to match line pattern */
-            align-items: center;
+        /* Left Side Text */
+        .left-col {
+            font-size: 34px;
+            letter-spacing: 1px;
+            width: 70%;
         }
 
-        /* Main Left Text */
-        .main-text {
-            flex: 1; /* Pushes the card number to the right */
-            font-size: 26px;
-            font-weight: 500;
-        }
-
-        /* Details (Right Aligned Column) */
-        .details {
-            width: 170px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: space-between;
-            height: 100%;
-        }
-
-        .right-aligned {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-weight: 600;
+        /* Right Side Text (Numbers/Grades) */
+        .right-col {
             text-align: right;
+            font-size: 34px;
+            width: 30%;
+            font-weight: 400;
         }
 
-        /* Sizing and layout for specific right-side elements */
-        .detail-line {
-            display: flex;
-            width: 100%;
-            height: 38px; /* Aligning with left rows */
-            align-items: center;
-            justify-content: flex-end;
-            font-size: 24px;
-        }
-
-        .grade-number-line {
-            display: flex;
-            width: 100%;
-            height: 38px;
-            align-items: center;
-            justify-content: flex-end;
-            font-size: 34px; /* Larger font for main grade */
-        }
-
-        /* Center PSA Logo */
-        .psa-logo-container {
+        /* PSA Logo Box at the bottom */
+        .logo-box {
             position: absolute;
-            bottom: 0px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 48px;
-            background-color: #eaecef; /* Gray/White logo background block */
+            background-color: #e8e8e8;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            width: 110px;
+            height: 45px;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-top: 1px solid #c0c0c0;
-            border-left: 1px solid #c0c0c0;
-            border-right: 1px solid #c0c0c0;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
+            border-radius: 4px 4px 0 0;
         }
 
-        .psa-logo {
-            font-size: 34px;
+        /* Creating the PSA Logo Look */
+        .psa-logo-text {
+            font-style: italic;
             font-weight: 900;
+            font-size: 32px;
             letter-spacing: -2px;
-            font-family: 'Montserrat', sans-serif; /* Use a font with strong, bold characteristics */
         }
 
-        .p { color: #0056b3; } /* PSA Blue */
-        .s { color: #d32f2f; } /* PSA Red */
-        .a { color: #0056b3; } /* PSA Blue */
+        .p-blue { color: #004a99; }
+        .s-red { color: #e31e24; margin: 0 -2px; }
+        .a-blue { color: #004a99; }
 
-        /* Responsive scaling (optional) */
-        @media screen and (max-width: 750px) {
-            .label-outer {
-                width: 90vw;
-                height: 25.7vw; /* maintain aspect ratio */
-            }
-            .label-inner {
-                padding: 1vw;
-                background-size: 100% 1.7vw;
-            }
-            input[type="text"] {
-                font-size: 3vw;
-            }
-            .psa-logo-container {
-                width: 14vw;
-                height: 6vw;
-            }
-            .psa-logo {
-                font-size: 4.5vw;
-            }
+        /* Specific sizing for the Serial Number row */
+        .serial-row {
+            font-size: 28px;
         }
-
     </style>
 </head>
 <body>
 
-    <div class="label-outer">
-        <div class="label-inner">
-
-            <div class="row">
-                <input type="text" class="main-text" value="1999 POKÉMON JPN. GYM 2">
-                <input type="text" class="right-aligned" style="width: 80px; font-size: 24px;" value="#150">
+    <div class="psa-card">
+        <div class="psa-label">
+            
+            <div class="line">
+                <input type="text" class="left-col" value="1999 POKEMON GAME">
+                <input type="text" class="right-col" value="#4">
             </div>
 
-            <div class="row">
-                <input type="text" class="main-text" value="GIOVANNI'S MEWTWO">
-                <input type="text" class="right-aligned" style="width: 140px; font-size: 24px;" value="GEM MT">
+            <div class="line">
+                <input type="text" class="left-col" value="CHARIZARD">
+                <input type="text" class="right-col" value="MINT 9">
             </div>
 
-            <div class="row">
-                <input type="text" class="main-text" value="HOLO"> <input type="text" class="right-aligned" style="width: 100px; font-size: 38px; font-weight: 700; color: #111;" value="10">
+            <div class="line">
+                <input type="text" class="left-col" value="HOLOFOIL">
+                <input type="text" class="right-col" value="AUTO 10">
             </div>
 
-            <div class="row">
-                <input type="text" class="main-text" style="font-size: 22px;" value="PSA/DNA CERT">
-                <input type="text" class="right-aligned" style="width: 200px; font-size: 22px;" value="45729103">
+            <div class="line serial-row">
+                <input type="text" class="left-col" style="font-size: 28px;" value="PSA/DNA CERT">
+                <input type="text" class="right-col" style="font-size: 32px;" value="27581588">
             </div>
 
-            <div class="psa-logo-container">
-                <div class="psa-logo">
-                    <span class="p">P</span><span class="s">S</span><span class="a">A</span>
+            <div class="logo-box">
+                <div class="psa-logo-text">
+                    <span class="p-blue">P</span><span class="s-red">S</span><span class="a-blue">A</span>
                 </div>
             </div>
 
