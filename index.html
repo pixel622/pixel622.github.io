@@ -1,145 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Exact PSA Label Replica</title>
-    <style>
-        /* This font mimics the thin, slightly spaced-out look of the real labels */
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap');
+<style>
+    :root {
+        --psa-red: #e41e26;
+        --label-bg: #f2f2f2;
+    }
 
-        body {
-            background-color: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Courier Prime', monospace;
-        }
+    body {
+        background-color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
 
-        .psa-red-frame {
-            width: 720px;
-            height: 190px;
-            background-color: #df1a23;
-            padding: 8px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    /* The Main Label Container */
+    .psa-label {
+        width: 500px;
+        height: 180px;
+        background-color: var(--psa-red);
+        padding: 12px;
+        border-radius: 4px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-        .label-white-area {
-            width: 100%;
-            height: 100%;
-            background-color: #fdfdfd;
-            position: relative;
-            padding: 10px 15px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    /* Inner White Card */
+    .inner-card {
+        background-color: var(--label-bg);
+        width: 100%;
+        height: 100%;
+        padding: 10px 20px;
+        box-sizing: border-box;
+        position: relative;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: auto auto auto;
+        text-transform: uppercase;
+        color: #1a1a1a;
+    }
 
-        /* The actual text layout */
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            width: 100%;
-        }
+    /* Text Styling */
+    .card-info {
+        font-weight: 500;
+        font-size: 26px;
+        line-height: 1.2;
+        letter-spacing: 0.5px;
+    }
 
-        input {
-            border: none;
-            background: transparent;
-            font-family: 'Courier Prime', monospace;
-            text-transform: uppercase;
-            color: #1a1a1a;
-            padding: 0;
-            outline: none;
-            font-size: 28px;
-            font-weight: 400;
-            letter-spacing: 1px;
-        }
+    .card-number {
+        text-align: right;
+        font-size: 26px;
+        font-weight: 500;
+    }
 
-        .left { width: 75%; }
-        .right { width: 25%; text-align: right; }
+    .grade-section {
+        grid-column: 2;
+        text-align: right;
+        margin-top: 5px;
+    }
 
-        /* The Barcode at the bottom left */
-        .barcode-area {
-            font-family: 'Libre Barcode 39', cursive; /* Generic barcode look */
-            font-size: 50px;
-            margin-top: -5px;
-            letter-spacing: -2px;
-            color: #000;
-        }
+    .grade-text {
+        font-size: 26px;
+        font-weight: 500;
+        display: block;
+    }
 
-        /* The Holographic Logo Rectangle */
-        .hologram-box {
-            position: absolute;
-            bottom: -5px; /* Overlapping the red edge like the original */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 95px;
-            height: 52px;
-            background: linear-gradient(135deg, #a1a1a1 0%, #cfcfcf 50%, #a1a1a1 100%);
-            border: 1px solid #888;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
-        }
+    .grade-number {
+        font-size: 38px;
+        font-weight: 600;
+        margin-top: -5px;
+        display: block;
+    }
 
-        .hologram-text {
-            font-style: italic;
-            font-weight: 900;
-            font-size: 26px;
-            letter-spacing: -2px;
-            font-family: sans-serif;
-        }
+    .cert-number {
+        position: absolute;
+        bottom: 15px;
+        right: 20px;
+        font-size: 32px;
+        letter-spacing: 2px;
+        font-weight: 400;
+    }
 
-        .p-blue { color: #073a7a; }
-        .s-red { color: #cc0000; }
-        .a-blue { color: #073a7a; }
-
-        .serial-text {
-            font-size: 32px;
-            letter-spacing: 2px;
-        }
-    </style>
+    /* PSA Logo Placeholder */
+    .psa-logo-holo {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 40px;
+        background: linear-gradient(135deg, #a1a1a1 0%, #e1e1e1 50%, #a1a1a1 100%);
+        border: 1px solid #999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: #003399;
+        font-style: italic;
+        font-size: 18px;
+        border-bottom: none;
+    }
+</style>
 </head>
 <body>
 
-    <div class="psa-red-frame">
-        <div class="label-white-area">
-            
-            <div class="row">
-                <input type="text" class="left" value="1999 POKEMON GAME">
-                <input type="text" class="right" value="#4">
-            </div>
-
-            <div class="row">
-                <input type="text" class="left" value="CHARIZARD - HOLO">
-                <input type="text" class="right" value="VG - EX">
-            </div>
-
-            <div class="row">
-                <input type="text" class="left" value="SHADOWLESS">
-                <input type="text" class="right" value="4">
-            </div>
-
-            <div class="row" style="align-items: flex-end;">
-                <div class="barcode-area">|||||||||||||||||||||</div>
-                <input type="text" class="right serial-text" value="28635465">
-            </div>
-
-            <div class="hologram-box">
-                <div class="hologram-text">
-                    <span class="p-blue">P</span><span class="s-red">S</span><span class="a-blue">A</span>
-                </div>
-            </div>
-
+<div class="psa-label">
+    <div class="inner-card">
+        <div class="card-info">
+            1999 POKEMON GAME<br>
+            CHARIZARD - HOLO<br>
+            SHADOWLESS
         </div>
+
+        <div class="card-number">#4</div>
+
+        <div class="grade-section">
+            <span class="grade-text">VG - EX</span>
+            <span class="grade-number">4</span>
+        </div>
+
+        <div class="psa-logo-holo">PSA</div>
+        <div class="cert-number">28635465</div>
     </div>
+</div>
 
 </body>
 </html>
