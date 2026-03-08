@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro PSA Label Generator</title>
+    <title>PSA Label Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             display: flex;
             flex-direction: column;
@@ -17,101 +17,96 @@
             margin: 0;
         }
 
-        /* Outer Red Border Area */
+        /* Outer Red Border */
         .label-outer {
             width: 700px;
-            height: 220px; /* Slightly taller to accommodate the lower logo */
-            background-color: #D32F2F; 
-            padding: 4px; 
+            height: 220px;
+            background-color: #D32F2F;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
             box-sizing: border-box;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            padding: 5px;
         }
 
         /* Inner White Area */
         .label-inner {
-            width: calc(100% - 24px);
-            height: calc(100% - 20px);
+            width: 100%;
+            height: 100%;
             background-color: #ffffff;
-            /* Blue line watermark */
-            background-image: linear-gradient(0deg, #eaf8ff 1px, transparent 1px);
-            background-size: 100% 14px;
+            background-image: linear-gradient(0deg, #f0f9ff 1px, transparent 1px);
+            background-size: 100% 15px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            padding: 12px 15px;
+            padding: 10px 20px;
             box-sizing: border-box;
             position: relative;
-            overflow: visible; /* Allows logo to hang over the edge */
         }
 
+        /* Normal Writing (Not Bold) */
         input[type="text"] {
             border: none;
             background: transparent;
-            font-family: inherit;
+            font-family: "Helvetica", "Arial", sans-serif;
             color: #111;
             text-transform: uppercase;
             padding: 0;
             margin: 0;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-weight: 400; /* Normal weight, no 'B' effect */
+            letter-spacing: 0.5px;
         }
 
         input[type="text"]:focus {
             outline: none;
-            background-color: rgba(0, 150, 136, 0.1);
         }
 
         .row {
             display: flex;
             width: 100%;
-            height: 36px;
+            height: 40px;
             align-items: center;
-            margin-bottom: 2px;
         }
 
         .main-text { flex: 1; font-size: 28px; }
         .right-aligned { text-align: right; }
 
-        /* Fake Barcode Style */
+        /* Visual Barcode */
         .barcode-sim {
-            width: 220px;
-            height: 35px;
+            width: 250px;
+            height: 45px;
             background: repeating-linear-gradient(
                 90deg,
                 #000,
-                #000 2px,
-                #fff 2px,
-                #fff 4px,
+                #000 1px,
+                #fff 1px,
+                #fff 3px,
+                #000 3px,
                 #000 4px,
-                #000 5px,
-                #fff 5px,
-                #fff 8px
+                #fff 4px,
+                #fff 5px
             );
-            margin-top: 5px;
+            margin-right: 15px;
         }
 
-        /* The PSA Logo centered and shifted onto the red line */
+        /* PSA Logo Box - Covers the red line completely */
         .psa-logo-container {
             position: absolute;
-            bottom: -12px; /* Pulls it down onto the red border */
+            bottom: -5px; /* Aligns to bottom of red container */
             left: 50%;
             transform: translateX(-50%);
-            width: 110px;
-            height: 42px;
-            background-color: #d1d5db; /* Metallic silver/grey look */
+            width: 140px; /* Wider to cover more of the line */
+            height: 55px;
+            background-color: #d8dee9; /* Silver-grey background */
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 1px solid #999;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 10;
+            border: 2px solid #999;
+            z-index: 100;
         }
 
         .psa-logo {
-            font-size: 32px;
+            font-size: 38px;
             font-weight: 900;
             letter-spacing: -2px;
             font-style: italic;
@@ -121,23 +116,15 @@
         .s { color: #cc0000; }
         .a { color: #00448d; }
 
-        /* Button */
         #download-btn {
             margin-top: 40px;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #D32F2F;
+            padding: 15px 30px;
+            background: #222;
             color: white;
             border: none;
-            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 0 #8b1e1e;
-        }
-
-        #download-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #8b1e1e;
+            font-size: 16px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -157,7 +144,7 @@
 
             <div class="row">
                 <input type="text" class="main-text" value="HOLO"> 
-                <input type="text" class="right-aligned" style="width: 80px; font-size: 42px; color: #000;" value="10">
+                <input type="text" class="right-aligned" style="width: 80px; font-size: 40px;" value="10">
             </div>
 
             <div class="row" style="margin-top: 10px;">
@@ -173,21 +160,21 @@
         </div>
     </div>
 
-    <button id="download-btn">DOWNLOAD LABEL</button>
+    <button id="download-btn">DOWNLOAD TO PHOTOS</button>
 
     <script>
         document.getElementById('download-btn').addEventListener('click', function() {
+            // Target the outer container to include the red border and the logo overlap
             const label = document.getElementById('capture-area');
             
             html2canvas(label, {
-                scale: 4, // Ultra high resolution
-                useCORS: true,
+                scale: 3,
                 backgroundColor: null,
-                y: -15, // Adjust capture offset if logo clips
-                height: label.offsetHeight + 20 
+                logging: false,
+                useCORS: true
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'psa-custom-pro-label.png';
+                link.download = 'psa-label.png';
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
