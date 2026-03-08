@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom PSA Pokémon Label Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif; /* A generic sans-serif for wide compatibility */
+            font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             display: flex;
+            flex-direction: column; /* Changed to column to fit button below */
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -19,8 +21,8 @@
         .label-outer {
             width: 700px;
             height: 200px;
-            background-color: #D32F2F; /* Closest vintage PSA label red */
-            padding: 2px; /* Small outer border effect */
+            background-color: #D32F2F;
+            padding: 2px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,10 +32,9 @@
 
         /* Inner White Lined Area */
         .label-inner {
-            width: calc(100% - 30px); /* 15px margin on left and right */
-            height: calc(100% - 16px); /* 8px margin on top and bottom */
+            width: calc(100% - 30px);
+            height: calc(100% - 16px);
             background-color: #ffffff;
-            /* Subtle blue faint line watermark */
             background-image: linear-gradient(0deg, #e6f7ff 1px, transparent 1px);
             background-size: 100% 12px;
             display: flex;
@@ -44,7 +45,6 @@
             position: relative;
         }
 
-        /* Text Input Styling (makes inputs look like flat text) */
         input[type="text"] {
             border: none;
             background: transparent;
@@ -57,35 +57,22 @@
             box-sizing: border-box;
         }
 
-        /* Focused input (when editing) - small visual cue */
         input[type="text"]:focus {
             outline: none;
             background-color: #e0f2f1;
         }
 
-        /* Row Container */
         .row {
             display: flex;
             width: 100%;
-            height: 38px; /* Fixed height per row to match line pattern */
+            height: 38px;
             align-items: center;
         }
 
-        /* Main Left Text */
         .main-text {
-            flex: 1; /* Pushes the card number to the right */
+            flex: 1;
             font-size: 26px;
             font-weight: 500;
-        }
-
-        /* Details (Right Aligned Column) */
-        .details {
-            width: 170px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            justify-content: space-between;
-            height: 100%;
         }
 
         .right-aligned {
@@ -94,26 +81,6 @@
             text-align: right;
         }
 
-        /* Sizing and layout for specific right-side elements */
-        .detail-line {
-            display: flex;
-            width: 100%;
-            height: 38px; /* Aligning with left rows */
-            align-items: center;
-            justify-content: flex-end;
-            font-size: 24px;
-        }
-
-        .grade-number-line {
-            display: flex;
-            width: 100%;
-            height: 38px;
-            align-items: center;
-            justify-content: flex-end;
-            font-size: 34px; /* Larger font for main grade */
-        }
-
-        /* Center PSA Logo */
         .psa-logo-container {
             position: absolute;
             bottom: 0px;
@@ -121,7 +88,7 @@
             transform: translateX(-50%);
             width: 100px;
             height: 48px;
-            background-color: #eaecef; /* Gray/White logo background block */
+            background-color: #eaecef;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -136,42 +103,34 @@
             font-size: 34px;
             font-weight: 900;
             letter-spacing: -2px;
-            font-family: 'Montserrat', sans-serif; /* Use a font with strong, bold characteristics */
         }
 
-        .p { color: #0056b3; } /* PSA Blue */
-        .s { color: #d32f2f; } /* PSA Red */
-        .a { color: #0056b3; } /* PSA Blue */
+        .p { color: #0056b3; }
+        .s { color: #d32f2f; }
+        .a { color: #0056b3; }
 
-        /* Responsive scaling (optional) */
-        @media screen and (max-width: 750px) {
-            .label-outer {
-                width: 90vw;
-                height: 25.7vw; /* maintain aspect ratio */
-            }
-            .label-inner {
-                padding: 1vw;
-                background-size: 100% 1.7vw;
-            }
-            input[type="text"] {
-                font-size: 3vw;
-            }
-            .psa-logo-container {
-                width: 14vw;
-                height: 6vw;
-            }
-            .psa-logo {
-                font-size: 4.5vw;
-            }
+        /* Button Styling */
+        #download-btn {
+            margin-top: 30px;
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
+        #download-btn:hover {
+            background-color: #555;
+        }
     </style>
 </head>
 <body>
 
-    <div class="label-outer">
+    <div id="capture-area" class="label-outer">
         <div class="label-inner">
-
             <div class="row">
                 <input type="text" class="main-text" value="1999 POKÉMON JPN. GYM 2">
                 <input type="text" class="right-aligned" style="width: 80px; font-size: 24px;" value="#150">
@@ -183,7 +142,8 @@
             </div>
 
             <div class="row">
-                <input type="text" class="main-text" value="HOLO"> <input type="text" class="right-aligned" style="width: 100px; font-size: 38px; font-weight: 700; color: #111;" value="10">
+                <input type="text" class="main-text" value="HOLO"> 
+                <input type="text" class="right-aligned" style="width: 100px; font-size: 38px; font-weight: 700; color: #111;" value="10">
             </div>
 
             <div class="row">
@@ -196,9 +156,28 @@
                     <span class="p">P</span><span class="s">S</span><span class="a">A</span>
                 </div>
             </div>
-
         </div>
     </div>
+
+    <button id="download-btn">Download to Photos</button>
+
+    <script>
+        document.getElementById('download-btn').addEventListener('click', function() {
+            const label = document.getElementById('capture-area');
+            
+            // Capture the label div
+            html2canvas(label, {
+                scale: 3, // High quality scale
+                backgroundColor: null // Transparent background around rounded corners if any
+            }).then(canvas => {
+                // Create a link to download the image
+                const link = document.createElement('a');
+                link.download = 'psa-custom-label.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        });
+    </script>
 
 </body>
 </html>
