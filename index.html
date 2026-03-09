@@ -14,72 +14,134 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Arial Black', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             overflow: hidden;
         }
 
-        #start-btn {
-            display: none; /* Hidden at start */
-            padding: 20px 40px;
-            font-size: 24px;
-            cursor: pointer;
-            background-color: #00ff00;
-            border: none;
-            border-radius: 5px;
-            color: black;
-            font-weight: bold;
-            text-transform: uppercase;
+        /* The System Volume HUD (Top Center) */
+        #volume-hud {
+            position: fixed;
+            top: -80px; /* Start hidden above screen */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            background: rgba(25, 25, 25, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 9999;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* The flashing rainbow animation */
+        #volume-icon { font-size: 20px; color: white; }
+
+        #volume-track {
+            flex-grow: 1;
+            height: 6px;
+            background: #444;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        #volume-level {
+            width: 0%; /* Start at zero */
+            height: 100%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        /* Rainbow Flash Animation */
         @keyframes strobe {
-            0% { background-color: red; }
-            20% { background-color: yellow; }
-            40% { background-color: lime; }
-            60% { background-color: cyan; }
-            80% { background-color: fuchsia; }
-            100% { background-color: red; }
+            0% { background-color: #ff0000; }
+            15% { background-color: #ff8800; }
+            30% { background-color: #ffff00; }
+            45% { background-color: #00ff00; }
+            60% { background-color: #00ffff; }
+            75% { background-color: #0000ff; }
+            90% { background-color: #ff00ff; }
+            100% { background-color: #ff0000; }
         }
 
-        .rainbow-flash {
-            animation: strobe 0.05s infinite; /* Extremely fast flash */
+        .active-flash {
+            animation: strobe 0.04s infinite linear;
         }
 
-        #message {
+        #start-btn {
             display: none;
-            font-size: 10vw; /* Massive text */
+            padding: 22px 50px;
+            font-size: 20px;
+            cursor: pointer;
+            background: #00ff00;
+            color: black;
+            border: none;
+            border-radius: 50px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(0,255,0,0.4);
+        }
+
+        #big-text {
+            display: none;
+            font-size: 10vw;
             color: white;
-            text-shadow: 5px 5px 10px black;
+            font-family: 'Arial Black', sans-serif;
             text-align: center;
-            z-index: 10;
+            text-shadow: 0 0 20px black, 0 0 40px black;
+            z-index: 100;
+            line-height: 1;
+            transform: rotate(-5deg);
         }
     </style>
 </head>
 <body>
 
+    <div id="volume-hud">
+        <div id="volume-icon">🔊</div>
+        <div id="volume-track">
+            <div id="volume-level"></div>
+        </div>
+    </div>
+
     <button id="start-btn">PRESS TO START TRADING</button>
-    <div id="message">ROBIN IS GAYYYYYYYYYYYYY</div>
+    <div id="big-text">ROBIN IS GAYYYYYYYYYYYYY</div>
 
     <script>
         const btn = document.getElementById('start-btn');
-        const msg = document.getElementById('message');
+        const hud = document.getElementById('volume-hud');
+        const level = document.getElementById('volume-level');
+        const txt = document.getElementById('big-text');
         const body = document.body;
 
-        // 1. Wait 1 second then show the button
+        // 1. Initial 1 second black screen then button appears
         setTimeout(() => {
             btn.style.display = 'block';
         }, 1000);
 
-        // 2. Click event
+        // 2. Click logic
         btn.addEventListener('click', () => {
-            // Hide the button
-            btn.style.display = 'none';
+            btn.style.display = 'none'; // Remove button
+            body.classList.add('active-flash'); // Start rainbow
+            txt.style.display = 'block'; // Show massive text
             
-            // Start the flashing
-            body.classList.add('rainbow-flash');
-            
-            // Show the massive message
-            msg.style.display = 'block';
+            // Bring down the Volume HUD
+            hud.style.top = '25px';
+
+            // Make the volume go up automatically
+            let currentVol = 0;
+            const volInterval = setInterval(() => {
+                currentVol += 4; // Increases by 4% every step
+                level.style.width = currentVol + '%';
+                
+                if (currentVol >= 100) {
+                    clearInterval(volInterval);
+                }
+            }, 30); // Speed of the volume climb
         });
     </script>
 </body>
